@@ -19,6 +19,15 @@ int getJoystick(unsigned char joystick, unsigned char axis){
 	}
 	return value;
 }
+
+bool getMoGoUp(){
+	return joystickGetDigital(1, 5, JOY_UP);
+}
+
+bool getMoGoDown(){
+	return joystickGetDigital(1, 5, JOY_DOWN);
+}
+
 int getForwardAxis(){
 	return getJoystick(1, 3);
 }
@@ -35,9 +44,16 @@ void setRightDrive(int speed){
 	motorSet(2, speed);
 }
 
+void setMoGoMotor(int speed){
+	motorSet(6, speed);
+	motorSet(7, speed);
+}
+
 void operatorControl() {
 	int forward;
 	int turn;
+	bool moGoUp;
+	bool moGoDown;
 	while (1) {
 		forward = getForwardAxis();
 		turn = getTurnAxis();
@@ -45,6 +61,19 @@ void operatorControl() {
 		setLeftDrive(forward + turn);
 		setRightDrive(forward - turn);
 
+		moGoUp = getMoGoUp();
+		moGoDown = getMoGoDown();
+		if(moGoUp){
+			setMoGoMotor(127);
+		}
+		else if(moGoDown)
+		{
+			setMoGoMotor(-127);
+		}
+		else
+		{
+			setMoGoMotor(0);
+		}
 		delay(20);
 
 	}
