@@ -28,6 +28,20 @@ bool getMoGoDown(){
 	return joystickGetDigital(1, 5, JOY_DOWN);
 }
 
+bool getChainUp(){
+	return joystickGetDigital(1, 6, JOY_UP);
+}
+bool getChainDown(){
+	return joystickGetDigital(1, 6, JOY_DOWN);
+}
+
+bool getClawOpen(){
+	return joystickGetDigital(1, 7, JOY_UP);
+}
+bool getClawClose(){
+	return joystickGetDigital(1, 7, JOY_DOWN);
+}
+
 int getForwardAxis(){
 	return getJoystick(1, 3);
 }
@@ -49,11 +63,30 @@ void setMoGoMotor(int speed){
 	motorSet(7, speed);
 }
 
+void setChainMotor(int speed){
+	motorSet(8, speed);
+	motorSet(9, speed);
+}
+
+void setClawMotor(int speed){
+	motorSet(10, speed);
+}
+
 void operatorControl() {
 	int forward;
 	int turn;
 	bool moGoUp;
 	bool moGoDown;
+	bool chainUp;
+	bool chainDown;
+	bool clawOpen;
+	bool clawClose;
+
+	int timerLimit = 100;
+	bool clawOpening = false;
+
+	int clawTimer;
+
 	while (1) {
 		forward = getForwardAxis();
 		turn = getTurnAxis();
@@ -63,6 +96,26 @@ void operatorControl() {
 
 		moGoUp = getMoGoUp();
 		moGoDown = getMoGoDown();
+
+		chainUp = getChainUp();
+		chainDown = getChainDown();
+
+		clawClose = getClawClose();
+		clawOpen = getClawOpen();
+
+		if (clawOpen || clawOpening){
+
+			clawOpening = true;
+
+			if(clawTimer < timerLimit){
+				clawTimer++;
+				setClawMotor(127);
+			} else {
+				setClawMotor(0);
+				clawOpening = false;
+			}
+		}
+
 		if(moGoUp){
 			setMoGoMotor(127);
 		}
@@ -74,6 +127,27 @@ void operatorControl() {
 		{
 			setMoGoMotor(0);
 		}
+
+
+		if(chainUp){
+			setChainMotor(127);
+		}
+		else if(chainDown)
+		{
+			setChainMotor(-127);
+		}
+		else
+		{
+			setChainMotor(0);
+		}
+
+		if(clawClose)
+		{
+			setClawMotor(-30);
+			clawTimer = 0;
+			clawOpening = false;
+		}
+
 		delay(20);
 
 	}
