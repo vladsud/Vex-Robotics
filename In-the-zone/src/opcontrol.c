@@ -14,9 +14,12 @@
 
 int getJoystick(unsigned char joystick, unsigned char axis){
 	int value = joystickGetAnalog(joystick, axis);
-	if (abs(value) < 5){
+	if (abs(value) < 15){
 		value = 0;
 	}
+
+	value = (value * value) / 127;
+
 	return value;
 }
 

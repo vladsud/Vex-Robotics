@@ -12,7 +12,37 @@
 
 #include "main.h"
 
+void SetLeftDrive(int speed){
+	motorSet(5, speed);
+	motorSet(4, speed);
+}
+void SetRightDrive(int speed){
+	motorSet(3, speed);
+	motorSet(2, speed);
+}
+void setMoGoMotor(int speed){
+	motorSet(6, speed);
+	motorSet(7, speed);
+}
+void GoForward(int speed){
+  SetLeftDrive(speed);
+  SetRightDrive(speed);
+}
+void GoBackward(int speed){
+  SetLeftDrive(-speed);
+  SetRightDrive(-speed);
+}
+void TurnLeft(int speed){
+  SetLeftDrive(-speed);
+  SetRightDrive(speed);
+}
+void TurnRight(int speed){
+  SetLeftDrive(speed);
+  SetRightDrive(-speed);
+}
 
 void autonomous() {
+  GoForward(127);
+  delay(5000);
 
 }
