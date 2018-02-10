@@ -18,8 +18,11 @@ int getJoystick(unsigned char joystick, unsigned char axis){
 	if (abs(value) < 15){
 		value = 0;
 	}
-
-	value = (value * value) / 127;
+	if (value > 0){
+		value = (value * value) / 127;
+	} else{
+		value = (value * value) / -127;
+	}
 
 	return value;
 }
@@ -64,7 +67,6 @@ void setRightDrive(int speed){
 
 void setMoGoMotor(int speed){
 	motorSet(6, speed);
-	motorSet(7, speed);
 }
 
 void setChainMotor(int speed){

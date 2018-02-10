@@ -10,7 +10,6 @@
  * PROS contains FreeRTOS (http://www.freertos.org) whose source code may be
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
-
 #include "main.h"
 
 void SetLeftDrive(int speed){
@@ -21,9 +20,8 @@ void SetRightDrive(int speed){
 	motorSet(3, speed);
 	motorSet(2, speed);
 }
-void setMoGoMotor(int speed){
+void SetMoGoMotor(int speed){
 	motorSet(6, speed);
-	motorSet(7, speed);
 }
 
 void GoForward(int speed){
@@ -31,56 +29,56 @@ void GoForward(int speed){
   SetRightDrive(speed);
 }
 void GoBackward(int speed){
-  SetLeftDrive(-speed);
-  SetRightDrive(-speed);
+  SetLeftDrive(-1 * speed);
+  SetRightDrive(-1 * speed);
 }
 void TurnLeft(int speed){
-  SetLeftDrive(-speed);
+  SetLeftDrive(-1 * speed);
   SetRightDrive(speed);
 }
 void TurnRight(int speed){
-  SetLeftDrive(speed);
-  SetRightDrive(-speed);
+	SetLeftDrive(speed);
+  SetRightDrive(-1 * speed);
 }
 void StopDrive(){
 	SetLeftDrive(0);
   SetRightDrive(0);
 }
 void MoGoUp(){
-	setMoGoMotor(127);
+	SetMoGoMotor(127);
 	delay(1000);
 }
 void MoGoDown(){
-	setMoGoMotor(-127);
+	SetMoGoMotor(-127);
 	delay(1000);
 }
-void Delay(int time){
+void Delay(float time){
 	delay (time * 1000);
 }
 
 void autonomous() {
-  GoForward(127);
-  Delay(5);
+  GoForward(70);
 	MoGoDown();
-	Delay(5);
+	Delay(0.9);
 	StopDrive();
 	MoGoUp();
 	GoBackward(127);
-	Delay(5);
-	TurnRight(127);
 	Delay(1);
+	TurnLeft(127);
+	Delay(0.147);
 	GoBackward(127);
-	TurnRight(127);
+	Delay(0.64);
+	TurnLeft(127);
 	Delay(0.5);
 	GoForward(127);
-	Delay(3);
+	Delay(0.3);
 	MoGoDown();
-	GoBackward(127);
-	Delay(3);
+	Delay(0.4);
 	StopDrive();
-
+	GoBackward(127);
+	Delay(1);
+	StopDrive();
 }
-
 
 
 //Created by Jason Zhang, Feburary 9, 2018
