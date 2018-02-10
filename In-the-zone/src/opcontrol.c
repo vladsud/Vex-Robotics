@@ -1,3 +1,4 @@
+//Created by Jason Zhang, Feburary 9, 2018
 /** @file opcontrol.c
  * @brief File for operator control code
  *
@@ -155,3 +156,8 @@ void operatorControl() {
 
 	}
 }
+
+
+
+
+//Created by Jason Zhang, Feburary 9, 2018
