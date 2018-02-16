@@ -29,16 +29,16 @@ void GoForward(int speed){
   SetRightDrive(speed);
 }
 void GoBackward(int speed){
-  SetLeftDrive(-1 * speed);
-  SetRightDrive(-1 * speed);
+  SetLeftDrive(-speed);
+  SetRightDrive(-speed);
 }
 void TurnLeft(int speed){
-  SetLeftDrive(-1 * speed);
+  SetLeftDrive(-speed);
   SetRightDrive(speed);
 }
 void TurnRight(int speed){
 	SetLeftDrive(speed);
-  SetRightDrive(-1 * speed);
+  SetRightDrive(-speed);
 }
 void StopDrive(){
 	SetLeftDrive(0);
