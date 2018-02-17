@@ -62,7 +62,7 @@ void setRightDrive(int speed){
 }
 
 void setMoGoMotor(int speed){
-	motorSet(2, speed);
+	motorSet(2, -speed);
 }
 
 
@@ -73,9 +73,6 @@ void operatorControl() {
 	bool moGoDown;
 	bool moGoHoldUp;
 	bool moGoHoldDown;
-
-	bool isHoldUp = false;
-	bool isHoldDown = false;
 
 	while (1) {
 		forward = getForwardAxis();
@@ -92,14 +89,10 @@ void operatorControl() {
 
 		if(moGoUp){
 			setMoGoMotor(127);
-			isHoldUp = false;
-			isHoldDown = false;
 		}
 		else if(moGoDown)
 		{
 			setMoGoMotor(-127);
-			isHoldUp = false;
-			isHoldDown = false;
 		}
 		else
 		{
@@ -107,21 +100,11 @@ void operatorControl() {
 		}
 
 		if(moGoHoldUp){
-			isHoldUp = true;
-			isHoldDown = false;
-
-		}
-		if(moGoHoldDown){
-			isHoldDown = true;
-			isHoldUp = false;
-		}
-		if (isHoldUp == false){
 			setMoGoMotor(40);
 		}
-		if (isHoldDown == false){
+		if(moGoHoldDown){
 			setMoGoMotor(-40);
 		}
-
 		delay(20);
 	}
 }
