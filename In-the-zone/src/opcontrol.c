@@ -19,9 +19,9 @@ int getJoystick(unsigned char joystick, unsigned char axis){
 		value = 0;
 	}
 	if (value > 0){
-		value = (value * value) / 127;
+		value = (value * value * value) / 16129;
 	} else{
-		value = (value * value) / -127;
+		value = (value * value) / -16129;
 	}
 
 	return value;
@@ -43,19 +43,19 @@ int getTurnAxis(){
 }
 
 void setLeftDrive(int speed){
+	motorSet(3, speed);
 	motorSet(4, speed);
-	motorSet(5, speed);
-	motorSet(8, -speed);
+	motorSet(6, speed);
+	motorSet(7, speed);
 }
 void setRightDrive(int speed){
-	motorSet(2, speed);
-	motorSet(3, speed);
-	motorSet(9, -speed);
+	motorSet(5, speed);
+	motorSet(8, speed);
+	motorSet(9, speed);
 }
 
 void setMoGoMotor(int speed){
-	motorSet(6, speed);
-	motorSet(7, speed);
+	motorSet(2, speed);
 }
 
 
