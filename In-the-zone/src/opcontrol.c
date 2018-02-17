@@ -19,9 +19,9 @@ int getJoystick(unsigned char joystick, unsigned char axis){
 		value = 0;
 	}
 	if (value > 0){
-		value = (value * value) / 16129;
+		value = (value * value) / 127;
 	} else{
-		value = (value * value) / -16129;
+		value = (value * value) / -127;
 	}
 
 	return value;
