@@ -74,6 +74,9 @@ void operatorControl() {
 	bool moGoHoldUp;
 	bool moGoHoldDown;
 
+	bool isHoldUp = false;
+	bool isHoldDown = false;
+
 	while (1) {
 		forward = getForwardAxis();
 		turn = getTurnAxis();
@@ -99,16 +102,19 @@ void operatorControl() {
 			setMoGoMotor(0);
 		}
 		if(moGoHoldUp){
-			setMoGoMotor(20);
-		} else {
-			setMoGoMotor(0);
+			if (isHoldUp == false){
+				setMoGoMotor(20);
+				isHoldUp = true;
+				isHoldDown = false;
+			}
 		}
 		if(moGoHoldDown){
-			setMoGoMotor(-20);
-		} else {
-			setMoGoMotor(0);
+			if (isHoldDown == false){
+				setMoGoMotor(-20);
+				isHoldDown = true;
+				isHoldUp = false;
+			}
 		}
-
 	}
 }
 
