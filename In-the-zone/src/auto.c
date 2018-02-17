@@ -73,33 +73,65 @@ void autonomous() {
   GoForward(40);
 	MoGoDown();
 
-	while((encoderLeftValue + encoderRightValue)/2 < 50){
+	while((abs(encoderLeftValue) + abs(encoderRightValue))/2 < 50){
 		encoderLeftValue = encoderGet(encoderLeft)/360;
 	}
 
 	StopDrive();
 	MoGoUp();
-	ResetEncoders();
-	GoForward(40);
 
-	while((encoderLeftValue + encoderRightValue)/2 < 50){
+	ResetEncoders();
+
+	GoBackward(40);
+
+	while((abs(encoderLeftValue) + abs(encoderRightValue))/2 < 50){
 		encoderLeftValue = encoderGet(encoderLeft)/360;
 	}
 
 	StopDrive();
-	TurnLeft(127);
-	Delay(0.147);
-	GoBackward(127);
-	Delay(0.64);
-	TurnLeft(127);
-	Delay(0.5);
-	GoForward(127);
-	Delay(0.3);
+
+	ResetEncoders();
+
+	TurnLeft(40);
+
+	while((abs(encoderLeftValue) + abs(encoderRightValue))/2 < 50){
+		encoderLeftValue = encoderGet(encoderLeft)/360;
+	}
+
+	ResetEncoders();
+
+	GoBackward(40);
+
+	while((abs(encoderLeftValue) + abs(encoderRightValue))/2 < 50){
+		encoderLeftValue = encoderGet(encoderLeft)/360;
+	}
+
+	ResetEncoders();
+
+	TurnLeft(40);
+
+	while((abs(encoderLeftValue) + abs(encoderRightValue))/2 < 50){
+		encoderLeftValue = encoderGet(encoderLeft)/360;
+	}
+
+	ResetEncoders();
+
+	GoForward(40);
+
+	while((abs(encoderLeftValue) + abs(encoderRightValue))/2 < 50){
+		encoderLeftValue = encoderGet(encoderLeft)/360;
+	}
+
 	MoGoDown();
-	Delay(0.4);
-	StopDrive();
+
+	ResetEncoders();
+
 	GoBackward(127);
-	Delay(1);
+
+	while((abs(encoderLeftValue) + abs(encoderRightValue))/2 < 50){
+		encoderLeftValue = encoderGet(encoderLeft)/360;
+	}
+	
 	StopDrive();
 }
 

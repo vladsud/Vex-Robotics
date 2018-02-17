@@ -92,29 +92,36 @@ void operatorControl() {
 
 		if(moGoUp){
 			setMoGoMotor(127);
+			isHoldUp = false;
+			isHoldDown = false;
 		}
 		else if(moGoDown)
 		{
 			setMoGoMotor(-127);
+			isHoldUp = false;
+			isHoldDown = false;
 		}
 		else
 		{
 			setMoGoMotor(0);
 		}
+
 		if(moGoHoldUp){
-			if (isHoldUp == false){
-				setMoGoMotor(40);
-				isHoldUp = true;
-				isHoldDown = false;
-			}
+			isHoldUp = true;
+			isHoldDown = false;
+
 		}
 		if(moGoHoldDown){
-			if (isHoldDown == false){
-				setMoGoMotor(-40);
-				isHoldDown = true;
-				isHoldUp = false;
-			}
+			isHoldDown = true;
+			isHoldUp = false;
 		}
+		if (isHoldUp == false){
+			setMoGoMotor(40);
+		}
+		if (isHoldDown == false){
+			setMoGoMotor(-40);
+		}
+
 		delay(20);
 	}
 }
