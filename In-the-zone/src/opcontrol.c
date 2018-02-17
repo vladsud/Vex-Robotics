@@ -103,14 +103,14 @@ void operatorControl() {
 		}
 		if(moGoHoldUp){
 			if (isHoldUp == false){
-				setMoGoMotor(20);
+				setMoGoMotor(40);
 				isHoldUp = true;
 				isHoldDown = false;
 			}
 		}
 		if(moGoHoldDown){
 			if (isHoldDown == false){
-				setMoGoMotor(-20);
+				setMoGoMotor(-40);
 				isHoldDown = true;
 				isHoldUp = false;
 			}
