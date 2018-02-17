@@ -34,6 +34,13 @@ bool getMoGoUp(){
 bool getMoGoDown(){
 	return joystickGetDigital(1, 5, JOY_DOWN);
 }
+bool getMoGoHoldUp(){
+	return joystickGetDigital(1, 8, JOY_UP);
+}
+
+bool getMoGoHoldDown(){
+	return joystickGetDigital(1, 8, JOY_DOWN);
+}
 
 int getForwardAxis(){
 	return getJoystick(1, 3);
@@ -64,6 +71,8 @@ void operatorControl() {
 	int turn;
 	bool moGoUp;
 	bool moGoDown;
+	bool moGoHoldUp;
+	bool moGoHoldDown;
 
 	while (1) {
 		forward = getForwardAxis();
@@ -75,6 +84,9 @@ void operatorControl() {
 		moGoUp = getMoGoUp();
 		moGoDown = getMoGoDown();
 
+		moGoHoldDown = getMoGoHoldDown();
+		moGoHoldUp = getMoGoHoldUp();
+
 		if(moGoUp){
 			setMoGoMotor(127);
 		}
@@ -85,6 +97,12 @@ void operatorControl() {
 		else
 		{
 			setMoGoMotor(0);
+		}
+		if(moGoHoldUp){
+			setMoGoMotor(20);
+		}
+		if(moGoHoldDown){
+			setMoGoMotor(-20);
 		}
 
 	}

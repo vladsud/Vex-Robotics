@@ -10,7 +10,9 @@
  * PROS contains FreeRTOS (http://www.freertos.org) whose source code may be
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
+
 #include "main.h"
+
 
 void SetLeftDrive(int speed){
 	motorSet(5, speed);
@@ -55,15 +57,36 @@ void MoGoDown(){
 void Delay(float time){
 	delay (time * 1000);
 }
+void ResetEncoders(){
+	encoderReset(encoderLeft);
+	encoderReset(encoderRight);
+}
+
 
 void autonomous() {
-  GoForward(70);
+
+	int encoderLeftValue = 0;
+	int encoderRightValue = 0;
+
+	ResetEncoders();
+
+  GoForward(40);
 	MoGoDown();
-	Delay(0.9);
+
+	while((encoderLeftValue + encoderRightValue)/2 < 50){
+		encoderLeftValue = encoderGet(encoderLeft)/360;
+	}
+
 	StopDrive();
 	MoGoUp();
-	GoBackward(127);
-	Delay(1);
+	ResetEncoders();
+	GoForward(40);
+
+	while((encoderLeftValue + encoderRightValue)/2 < 50){
+		encoderLeftValue = encoderGet(encoderLeft)/360;
+	}
+
+	StopDrive();
 	TurnLeft(127);
 	Delay(0.147);
 	GoBackward(127);
@@ -79,6 +102,11 @@ void autonomous() {
 	Delay(1);
 	StopDrive();
 }
+
+
+
+
+
 
 
 //Created by Jason Zhang, Feburary 9, 2018

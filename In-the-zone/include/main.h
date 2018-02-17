@@ -27,6 +27,9 @@
 
 #include <API.h>
 
+extern Encoder encoderLeft;
+extern Encoder encoderRight;
+
 // Allow usage of this file in C++ programs
 #ifdef __cplusplus
 extern "C" {
