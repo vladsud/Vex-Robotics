@@ -115,6 +115,7 @@ void operatorControl() {
 				isHoldUp = false;
 			}
 		}
+		delay(20);
 	}
 }
 
