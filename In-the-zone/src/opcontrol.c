@@ -100,9 +100,13 @@ void operatorControl() {
 		}
 		if(moGoHoldUp){
 			setMoGoMotor(20);
+		} else {
+			setMoGoMotor(0);
 		}
 		if(moGoHoldDown){
 			setMoGoMotor(-20);
+		} else {
+			setMoGoMotor(0);
 		}
 
 	}
