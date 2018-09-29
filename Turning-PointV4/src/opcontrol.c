@@ -1,4 +1,3 @@
-//Created by Jason Zhang, Feburary 16, 2018
 /** @file opcontrol.c
  * @brief File for operator control code
  *
@@ -25,6 +24,8 @@ int liftRight2Port = 5;
 int spinnerMotorPort = 8;
 int shooterMotor1Port = 9;
 int shooterMotor2Port = 10;
+
+
 //Drive Control
 int GetMovementJoystick(unsigned char joystick, unsigned char axis){
 	int value = joystickGetAnalog(joystick, axis);
@@ -54,7 +55,7 @@ void SetRightDrive(int speed){
 }
 
 
-//LiftControl
+//Lift Control
 bool GetLiftUp(){
 	return joystickGetDigital(1, 5, JOY_UP);
 }
@@ -74,7 +75,7 @@ void SetLiftMotor(int speed){
 	motorSet(liftRight2Port, -speed);
 }
 
-//spinner
+//Spinner Control
 bool GetSpinner(){
 	return joystickGetDigital(1, 6, JOY_DOWN);
 }
@@ -83,7 +84,7 @@ void SetSpinnerMotor(int speed){
 	motorSet(spinnerMotorPort, speed);
 }
 
-//shooter
+//Shooter Control
 bool GetShooter(){
 	return joystickGetDigital(1, 8, JOY_RIGHT);
 }
@@ -93,6 +94,7 @@ void SetShooterMotor(int speed){
 }
 
 
+//Operator Control
 void operatorControl() {
 	int forward;
 	int turn;
@@ -100,6 +102,7 @@ void operatorControl() {
 	bool liftUp;
 	bool liftDown;
 	bool spinner;
+	bool shooter;
 	while (1) {
 		//Drive
 		forward = GetForwardAxis();
@@ -127,6 +130,14 @@ void operatorControl() {
 			SetSpinnerMotor(80);
 		} else {
 			SetSpinnerMotor(0);
+		}
+
+		//shooter
+		shooter = GetShooter();
+		if(shooter){
+			SetShooterMotor(100);
+		} else {
+			SetShooterMotor(0);
 		}
 
 	}
