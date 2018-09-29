@@ -21,6 +21,10 @@ int liftLeft1Port = 2;
 int liftLeft2Port = 3;
 int liftRight1Port = 4;
 int liftRight2Port = 5;
+
+int spinnerMotorPort = 8;
+int shooterMotor1Port = 9;
+int shooterMotor2Port = 10;
 //Drive Control
 int GetMovementJoystick(unsigned char joystick, unsigned char axis){
 	int value = joystickGetAnalog(joystick, axis);
@@ -70,6 +74,23 @@ void SetLiftMotor(int speed){
 	motorSet(liftRight2Port, -speed);
 }
 
+//spinner
+bool GetSpinner(){
+	return joystickGetDigital(1, 6, JOY_DOWN);
+}
+
+void SetSpinnerMotor(int speed){
+	motorSet(spinnerMotorPort, speed);
+}
+
+//shooter
+bool GetShooter(){
+	return joystickGetDigital(1, 8, JOY_RIGHT);
+}
+void SetShooterMotor(int speed){
+	motorSet(shooterMotor1Port, speed);
+	motorSet(shooterMotor2Port, speed);
+}
 
 
 void operatorControl() {
@@ -78,6 +99,7 @@ void operatorControl() {
 
 	bool liftUp;
 	bool liftDown;
+	bool spinner;
 	while (1) {
 		//Drive
 		forward = GetForwardAxis();
@@ -98,6 +120,15 @@ void operatorControl() {
 		} else {
 			SetLiftMotor(0);
 		}
+
+		//spinner
+		spinner = GetSpinner();
+		if(spinner){
+			SetSpinnerMotor(80);
+		} else {
+			SetSpinnerMotor(0);
+		}
+
 	}
 }
 
