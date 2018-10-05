@@ -25,6 +25,9 @@ int spinnerMotorPort = 8;
 int shooterMotor1Port = 9;
 int shooterMotor2Port = 10;
 
+int rollerMotorPort = 11;
+int conveyorMotorPort = 12;
+
 
 //Drive Control
 int GetMovementJoystick(unsigned char joystick, unsigned char axis){
@@ -93,6 +96,15 @@ void SetShooterMotor(int speed){
 	motorSet(shooterMotor2Port, speed);
 }
 
+//Shooter Control
+bool GetIntake(){
+	return joystickGetDigital(1, 8, JOY_LEFT);
+}
+void SetIntakeMotor(int speed){
+	motorSet(rollerMotorPort, speed);
+	motorSet(conveyorMotorPort, speed);
+}
+
 
 //Operator Control
 void operatorControl() {
@@ -103,6 +115,7 @@ void operatorControl() {
 	bool liftDown;
 	bool spinner;
 	bool shooter;
+	bool intake;
 	while (1) {
 		//Drive
 		forward = GetForwardAxis();
@@ -140,6 +153,12 @@ void operatorControl() {
 			SetShooterMotor(0);
 		}
 
+		intake = GetIntake();
+		if(intake){
+			SetIntakeMotor(100);
+		} else {
+			SetIntakeMotor(0);
+		}
 	}
 }
 
