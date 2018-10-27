@@ -11,30 +11,18 @@
  */
 
 #include "main.h"
+#include "init.c"
 
-//PORTS CHANGE HERE
-int leftDrivePortY = 2;
-int rightDrivePortY = 3;
-int leftDrivePort2 = 4;
-int rightDrivePort2 = 5;
-
-int liftPort = 6;
-int intakePort = 7;
-int shooterPort = 8;
-int spinnerPort = 9;
-int anglePort = 10;
-//END PORTS
-
-
-/*
+/* BUTTON MAPPING
 lift is left side triggers up and down
 Spinner is right trigger down
 Shooter is right side button left
 Intake is right side button left
 */
-
-
 int liftMotorSpeed = 100;
+int spinnerMotorSpeed = 100;
+int shooterMotorSpeed = 100;
+int intakeMotorSpeed = 100;
 //Drive Control
 int GetMovementJoystick(unsigned char joystick, unsigned char axis){
 	int value = joystickGetAnalog(joystick, axis);
@@ -115,7 +103,7 @@ void operatorControl() {
 	bool shooter;
 	bool intake;
 
-	while (1) {
+	while (true) {
 		//Drive
 		forward = GetForwardAxis();
 		turn = GetTurnAxis();
@@ -139,7 +127,7 @@ void operatorControl() {
 		//spinner
 		spinner = GetSpinner();
 		if(spinner){
-			SetSpinnerMotor(80);
+			SetSpinnerMotor(spinnerMotorSpeed);
 		} else {
 			SetSpinnerMotor(0);
 		}
@@ -147,7 +135,7 @@ void operatorControl() {
 		//shooter
 		shooter = GetShooter();
 		if(shooter){
-			SetShooterMotor(100);
+			SetShooterMotor(shooterMotorSpeed);
 		} else {
 			SetShooterMotor(0);
 		}
@@ -155,7 +143,7 @@ void operatorControl() {
 		//intake
 		intake = GetIntake();
 		if(intake){
-			SetIntakeMotor(100);
+			SetIntakeMotor(intakeMotorSpeed);
 		} else {
 			SetIntakeMotor(0);
 		}
