@@ -12,18 +12,18 @@
 
 #include "main.h"
 
+//PORTS CHANGE HERE
 int leftDrivePortY = 2;
 int rightDrivePortY = 3;
 int leftDrivePort2 = 4;
 int rightDrivePort2 = 5;
 
 int liftPort = 6;
-
 int intakePort = 7;
 int shooterPort = 8;
 int spinnerPort = 9;
 int anglePort = 10;
-
+//END PORTS
 
 
 
