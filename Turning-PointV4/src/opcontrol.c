@@ -12,23 +12,22 @@
 
 #include "main.h"
 
-int leftDrivePort = 6;
-int rightDrivePort = 7;
+int leftDrivePortY = 2;
+int rightDrivePortY = 3;
+int leftDrivePort2 = 4;
+int rightDrivePort2 = 5;
+
+int liftPort = 6;
+
+int intakePort = 7;
+int shooterPort = 8;
+int spinnerPort = 9;
+int anglePort = 10;
+
+
+
 
 int liftMotorSpeed = 100;
-int liftLeft1Port = 2;
-int liftLeft2Port = 3;
-int liftRight1Port = 4;
-int liftRight2Port = 5;
-
-int spinnerMotorPort = 8;
-int shooterMotor1Port = 9;
-int shooterMotor2Port = 10;
-
-int rollerMotorPort = 11;
-int conveyorMotorPort = 12;
-
-
 //Drive Control
 int GetMovementJoystick(unsigned char joystick, unsigned char axis){
 	int value = joystickGetAnalog(joystick, axis);
@@ -51,10 +50,12 @@ int GetTurnAxis(){
 }
 
 void SetLeftDrive(int speed){
-	motorSet(leftDrivePort, speed);
+	motorSet(leftDrivePortY, speed);
+	motorSet(leftDrivePort2, speed);
 }
 void SetRightDrive(int speed){
-	motorSet(rightDrivePort, speed);
+	motorSet(rightDrivePortY, speed);
+	motorSet(rightDrivePort2, speed);
 }
 
 
@@ -68,14 +69,7 @@ bool GetLiftDown(){
 }
 
 void SetLiftMotor(int speed){
-	//Left1
-	motorSet(liftLeft1Port, speed);
-	//Left2
-	motorSet(liftLeft2Port, -speed);
-	//Right1
-	motorSet(liftRight1Port, speed);
-	//Right2
-	motorSet(liftRight2Port, -speed);
+	motorSet(liftPort, speed);
 }
 
 //Spinner Control
@@ -84,7 +78,7 @@ bool GetSpinner(){
 }
 
 void SetSpinnerMotor(int speed){
-	motorSet(spinnerMotorPort, speed);
+	motorSet(spinnerPort, speed);
 }
 
 //Shooter Control
@@ -92,17 +86,14 @@ bool GetShooter(){
 	return joystickGetDigital(1, 8, JOY_RIGHT);
 }
 void SetShooterMotor(int speed){
-	motorSet(shooterMotor1Port, speed);
-	motorSet(shooterMotor2Port, speed);
+	motorSet(shooterPort, speed);
 }
 
-//Shooter Control
 bool GetIntake(){
 	return joystickGetDigital(1, 8, JOY_LEFT);
 }
 void SetIntakeMotor(int speed){
-	motorSet(rollerMotorPort, speed);
-	motorSet(conveyorMotorPort, speed);
+	motorSet(intakePort, speed);
 }
 
 
@@ -116,6 +107,7 @@ void operatorControl() {
 	bool spinner;
 	bool shooter;
 	bool intake;
+
 	while (1) {
 		//Drive
 		forward = GetForwardAxis();
@@ -153,12 +145,14 @@ void operatorControl() {
 			SetShooterMotor(0);
 		}
 
+		//intake
 		intake = GetIntake();
 		if(intake){
 			SetIntakeMotor(100);
 		} else {
 			SetIntakeMotor(0);
 		}
+
 	}
 }
 
