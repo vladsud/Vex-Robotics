@@ -26,6 +26,13 @@ int anglePort = 10;
 //END PORTS
 
 
+/*
+lift is left side triggers up and down
+Spinner is right trigger down
+Shooter is right side button left
+Intake is right side button left
+*/
+
 
 int liftMotorSpeed = 100;
 //Drive Control
