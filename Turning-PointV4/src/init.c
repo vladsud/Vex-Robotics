@@ -1,18 +1,4 @@
 #include "main.h"
-//DRIVE MOTOR PORTS
-int leftDrivePortY = 2;
-int rightDrivePortY = 3;
-int leftDrivePort2 = 4;
-int rightDrivePort2 = 5;
-//END DRIVE MOTOR PORTS
-
-//OTHER MOTOR PORTS
-int liftPort = 6;
-int intakePort = 7;
-int shooterPort = 8;
-int spinnerPort = 9;
-int anglePort = 10;
-//END OTHER MOTOR PORTS
 
 //ANALOG SENSOR PORTS
 int spinnerPotPort = 2;

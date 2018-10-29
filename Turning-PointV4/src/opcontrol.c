@@ -11,7 +11,6 @@
  */
 
 #include "main.h"
-#include "init.c"
 
 /* BUTTON MAPPING
 lift is left side triggers up and down
@@ -19,6 +18,22 @@ Spinner is right trigger down
 Shooter is right side button left
 Intake is right side button left
 */
+
+//DRIVE MOTOR PORTS
+int leftDrivePortY = 99;
+int leftDrivePort2 = 4;
+int rightDrivePortY = 6;
+int rightDrivePort2 = 7;
+//END DRIVE MOTOR PORTS
+
+//OTHER MOTOR PORTS
+int liftPort = 5;
+int intakePort = 8;
+int shooterPort = 99;
+int spinnerPort = 9;
+int anglePort = 99;
+//END OTHER MOTOR PORTS
+
 int liftMotorSpeed = 100;
 int spinnerMotorSpeed = 100;
 int shooterMotorSpeed = 100;
@@ -103,6 +118,11 @@ void operatorControl() {
 	bool shooter;
 	bool intake;
 
+	//TEST
+	bool test;
+
+
+
 	while (true) {
 		//Drive
 		forward = GetForwardAxis();
@@ -139,7 +159,6 @@ void operatorControl() {
 		} else {
 			SetShooterMotor(0);
 		}
-
 		//intake
 		intake = GetIntake();
 		if(intake){
@@ -148,7 +167,6 @@ void operatorControl() {
 			SetIntakeMotor(0);
 		}
 
-	}
 }
 
 
