@@ -29,9 +29,9 @@ int rightDrivePort2 = 7;
 //OTHER MOTOR PORTS
 int liftPort = 5;
 int intakePort = 8;
-int shooterPort = 99;
+int shooterPort = 3;
 int spinnerPort = 9;
-int anglePort = 99;
+int anglePort = 2;
 //END OTHER MOTOR PORTS
 
 int liftMotorSpeed = 100;
