@@ -27,6 +27,46 @@
 
 #include <API.h>
 
+#define liftMotorSpeed 100
+#define spinnerMotorSpeed 50
+#define shooterMotorSpeed 100
+#define intakeMotorSpeed 100
+//DRIVE MOTOR PORTS
+#define leftDrivePortY 3
+#define leftDrivePort2 4
+#define rightDrivePortY 6
+#define rightDrivePort2 7
+//END DRIVE MOTOR PORTS
+
+//OTHER MOTOR PORTS
+#define liftPort 5
+#define intakePort 8
+#define shooterPort 2
+#define spinnerPort 9
+#define anglePort 1
+//END OTHER MOTOR PORTS
+
+//ANALOG SENSOR PORTS
+#define spinnerPotPort 5
+//END ANALOG SENSOR PORTS
+
+//ENCODER PORTS
+#define leftDriveEncoderTopPort 3
+#define leftDriveEncoderBotPort 4
+#define rightDriveEncoderTopPort 2
+#define rightDriveEncoderBotPort 6
+#define leftLiftEncoderTopPort 7
+#define leftLiftEncoderBotPort 8
+#define rightLiftEncoderTopPort 9
+#define rightLiftEncoderBotPort 10
+//END ENCODER PORTS
+
+Encoder leftDriveEncoder;
+Encoder rightDriveEncoder;
+Encoder leftLiftEncoder;
+Encoder rightLiftEncoder;
+
+
 
 // Allow usage of this file in C++ programs
 #ifdef __cplusplus

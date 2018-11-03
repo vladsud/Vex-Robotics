@@ -11,33 +11,12 @@
  */
 
 #include "main.h"
-
 /* BUTTON MAPPING
 lift is left side triggers up and down
 Spinner is right trigger down
-Shooter is right side button left
+Shooter is right side button right
 Intake is right side button left
 */
-
-//DRIVE MOTOR PORTS
-int leftDrivePortY = 99;
-int leftDrivePort2 = 4;
-int rightDrivePortY = 6;
-int rightDrivePort2 = 7;
-//END DRIVE MOTOR PORTS
-
-//OTHER MOTOR PORTS
-int liftPort = 5;
-int intakePort = 8;
-int shooterPort = 3;
-int spinnerPort = 9;
-int anglePort = 2;
-//END OTHER MOTOR PORTS
-
-int liftMotorSpeed = 100;
-int spinnerMotorSpeed = 100;
-int shooterMotorSpeed = 100;
-int intakeMotorSpeed = 100;
 //Drive Control
 int GetMovementJoystick(unsigned char joystick, unsigned char axis){
 	int value = joystickGetAnalog(joystick, axis);
@@ -60,8 +39,8 @@ int GetTurnAxis(){
 }
 
 void SetLeftDrive(int speed){
-	motorSet(leftDrivePortY, speed);
-	motorSet(leftDrivePort2, speed);
+	motorSet(leftDrivePortY, -speed);
+	motorSet(leftDrivePort2, -speed);
 }
 void SetRightDrive(int speed){
 	motorSet(rightDrivePortY, speed);
@@ -93,7 +72,7 @@ void SetSpinnerMotor(int speed){
 
 //Shooter Control
 bool GetShooter(){
-	return joystickGetDigital(1, 8, JOY_RIGHT);
+	return joystickGetDigital(1, 8, JOY_UP);
 }
 void SetShooterMotor(int speed){
 	motorSet(shooterPort, speed);
@@ -116,12 +95,9 @@ void operatorControl() {
 	bool liftDown;
 	bool spinner;
 	bool shooter;
-	bool intake;
+	bool intake = false;
 
-	//TEST
-	bool test;
-
-
+	bool oldState = false;
 
 	while (true) {
 		//Drive
@@ -137,38 +113,45 @@ void operatorControl() {
 		liftDown = GetLiftDown();
 
 		if (liftUp){
-			SetLiftMotor(liftMotorSpeed);
-		} else if (liftDown){
 			SetLiftMotor(-liftMotorSpeed);
+		} else if (liftDown){
+			SetLiftMotor(liftMotorSpeed/2);
 		} else {
 			SetLiftMotor(0);
 		}
 
 		//spinner
 		spinner = GetSpinner();
-		if(spinner){
-			SetSpinnerMotor(spinnerMotorSpeed);
-		} else {
+			if(spinner){
+				SetSpinnerMotor(spinnerMotorSpeed);
+			//2948.4 is 180 degrees
+		}else {
 			SetSpinnerMotor(0);
 		}
 
+		auto newState = GetIntake();
+		//intake
+		if (oldState == false && newState == true){
+			intake = !intake;
+			if (intake)
+				SetIntakeMotor(intakeMotorSpeed);
+			else
+				SetIntakeMotor(0);
+
+		}
+		oldState = newState;
+
 		//shooter
 		shooter = GetShooter();
+
 		if(shooter){
 			SetShooterMotor(shooterMotorSpeed);
 		} else {
 			SetShooterMotor(0);
 		}
-		//intake
-		intake = GetIntake();
-		if(intake){
-			SetIntakeMotor(intakeMotorSpeed);
-		} else {
-			SetIntakeMotor(0);
-		}
-
+		delay(10);
+	}
 }
-
 
 
 
