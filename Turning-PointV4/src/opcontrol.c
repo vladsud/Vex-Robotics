@@ -104,9 +104,31 @@ void operatorControl() {
 		forward = GetForwardAxis();
 		turn = GetTurnAxis();
 
-		SetLeftDrive(forward + turn);
-		SetRightDrive(forward - turn);
+		if (turn == 0){
+			int mainPower = forward;
+			int subPower = forward;
 
+			int error = 0;
+
+			int ConstantOfP = 5;
+
+			encoderRest(leftDriveEncoder);
+			encoderRest(rightDriveEncoder);
+
+			SetLeftDrive(mainPower);
+			SetRightDrive(subPower);
+
+			error = encoderGet(leftDriveEncoder) - encoderGet(rightDriveEncoder);
+
+			subPower += error/ConstantOfP
+
+			encoderRest(leftDriveEncoder);
+			encoderRest(rightDriveEncoder);
+
+		} else {
+			SetLeftDrive(forward + turn);
+			SetRightDrive(forward - turn);
+		}
 
 		//Lift
 		liftUp = GetLiftUp();
