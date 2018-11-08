@@ -51,18 +51,18 @@
 */
 
 //DRIVE MOTOR PORTS
-#define leftDrivePortY 3 //guchi
+#define leftDrivePortY 3
 #define leftDrivePort2 6
-#define rightDrivePortY 8 //fuck u
+#define rightDrivePortY 8
 #define rightDrivePort2 9
 //END DRIVE MOTOR PORTS
 
 //OTHER MOTOR PORTS
-#define liftPort 4 //fuk u
-#define intakePort 2  //good
-#define shooterPort 1 //good
+#define liftPort 4
+#define intakePort 2
+#define shooterPort 1
 #define spinnerPort 7
-#define anglePort 5 //guchu
+#define anglePort 5
 //END OTHER MOTOR PORTS
 
 //ANALOG SENSOR PORTS
