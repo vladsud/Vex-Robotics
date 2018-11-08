@@ -31,6 +31,9 @@
 #define spinnerMotorSpeed 50
 #define shooterMotorSpeed 100
 #define intakeMotorSpeed 100
+#define angleMotorSpeed 30
+
+/*
 //DRIVE MOTOR PORTS
 #define leftDrivePortY 3
 #define leftDrivePort2 4
@@ -41,13 +44,30 @@
 //OTHER MOTOR PORTS
 #define liftPort 5
 #define intakePort 8
-#define shooterPort 2
+#define shooterPort 1
 #define spinnerPort 9
-#define anglePort 1
+#define anglePort 2
+//END OTHER MOTOR PORTS
+*/
+
+//DRIVE MOTOR PORTS
+#define leftDrivePortY 3 //guchi
+#define leftDrivePort2 99999999
+#define rightDrivePortY 99
+#define rightDrivePort2 99
+//END DRIVE MOTOR PORTS
+
+//OTHER MOTOR PORTS
+#define liftPort 99
+#define intakePort 2  //good
+#define shooterPort 1 //good
+#define spinnerPort 9
+#define anglePort 5
 //END OTHER MOTOR PORTS
 
 //ANALOG SENSOR PORTS
 #define spinnerPotPort 5
+#define anglePotPort 1
 //END ANALOG SENSOR PORTS
 
 //ENCODER PORTS

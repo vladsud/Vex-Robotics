@@ -7,5 +7,6 @@ void initialize(){
   leftLiftEncoder = encoderInit(leftLiftEncoderTopPort, leftLiftEncoderBotPort, false);
   rightLiftEncoder = encoderInit(rightLiftEncoderTopPort, rightLiftEncoderBotPort, false);
 
-  analogCalibrate(spinnerPotPort);
+  //analogCalibrate(spinnerPotPort);
+  //analogCalibrate(anglePotPort);
 }

@@ -40,7 +40,7 @@ int GetTurnAxis(){
 
 void SetLeftDrive(int speed){
 	motorSet(leftDrivePortY, -speed);
-	motorSet(leftDrivePort2, -speed);
+	motorSet(leftDrivePort2, speed);
 }
 void SetRightDrive(int speed){
 	motorSet(rightDrivePortY, speed);
@@ -75,7 +75,7 @@ bool GetShooter(){
 	return joystickGetDigital(1, 8, JOY_UP);
 }
 void SetShooterMotor(int speed){
-	motorSet(shooterPort, speed);
+	motorSet(shooterPort, -speed);
 }
 
 bool GetIntake(){
@@ -86,6 +86,25 @@ void SetIntakeMotor(int speed){
 }
 
 
+//Angle
+bool GetAngleUp(){
+	return joystickGetDigital(1, 7, JOY_UP);
+}
+
+bool GetAngleDown(){
+	return joystickGetDigital(1, 7, JOY_DOWN);
+}
+
+void SetAngleMotor(int speed){
+	motorSet(anglePort, speed);
+}
+
+
+
+int AbsDifferent(int first, int second){
+	return abs(first - second);
+}
+
 //Operator Control
 void operatorControl() {
 	int forward;
@@ -95,40 +114,55 @@ void operatorControl() {
 	bool liftDown;
 	bool spinner;
 	bool shooter;
+	bool angleUp;
+	bool angleDown;
 	bool intake = false;
 
 	bool oldState = false;
 
+	//int lastRightEncoder = 0;
+	//int lastLeftEncoder = 0;
+
+	//int ErrorPower = 0;
+
 	while (true) {
+
+		printf("%d\n", analogRead(anglePotPort));
 		//Drive
 		forward = GetForwardAxis();
 		turn = GetTurnAxis();
 
-		if (turn == 0){
-			int mainPower = forward;
-			int subPower = forward;
+		SetLeftDrive(forward + turn);
+		SetRightDrive(forward - turn);
+
+		/*
+		if (turn == 0 && forward == 0){
+
+			SetLeftDrive(0);
+			SetRightDrive(0);
+
+		} else if (turn == 0){
 
 			int error = 0;
+			int k = 5;
 
-			int ConstantOfP = 5;
+			SetLeftDrive(forward);
+			SetRightDrive(forward+ErrorPower);
 
-			encoderRest(leftDriveEncoder);
-			encoderRest(rightDriveEncoder);
+			error = AbsDifferent(encoderGet(leftDriveEncoder), lastLeftEncoder) - AbsDifferent(encoderGet(rightDriveEncoder), lastRightEncoder);
 
-			SetLeftDrive(mainPower);
-			SetRightDrive(subPower);
+			ErrorPower = error/k;
 
-			error = encoderGet(leftDriveEncoder) - encoderGet(rightDriveEncoder);
-
-			subPower += error/ConstantOfP
-
-			encoderRest(leftDriveEncoder);
-			encoderRest(rightDriveEncoder);
+			lastLeftEncoder = encoderGet(leftDriveEncoder);
+			lastRightEncoder = encoderGet(rightDriveEncoder);
 
 		} else {
+
 			SetLeftDrive(forward + turn);
 			SetRightDrive(forward - turn);
+
 		}
+		*/
 
 		//Lift
 		liftUp = GetLiftUp();
@@ -171,6 +205,19 @@ void operatorControl() {
 		} else {
 			SetShooterMotor(0);
 		}
+
+		//angle
+		angleUp = GetAngleUp();
+		angleDown = GetAngleDown();
+
+		if (angleUp){
+			SetAngleMotor(angleMotorSpeed);
+		} else if (angleDown){
+			SetAngleMotor(angleMotorSpeed);
+		} else {
+			SetAngleMotor(0);
+		}
+
 		delay(10);
 	}
 }
