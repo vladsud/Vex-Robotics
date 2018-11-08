@@ -213,7 +213,7 @@ void operatorControl() {
 		if (angleUp){
 			SetAngleMotor(angleMotorSpeed);
 		} else if (angleDown){
-			SetAngleMotor(angleMotorSpeed);
+			SetAngleMotor(-angleMotorSpeed);
 		} else {
 			SetAngleMotor(0);
 		}
