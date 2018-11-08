@@ -40,7 +40,7 @@ int GetTurnAxis(){
 
 void SetLeftDrive(int speed){
 	motorSet(leftDrivePortY, -speed);
-	motorSet(leftDrivePort2, speed);
+	motorSet(leftDrivePort2, -speed);
 }
 void SetRightDrive(int speed){
 	motorSet(rightDrivePortY, speed);
@@ -213,7 +213,7 @@ void operatorControl() {
 		if (angleUp){
 			SetAngleMotor(angleMotorSpeed);
 		} else if (angleDown){
-			SetAngleMotor(-angleMotorSpeed);
+			SetAngleMotor(-angleMotorSpeed/2);
 		} else {
 			SetAngleMotor(0);
 		}
