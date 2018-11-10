@@ -1,11 +1,12 @@
 #include "main.h"
 
+void initialize()
+{
 
-void initialize(){
+  leftDriveEncoder = encoderInit(LEFTDRIVEENCODERTOPPORT, LEFTDRIVEENCODERBOTPORT, true);
+  rightDriveEncoder = encoderInit(RIGHTDRIVEENCODERTOPPORT, RIGHTDRIVEENCODERBOTPORT, true);
 
-  leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, true);
-  rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, true);
-
-  //analogCalibrate(spinnerPotPort);
+  //analogCalibrate(spinnerPotPort)s;
   //analogCalibrate(anglePotPort);
+
 }
