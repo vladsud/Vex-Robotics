@@ -18,8 +18,8 @@ Shooter is right side button right
 Intake is right side button left
 */
 //Drive Control
-int GetMovementJoystick(unsigned char joystick, unsigned char axis){
-	int value = joystickGetAnalog(joystick, axis);
+float GetMovementJoystick(unsigned char joystick, unsigned char axis){
+	float value = joystickGetAnalog(joystick, axis);
 	if (abs(value) < 15){
 		value = 0;
 	}
@@ -28,21 +28,20 @@ int GetMovementJoystick(unsigned char joystick, unsigned char axis){
 	} else{
 		value = (value * value) / 127;
 	}
-
 	return value;
 }
-int GetForwardAxis(){
+float GetForwardAxis(){
 	return GetMovementJoystick(1, 3);
 }
-int GetTurnAxis(){
+float GetTurnAxis(){
 	return GetMovementJoystick(1, 1);
 }
 
-void SetLeftDrive(int speed){
+void SetLeftDrive(float speed){
 	motorSet(leftDrivePortY, -speed);
 	motorSet(leftDrivePort2, -speed);
 }
-void SetRightDrive(int speed){
+void SetRightDrive(float speed){
 	motorSet(rightDrivePortY, speed);
 	motorSet(rightDrivePort2, speed);
 }
@@ -57,7 +56,7 @@ bool GetLiftDown(){
 	return joystickGetDigital(1, 5, JOY_DOWN);
 }
 
-void SetLiftMotor(int speed){
+void SetLiftMotor(float speed){
 	motorSet(liftPort, speed);
 }
 
@@ -66,7 +65,7 @@ bool GetSpinner(){
 	return joystickGetDigital(1, 6, JOY_DOWN);
 }
 
-void SetSpinnerMotor(int speed){
+void SetSpinnerMotor(float speed){
 	motorSet(spinnerPort, speed);
 }
 
@@ -74,17 +73,16 @@ void SetSpinnerMotor(int speed){
 bool GetShooter(){
 	return joystickGetDigital(1, 8, JOY_UP);
 }
-void SetShooterMotor(int speed){
+void SetShooterMotor(float speed){
 	motorSet(shooterPort, -speed);
 }
 
 bool GetIntake(){
 	return joystickGetDigital(1, 8, JOY_LEFT);
 }
-void SetIntakeMotor(int speed){
+void SetIntakeMotor(float speed){
 	motorSet(intakePort, speed);
 }
-
 
 //Angle
 bool GetAngleUp(){
@@ -95,47 +93,39 @@ bool GetAngleDown(){
 	return joystickGetDigital(1, 7, JOY_DOWN);
 }
 
-void SetAngleMotor(int speed){
+void SetAngleMotor(float speed){
 	motorSet(anglePort, speed);
-}
-
-
-
-int AbsDifferent(int first, int second){
-	return abs(first - second);
 }
 
 //Operator Control
 void operatorControl() {
-	int forward;
-	int turn;
+	float forward = 0;
+	float turn = 0;
 
-	bool liftUp;
-	bool liftDown;
-	bool spinner;
-	bool shooter;
-	bool angleUp;
-	bool angleDown;
+	bool liftUp = false;
+	bool liftDown = false;
+	bool spinner = false;
+	bool shooter = false;
+	bool angleUp = false;
+	bool angleDown = false;
 	bool intake = false;
 
-	bool oldState = false;
+	bool oldIntakeState = false;
+	bool oldSpinnerState = false;
 
-	//int lastRightEncoder = 0;
-	//int lastLeftEncoder = 0;
+	float ErrorPower = 0;
 
-	//int ErrorPower = 0;
 
+	int count = 0;
 	while (true) {
+		count++;
+		if (count % 50 == 0){
+			printf("LD: %d     LL: %d     A: %d     S:%d    RL: %d     RD: %d\n", encoderGet(leftDriveEncoder), analogRead(leftLiftPotPort), analogRead(anglePotPort), analogRead(spinnerPotPort), analogRead(rightLiftPotPort), encoderGet(rightDriveEncoder));
+		}
 
-		printf("%d\n", analogRead(anglePotPort));
 		//Drive
 		forward = GetForwardAxis();
 		turn = GetTurnAxis();
-
-		SetLeftDrive(forward + turn);
-		SetRightDrive(forward - turn);
-
-		/*
 		if (turn == 0 && forward == 0){
 
 			SetLeftDrive(0);
@@ -144,25 +134,23 @@ void operatorControl() {
 		} else if (turn == 0){
 
 			int error = 0;
-			int k = 5;
+			float k = 0.1;
 
-			SetLeftDrive(forward);
+			SetLeftDrive(forward-ErrorPower);
 			SetRightDrive(forward+ErrorPower);
 
-			error = AbsDifferent(encoderGet(leftDriveEncoder), lastLeftEncoder) - AbsDifferent(encoderGet(rightDriveEncoder), lastRightEncoder);
+			error = leftDriveEncoder - rightDriveEncoder;
 
-			ErrorPower = error/k;
-
-			lastLeftEncoder = encoderGet(leftDriveEncoder);
-			lastRightEncoder = encoderGet(rightDriveEncoder);
+			ErrorPower = error * k;
 
 		} else {
+			encoderReset(leftDriveEncoder);
+			encoderReset(rightDriveEncoder);
 
 			SetLeftDrive(forward + turn);
 			SetRightDrive(forward - turn);
 
 		}
-		*/
 
 		//Lift
 		liftUp = GetLiftUp();
@@ -177,17 +165,34 @@ void operatorControl() {
 		}
 
 		//spinner
-		spinner = GetSpinner();
-			if(spinner){
-				SetSpinnerMotor(spinnerMotorSpeed);
-			//2948.4 is 180 degrees
-		}else {
-			SetSpinnerMotor(0);
+		bool newSpinnerState = GetSpinner();
+		if (oldSpinnerState == false && newSpinnerState == true){
+			spinner = !spinner;
+		}
+		if(spinner)
+		{
+			if (analogRead(spinnerPotPort) < 2000)
+			{
+				while (analogRead(spinnerPotPort) < 3600)
+				{
+					SetSpinnerMotor(-1 * abs(analogRead(spinnerPotPort) - 3600)  * spinnerMotorConstant);
+				}
+				SetSpinnerMotor(0);
+			}
+			else
+			{
+				while (analogRead(spinnerPotPort) > 500)
+				{
+					SetSpinnerMotor(abs(analogRead(spinnerPotPort) - 450) * spinnerMotorConstant);
+				}
+				SetSpinnerMotor(0);
+			}
+			spinner = !spinner;
 		}
 
-		auto newState = GetIntake();
+		bool newIntakeState = GetIntake();
 		//intake
-		if (oldState == false && newState == true){
+		if (oldIntakeState == false && newIntakeState == true){
 			intake = !intake;
 			if (intake)
 				SetIntakeMotor(intakeMotorSpeed);
@@ -195,7 +200,7 @@ void operatorControl() {
 				SetIntakeMotor(0);
 
 		}
-		oldState = newState;
+		oldIntakeState = newIntakeState;
 
 		//shooter
 		shooter = GetShooter();

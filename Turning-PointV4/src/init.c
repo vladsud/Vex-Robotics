@@ -2,10 +2,9 @@
 
 
 void initialize(){
-  leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, false);
-  rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, false);
-  leftLiftEncoder = encoderInit(leftLiftEncoderTopPort, leftLiftEncoderBotPort, false);
-  rightLiftEncoder = encoderInit(rightLiftEncoderTopPort, rightLiftEncoderBotPort, false);
+
+  leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, true);
+  rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, true);
 
   //analogCalibrate(spinnerPotPort);
   //analogCalibrate(anglePotPort);

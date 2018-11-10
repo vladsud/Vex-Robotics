@@ -28,7 +28,7 @@
 #include <API.h>
 
 #define liftMotorSpeed 100
-#define spinnerMotorSpeed 50
+#define spinnerMotorConstant 0.02
 #define shooterMotorSpeed 100
 #define intakeMotorSpeed 100
 #define angleMotorSpeed 30
@@ -66,25 +66,22 @@
 //END OTHER MOTOR PORTS
 
 //ANALOG SENSOR PORTS
-#define spinnerPotPort 5
+#define spinnerPotPort 2
 #define anglePotPort 1
+#define leftLiftPotPort 3
+#define rightLiftPotPort 4
 //END ANALOG SENSOR PORTS
 
 //ENCODER PORTS
 #define leftDriveEncoderTopPort 3
 #define leftDriveEncoderBotPort 4
-#define rightDriveEncoderTopPort 2
-#define rightDriveEncoderBotPort 6
-#define leftLiftEncoderTopPort 7
-#define leftLiftEncoderBotPort 8
-#define rightLiftEncoderTopPort 9
-#define rightLiftEncoderBotPort 10
+#define rightDriveEncoderTopPort 1
+#define rightDriveEncoderBotPort 2
 //END ENCODER PORTS
 
 Encoder leftDriveEncoder;
 Encoder rightDriveEncoder;
-Encoder leftLiftEncoder;
-Encoder rightLiftEncoder;
+
 
 
 
