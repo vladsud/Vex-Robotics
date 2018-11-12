@@ -28,11 +28,10 @@
 
 #include "API.h"
 
-#define liftMotorSpeed 100
-#define spinnerMotorConstant 0.02
-#define shooterMotorSpeed 100
-#define intakeMotorSpeed 100
-#define angleMotorSpeed 30
+#define liftMotorSpeed 127
+#define shooterMotorSpeed 127
+#define intakeMotorSpeed 127
+#define angleMotorSpeed 70
 
 /*
 //DRIVE MOTOR PORTS
