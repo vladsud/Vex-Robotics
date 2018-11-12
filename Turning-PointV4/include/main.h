@@ -25,13 +25,13 @@
 // This prevents multiple inclusion, which isn't bad for this file but is good practice
 #define MAIN_H_
 
-#include "API.h"
+#include <API.h>
 
-#define LIFTMOTORSPEED 100
-#define SPINNERMOTORCONSTANT 0.02
-#define SHOOTERMOTORSPEED 100
-#define INTAKEMOTORSPEED 100
-#define ANGLEMOTORSPEED 30
+#define liftMotorSpeed 100
+#define spinnerMotorConstant 0.02
+#define shooterMotorSpeed 100
+#define intakeMotorSpeed 100
+#define angleMotorSpeed 30
 
 /*
 //DRIVE MOTOR PORTS
@@ -51,32 +51,32 @@
 */
 
 //DRIVE MOTOR PORTS
-#define LEFTDRIVEPORTY 3
-#define LEFTDRIVEPORT2 6
-#define RIGHTDRIVEPORTY 8
-#define RIGHTDRIVEPORT2 9
+#define leftDrivePortY 3
+#define leftDrivePort2 6
+#define rightDrivePortY 8
+#define rightDrivePort2 9
 //END DRIVE MOTOR PORTS
 
 //OTHER MOTOR PORTS
-#define LIFTPORT 4
-#define INTAKEPORT 2
-#define SHOOTERPORT 1
-#define SPINNERPORT 7
-#define ANGLEPORT 5
+#define liftPort 4
+#define intakePort 2
+#define shooterPort 1
+#define spinnerPort 7
+#define anglePort 5
 //END OTHER MOTOR PORTS
 
 //ANALOG SENSOR PORTS
-#define SPINNERPOTPORT 2
-#define ANGLEPOTPORT 1
-#define LEFTLIFTPOTPORT 3
-#define RIGHTLIFTPOTPORT 4
+#define spinnerPotPort 2
+#define anglePotPort 1
+#define leftLiftPotPort 3
+#define rightLiftPotPort 4
 //END ANALOG SENSOR PORTS
 
 //ENCODER PORTS
-#define LEFTDRIVEENCODERTOPPORT 3
-#define LEFTDRIVEENCODERBOTPORT 4
-#define RIGHTDRIVEENCODERTOPPORT 1
-#define RIGHTDRIVEENCODERBOTPORT 2
+#define leftDriveEncoderTopPort 3
+#define leftDriveEncoderBotPort 4
+#define rightDriveEncoderTopPort 1
+#define rightDriveEncoderBotPort 2
 //END ENCODER PORTS
 
 Encoder leftDriveEncoder;
