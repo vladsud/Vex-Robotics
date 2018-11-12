@@ -3,9 +3,9 @@
 Encoder leftDriveEncoder;
 Encoder rightDriveEncoder;
 
-void initialize(){
+void initialize()
+{
 
   leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, true);
   rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, true);
-
 }

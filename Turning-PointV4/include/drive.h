@@ -3,18 +3,18 @@
 
 class Drive
 {
-    float forward = 0;
-    float turn = 0;
-    float ErrorPower = 0;
+  float forward = 0;
+  float turn = 0;
+  float ErrorPower = 0;
 
-  public:
-    float GetMovementJoystick(unsigned char joystick, unsigned char axis);
+public:
+  float GetMovementJoystick(unsigned char joystick, unsigned char axis);
 
-    float GetForwardAxis();
-    float GetTurnAxis();
+  float GetForwardAxis();
+  float GetTurnAxis();
 
-    void SetLeftDrive(float speed);
-    void SetRightDrive(float speed);
+  void SetLeftDrive(float speed);
+  void SetRightDrive(float speed);
 
-    void Update();
+  void Update();
 };

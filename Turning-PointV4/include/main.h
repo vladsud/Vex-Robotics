@@ -85,15 +85,16 @@ extern Encoder rightDriveEncoder;
 
 // Allow usage of this file in C++ programs
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-// A function prototype looks exactly like its declaration, but with a semicolon instead of
-// actual code. If a function does not match a prototype, compile errors will occur.
+    // A function prototype looks exactly like its declaration, but with a semicolon instead of
+    // actual code. If a function does not match a prototype, compile errors will occur.
 
-// Prototypes for initialization, operator control and autonomous
+    // Prototypes for initialization, operator control and autonomous
 
-/**
+    /**
  * Runs the user autonomous code. This function will be started in its own task with the default
  * priority and stack size whenever the robot is enabled via the Field Management System or the
  * VEX Competition Switch in the autonomous mode. If the robot is disabled or communications is
@@ -107,8 +108,8 @@ extern "C" {
  * The autonomous task may exit, unlike operatorControl() which should never exit. If it does
  * so, the robot will await a switch to another mode or disable/enable cycle.
  */
-void autonomous();
-/**
+    void autonomous();
+    /**
  * Runs pre-initialization code. This function will be started in kernel mode one time while the
  * VEX Cortex is starting up. As the scheduler is still paused, most API functions will fail.
  *
@@ -116,8 +117,8 @@ void autonomous();
  * states (digitalWrite()) of limit switches, push buttons, and solenoids. It can also safely
  * configure a UART port (usartOpen()) but cannot set up an LCD (lcdInit()).
  */
-void initializeIO();
-/**
+    void initializeIO();
+    /**
  * Runs user initialization code. This function will be started in its own task with the default
  * priority and stack size once when the robot is starting up. It is possible that the VEXnet
  * communication link may not be fully established at this time, so reading from the VEX
@@ -130,8 +131,8 @@ void initializeIO();
  * will not start. An autonomous mode selection menu like the pre_auton() in other environments
  * can be implemented in this task if desired.
  */
-void initialize();
-/**
+    void initialize();
+    /**
  * Runs the user operator control code. This function will be started in its own task with the
  * default priority and stack size whenever the robot is enabled via the Field Management System
  * or the VEX Competition Switch in the operator control mode. If the robot is disabled or
@@ -148,7 +149,7 @@ void initialize();
  *
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
-void operatorControl();
+    void operatorControl();
 
 // End C++ export structure
 #ifdef __cplusplus
