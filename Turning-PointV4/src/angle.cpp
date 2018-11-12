@@ -17,14 +17,14 @@ void Angle::SetAngleMotor(float speed)
 
 void Angle::Update()
 {
-    angleUp = GetAngleUp();
-    angleDown = GetAngleDown();
+    m_angleUp = GetAngleUp();
+    m_angleDown = GetAngleDown();
 
-    if (angleUp)
+    if (m_angleUp)
     {
         SetAngleMotor(angleMotorSpeed);
     }
-    else if (angleDown)
+    else if (m_angleDown)
     {
         SetAngleMotor(-angleMotorSpeed / 2);
     }

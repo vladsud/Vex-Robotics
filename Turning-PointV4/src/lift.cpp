@@ -17,14 +17,14 @@ void Lift::SetLiftMotor(float speed)
 
 void Lift::Update()
 {
-    liftUp = GetLiftUp();
-    liftDown = GetLiftDown();
+    m_liftUp = GetLiftUp();
+    m_liftDown = GetLiftDown();
 
-    if (liftUp)
+    if (m_liftUp)
     {
         SetLiftMotor(-liftMotorSpeed);
     }
-    else if (liftDown)
+    else if (m_liftDown)
     {
         SetLiftMotor(liftMotorSpeed / 2);
     }

@@ -3,8 +3,8 @@
 
 class Lift
 {
-    bool liftUp = false;
-    bool liftDown = false;
+    bool m_liftUp = false;
+    bool m_liftDown = false;
 
   public:
     bool GetLiftUp();

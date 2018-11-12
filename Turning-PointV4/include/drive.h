@@ -3,9 +3,9 @@
 
 class Drive
 {
-  float forward = 0;
-  float turn = 0;
-  float ErrorPower = 0;
+  float m_forward = 0;
+  float m_turn = 0;
+  float m_ErrorPower = 0;
 
 public:
   float GetMovementJoystick(unsigned char joystick, unsigned char axis);

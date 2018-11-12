@@ -10,9 +10,9 @@ void Shooter::SetShooterMotor(float speed)
 }
 void Shooter::Update()
 {
-    shooter = GetShooter();
+    m_shooter = GetShooter();
 
-    if (shooter)
+    if (m_shooter)
     {
         SetShooterMotor(shooterMotorSpeed);
     }

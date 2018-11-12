@@ -3,8 +3,8 @@
 
 class Angle
 {
-    bool angleUp = false;
-    bool angleDown = false;
+    bool m_angleUp = false;
+    bool m_angleDown = false;
 
   public:
     bool GetAngleUp();

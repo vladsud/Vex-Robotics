@@ -40,32 +40,32 @@ void Drive::SetRightDrive(float speed)
 void Drive::Update()
 {
     //Drive
-    forward = GetForwardAxis();
-    turn = GetTurnAxis();
-    if (turn == 0 && forward == 0)
+    m_forward = GetForwardAxis();
+    m_turn = GetTurnAxis();
+    if (m_turn == 0 && m_forward == 0)
     {
 
         SetLeftDrive(0);
         SetRightDrive(0);
     }
-    else if (turn == 0)
+    else if (m_turn == 0)
     {
 
         float k = 0.1;
 
-        SetLeftDrive(forward - ErrorPower);
-        SetRightDrive(forward + ErrorPower);
+        SetLeftDrive(m_forward - m_ErrorPower);
+        SetRightDrive(m_forward + m_ErrorPower);
 
         int error = encoderGet(leftDriveEncoder) - encoderGet(rightDriveEncoder);
 
-        ErrorPower = error * k;
+        m_ErrorPower = error * k;
     }
     else
     {
         encoderReset(leftDriveEncoder);
         encoderReset(rightDriveEncoder);
 
-        SetLeftDrive(forward + turn);
-        SetRightDrive(forward - turn);
+        SetLeftDrive(m_forward + m_turn);
+        SetRightDrive(m_forward - m_turn);
     }
 }

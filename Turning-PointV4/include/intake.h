@@ -3,8 +3,8 @@
 
 class Intake
 {
-    bool intake = false;
-    bool oldIntakeState = false;
+    bool m_intake = false;
+    bool m_oldIntakeState = false;
 
   public:
     bool GetIntake();

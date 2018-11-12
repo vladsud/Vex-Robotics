@@ -12,13 +12,13 @@ void Intake::Update()
 {
     bool newIntakeState = GetIntake();
     //intake
-    if (oldIntakeState == false && newIntakeState == true)
+    if (m_oldIntakeState == false && newIntakeState == true)
     {
-        intake = !intake;
-        if (intake)
+        m_intake = !m_intake;
+        if (m_intake)
             SetIntakeMotor(intakeMotorSpeed);
         else
             SetIntakeMotor(0);
     }
-    oldIntakeState = newIntakeState;
+    m_oldIntakeState = newIntakeState;
 }

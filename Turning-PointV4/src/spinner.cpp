@@ -78,7 +78,7 @@ void Spinner::Update()
     if (distance < 50 && m_cyclesAfterStopped > 10)
         m_cyclesAfterStopped = 10;
 
-    // at 500, we need to slow down a lot!
+    // at 350, we need to slow down a lot!
     int power = error;
     if (power > 350)
         power = 350;

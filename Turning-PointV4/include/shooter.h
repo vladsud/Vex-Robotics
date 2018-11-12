@@ -2,7 +2,7 @@
 #include "main.h"
 class Shooter
 {
-    bool shooter = false;
+    bool m_shooter = false;
 
   public:
     bool GetShooter();
