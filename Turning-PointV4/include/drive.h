@@ -13,8 +13,8 @@ public:
   float GetForwardAxis();
   float GetTurnAxis();
 
-  void SetLeftDrive(float speed);
-  void SetRightDrive(float speed);
+  void SetLeftDrive(int speed);
+  void SetRightDrive(int speed);
 
   void Update();
 };

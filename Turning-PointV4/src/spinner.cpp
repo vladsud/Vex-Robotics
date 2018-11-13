@@ -20,8 +20,8 @@ void Spinner::ReadInputs()
             Start();
         else
             Stop();
-        m_oldSpinnerState = newSpinnerState;
     }
+    m_oldSpinnerState = newSpinnerState;
 }
 
 void Spinner::Start()
@@ -35,17 +35,9 @@ void Spinner::Start()
 
 void Spinner::Stop()
 {
-    if (m_on)
-    {
-        m_on = false;
-        SetSpinnerMotor(0);
-        printf("\n");
-        for (int i = 0; i < 5; i++)
-        {
-            delay(10);
-            printf(" Count:      , Read: %d  Target: %d  (stopped)\n", analogRead(spinnerPotPort), m_target);
-        }
-    }
+    m_on = false;
+    SetSpinnerMotor(0);
+    printf("\n");
 }
 
 void Spinner::DebugRun()
@@ -58,8 +50,7 @@ void Spinner::DebugRun()
 
 void Spinner::Update()
 {
-    // const int maxpower = 35;
-
+   // DebugRun();
     ReadInputs();
 
     if (!m_on)
@@ -75,26 +66,42 @@ void Spinner::Update()
     int reading = analogRead(spinnerPotPort);
     int error = m_target - reading;
     int distance = abs(error);
-    if (distance < 50 && m_cyclesAfterStopped > 10)
-        m_cyclesAfterStopped = 10;
 
     // at 350, we need to slow down a lot!
     int power = error;
-    if (power > 350)
-        power = 350;
-    else if (power < -350)
-        power = -350;
+    if (power > 500)
+        power = 500;
+    else if (power < -500)
+        power = -500;
 
     int differential = error - m_lastError;
-    if (differential > 60)
-        differential = 60;
-    else if (differential < -60)
-        differential = -60;
-    error = differential + m_lastError;
+    int abs_differential = abs(differential);
 
-    m_power = power * 0.1 + differential * 0.2;
+    if (distance < 50)
+    {
+        if (abs_differential <= 10)
+        {
+            Stop();
+            return;
+        }
+        // safety net- stop after 2 seconds, even if we can't get there...
+        if (m_cyclesAfterStopped > 50)
+            m_cyclesAfterStopped  = 50;
+    }
 
-    printf("Count: %d Read: %d  Target: %d  Power: %d (%d) LastErorr: %d  Diff: %d\n", m_cyclesAfterStopped, analogRead(spinnerPotPort), m_target, m_power, power, m_lastError, error - m_lastError);
+    int newpower = power * 0.08 + differential * (0.1 + abs_differential * 0.005);
+    // slow down rate of changes - use average of old & new power
+    m_power = (m_power + newpower) / 2;
+
+    printf("Count: %d Read: %d  Target: %d  Power: %d (%d) error: %d  Diff: %d\n",
+            m_cyclesAfterStopped,
+            analogRead(spinnerPotPort),
+            m_target,
+            m_power,
+            power,
+            error,
+            differential);
+ 
     SetSpinnerMotor(-m_power);
     m_lastError = error;
 }

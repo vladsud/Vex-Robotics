@@ -5,6 +5,7 @@ class Lift
 {
     bool m_liftUp = false;
     bool m_liftDown = false;
+    int m_LiftSpeed = 0;
 
   public:
     bool GetLiftUp();

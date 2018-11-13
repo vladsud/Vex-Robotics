@@ -12,7 +12,16 @@ bool Lift::GetLiftDown()
 
 void Lift::SetLiftMotor(float speed)
 {
-    motorSet(liftPort, speed);
+    // slowly decrease speed when going up.
+    if (speed == 0 && m_LiftSpeed < 0)
+    {
+        if (m_LiftSpeed < -100)
+            m_LiftSpeed = -100;
+        m_LiftSpeed = 0.97 * m_LiftSpeed + 0.03 * speed;
+    }
+    else
+        m_LiftSpeed = speed;
+    motorSet(liftPort, m_LiftSpeed);
 }
 
 void Lift::Update()
