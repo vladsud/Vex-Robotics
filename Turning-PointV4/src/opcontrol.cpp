@@ -18,12 +18,13 @@
 #include "intake.h"
 #include "angle.h"
 
+Lift lift;
+Spinner spinner;
+
 //Operator Control
 void operatorControl()
 {
 	Drive drive;
-	Spinner spinner;
-	Lift lift;
 	Shooter shooter;
 	Intake intake;
 	Angle angle;

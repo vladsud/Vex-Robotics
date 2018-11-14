@@ -1,9 +1,15 @@
 #include "main.h"
 #include "spinner.h"
+#include "lift.h"
 
 bool Spinner::GetSpinner()
 {
     return joystickGetDigital(1, 6, JOY_DOWN);
+}
+
+bool Spinner::GetAutoSpinner()
+{
+    return joystickGetDigital(1, 6, JOY_UP);
 }
 
 void Spinner::SetSpinnerMotor(float speed)
@@ -13,20 +19,28 @@ void Spinner::SetSpinnerMotor(float speed)
 
 void Spinner::ReadInputs()
 {
-    bool newSpinnerState = GetSpinner();
-    if (newSpinnerState && !m_oldSpinnerState)
+    bool spinner = GetSpinner();
+    if (!m_oldSpinnerState && spinner)
     {
-        if (!m_on)
+        if (m_state == SpinnerState::Off)
             Start();
         else
             Stop();
     }
-    m_oldSpinnerState = newSpinnerState;
+    m_oldSpinnerState = spinner;
 }
 
+// Sequence Lift up, spin, lift down
+void Spinner::RotateAndDown()
+{
+    if (m_state == SpinnerState::Off)
+        Start();
+    m_state = SpinnerState::Automatic;
+}
+ 
 void Spinner::Start()
 {
-    m_on = true;
+    m_state = SpinnerState::On;
     int reading = analogRead(spinnerPotPort);
     m_target = (reading > 2000) ? 520 : 3560;
     m_lastError = m_target - reading;
@@ -35,7 +49,10 @@ void Spinner::Start()
 
 void Spinner::Stop()
 {
-    m_on = false;
+    if (m_state == SpinnerState::Automatic)
+        lift.MoveDown();
+    m_state = SpinnerState::Off;
+
     SetSpinnerMotor(0);
     printf("\n");
 }
@@ -53,7 +70,7 @@ void Spinner::Update()
    // DebugRun();
     ReadInputs();
 
-    if (!m_on)
+    if (m_state == SpinnerState::Off)
         return;
 
     m_cyclesAfterStopped--;
@@ -77,6 +94,11 @@ void Spinner::Update()
     int differential = error - m_lastError;
     int abs_differential = abs(differential);
 
+    if (distance < 1000 && m_state == SpinnerState::Automatic)
+    {
+        m_state = SpinnerState::On;
+        lift.MoveDown();        
+    }
     if (distance < 50)
     {
         if (abs_differential <= 10)

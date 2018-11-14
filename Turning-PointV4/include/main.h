@@ -32,7 +32,8 @@
 #define shooterMotorSpeed 127
 #define intakeMotorSpeed 127
 #define angleMotorSpeed 70
-
+#define driveMotorMaxSpeed 127
+#define joystickMax 127
 /*
 //DRIVE MOTOR PORTS
 #define leftDrivePortY 3
