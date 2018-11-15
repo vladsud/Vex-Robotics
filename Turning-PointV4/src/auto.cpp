@@ -12,9 +12,3 @@
  */
 
 #include "main.h"
-
-
-
-
-
-//Created by Jason Zhang, Feburary 9, 2018
