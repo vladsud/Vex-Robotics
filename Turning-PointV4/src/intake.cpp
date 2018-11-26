@@ -1,24 +1,57 @@
 #include "intake.h"
 
-bool Intake::GetIntake()
-{
-    return joystickGetDigital(1, 8, JOY_LEFT);
-}
-void Intake::SetIntakeMotor(float speed)
+void Intake::SetIntakeMotor(int speed)
 {
     motorSet(intakePort, speed);
 }
+
 void Intake::Update()
 {
-    bool newIntakeState = GetIntake();
-    //intake
-    if (m_oldIntakeState == false && newIntakeState == true)
+    Direction direction;
+
+    if (joystickGetDigital(1, 6, JOY_UP))
     {
-        m_intake = !m_intake;
-        if (m_intake)
-            SetIntakeMotor(intakeMotorSpeed);
-        else
+         if (joystickGetDigital(1, 6, JOY_DOWN))
+         {
+            m_doublePressed = true;
             SetIntakeMotor(0);
+            return;
+         }
+        direction = Direction::Up;
     }
-    m_oldIntakeState = newIntakeState;
+    else if (joystickGetDigital(1, 6, JOY_DOWN))
+    {
+        direction = Direction::Down;
+    }
+    else
+    {
+        m_doublePressed = false;
+        return;
+    }
+
+    if (m_doublePressed)
+        return;
+
+    m_direction = direction;
+    SetIntakeMotor(m_direction == Direction::Up ? -intakeMotorSpeed : intakeMotorSpeed);
+}
+
+
+void Descorer::Update()
+{
+    if (joystickGetDigital(1, 5, JOY_UP))
+        motorSet(descorerPort, 85);
+    else if (joystickGetDigital(1, 5, JOY_DOWN))
+    {
+        m_count++;
+        if (m_count > 75)
+            motorSet(descorerPort, -35);
+        else
+            motorSet(descorerPort, -70);
+    }
+    else
+    {
+        motorSet(descorerPort, 0);
+        m_count = 0;
+    }
 }

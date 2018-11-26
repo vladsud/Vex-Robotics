@@ -11,15 +11,10 @@
  */
 #include "main.h"
 
-#include "spinner.h"
 #include "drive.h"
-#include "lift.h"
 #include "shooter.h"
 #include "intake.h"
 #include "angle.h"
-
-Lift lift;
-Spinner spinner;
 
 //Operator Control
 void operatorControl()
@@ -27,23 +22,32 @@ void operatorControl()
 	Drive drive;
 	Shooter shooter;
 	Intake intake;
+	Descorer descorer;
 	Angle angle;
 
 	int count = 0;
 	while (true)
 	{
 		count++;
+		// printf("%d ", gyroGet(g_gyro));
+
 		if (count % 50 == 0)
 		{
-			printf("LD: %d     LL: %d     A: %d     S:%d    RL: %d     RD: %d\n", encoderGet(leftDriveEncoder), analogRead(leftLiftPotPort), analogRead(anglePotPort), analogRead(spinnerPotPort), analogRead(rightLiftPotPort), encoderGet(rightDriveEncoder));
+			printf("Encoders: %d : %d     Angle: %d     Gyro: %p, %d\n",
+			encoderGet(g_leftDriveEncoder),
+			encoderGet(g_rightDriveEncoder),
+			analogRead(anglePotPort), 
+			g_gyro, gyroGet(g_gyro));
 		}
 
+		// save power
+		// gyroShutdown(g_gyro);
+
 		drive.Update();
-		lift.Update();
-		spinner.Update();
 		shooter.Update();
 		intake.Update();
 		angle.Update();
+		descorer.Update();
 
 		delay(10);
 	}

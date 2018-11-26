@@ -5,10 +5,14 @@ class Drive
 {
   int m_forward = 0;
   int m_turn = 0;
-  int m_ErrorPower = 0;
+  int m_ErrorPowerLeft = 0;
+  int m_ErrorPowerRight = 0;
+  int m_ErrorIntergral = 0;
+  int m_RightSpeed = 0;
+  int m_LeftSpeed = 0;
 
 public:
-  static int GetMovementJoystick(unsigned char joystick, unsigned char axis);
+  static int GetMovementJoystick(unsigned char joystick, unsigned char axis, int minValue);
 
   int GetForwardAxis();
   int GetTurnAxis();

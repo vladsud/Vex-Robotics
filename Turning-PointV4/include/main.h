@@ -1,4 +1,5 @@
 #pragma once
+
 /** @file main.h
  * @brief Header file for global functions
  *
@@ -28,61 +29,72 @@
 
 #include "API.h"
 
-#define liftMotorSpeed 127
-#define shooterMotorSpeed 127
-#define intakeMotorSpeed 127
-#define angleMotorSpeed 70
-#define driveMotorMaxSpeed 127
+
 #define joystickMax 127
-/*
-//DRIVE MOTOR PORTS
-#define leftDrivePortY 3
-#define leftDrivePort2 4
-#define rightDrivePortY 6
-#define rightDrivePort2 7
-//END DRIVE MOTOR PORTS
 
-//OTHER MOTOR PORTS
-#define liftPort 5
-#define intakePort 8
-#define shooterPort 1
-#define spinnerPort 9
-#define anglePort 2
-//END OTHER MOTOR PORTS
-*/
+#define ReportStatus printf
 
+/*******************************************************************************
+* 
+* MOTOR SPEEDS
+*
+*******************************************************************************/
+#define liftMotorSpeed 127
+#define shooterMotorSpeed 100 // it botherwise burns controller / port
+#define intakeMotorSpeed 100 // same, being protective
+#define angleMotorSpeed 127
+#define driveMotorMaxSpeed 127
+
+
+/*******************************************************************************
+* 
+* MOTOR PORTS
+*    Externder: 2-5
+*
+*******************************************************************************/
 //DRIVE MOTOR PORTS
-#define leftDrivePortY 3
-#define leftDrivePort2 6
+#define leftDrivePortY 2 // middle
+#define leftDrivePort2 5 // back
 #define rightDrivePortY 8
-#define rightDrivePort2 9
-//END DRIVE MOTOR PORTS
-
+#define rightDrivePort2 7
 //OTHER MOTOR PORTS
-#define liftPort 4
-#define intakePort 2
-#define shooterPort 1
-#define spinnerPort 7
-#define anglePort 5
-//END OTHER MOTOR PORTS
+#define intakePort 9
+#define descorerPort 4
+#define shooterPort 3   // "C" on extender
+#define anglePort 6
 
-//ANALOG SENSOR PORTS
-#define spinnerPotPort 2
-#define anglePotPort 1
-#define leftLiftPotPort 3
-#define rightLiftPotPort 4
-//END ANALOG SENSOR PORTS
 
-//ENCODER PORTS
-#define leftDriveEncoderTopPort 3
-#define leftDriveEncoderBotPort 4
-#define rightDriveEncoderTopPort 1
-#define rightDriveEncoderBotPort 2
-//END ENCODER PORTS
+/*******************************************************************************
+* 
+* DIGITAL SENSORS
+*
+*******************************************************************************/
+#define leftDriveEncoderTopPort 2
+#define leftDriveEncoderBotPort 1
+#define rightDriveEncoderTopPort 4
+#define rightDriveEncoderBotPort 3
 
-extern Encoder leftDriveEncoder;
-extern Encoder rightDriveEncoder;
+extern Encoder g_leftDriveEncoder;
+extern Encoder g_rightDriveEncoder;
 
+
+/*******************************************************************************
+* 
+* ANALOG SENSORS
+*
+*******************************************************************************/
+#define spinnerPotPort 100
+#define gyroPort 7
+#define anglePotPort 8
+extern Gyro g_gyro;
+
+
+/*******************************************************************************
+* 
+* PROTOTYPES
+*
+
+*******************************************************************************/
 // Allow usage of this file in C++ programs
 #ifdef __cplusplus
 extern "C"

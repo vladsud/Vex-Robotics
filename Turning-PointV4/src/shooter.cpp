@@ -2,12 +2,14 @@
 
 bool Shooter::GetShooter()
 {
-    return joystickGetDigital(1, 8, JOY_UP);
+    return joystickGetDigital(1, 7, JOY_LEFT);
 }
+
 void Shooter::SetShooterMotor(float speed)
 {
-    motorSet(shooterPort, -speed);
+    motorSet(shooterPort, speed);
 }
+
 void Shooter::Update()
 {
     m_shooter = GetShooter();

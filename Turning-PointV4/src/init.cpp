@@ -1,11 +1,16 @@
 #include "main.h"
 
-Encoder leftDriveEncoder;
-Encoder rightDriveEncoder;
+Encoder g_leftDriveEncoder = nullptr;
+Encoder g_rightDriveEncoder = nullptr;
+Gyro g_gyro = nullptr;
 
 void initialize()
 {
+  g_leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, true);
+  g_rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, true);
+  g_gyro = gyroInit(gyroPort, 0/*multiplier, 0-default*/);
 
-  leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, true);
-  rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, true);
+  ReportStatus("Init: Encoders: %p, %p, Gyro: %p\n", g_leftDriveEncoder, g_rightDriveEncoder, g_gyro);
+
+  delay(2000);
 }
