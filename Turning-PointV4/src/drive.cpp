@@ -193,3 +193,30 @@ void Drive::Update()
         SetRightDrive(m_forward - m_turn);
     }
 }
+
+
+void AutoDriveForward(float distance, int power) {
+    encoderReset(leftDriveEncoder);
+    encoderReset(rightDriveEncoder);
+
+    float leftMotorPower = 100;
+    float rightMotorPower = 100;
+
+    float error = 0;
+    float K = 0.1
+
+    while (encoderGet(leftDriveEncoder) < distance){
+        SetLeftDrive(leftMotorPower);
+        SetRightDrive(rightMotorPower);
+
+        error = (encoderGet(leftDriveEncoder) - encoderGet(rightDriveEncoder)) * K;
+
+        leftMotorPower += error;
+        rightMotorPower -= error;
+
+    }
+
+    SetLeftDrive(0);
+    SetRightDrive(0);
+
+}
