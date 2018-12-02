@@ -10,45 +10,57 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 #include "main.h"
+#include "cycle.h"
 
-#include "drive.h"
-#include "shooter.h"
-#include "intake.h"
-#include "angle.h"
+// Scans both joysticks, allowing secondary operator to help with controlling non-driving functions.
+bool joystickGetDigital(unsigned char buttonGroup, unsigned char button)
+{
+	return ::joystickGetDigital(1, buttonGroup, button) || ::joystickGetDigital(2, buttonGroup, button);
+}
+
+
+void Main::Update()
+{
+	m_count++;
+	// printf("%d ", gyroGet(g_gyro));
+
+	if (m_count % 50 == 0)
+	{
+		printf("Encoders: %d : %d     Angle: %d     Gyro: %p, %d  %d\n",
+		encoderGet(g_leftDriveEncoder),
+		encoderGet(g_rightDriveEncoder),
+		analogRead(anglePotPort), 
+		g_gyro, gyroGet(g_gyro),
+		analogRead(lightSensor));
+	}
+
+	// save power
+	// gyroShutdown(g_gyro);
+
+	g_lcd.Update();
+	drive.Update();
+	intake.Update();
+	shooter.Update();
+	descorer.Update();
+}
 
 //Operator Control
 void operatorControl()
 {
-	Drive drive;
-	Shooter shooter;
-	Intake intake;
-	Descorer descorer;
-	Angle angle;
+	if (isAuto())
+	{
+		delay(2000);
+		autonomous();
+	}
 
-	int count = 0;
+	Main main;
+
+	main.shooter.SetDistance(48);
+	main.shooter.SetFlag(Flag::Middle);
+	
 	while (true)
 	{
-		count++;
-		// printf("%d ", gyroGet(g_gyro));
-
-		if (count % 50 == 0)
-		{
-			printf("Encoders: %d : %d     Angle: %d     Gyro: %p, %d\n",
-			encoderGet(g_leftDriveEncoder),
-			encoderGet(g_rightDriveEncoder),
-			analogRead(anglePotPort), 
-			g_gyro, gyroGet(g_gyro));
-		}
-
-		// save power
-		// gyroShutdown(g_gyro);
-
-		drive.Update();
-		shooter.Update();
-		intake.Update();
-		angle.Update();
-		descorer.Update();
-
+		main.Update();
 		delay(10);
 	}
 }

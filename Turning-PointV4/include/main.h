@@ -29,20 +29,39 @@
 
 #include "API.h"
 
+// Helper function to use both oysticsk
+bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
 
+#define Assert(f) AssertCore(f, #f)
+inline void AssertCore(bool condition, const char* message)
+{
+   if (!condition)
+      printf("Assert: %s\n", message);
+}
+
+inline float abs(float fl)
+{
+   return (fl < 0) ? -fl : fl;
+}
+
+inline bool isAuto()
+{
+    // return true;
+    return isAutonomous();
+}
+
+#define CountOf(a) (sizeof(a)/sizeof(a[0]))
+#define ReportStatus printf
 #define joystickMax 127
 
-#define ReportStatus printf
 
 /*******************************************************************************
 * 
 * MOTOR SPEEDS
 *
 *******************************************************************************/
-#define liftMotorSpeed 127
 #define shooterMotorSpeed 100 // it botherwise burns controller / port
-#define intakeMotorSpeed 100 // same, being protective
-#define angleMotorSpeed 127
+#define intakeMotorSpeed 127 // same, being protective
 #define driveMotorMaxSpeed 127
 
 
@@ -54,12 +73,12 @@
 *******************************************************************************/
 //DRIVE MOTOR PORTS
 #define leftDrivePortY 2 // middle
-#define leftDrivePort2 5 // back
+#define leftDrivePort2 4 // back
 #define rightDrivePortY 8
 #define rightDrivePort2 7
 //OTHER MOTOR PORTS
 #define intakePort 9
-#define descorerPort 4
+#define descorerPort 5
 #define shooterPort 3   // "C" on extender
 #define anglePort 6
 
@@ -84,6 +103,9 @@ extern Encoder g_rightDriveEncoder;
 *
 *******************************************************************************/
 #define spinnerPotPort 100
+#define lightSensor 6
+#define lightSensorBallIn 230
+#define lightSensorBallOut 180
 #define gyroPort 7
 #define anglePotPort 8
 extern Gyro g_gyro;

@@ -32,18 +32,42 @@ int Drive::GetMovementJoystick(unsigned char joystick, unsigned char axis, int m
 int Drive::GetForwardAxis()
 {
     // motors can't move robot at slow speed, so add some boost
-    return GetMovementJoystick(1, 3, 18);
+    if (isAuto())
+        return m_overrideForward;
+    return -GetMovementJoystick(1, 3, 18);
 }
 
 int Drive::GetTurnAxis()
 {
     // We adjust speed to put more power to motors initially to move robot from still position.
-    return -GetMovementJoystick(1, 1, 30);
+    if (isAuto())
+        return m_overrideTurn;
+    // convert joystick metric to drive metric
+    return -GetMovementJoystick(1, 1, 30) * driveMotorMaxSpeed / joystickMax;
+}
+
+void Drive::OverrideInputs(int forward, int turn)
+{
+    Assert(isAuto());
+
+    m_overrideForward = forward;
+    m_overrideTurn = turn;
+
+    // We need this to properly count turning on the spot without using gyro.
+    // Maybe this will not be needed in the future).
+    ResetEncoders();
+}
+
+void Drive::ResetEncoders()
+{
+    encoderReset(g_leftDriveEncoder);
+    encoderReset(g_rightDriveEncoder);
+    m_distance = 0;
+    m_ErrorIntergral = 0;
 }
 
 void Drive::SetLeftDrive(int speed)
 {
-    m_LeftSpeed = speed;
     speed = AdjustSpeed(speed);
     motorSet(leftDrivePortY, speed);
     motorSet(leftDrivePort2, speed);
@@ -51,7 +75,6 @@ void Drive::SetLeftDrive(int speed)
 
 void Drive::SetRightDrive(int speed)
 {
-    m_RightSpeed = speed;
     speed = AdjustSpeed(speed);
     motorSet(rightDrivePortY, -speed);
     motorSet(rightDrivePort2, -speed);
@@ -60,130 +83,47 @@ void Drive::SetRightDrive(int speed)
 void Drive::DebugDrive()
 {
     // will be used for debugging in the future...
-    encoderReset(g_leftDriveEncoder);
-    encoderReset(g_rightDriveEncoder);
-
-    m_forward = 90;
-
-    delay(2000);
-
-    while (true)
-    {
-        // 400 is roughtly one full turn, positive is forward
-        int left = encoderGet(g_leftDriveEncoder);
-        int right = encoderGet(g_rightDriveEncoder);
-
-        int error =  left - right;
-        m_ErrorIntergral += error;
-
-        if (error > 0)
-        {
-            error += 4;
-            if (error > 10)
-                error = 10;
-        }
-        else if (error < 0)
-        {
-            error -= 4;
-            if (error < -10)
-                error = -10;
-        }
-            
-        m_ErrorPowerLeft = 0;
-        m_ErrorPowerRight = 0;
-
-        int errorMultiplier = error * (0.7 + abs(error) * 0.15) + m_ErrorIntergral * 0.05;
-        // reduce power on faster motor
-        if (m_forward * error > 0)
-            m_ErrorPowerLeft = (m_ErrorPowerLeft + errorMultiplier) / 2;
-        else
-            m_ErrorPowerRight = (m_ErrorPowerRight + errorMultiplier) / 2;
-
-        SetLeftDrive(m_forward - m_ErrorPowerLeft);
-        SetRightDrive(m_forward + m_ErrorPowerRight);
-
-        printf("Diff: %d, integral: %d, Reading: %d, %d, Drive: %d, %d\n", left - right, m_ErrorIntergral, left, right, m_forward - m_ErrorPowerLeft, m_forward + m_ErrorPowerRight);
-
-        delay(10);
-    }
 }
 
 bool SmartsOn()
 {
-    // return isAutonomous();
-    return false;
+    return isAuto();
 }
 
 void Drive::Update()
 {
     // DebugDrive();
 
-    bool wasForward = (m_turn == 0 && m_forward != 0);
-
     //Drive
-    m_forward = -GetForwardAxis();
-    m_turn = GetTurnAxis();
+    int forward = GetForwardAxis();
+    int turn = GetTurnAxis();
+
+    bool resetDirection = (m_turn != turn || m_forward != forward);
+
+    m_forward = forward;
+    m_turn = turn;
+
+    if (resetDirection)
+    {
+        ResetEncoders();
+        m_ErrorIntergral = 0;
+    }
+
+    // 400 is roughtly one full turn, positive is forward
+    int left = encoderGet(g_leftDriveEncoder);
+    int right = encoderGet(g_rightDriveEncoder);
+
+    m_distance = (abs(left) + abs(right)) / 2;
 
     if (m_turn == 0 && m_forward == 0)
     {
         SetLeftDrive(0);
         SetRightDrive(0);
+        return;
     }
-    else if (m_turn == 0)
+
+    if (!SmartsOn())
     {
-        if (!SmartsOn())
-        {
-            SetLeftDrive(m_forward);
-            SetRightDrive(m_forward);
-        }
-        else
-        {
-            if (!wasForward)
-            {
-                encoderReset(g_leftDriveEncoder);
-                encoderReset(g_rightDriveEncoder);
-                m_ErrorIntergral = 0;
-            }
-
-            // 400 is roughtly one full turn, positive is forward
-            int left = encoderGet(g_leftDriveEncoder);
-            int right = encoderGet(g_rightDriveEncoder);
-
-            int error =  left - right;
-            m_ErrorIntergral += error;
-
-            if (error > 0)
-            {
-                error += 4;
-                if (error > 10)
-                    error = 10;
-            }
-            else if (error < 0)
-            {
-                error -= 4;
-                if (error < -10)
-                    error = -10;
-            }
-                
-            m_ErrorPowerLeft = 0;
-            m_ErrorPowerRight = 0;
-
-            int errorMultiplier = error * (0.7 + abs(error) * 0.15) + m_ErrorIntergral * 0.05;
-            // reduce power on faster motor
-            if (m_forward * error > 0)
-                m_ErrorPowerLeft = (m_ErrorPowerLeft + errorMultiplier) / 2;
-            else
-                m_ErrorPowerRight = (m_ErrorPowerRight + errorMultiplier) / 2;
-
-            SetLeftDrive(m_forward - m_ErrorPowerLeft);
-            SetRightDrive(m_forward + m_ErrorPowerRight);
-        } 
-    }
-    else
-    {
-        // convert joystick metric to drive metric
-        m_turn = m_turn * driveMotorMaxSpeed / joystickMax;
-
         // if we are not moving forward, then we want to put all power to motors to turn
         // But if we are moving forward 100%, we do not want to completely stop one motor if
         // turning 100% to the right - we still want to make forward progress! 
@@ -191,32 +131,35 @@ void Drive::Update()
 
         SetLeftDrive(m_forward + m_turn);
         SetRightDrive(m_forward - m_turn);
-    }
-}
-
-
-void AutoDriveForward(float distance, int power) {
-    encoderReset(leftDriveEncoder);
-    encoderReset(rightDriveEncoder);
-
-    float leftMotorPower = 100;
-    float rightMotorPower = 100;
-
-    float error = 0;
-    float K = 0.1
-
-    while (encoderGet(leftDriveEncoder) < distance){
-        SetLeftDrive(leftMotorPower);
-        SetRightDrive(rightMotorPower);
-
-        error = (encoderGet(leftDriveEncoder) - encoderGet(rightDriveEncoder)) * K;
-
-        leftMotorPower += error;
-        rightMotorPower -= error;
-
+        return;
     }
 
-    SetLeftDrive(0);
-    SetRightDrive(0);
+    float error =  left - right - 2 * m_turn * m_distance / m_forward;
+    m_ErrorIntergral += error;
 
+    if (error > 0)
+    {
+        error += 4;
+        if (error > 10)
+            error = 10;
+    }
+    else if (error < 0)
+    {
+        error -= 4;
+        if (error < -10)
+            error = -10;
+    }
+        
+    int errorMultiplier = error * (0.3 + abs(error) * 0.1) + m_ErrorIntergral * 0.02;
+    
+    // adjust power on slower motor
+    int leftAdjustment = 0;
+    int rightAdjustment = 0;
+    if (m_forward * error > 0)
+        rightAdjustment = errorMultiplier;
+    else
+        leftAdjustment = errorMultiplier;
+
+    SetLeftDrive(m_forward - leftAdjustment + m_turn);
+    SetRightDrive(m_forward + rightAdjustment - m_turn);
 }

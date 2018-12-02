@@ -2,6 +2,7 @@
 
 void Intake::SetIntakeMotor(int speed)
 {
+
     motorSet(intakePort, speed);
 }
 
@@ -9,17 +10,17 @@ void Intake::Update()
 {
     Direction direction;
 
-    if (joystickGetDigital(1, 6, JOY_UP))
+    if (joystickGetDigital(6, JOY_UP))
     {
-         if (joystickGetDigital(1, 6, JOY_DOWN))
+         if (joystickGetDigital(6, JOY_DOWN) || joystickGetDigital(5, JOY_UP))
          {
             m_doublePressed = true;
             SetIntakeMotor(0);
             return;
          }
-        direction = Direction::Up;
+         direction = Direction::Up;
     }
-    else if (joystickGetDigital(1, 6, JOY_DOWN))
+    else if (joystickGetDigital(6, JOY_DOWN))
     {
         direction = Direction::Down;
     }
@@ -39,10 +40,18 @@ void Intake::Update()
 
 void Descorer::Update()
 {
-    if (joystickGetDigital(1, 5, JOY_UP))
-        motorSet(descorerPort, 85);
-    else if (joystickGetDigital(1, 5, JOY_DOWN))
+    if (joystickGetDigital(5, JOY_UP))
     {
+        if (m_direction == Direction::Up || joystickGetDigital(6, JOY_UP))
+        {
+            m_count++;
+            m_direction = Direction::Up;
+            motorSet(descorerPort, 85);
+        }
+    }
+    else if (joystickGetDigital(5, JOY_DOWN))
+    {
+        m_direction = Direction::Down;
         m_count++;
         if (m_count > 75)
             motorSet(descorerPort, -35);
@@ -51,7 +60,8 @@ void Descorer::Update()
     }
     else
     {
-        motorSet(descorerPort, 0);
+        m_direction = Direction::None;
         m_count = 0;
+        motorSet(descorerPort, 0);
     }
 }

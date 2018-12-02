@@ -8,22 +8,25 @@
     Loading,
   };
 
-class Angle
+// Angle potentiometer:
+const int anglePotentiometerLow = 1820;
+const int anglePotentiometerHigh = 1060;
+
+class Shooter
 {
     bool m_fMoving = false;
-    int m_angleToMove = 0;
+    int m_angleToMove = anglePotentiometerLow;
     int m_count = 0;
+    bool m_Manual = false;
 
-    int m_distanceInches = 48;
-    // it's better to have non-loading default, as changing either flag or
-    // distance would properly change angle, and clicking Loading would work.
-    Flag m_flag = Flag::Middle;
+    int m_distanceInches = 72;
+    Flag m_flag = Flag::Loading;
 
     int m_lastAngleDistance = 0;
-    float m_diffAdjusted = 0;
+    int m_diffAdjusted = 0;
 
   public:
-    Angle();
+    Shooter();
     bool GetAngleDown();
     void KeepMoving();
     void StartMoving(int destination);

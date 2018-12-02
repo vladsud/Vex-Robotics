@@ -21,7 +21,14 @@ class Intake
 
 class Descorer
 {
+    enum class Direction
+    {
+        None,
+        Up,
+        Down,
+    };
     int m_count = 0;
+    Direction m_direction = Direction::None;
   public:
     void Update();
 };
