@@ -31,6 +31,7 @@
 
 // Helper function to use both oysticsk
 bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
+void memmove(char* dest, char* src, size_t size);
 
 #define Assert(f) AssertCore(f, #f)
 inline void AssertCore(bool condition, const char* message)
@@ -46,12 +47,13 @@ inline float abs(float fl)
 
 inline bool isAuto()
 {
-    // return true;
+ //   return true;
     return isAutonomous();
 }
 
 #define CountOf(a) (sizeof(a)/sizeof(a[0]))
 #define ReportStatus printf
+
 #define joystickMax 127
 
 

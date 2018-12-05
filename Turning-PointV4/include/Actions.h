@@ -2,11 +2,11 @@
 #include "main.h"
 #include "cycle.h"
 
-#define TurnToCenter() Move(0, AtonBlueRight ? -50 : 50, 200)
-#define TurnFromCenter() Move(0, AtonBlueRight ? 50 : -50, 200)
-
 extern Main* g_main;
-extern bool AtonBlueRight;
+
+#define TurnToCenter() Move(0, g_lcd.AtonBlueRight ? -50 : 50, 200)
+#define TurnFromCenter() Move(0, g_lcd.AtonBlueRight ? 50 : -50, 200)
+
 
 struct Action
 {
@@ -23,8 +23,12 @@ struct Action
     virtual void Stop() {}
 };
 
-struct ActionNeverEnding : public Action
+// Action that does nothing.
+using NoOp = Action;
+
+struct EndOfAction : public Action
 {
+    void Start() override { printf ("\n*** END AUTONOMOUS ***\n\n"); }
     bool ShouldStop() override  { return false; }
 };
 

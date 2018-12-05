@@ -14,38 +14,56 @@
 #include "cycle.h"
 #include "actions.h"
 
+LCD g_lcd;
 Main* g_main;
 
+Action* g_actions[100];
+size_t g_actionSize = 0;
 
-bool AtonBlueRight = true;
-bool AtonFirstPos = false;
+bool testAgles = true;
 
-bool AtonClimbPlatform = false;
-
+#define AddActions(actions) do {\
+    memmove((char*)(g_actions + g_actionSize), (char*)actions, sizeof(actions)); \
+    g_actionSize += CountOf(actions); \
+} while (false)
 
 void autonomous()
 {
-    Action** g_actions = nullptr;
     Main main;
-    g_main = &main;
+    g_main = &main;    
+    g_actionSize = 0;
 
+// This brings all key actions.
+// It has to be part of function, not global scope, dur to Pros not initializing static/global variables
 #include "ActionLists.h"
 
-    g_actions = g_actionsNothing;
-    if (AtonFirstPos)
+    if (g_lcd.AtonFirstPos)
     {
-        g_actions = g_actionsFirstPos;
-        if (AtonClimbPlatform)
-            g_actions = g_ParkFromFirstPos;
+        AddActions(g_actionsFirstPos);
+        if (g_lcd.AtonClimbPlatform)
+            AddActions(g_ParkFromFirstPos);
+        else
+            AddActions(g_knockConeFirstPos);
     }
     else
     {
-        if (AtonClimbPlatform)
-            g_actions = g_ParkFromSecondPos;
+        if (g_lcd.AtonShootHighFlag)
+            AddActions(g_ShootFromSecondPos);
+        if (g_lcd.AtonClimbPlatform)
+            AddActions(g_ParkFromSecondPos);
+        else
+            AddActions(g_knockConeSecondPos);
+    }
+
+    // Debugging code - should not run in real autonomous
+    if (testAgles && !isAutonomous())
+    {
+        g_actionSize = 0;
+        AddActions(g_testAngles);
     }
 
 
-
+    g_actions[g_actionSize] = new EndOfAction();
     // all system update their counters, like distance counter.
 	main.Update();
 
@@ -60,7 +78,7 @@ void autonomous()
         while ((*currentAction)->ShouldStop())
         {
             (*currentAction)->Stop();
-            printf("Next\n");
+            printf("\nNext\n\n");
             currentAction++;
             (*currentAction)->StartCore();
         }

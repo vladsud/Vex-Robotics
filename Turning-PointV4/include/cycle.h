@@ -13,30 +13,21 @@
 *******************************************************************************/
 class LCD
 {
+	int m_buttons = 0;
+	int m_step = 0;
+	int m_count;
 public:
 	bool AtonBlueRight = true;
 	bool AtonFirstPos = true;
-	bool AtonClimbPlatform = false; // used only if AtonFirstPos == false;
+	bool AtonClimbPlatform = false;
+	bool AtonShootHighFlag = true;
 
-	void Init()
-	{
-		AtonBlueRight = true;
-		AtonFirstPos = true;
-		AtonClimbPlatform = false; // used only if AtonFirstPos == false;
-
-		lcdInit(uart1);
-		lcdClear(uart1);
-		lcdSetBacklight(uart1, true);
-
-		lcdInit(uart2);
-		lcdClear(uart2);
-		lcdSetBacklight(uart2, true);
-	}
-
-	void Update()
-	{
-		// int buttons = lcdReadButtons(uart2);
-	}	
+	// I do not think it runs...
+	LCD() { Init(); }
+	void Init();
+	void PrintStepInstructions();
+	void SelectAction(bool rigthButton);
+	void Update();
 };
 
 extern LCD g_lcd;

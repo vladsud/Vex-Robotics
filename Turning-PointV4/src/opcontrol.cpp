@@ -12,30 +12,24 @@
 #include "main.h"
 #include "cycle.h"
 
-// Scans both joysticks, allowing secondary operator to help with controlling non-driving functions.
-bool joystickGetDigital(unsigned char buttonGroup, unsigned char button)
-{
-	return ::joystickGetDigital(1, buttonGroup, button) || ::joystickGetDigital(2, buttonGroup, button);
-}
-
-
 void Main::Update()
 {
 	m_count++;
-	// printf("%d ", gyroGet(g_gyro));
 
 	if (m_count % 50 == 0)
 	{
-		printf("Encoders: %d : %d     Angle: %d     Gyro: %p, %d  %d\n",
+		printf("Encoders: %d : %d     Angle: %d     Gyro: %d  Light: %d\n",
 		encoderGet(g_leftDriveEncoder),
 		encoderGet(g_rightDriveEncoder),
 		analogRead(anglePotPort), 
-		g_gyro, gyroGet(g_gyro),
+		gyroGet(g_gyro),
 		analogRead(lightSensor));
 	}
 
 	// save power
 	// gyroShutdown(g_gyro);
+
+	// printf("%d\n", analogRead(1));o
 
 	g_lcd.Update();
 	drive.Update();

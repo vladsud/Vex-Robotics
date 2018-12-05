@@ -4,7 +4,6 @@
 Encoder g_leftDriveEncoder = nullptr;
 Encoder g_rightDriveEncoder = nullptr;
 Gyro g_gyro = nullptr;
-LCD g_lcd;
 
 void initialize()
 {

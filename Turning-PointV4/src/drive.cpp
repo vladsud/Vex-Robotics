@@ -87,6 +87,7 @@ void Drive::DebugDrive()
 
 bool SmartsOn()
 {
+    return true;
     return isAuto();
 }
 
@@ -122,7 +123,17 @@ void Drive::Update()
         return;
     }
 
-    if (!SmartsOn())
+    bool smartsOn = SmartsOn();
+
+    float error;
+    if (abs(m_turn) < abs(m_forward))
+        error  =  left - right - 2 * m_turn * m_distance / m_forward;
+    else if (m_forward == 0)
+        error  =  left + right;
+    else
+        smartsOn = false;
+
+    if (!smartsOn)
     {
         // if we are not moving forward, then we want to put all power to motors to turn
         // But if we are moving forward 100%, we do not want to completely stop one motor if
@@ -134,7 +145,6 @@ void Drive::Update()
         return;
     }
 
-    float error =  left - right - 2 * m_turn * m_distance / m_forward;
     m_ErrorIntergral += error;
 
     if (error > 0)
