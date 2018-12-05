@@ -36,4 +36,6 @@ class Shooter
     void UpdateDistance();
     void SetDistance(unsigned int distance);
     void SetFlag(Flag flag);
+
+    bool IsMoving() { return m_fMoving; }
 };

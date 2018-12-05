@@ -243,8 +243,8 @@ void Shooter::Debug()
 
 void Shooter::SetDistance(unsigned int distance)
 {
-    // if (m_distanceInches == distance)
-    //    return;
+    if (m_distanceInches == distance)
+        return;
     m_distanceInches = distance;
     StartMoving();
 }

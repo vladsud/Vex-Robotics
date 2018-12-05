@@ -34,11 +34,7 @@ bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
 void memmove(char* dest, char* src, size_t size);
 
 #define Assert(f) AssertCore(f, #f)
-inline void AssertCore(bool condition, const char* message)
-{
-   if (!condition)
-      printf("Assert: %s\n", message);
-}
+void AssertCore(bool condition, const char* message);
 
 inline float abs(float fl)
 {

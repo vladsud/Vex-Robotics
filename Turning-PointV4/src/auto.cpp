@@ -64,6 +64,7 @@ void autonomous()
 
 
     g_actions[g_actionSize] = new EndOfAction();
+
     // all system update their counters, like distance counter.
 	main.Update();
 
@@ -72,8 +73,8 @@ void autonomous()
 
 	while (true)
 	{
-		main.Update();
 		delay(10);
+		main.Update();
 
         while ((*currentAction)->ShouldStop())
         {

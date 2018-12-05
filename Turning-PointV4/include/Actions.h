@@ -57,9 +57,21 @@ struct Wait : public Action
 struct Move : public Action
 {
     int m_distanceToMove, m_forward, m_turn;
-    Move(int distance, int forward, int turn = 0) : m_distanceToMove(distance), m_forward(forward), m_turn(turn) {}
-    void Start() override { g_main->drive.OverrideInputs(m_forward, m_turn); }
-    bool ShouldStop() override  { return g_main->drive.m_distance >= m_distanceToMove; }
+    Move(int distance, int forward, int turn = 0)
+      : m_distanceToMove(distance),
+        m_forward(forward),
+        m_turn(turn)
+    {
+        // You should either turn on spot, or move forward with small turning.
+        // Doing something else is likely slower, and less accurate.
+        Assert(forward == 0 || abs(forward) > abs(turn));
+    }
+    void Start() override
+    {
+        g_main->drive.OverrideInputs(m_forward, m_turn);
+        Assert(g_main->drive.m_distance == 0);
+    }
+    bool ShouldStop() override  { return abs(g_main->drive.m_distance) >= m_distanceToMove; }
 };
 
 struct ShooterAngle : public Action
@@ -72,6 +84,7 @@ struct ShooterAngle : public Action
         g_main->shooter.SetFlag(m_flag);
         g_main->shooter.SetDistance(m_distanceToShoot);
     }
+    bool ShouldStop() override { return !g_main->shooter.IsMoving(); }
 };
 
 struct ShootBall : public Action

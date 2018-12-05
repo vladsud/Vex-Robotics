@@ -1,10 +1,20 @@
 #include "cycle.h"
 
+void AssertCore(bool condition, const char* message)
+{
+   if (!condition)
+   {
+      printf("\n*** ASSERT: %s ***\n\n", message);
+      g_lcd.PrintMessage(message);
+   }
+}
+
 void LCD::Init()
 {
     printf("LCD Init\n");
     m_buttons = 0;
     m_step = 0;
+    m_RefreshOnClick = false;
         
     AtonBlueRight = true;
     AtonFirstPos = true;
@@ -17,8 +27,16 @@ void LCD::Init()
     m_count = 0;
 }
 
+void LCD::PrintMessage(const char* message)
+{
+    m_RefreshOnClick = true;
+    lcdSetBacklight(uart1, true);
+    lcdSetText(uart1, 1, message);
+}
+
 void LCD::PrintStepInstructions()
 {
+    m_RefreshOnClick = false;
     lcdSetBacklight(uart1, true);
     if (m_step == 0)
         lcdSetText(uart1, 2, "No           Yes");
@@ -43,7 +61,7 @@ void LCD::PrintStepInstructions()
             lcdPrint(uart1, 1, "%s, %s, %s", 
                 AtonBlueRight ? "Blue" : "Red",
                 AtonFirstPos ? "1st" : "2nd",
-                AtonShootHighFlag ? "High" : (AtonFirstPos ? "Middle" : "");
+                AtonShootHighFlag ? "High" : (AtonFirstPos ? "Middle" : ""));
             lcdPrint(uart1, 2, "%-8s  Cancel", 
                 AtonClimbPlatform ? "Climb" : "No climb");
             break;
@@ -84,6 +102,7 @@ void LCD::Update()
     m_count++;
     if (m_count == 1000)
     {
+        m_RefreshOnClick = true;
         lcdSetBacklight(uart1, false);
         lcdClear(uart1);
     }
@@ -91,19 +110,19 @@ void LCD::Update()
     int buttons = lcdReadButtons(uart1);
     if (m_buttons == buttons)
         return;
+    m_buttons = buttons;
 
     printf("LCD: step %d,  buttons: %d, count: %d\n", m_step, buttons, m_count);
 
-    m_buttons = buttons;
-    if (m_count >= 1000)
+    m_count = 0;
+
+    if (m_RefreshOnClick)
     {
-        m_count = 0;
         lcdSetBacklight(uart1, true);
         PrintStepInstructions();
         return;
     }
 
-    m_count = 0;
     if (m_buttons == 0)
         return;
 
