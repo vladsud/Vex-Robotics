@@ -43,7 +43,7 @@ inline float abs(float fl)
 
 inline bool isAuto()
 {
- //   return true;
+    // return true;
     return isAutonomous();
 }
 
@@ -100,13 +100,18 @@ extern Encoder g_rightDriveEncoder;
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define spinnerPotPort 100
-#define lightSensor 6
-#define lightSensorBallIn 230
-#define lightSensorBallOut 180
+#define lightSensor 5
+#define lightSensorBallIn 2700
+#define lightSensorBallOut 2900
+
+#define shooterPreloadPoterntiometer 6
+#define ShooterPreloadEnd 850
+#define ShooterPreloadStart 1050
+
 #define gyroPort 7
-#define anglePotPort 8
 extern Gyro g_gyro;
+
+#define anglePotPort 8
 
 
 /*******************************************************************************

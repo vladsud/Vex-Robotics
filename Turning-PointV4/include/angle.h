@@ -23,6 +23,11 @@ class Shooter
 
     unsigned int m_lastAngleDistance = 0;
     int m_diffAdjusted = 0;
+    int m_preLoadCount = 0;
+    bool m_disablePreload = false;
+    bool m_userShooting = false;
+    bool m_preloading = false;
+    bool m_preloadAfterShot = false;
 
   public:
     Shooter();

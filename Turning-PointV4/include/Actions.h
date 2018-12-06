@@ -4,8 +4,9 @@
 
 extern Main* g_main;
 
-#define TurnToCenter() Move(0, g_lcd.AtonBlueRight ? -50 : 50, 200)
-#define TurnFromCenter() Move(0, g_lcd.AtonBlueRight ? 50 : -50, 200)
+// Should be Turn(+/-90)
+#define TurnToCenter() Move(200, g_lcd.AtonBlueRight ? -50 : 50, 200)
+#define TurnFromCenter() Move(200, g_lcd.AtonBlueRight ? 50 : -50, 200)
 
 
 struct Action
@@ -72,6 +73,27 @@ struct Move : public Action
         Assert(g_main->drive.m_distance == 0);
     }
     bool ShouldStop() override  { return abs(g_main->drive.m_distance) >= m_distanceToMove; }
+};
+
+struct Turn : public Action
+{
+    Turn(int turn)
+        : m_turn(turn)
+    {
+        g_main->gyro.Reset();
+        Assert(g_main->gyro.Get() == 0);
+    }
+    bool ShouldStop() override
+    {
+        int error = g_main->gyro.Get() - m_turn;
+        if (abs(error) <= 1)
+            return true;
+        int speed = 27 + error * 0.5;
+        g_main->drive.OverrideInputs(0, speed, true/*keepDirection*/);
+        return false;
+    }
+private:
+    int m_turn;
 };
 
 struct ShooterAngle : public Action

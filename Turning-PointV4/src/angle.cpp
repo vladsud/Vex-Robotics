@@ -6,18 +6,18 @@ constexpr unsigned int Distances[]    {   24 ,  30,  48,   54,    108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]   {  136,   104,  78,   74,   60};
-constexpr unsigned int AnglesMedium[] {   92,   80,   47,   46,   44};
+constexpr unsigned int AnglesHigh[]   {  110,   105,  82,   69,   60};
+constexpr unsigned int AnglesMedium[] {   85,   62,   45,   44,   44};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances)-1;
 
 constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 {
-    return 1900 - angle*5;
+    return 1860 - angle*5;
 }
 
 // Angle potentiometer:
-constexpr unsigned int anglerLow = 16; 
+constexpr unsigned int anglerLow = 0; 
 const unsigned int anglePotentiometerLow = ConvertAngleToPotentiometer(anglerLow);
 const unsigned int anglePotentiometerHigh = 1060;
 
@@ -73,7 +73,7 @@ constexpr unsigned int CalcAngle(Flag flag, unsigned int distanceInches)
 
 constexpr bool AlmostSameAngle(unsigned int angle1, unsigned int angle2)
 {
-    return abs((int)angle1-(int)angle2) <= 1;
+    return abs((int)angle1-(int)angle2) <= 2;
 }
 
 static_assert(CalcAngle(Flag::Loading, Distances[2]) == anglerLow);
@@ -164,10 +164,10 @@ void Shooter::KeepMoving()
     int diff = distance - m_lastAngleDistance;
 
     // sometimes we get really wrong readings.
-    if (diff > m_diffAdjusted + 12)
-        diff = m_diffAdjusted + 12;
-    else if (diff < m_diffAdjusted - 12)
-        diff = m_diffAdjusted - 12;
+    if (diff > m_diffAdjusted + 15)
+        diff = m_diffAdjusted + 15;
+    else if (diff < m_diffAdjusted - 15)
+        diff = m_diffAdjusted - 15;
 
     distance = diff + m_lastAngleDistance;
     unsigned int distanceAbs = abs(distance);
@@ -179,7 +179,7 @@ void Shooter::KeepMoving()
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
     if (m_fMoving && (m_count >= 200 || (distanceAbs <= 10 && abs(m_diffAdjusted) <= 1)))
     {
-        // printf("STOP: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+        printf("STOP: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
         StopMoving();
         return;
     }
@@ -187,20 +187,20 @@ void Shooter::KeepMoving()
     if (m_fMoving)
     {
         if (distance > 0) // going up
-            speed = distance * 2 + m_diffAdjusted * (5 + abs(m_diffAdjusted)/5);
+            speed = distance * 1 + m_diffAdjusted * 4.5; //(5 + abs(m_diffAdjusted)/5);
         else if (m_flag != Flag::Loading)
-            speed = distance * 0.5 + m_diffAdjusted * 2;
+            speed = distance * 0.5 + m_diffAdjusted * 4;
         else
-            speed = distance * 1.5 + m_diffAdjusted / 5;
-        // printf("MOVE: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+            speed = distance * 1.2 + m_diffAdjusted / 5;
+        printf("MOVE: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
     }
-    else if (distanceAbs >= 15 && m_flag != Flag::Loading)
+    else if (distanceAbs >= 10 && m_flag != Flag::Loading)
     {
         if (distance > 0) // going up
-            speed = distance * 2 + m_diffAdjusted * 5;
+            speed = distance * 2 + m_diffAdjusted * 6;
         else
-            speed = distance * 0.6 + m_diffAdjusted * 2;
-        // printf("ADJUST: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+            speed = distance * 1 + m_diffAdjusted * 4;
+        printf("ADJUST: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
     }
     else
     {
@@ -273,21 +273,54 @@ void Shooter::Update()
 {
     // Debug();
 
-    unsigned int darkness = analogRead(lightSensor);
-    bool ballIn = (darkness > lightSensorBallIn);
-    bool ballOut = (darkness < lightSensorBallOut);
+    bool userShooting = joystickGetDigital(7, JOY_LEFT);
+    int shooterPreloadPos = analogRead(shooterPreloadPoterntiometer);
 
-    /*
+    if (shooterPreloadPos > ShooterPreloadStart)
+        m_preloadAfterShot = false;
+
+    // remove jiggering by having two stops
+    bool needPreload = !m_disablePreload && (
+        m_preloadAfterShot ||
+        (m_preloading && shooterPreloadPos > ShooterPreloadEnd) ||
+        shooterPreloadPos > ShooterPreloadStart
+        );
+    bool lostball = false;
+
+    //safety net - if something goes wrong, user needs to have a way to disable preload.
+    if (needPreload && userShooting && !m_userShooting)
+    {
+        m_disablePreload = true;
+        needPreload = false;
+    }
+    m_userShooting = userShooting;
+    m_preloading = needPreload;
+
+    unsigned int darkness = analogRead(lightSensor);
+    bool ballIn = (darkness < lightSensorBallIn);
+    bool ballOut = (darkness > lightSensorBallOut);
+
     if (!isAuto() && !m_Manual)
     {
         if (ballIn && m_flag == Flag::Loading)
-            SetFlag(Flag::High);
+            SetFlag(Flag::Middle);
         if (ballOut && m_flag != Flag::Loading)
+        {
+            lostball = true;
             SetFlag(Flag::Loading);
+        }
     }
-    */
+
+    if (userShooting && lostball)
+    {
+        m_disablePreload = false;
+        m_preloadAfterShot = true;
+    }
 
     UpdateDistance();
+
+    bool topFlag =IsUpperPosition();
+    bool middleFlag =  IsMiddlePosition();
 
     if (GetAngleDown())
     {
@@ -300,7 +333,7 @@ void Shooter::Update()
         }
         SetFlag(Flag::Loading);
     }
-    else if (IsUpperPosition())
+    else if (topFlag || middleFlag)
     {
         if (m_flag == Flag::Loading)
         {
@@ -309,22 +342,11 @@ void Shooter::Update()
             if (ballIn)
                 m_Manual = false;
         }
-        SetFlag(Flag::High);
-    }
-    else if (IsMiddlePosition())
-    {
-        if (m_flag == Flag::Loading)
-        {
-            if (ballOut)
-                m_Manual = true;
-            if (ballIn)
-                m_Manual = false;
-        }
-        SetFlag(Flag::Middle);
+        SetFlag(topFlag ? Flag::High : Flag::Middle);
     }
 
     // Shooter
-    if (joystickGetDigital(7, JOY_LEFT))
+    if (userShooting || needPreload || m_preloadAfterShot)
     {
         motorSet(shooterPort, shooterMotorSpeed);
     }

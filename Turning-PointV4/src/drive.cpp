@@ -46,16 +46,21 @@ int Drive::GetTurnAxis()
     return -GetMovementJoystick(1, 1, 30) * driveMotorMaxSpeed / joystickMax;
 }
 
-void Drive::OverrideInputs(int forward, int turn)
+void Drive::OverrideInputs(int forward, int turn, bool keepDirection /* = false*/)
 {
     Assert(isAuto());
+
+    bool keepDirectionCalc = KeepDrection(forward, turn);
+    // Are you sure in what you do??? Direction will be reset any way
+    Assert(keepDirection == keepDirectionCalc); 
 
     m_overrideForward = forward;
     m_overrideTurn = turn;
 
     // We need this to properly count turning on the spot without using gyro.
     // Maybe this will not be needed in the future).
-    ResetEncoders();
+    if (!keepDirection || !keepDirectionCalc)
+        ResetEncoders();
 }
 
 void Drive::ResetEncoders()
@@ -99,12 +104,12 @@ void Drive::Update()
     int forward = GetForwardAxis();
     int turn = GetTurnAxis();
 
-    bool resetDirection = (m_turn != turn || m_forward != forward);
+    bool keepDirection = KeepDrection(forward, turn); 
 
     m_forward = forward;
     m_turn = turn;
 
-    if (resetDirection)
+    if (!keepDirection)
     {
         ResetEncoders();
         m_ErrorIntergral = 0;
