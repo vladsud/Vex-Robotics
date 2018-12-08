@@ -8,6 +8,13 @@ enum class Flag
   Loading,
 };
 
+enum class BallPresence
+{
+  NoBall,
+  Unknown,
+  HasBall
+};
+
 class Shooter
 {
     // This should be comming from autonomous, probably.
@@ -27,20 +34,24 @@ class Shooter
     bool m_disablePreload = false;
     bool m_userShooting = false;
     bool m_preloading = false;
-    bool m_preloadAfterShot = false;
+    int  m_preloadAfterShotCounter = 0;
+    bool m_overrideShooting = false;
 
   public:
     Shooter();
-    bool GetAngleDown();
     void KeepMoving();
     void StartMoving();
     void StopMoving();
     void Update();
     void Debug();
     unsigned int  CalcAngle();
-    void UpdateDistance();
+    void UpdateDistanceControls();
     void SetDistance(unsigned int distance);
     void SetFlag(Flag flag);
 
-    bool IsMoving() { return m_fMoving; }
+    void OverrideSetShooterMode(bool on);
+    bool IsMovingAngle() { return m_fMoving; }
+    bool IsShooting() { return (joystickGetDigital(7, JOY_LEFT) || m_overrideShooting) && m_flag != Flag::Loading; }
+    BallPresence BallStatus();
+    Flag GetFlagPosition() { return m_flag; }
 };

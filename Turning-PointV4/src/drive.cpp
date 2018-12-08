@@ -1,4 +1,5 @@
 #include "drive.h"
+#include "gyro.h"
 
 int AdjustSpeed(int speed)
 {
@@ -37,7 +38,7 @@ int Drive::GetForwardAxis()
     return -GetMovementJoystick(1, 3, 18);
 }
 
-int Drive::GetTurnAxis()
+float Drive::GetTurnAxis()
 {
     // We adjust speed to put more power to motors initially to move robot from still position.
     if (isAuto())
@@ -46,20 +47,18 @@ int Drive::GetTurnAxis()
     return -GetMovementJoystick(1, 1, 30) * driveMotorMaxSpeed / joystickMax;
 }
 
-void Drive::OverrideInputs(int forward, int turn, bool keepDirection /* = false*/)
+void Drive::OverrideInputs(int forward, float turn)
 {
     Assert(isAuto());
 
-    bool keepDirectionCalc = KeepDrection(forward, turn);
+    bool keepDirection = KeepDrection(forward, turn);
     // Are you sure in what you do??? Direction will be reset any way
-    Assert(keepDirection == keepDirectionCalc); 
-
     m_overrideForward = forward;
     m_overrideTurn = turn;
 
     // We need this to properly count turning on the spot without using gyro.
     // Maybe this will not be needed in the future).
-    if (!keepDirection || !keepDirectionCalc)
+    if (!keepDirection)
         ResetEncoders();
 }
 
@@ -68,7 +67,9 @@ void Drive::ResetEncoders()
     encoderReset(g_leftDriveEncoder);
     encoderReset(g_rightDriveEncoder);
     m_distance = 0;
+    m_distanceTurn = 0;
     m_ErrorIntergral = 0;
+    m_gyro = GyroWrapper::Get();
 }
 
 void Drive::SetLeftDrive(int speed)
@@ -90,12 +91,6 @@ void Drive::DebugDrive()
     // will be used for debugging in the future...
 }
 
-bool SmartsOn()
-{
-    return true;
-    return isAuto();
-}
-
 void Drive::Update()
 {
     // DebugDrive();
@@ -106,37 +101,48 @@ void Drive::Update()
 
     bool keepDirection = KeepDrection(forward, turn); 
 
-    m_forward = forward;
-    m_turn = turn;
-
     if (!keepDirection)
-    {
         ResetEncoders();
-        m_ErrorIntergral = 0;
-    }
 
     // 400 is roughtly one full turn, positive is forward
     int left = encoderGet(g_leftDriveEncoder);
     int right = encoderGet(g_rightDriveEncoder);
 
-    m_distance = (abs(left) + abs(right)) / 2;
+    m_distance = abs(left) + abs(right);
+    m_distanceTurn = left - right;
 
-    if (m_turn == 0 && m_forward == 0)
+    // Do not reset m_forward & m_turn on full stop!
+    // that screws up autonomous turning.
+    if (turn == 0 && forward == 0)
     {
         SetLeftDrive(0);
         SetRightDrive(0);
         return;
     }
 
+    m_forward = forward;
+    m_turn = turn;
+
     bool smartsOn = SmartsOn();
 
     float error;
-    if (abs(m_turn) < abs(m_forward))
-        error  =  left - right - 2 * m_turn * m_distance / m_forward;
-    else if (m_forward == 0)
-        error  =  left + right;
+    if (1)
+    {
+        // turn is aded to left!
+        // when m_distance = 2*m_forward, we expect left-right to be 2*turn 
+        if (abs(m_turn) < abs(m_forward))
+            error  =  left - right - m_turn * m_distance / m_forward;
+        else if (m_forward == 0)
+            error  =  left + right;
+        else
+            smartsOn = false;
+    }
     else
-        smartsOn = false;
+    {
+        // 256 ticks is one degree.
+        // We expect turn = 10 to be one degree turn over one cycle (2*forward)
+        error = ((m_gyro - GyroWrapper::Get()) - m_turn * m_distance / m_forward * GyroWrapper::Multiplier / 20) / GyroWrapper::Multiplier;
+    }
 
     if (!smartsOn)
     {
@@ -152,29 +158,19 @@ void Drive::Update()
 
     m_ErrorIntergral += error;
 
-    if (error > 0)
-    {
-        error += 4;
-        if (error > 10)
-            error = 10;
-    }
-    else if (error < 0)
-    {
-        error -= 4;
-        if (error < -10)
-            error = -10;
-    }
-        
-    int errorMultiplier = error * (0.3 + abs(error) * 0.1) + m_ErrorIntergral * 0.02;
-    
+    int errorMultiplier = error * (2 + abs(error) * 0.5) + m_ErrorIntergral * 0.1;
+
     // adjust power on slower motor
+    // positive error (with positive forward) - left is going too fast
     int leftAdjustment = 0;
     int rightAdjustment = 0;
     if (m_forward * error > 0)
-        rightAdjustment = errorMultiplier;
-    else
         leftAdjustment = errorMultiplier;
+    else
+        rightAdjustment = errorMultiplier;
 
+
+    printf("Drive: encoders: (%d, %d), erorr: (%d, %d), integral: %d, Distance: %d\n", left, right, int(error), errorMultiplier, int(m_ErrorIntergral), m_distance);
     SetLeftDrive(m_forward - leftAdjustment + m_turn);
     SetRightDrive(m_forward + rightAdjustment - m_turn);
 }

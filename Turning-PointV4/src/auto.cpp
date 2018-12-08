@@ -14,13 +14,25 @@
 #include "cycle.h"
 #include "actions.h"
 
+bool isAuto()
+{
+    // return true;
+    return isAutonomous();
+}
+
+bool SmartsOn()
+{
+    // return true;
+    return isAuto();
+}
+
 LCD g_lcd;
 Main* g_main;
 
 Action* g_actions[100];
 size_t g_actionSize = 0;
 
-bool testAgles = true;
+bool testAgles = false;
 
 #define AddActions(actions) do {\
     memmove((char*)(g_actions + g_actionSize), (char*)actions, sizeof(actions)); \
@@ -49,6 +61,9 @@ void autonomous()
     {
         if (g_lcd.AtonShootHighFlag)
             AddActions(g_ShootFromSecondPos);
+        else
+            AddActions(g_WaitInsteadOfShot);
+
         if (g_lcd.AtonClimbPlatform)
             AddActions(g_ParkFromSecondPos);
         else
@@ -59,7 +74,7 @@ void autonomous()
     if (testAgles && !isAutonomous())
     {
         g_actionSize = 0;
-        AddActions(g_testAngles);
+        AddActions(g_testDrive); // g_testAngles
     }
 
 

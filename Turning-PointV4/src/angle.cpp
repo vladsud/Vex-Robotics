@@ -6,7 +6,7 @@ constexpr unsigned int Distances[]    {   24 ,  30,  48,   54,    108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]   {  110,   105,  82,   69,   60};
+constexpr unsigned int AnglesHigh[]   {  110,   105,  86,   69,   60};
 constexpr unsigned int AnglesMedium[] {   85,   62,   45,   44,   44};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances)-1;
@@ -73,7 +73,7 @@ constexpr unsigned int CalcAngle(Flag flag, unsigned int distanceInches)
 
 constexpr bool AlmostSameAngle(unsigned int angle1, unsigned int angle2)
 {
-    return abs((int)angle1-(int)angle2) <= 2;
+    return abs((int)angle1-(int)angle2) <= 3;
 }
 
 static_assert(CalcAngle(Flag::Loading, Distances[2]) == anglerLow);
@@ -98,39 +98,6 @@ static_assert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2]*3 + Distance
 Shooter::Shooter()
 {
     StartMoving();
-
-    /*
-    unsigned int precision = 10;
-    unsigned int angle = analogRead(anglePotPort);
-    
-    if (abs(angle - anglePotentiometerLow) < precision)
-    {
-        m_flag = Flag::Loading;
-        return;
-    }
-
-    for (unsigned int i = 0; i < CountOf(Distances); i++)
-    {
-        if (abs(angle - ConvertAngleToPotentiometer(AnglesHigh[i]) < precision)
-        {
-            m_flag = Flag::High;
-            m_distanceInches = Distances[i];
-            return;
-        }
-    }
-
-    for (unsigned int i = 0; i < CountOf(Distances); i++)
-    {
-        if (abs(angle - ConvertAngleToPotentiometer(AnglesMedium[i]) < precision)
-        {
-            m_flag = Flag::Middle;
-            m_distanceInches = Distances[i];
-            return;
-        }
-    }
-
-    // or well, fall back to defaults.
-    */
 }
 
 unsigned int Shooter::CalcAngle()
@@ -138,24 +105,24 @@ unsigned int Shooter::CalcAngle()
     return ::CalcAngle(m_flag, m_distanceInches);
 }
 
-bool Shooter::GetAngleDown()
+bool MoveToLoadingPosition()
 {
     return joystickGetDigital(7, JOY_DOWN);
 }
 
-bool IsUpperPosition()
+bool MoveToTopFlagPosition()
 {
     return joystickGetDigital(7, JOY_UP);
 }
 
-bool IsMiddlePosition()
+bool MoveToMiddleFlagPosition()
 {
     return joystickGetDigital(7, JOY_RIGHT);
 }
 
-// up: 100
-// stop: 0
-// down: -100
+// Motors:
+//   up: 100
+//   down: -100
 void Shooter::KeepMoving()
 {
     int speed = 0;
@@ -179,7 +146,7 @@ void Shooter::KeepMoving()
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
     if (m_fMoving && (m_count >= 200 || (distanceAbs <= 10 && abs(m_diffAdjusted) <= 1)))
     {
-        printf("STOP: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+        // printf("STOP: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
         StopMoving();
         return;
     }
@@ -192,7 +159,7 @@ void Shooter::KeepMoving()
             speed = distance * 0.5 + m_diffAdjusted * 4;
         else
             speed = distance * 1.2 + m_diffAdjusted / 5;
-        printf("MOVE: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+        // printf("MOVE: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
     }
     else if (distanceAbs >= 10 && m_flag != Flag::Loading)
     {
@@ -200,7 +167,7 @@ void Shooter::KeepMoving()
             speed = distance * 2 + m_diffAdjusted * 6;
         else
             speed = distance * 1 + m_diffAdjusted * 4;
-        printf("ADJUST: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+        // printf("ADJUST: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
     }
     else
     {
@@ -257,7 +224,7 @@ void Shooter::SetFlag(Flag flag)
     StartMoving();
 }
 
-void Shooter::UpdateDistance()
+void Shooter::UpdateDistanceControls()
 {
     if (joystickGetDigital(8, JOY_LEFT))
         SetDistance(Distances[0]);
@@ -269,66 +236,148 @@ void Shooter::UpdateDistance()
         SetDistance(Distances[3]);
 }
 
+void  Shooter::OverrideSetShooterMode(bool on)
+{
+    Assert(isAuto());
+    Assert(!on || m_flag != Flag::Loading);
+
+    m_overrideShooting = on;
+}
+
+BallPresence Shooter::BallStatus()
+{
+    // Check if we can detect ball present.
+    // Use two stops to make sure we do not move angle up and down if we are somewhere in gray area (on the boundary)
+    unsigned int darkness = analogRead(lightSensor);
+    static_assert(lightSensorBallIn < lightSensorBallOut);
+    bool ballIn = (darkness < lightSensorBallIn);
+    bool ballOut = (darkness > lightSensorBallOut);
+
+    if (ballOut)
+        return BallPresence::NoBall;
+    if (ballIn)
+        return BallPresence::HasBall;
+    return BallPresence::Unknown; 
+}
+
+// Preloadign/shooting phases:
+// 1) Preloaded, stopped:
+//      m_preloadAfterShotCounter = 0
+//      m_preloading = false
+//      Potentiometer: between ShooterPreloadStart & ShooterPreloadEnd
+// 2) Shooting:
+//      Same, potentiometer can jump from 0 to 4000
+// 3) Shot happened - preloading:
+//      Same, but lost ball.
+//      m_preloadAfterShotCounter = 150, counting down.
+//      m_overrideShooting = false (reset)
+// 4) Preloading:
+//      Potentiometer goes from 0 to 4000
+//      m_preloadAfterShotCounter = 20
+//      m_preloading = true
+// 5) Preloading - continuation:
+//      m_preloadAfterShotCounter = 0
+//      m_preloading = true
+// 6) Preloading - continuation:
+//      Potentiometer is between ShooterPreloadStart & ShooterPreloadEnd
+// 7) Preloading - stopping:
+//      Potentiometer reaches ShooterPreloadEnd
+//      Motor off, potentiometer reading can jump back, but needs to stay between ShooterPreloadStart & ShooterPreloadEnd (otherwise we go to #6)
+//      m_preloading = false;
 void Shooter::Update()
 {
     // Debug();
 
-    bool userShooting = joystickGetDigital(7, JOY_LEFT);
+    UpdateDistanceControls();
+
+    bool userShooting = IsShooting();
     int shooterPreloadPos = analogRead(shooterPreloadPoterntiometer);
 
+    // Did we go from zero to 4000 on potentiometer?
+    // That means shot was done, and we are starting "normal" preload.
     if (shooterPreloadPos > ShooterPreloadStart)
-        m_preloadAfterShot = false;
+    {
+        // We moved from 0 to 4000 (dead zone) on potentiometer
+        // But, there can be some physical jiggering, so we may come back to 0 in next couple updates.
+        // To avoid it, we will countinue preloading not looking at potentiometer for a while, and then switch
+        // to leverage potentiometer for guidance. 
+        if (m_preloadAfterShotCounter > 20)
+        {
+            print("Preloading after full rotation\n");
+            m_preloadAfterShotCounter = 20;
+        }
+    }
+
+    if (m_preloadAfterShotCounter > 0)
+        m_preloadAfterShotCounter--;
 
     // remove jiggering by having two stops
+    // Start moving if we are below first stop (ShooterPreloadStart)
+    // and keep motors moving to further stop (ShooterPreloadEnd)
+    // Physically system will move back until it catches next teath on stopper,
+    // so we need to have some gap in between those stops not to have ssytem continuosly moving up and down. 
     bool needPreload = !m_disablePreload && (
-        m_preloadAfterShot ||
+        m_preloadAfterShotCounter > 0 ||
         (m_preloading && shooterPreloadPos > ShooterPreloadEnd) ||
         shooterPreloadPos > ShooterPreloadStart
         );
-    bool lostball = false;
+
+    if (needPreload != m_preloading)
+        printf("Preload state: %d\n", needPreload); 
 
     //safety net - if something goes wrong, user needs to have a way to disable preload.
+    // This is done by clicking and releasing shooter button quickly while not in the shooting zone.
     if (needPreload && userShooting && !m_userShooting)
     {
+        print("Disabling preload\n");
         m_disablePreload = true;
         needPreload = false;
     }
     m_userShooting = userShooting;
     m_preloading = needPreload;
 
-    unsigned int darkness = analogRead(lightSensor);
-    bool ballIn = (darkness < lightSensorBallIn);
-    bool ballOut = (darkness > lightSensorBallOut);
+    // Check if we can detect ball present.
+    BallPresence ball = BallStatus();
 
-    if (!isAuto() && !m_Manual)
+    // User can disable auto-reload by moving angle up / down against system.
+    // If it happens, we set m_Manual = false for this cycle (until readng starts matching user actions) 
+    bool lostball = false;
+    if (!m_Manual)
     {
-        if (ballIn && m_flag == Flag::Loading)
+        if (ball == BallPresence::HasBall && m_flag == Flag::Loading)
             SetFlag(Flag::Middle);
-        if (ballOut && m_flag != Flag::Loading)
+        if (ball == BallPresence::NoBall && m_flag != Flag::Loading)
         {
+            printf("Lost vall\n");
             lostball = true;
             SetFlag(Flag::Loading);
         }
     }
 
+    // Did shot just hapened?
+    // We can't use potentiometer here, because we are very close to dead zone, so it can jump from 0 to 4000.
+    // But having user pressing shoot button and losing the ball is a good indicator we are done.
+    // This does not handle case when ball escapes, but shooter still did not fire - we will misfire and reload - 
+    // likely in time for next ball to land in shooter, so it's not a big issue. 
     if (userShooting && lostball)
     {
+        print("Ball was shot\n");
         m_disablePreload = false;
-        m_preloadAfterShot = true;
+        m_overrideShooting = false; // this is signal to autonomous!
+        m_preloadAfterShotCounter = 150;
     }
 
-    UpdateDistance();
+    // Check angle direction based on user actions.
+    bool topFlag =MoveToTopFlagPosition();
+    bool middleFlag =  MoveToMiddleFlagPosition();
 
-    bool topFlag =IsUpperPosition();
-    bool middleFlag =  IsMiddlePosition();
-
-    if (GetAngleDown())
+    if (MoveToLoadingPosition())
     {
         if (m_flag != Flag::Loading)
         {
-            if (ballIn)
+            if (ball == BallPresence::HasBall)
                 m_Manual = true;
-            if (ballOut)
+            if (ball == BallPresence::NoBall)
                 m_Manual = false;
         }
         SetFlag(Flag::Loading);
@@ -337,24 +386,24 @@ void Shooter::Update()
     {
         if (m_flag == Flag::Loading)
         {
-            if (ballOut)
+            if (ball == BallPresence::NoBall)
                 m_Manual = true;
-            if (ballIn)
+            else if (ball == BallPresence::HasBall)
                 m_Manual = false;
         }
         SetFlag(topFlag ? Flag::High : Flag::Middle);
     }
 
-    // Shooter
-    if (userShooting || needPreload || m_preloadAfterShot)
+    // Shooter motor.
+    if (userShooting || needPreload || m_preloadAfterShotCounter > 0)
     {
         motorSet(shooterPort, shooterMotorSpeed);
     }
-    else if (!isAuto())
+    else
     {
         motorSet(shooterPort, 0);
     }
 
-
+    // Keep moving angle to rigth position
     KeepMoving();
 }

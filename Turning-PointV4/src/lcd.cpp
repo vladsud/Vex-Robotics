@@ -16,10 +16,10 @@ void LCD::Init()
     m_step = 0;
     m_RefreshOnClick = false;
         
-    AtonBlueRight = true;
+    AtonBlueRight = false;
     AtonFirstPos = true;
     AtonClimbPlatform = false;
-    AtonShootHighFlag = true;
+    AtonShootHighFlag =  true;
 
     lcdInit(uart1);
     lcdClear(uart1);

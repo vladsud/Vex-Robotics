@@ -41,11 +41,9 @@ inline float abs(float fl)
    return (fl < 0) ? -fl : fl;
 }
 
-inline bool isAuto()
-{
-    // return true;
-    return isAutonomous();
-}
+bool isAuto();
+bool SmartsOn();
+
 
 #define CountOf(a) (sizeof(a)/sizeof(a[0]))
 #define ReportStatus printf
@@ -100,8 +98,10 @@ extern Encoder g_rightDriveEncoder;
 * ANALOG SENSORS
 *
 *******************************************************************************/
+#define ShooterSecondaryPotentiometer 4
+
 #define lightSensor 5
-#define lightSensorBallIn 2700
+#define lightSensorBallIn 2600
 #define lightSensorBallOut 2900
 
 #define shooterPreloadPoterntiometer 6

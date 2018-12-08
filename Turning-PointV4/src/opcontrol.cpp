@@ -18,11 +18,11 @@ void Main::Update()
 
 	if (m_count % 50 == 0)
 	{
-		printf("Encoders: %d : %d     Angle: %d,   Light: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
+		printf("Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
 		encoderGet(g_leftDriveEncoder),
 		encoderGet(g_rightDriveEncoder),
 		analogRead(anglePotPort),
-		analogRead(lightSensor),
+		analogRead(ShooterSecondaryPotentiometer),
 		analogRead(shooterPreloadPoterntiometer),
 		gyroGet(g_gyro),
 		analogRead(lightSensor));

@@ -4,9 +4,10 @@
 
 extern Main* g_main;
 
-// Should be Turn(+/-90)
-#define TurnToCenter() Move(200, g_lcd.AtonBlueRight ? -50 : 50, 200)
-#define TurnFromCenter() Move(200, g_lcd.AtonBlueRight ? 50 : -50, 200)
+#define TurnToCenter() Turn(-90)
+#define TurnFromCenter() Turn(90)
+// #define TurnToCenter() Move(400, 0, g_lcd.AtonBlueRight ? -50 : 50)
+// #define TurnFromCenter() Move(400, 0, g_lcd.AtonBlueRight ? 50 : -50)
 
 
 struct Action
@@ -26,6 +27,10 @@ struct Action
 
 // Action that does nothing.
 using NoOp = Action;
+
+using GyroOff = NoOp;
+using GyroOn = NoOp;
+
 
 struct EndOfAction : public Action
 {
@@ -73,49 +78,122 @@ struct Move : public Action
         Assert(g_main->drive.m_distance == 0);
     }
     bool ShouldStop() override  { return abs(g_main->drive.m_distance) >= m_distanceToMove; }
+    void Stop() override {g_main->drive.OverrideInputs(0, 0);}
 };
 
 struct Turn : public Action
 {
     Turn(int turn)
-        : m_turn(turn)
+        : m_turn(turn * GyroWrapper::Multiplier)
     {
-        g_main->gyro.Reset();
-        Assert(g_main->gyro.Get() == 0);
+        m_errorLast = -m_turn;
     }
+
+    void Start() override
+    {
+        m_initialAngle = g_main->gyro.Get();
+        g_main->drive.OverrideInputs(0, 0);
+    }
+
     bool ShouldStop() override
     {
-        int error = g_main->gyro.Get() - m_turn;
-        if (abs(error) <= 1)
+        if (m_turn == 0)
             return true;
-        int speed = 27 + error * 0.5;
-        g_main->drive.OverrideInputs(0, speed, true/*keepDirection*/);
+
+        // negative for positive turns
+        int error = g_main->gyro.Get() - m_initialAngle - m_turn;
+        
+        // Positive for positive positive turns
+        int errorDiff = (error - m_errorLast);
+        m_errorLast = error;
+
+        if (abs(error) <= GyroWrapper::Multiplier/2 && abs(errorDiff) <= GyroWrapper::Multiplier/16)
+        {
+            printf("Turn stop! Error: %d, ErrorDiff: %d\n", error, errorDiff);
+            g_main->drive.OverrideInputs(0, 0);
+            return true;
+        }
+
+        int diffPart = errorDiff * 53;
+        int errorPart = 6 * error;
+
+        if (abs(errorDiff) <= GyroWrapper::Multiplier/8 && abs(error) <= GyroWrapper::Multiplier * 5)
+        {
+            // If we stopped, then we can't start moving.
+            // Give it a kick!
+            m_integral += error;
+        }
+        else
+            m_integral = 0;
+
+        int speed = (errorPart + diffPart + m_integral) / GyroWrapper::Multiplier;
+        
+        printf("Error: %d, Speed adj: (%d, %d)  Speed: %d, integral: %d, initial angle: %d\n", error, errorPart, diffPart, speed, m_integral, m_initialAngle);
+
+        const int maxSpeed = 35;
+        if (speed > maxSpeed)
+            speed = maxSpeed;
+        else if (speed < -maxSpeed)
+            speed = -maxSpeed;
+
+        g_main->drive.OverrideInputs(0, speed);
         return false;
     }
 private:
     int m_turn;
+    int m_initialAngle;
+    int m_errorLast = 0;
+    int m_integral = 0;
 };
 
 struct ShooterAngle : public Action
 {
+private:
     Flag m_flag;
     int m_distanceToShoot;
-    ShooterAngle(Flag flag, int distance) : m_flag(flag), m_distanceToShoot(distance) {}
+    bool m_checkPresenceOfBall;
+public:
+    ShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
+      : m_flag(hightFlag ? Flag::High : Flag::Middle),
+        m_distanceToShoot(distance),
+        m_checkPresenceOfBall(checkPresenceOfBall)
+    {
+        // we disable checking for ball only for first action - shooting.
+        Assert(m_flag != Flag::Loading);
+        Assert(!g_main->shooter.IsShooting());
+    }
     void Start() override
     {
-        g_main->shooter.SetFlag(m_flag);
-        g_main->shooter.SetDistance(m_distanceToShoot);
+        if (!m_checkPresenceOfBall || g_main->shooter.BallStatus() != BallPresence::NoBall)
+        {
+            g_main->shooter.SetFlag(m_flag);
+            g_main->shooter.SetDistance(m_distanceToShoot);
+            Assert(g_main->shooter.GetFlagPosition() != Flag::Loading); // importatn for next ShootBall action to be no-op
+        }
+        else
+        {
+            Assert(!g_main->shooter.IsMovingAngle()); // are we waiting for nothing?
+            Assert(g_main->shooter.GetFlagPosition() == Flag::Loading); // importatn for next ShootBall action to be no-op
+        }
     }
-    bool ShouldStop() override { return !g_main->shooter.IsMoving(); }
+    bool ShouldStop() override { return !g_main->shooter.IsMovingAngle(); }
 };
 
 struct ShootBall : public Action
 {
-    void Start() override { motorSet(shooterPort, shooterMotorSpeed); }
-    bool ShouldStop() override  { return g_main->m_count >= 200; }
+    void Start() override
+    {
+        Assert(!g_main->shooter.IsShooting());
+        if (g_main->shooter.GetFlagPosition() != Flag::Loading)
+        {
+            g_main->shooter.OverrideSetShooterMode(true/*shooting*/);
+            Assert(g_main->shooter.IsShooting());
+        }
+    }
+    bool ShouldStop() override  { return !g_main->shooter.IsShooting(); }
     void Stop() override
     {
-        motorSet(shooterPort, 0);
+        // This should be not needed, but might be needed in the future (if we add safety in the form of time-based shooter off)
         g_main->shooter.SetFlag(Flag::Loading);
     }
 };

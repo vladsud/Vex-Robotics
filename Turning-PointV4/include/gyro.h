@@ -3,8 +3,19 @@
 
 class GyroWrapper
 {
-    int m_base = 0;
 public:
-    int Get() { return gyroGet(g_gyro) - m_base; }
-    void Reset() { m_base = gyroGet(g_gyro); }
+    static const int Multiplier = 256;
+    static int Get()
+    {
+        // Based on Pros implementaitno - this is 256x of what gyroGet returns!!! 
+        int result = *(int32_t*)g_gyro + 128;
+        int gyroRes = gyroGet(g_gyro);
+        if (abs(result - gyroRes * Multiplier) >= Multiplier)
+        {
+            printf("Gyro does not work: %d, %d\n", result, gyroRes);
+            Assert(false);
+        }
+        return result;
+        // return gyroGet(g_gyro);
+    }
 };
