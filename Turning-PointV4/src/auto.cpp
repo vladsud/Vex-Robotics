@@ -9,21 +9,28 @@
  *
  * PROS contains FreeRTOS (http://www.freertos.org) whose source code may be
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
- */12/7
+ */
 
 #include "cycle.h"
 #include "actions.h"
 
+
+// #define TESTING
+
+
+bool g_manualAuto = false;
+
 bool isAuto()
 {
-    // return true;
+    if (g_manualAuto)
+	    return true;
     return isAutonomous();
 }
 
+bool g_smartsOn = true;
 bool SmartsOn()
 {
-    // return true;
-    return isAuto();
+    return g_smartsOn && isAuto();
 }
 
 LCD g_lcd;
@@ -51,6 +58,7 @@ void autonomous()
 
     if (g_lcd.AtonFirstPos)
     {
+        printf("First Pos\n");
         AddActions(g_actionsFirstPos);
         if (g_lcd.AtonClimbPlatform)
             AddActions(g_ParkFromFirstPos);
@@ -59,6 +67,7 @@ void autonomous()
     }
     else
     {
+        printf("Second Pos\n");
         if (g_lcd.AtonShootHighFlag)
             AddActions(g_ShootFromSecondPos);
         else
@@ -70,13 +79,14 @@ void autonomous()
             AddActions(g_knockConeSecondPos);
     }
 
+#if TESTING
     // Debugging code - should not run in real autonomous
     if (testAgles && !isAutonomous())
     {
         g_actionSize = 0;
         AddActions(g_testDrive); // g_testAngles
     }
-
+#endif // TESTING
 
     g_actions[g_actionSize] = new EndOfAction();
 

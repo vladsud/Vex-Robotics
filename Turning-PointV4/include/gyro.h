@@ -5,6 +5,8 @@ class GyroWrapper
 {
 public:
     static const int Multiplier = 256;
+    
+    // Positive is counterclockwise
     static int Get()
     {
         // Based on Pros implementaitno - this is 256x of what gyroGet returns!!! 

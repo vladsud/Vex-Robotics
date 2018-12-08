@@ -5,53 +5,53 @@ Action* g_actionsFirstPos[] = {
     new ShootBall,
     new IntakeUp,
     
-    // we are starting a bit at an angle to shoot, so need to fix this as we go in for low flag
-    new Move(400, 60, 0),
-    new Move(1000, 60, g_lcd.AtonBlueRight ? 5 : -5),
-    new GyroOff(),
-    new Move(600, 85, 0),
-    new Wait(100),
-    new GyroOn(),
+    new Move(200, 45, 0),
+    new Move(550, 50, g_lcd.AtonBlueRight ? 3.5 : -4), // turn left for red
+    new Move(1350, 60, 0),
+
+    new Wait(50),
 
     // turn closer to center, but then streighten to look direct at flag
     // This should allow us to look directly at flag, but also to be far away from border to turn around
-  //   new Move(600, -60, 0),
-    new Move(1500, -60, g_lcd.AtonBlueRight ? -5 : 5),
-    // new Turn(g_lcd.AtonBlueRight ? -10 : 10),
-    // new Move(600, -60, 0),
-    //new Move(600, -60, g_lcd.AtonBlueRight ? 5 : -5),
-    // new Turn(g_lcd.AtonBlueRight ? 10 : -10),
+    new Move(100, -35, 0),
+    new Move(600, -50, g_lcd.AtonBlueRight ? 4 : -4), //turn rigth for red 
+    new Move(100, -35, 0),
+    new Move(1000, -45, g_lcd.AtonBlueRight ? -3 : 3), //turn rigth for red 
+    new Move(200, -45, 0),
+    new Move(200, -35, 0),
 
     new IntakeStop,
-
-    // Shooting the ball
-    new ShooterAngle(!g_lcd.AtonShootHighFlag, 31, true /*checkPresenceOfBall*/),
     new Wait(50),
+    new ShooterAngle(!g_lcd.AtonShootHighFlag, 48, true /*checkPresenceOfBall*/),
     new ShootBall
 };
 
 Action* g_knockConeFirstPos[] = {
-    // Moving to center to flip cone
-    //new TurnToCenter(),
-    //new IntakeDown,
-    //new Move(800, 50),
+    new Wait(30),
+    new TurnToCenter(),
+    new Move(1600, 50),
+    new Move(200, 35),
+    new IntakeUp,
+    new Wait(20),
+    new Move(300, -45),
+    new IntakeStop
 };
 
 Action* g_ParkFromFirstPos[] = {
-    // give some time for other robot to get out of the way
-    // FYI: It takes about 7 seconds to park
-    new Wait(500),
-    new Move(400, 50),
-    new TurnFromCenter(), // this is actually to center, it's in context of robot facing flags, but we are facing backfield
-    new Move(1350, 85),
+    new Move(950, -50),
+    new Wait(30),
+    new TurnToCenter(),
+    new Move(300, 65),  // first plat: 500
+    new MoveToPlatform(3250, 85), // first platform: 2050
+
+/* SECOND PLATFORM
+    new Move(100, 85),
+    new MoveToPlatform(3250, 85), // first platform: 2050
+    new MoveTimeBased(-30, 10)
+*/
 };
 
 Action* g_ShootFromSecondPos[] = {
-    new ShooterAngle(g_lcd.AtonShootHighFlag, 96, false /*checkPresenceOfBall*/),
-    // give some time for other robot to get out of the way
-    // FYI: It takes about 7 seconds to park
-    new Wait(400),
-    new ShootBall,
 };
 
 Action* g_WaitInsteadOfShot[] = {
@@ -60,13 +60,25 @@ Action* g_WaitInsteadOfShot[] = {
 
 // FYI: It takes about 6 seconds to park
 Action* g_ParkFromSecondPos[] = {
-    new Move(400, 50),
-    new TurnToCenter(),
-    new Move(1350, 85),
+    //new ShooterAngle(false, 108, false /*checkPresenceOfBall*/),
+    // give some time for other robot to get out of the way
+    // FYI: It takes about 7 seconds to park
+    //new Wait(400),
+    //new ShootBall,
+    new Move(850, 50),
+    new Wait(100),
+    new Turn(g_lcd.AtonBlueRight ? 45 : -45),
+    new Wait(20),
+    new Move(300, -65),  // first plat: 500
+    new Wait(40),
+    new Move(700, 85),  // first plat: 500
+    new MoveToPlatform(3250, 85) // first platform: 2050
 };
 
 // NYI
 Action* g_knockConeSecondPos[] = {};
+
+#if TESTING
 
 unsigned int TestDistance = 24;
 Action*g_testAngles[] = {
@@ -86,3 +98,5 @@ Action*g_testDrive[] = {
     new Wait(50),
     new Turn(45),
 };
+
+#endif

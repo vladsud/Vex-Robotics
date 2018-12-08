@@ -65,6 +65,12 @@ bool SmartsOn();
 * 
 * MOTOR PORTS
 *    Externder: 2-5
+
+Extender::
+A: Descorrer
+B: Back left drive
+C: Shooter 
+D: left y drive
 *
 *******************************************************************************/
 //DRIVE MOTOR PORTS

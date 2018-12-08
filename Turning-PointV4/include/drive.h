@@ -13,7 +13,7 @@ class Drive
   bool KeepDrection(int forward, float turn)
   {
     return
-        (m_turn == 0 && turn == 0) ||
+        (m_turn == 0 && turn == 0 && forward * m_forward >= 0) ||
         (m_forward == 0 && forward == 0) ||
         (m_turn == turn && m_forward == forward);
   }
@@ -32,7 +32,9 @@ public:
   void SetLeftDrive(int speed);
   void SetRightDrive(int speed);
   void DebugDrive();
-  void AutoDriveForward(float distance, int power);
+
+  // Forward: Positive turn - turn right (clockwise)
+  // Backwards: Positive turn - turn left (clockwise)
   void OverrideInputs(int forward, float turn);
   void ResetEncoders();
   void Update();
