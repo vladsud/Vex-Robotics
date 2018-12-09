@@ -151,6 +151,7 @@ struct MoveTimeBased : public Action
     MoveTimeBased(int speed, int time) : m_speed(speed), m_time(time) {}
     void Start() override { g_main->drive.OverrideInputs(m_speed, 0);}
     bool ShouldStop() {  return g_main->m_count >= m_time + m_count; }
+    void Stop() override { g_main->drive.OverrideInputs(0, 0); }
 }; 
 
 struct Turn : public Action
@@ -180,7 +181,7 @@ struct Turn : public Action
         int errorDiff = (error - m_errorLast);
         m_errorLast = error;
 
-        if (abs(error) <= GyroWrapper::Multiplier/2 && abs(errorDiff) <= GyroWrapper::Multiplier/16)
+        if (abs(error) <= GyroWrapper::Multiplier && abs(errorDiff) <= GyroWrapper::Multiplier/16)
         {
             printf("Turn stop! Error: %d, ErrorDiff: %d\n", error, errorDiff);
             g_main->drive.OverrideInputs(0, 0);
@@ -189,13 +190,13 @@ struct Turn : public Action
         }
 
         int diffPart = errorDiff * 53;
-        int errorPart = 6 * error;
+        int errorPart = 7 * error;
 
         if (abs(errorDiff) <= GyroWrapper::Multiplier/8 && abs(error) <= GyroWrapper::Multiplier * 5)
         {
             // If we stopped, then we can't start moving.
             // Give it a kick!
-            m_integral += 2*error;
+            m_integral += 5*error;
         }
         else
             m_integral = 0;
@@ -204,7 +205,7 @@ struct Turn : public Action
         
         printf("Error: %d, Speed adj: (%d, %d)  Speed: %d, integral: %d, initial angle: %d\n", error, errorPart, diffPart, speed, m_integral, m_initialAngle);
 
-        const int maxSpeed = 40;
+        const int maxSpeed = 45;
         if (speed > maxSpeed)
             speed = maxSpeed;
         else if (speed < -maxSpeed)

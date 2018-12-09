@@ -18,7 +18,7 @@ enum class BallPresence
 class Shooter
 {
     // This should be comming from autonomous, probably.
-    unsigned int m_distanceInches = 72;
+    unsigned int m_distanceInches = 48;
     Flag m_flag = Flag::Loading;
 
     // it is recalculated in constructor, so value does not matter that much

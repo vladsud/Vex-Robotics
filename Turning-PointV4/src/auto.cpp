@@ -68,15 +68,13 @@ void autonomous()
     else
     {
         printf("Second Pos\n");
-        if (g_lcd.AtonShootHighFlag)
-            AddActions(g_ShootFromSecondPos);
-        else
-            AddActions(g_WaitInsteadOfShot);
-
+        AddActions(g_ShootFromSecondPos);
+        /*
         if (g_lcd.AtonClimbPlatform)
             AddActions(g_ParkFromSecondPos);
         else
             AddActions(g_knockConeSecondPos);
+        */
     }
 
 #if TESTING

@@ -1,35 +1,39 @@
 Action* g_actionsFirstPos[] = {
     
+    new Wait(50),
+
     // Shoot the ball
-    new ShooterAngle(g_lcd.AtonShootHighFlag, 48, false /*checkPresenceOfBall*/),
+    new ShooterAngle(false, 48, false /*checkPresenceOfBall*/),
     new ShootBall,
     new IntakeUp,
+
+    new Wait(100),
     
     new Move(200, 45, 0),
-    new Move(550, 50, g_lcd.AtonBlueRight ? 3.5 : -4), // turn left for red
+    new Move(550, 50, g_lcd.AtonBlueRight ? 3.5 : -5), // turn left for red
     new Move(1350, 60, 0),
 
     new Wait(50),
 
-    // turn closer to center, but then streighten to look direct at flag
+    // turn closer to center, but then streighten to look dire ct at flag
     // This should allow us to look directly at flag, but also to be far away from border to turn around
     new Move(100, -35, 0),
-    new Move(600, -50, g_lcd.AtonBlueRight ? 4 : -4), //turn rigth for red 
+    new Move(600, -50, g_lcd.AtonBlueRight ? 8 : -8), //turn rigth for red 
     new Move(100, -35, 0),
-    new Move(1000, -45, g_lcd.AtonBlueRight ? -3 : 3), //turn rigth for red 
-    new Move(200, -45, 0),
-    new Move(200, -35, 0),
+    new Move(1000, -45, g_lcd.AtonBlueRight ? -4 : 4), //turn rigth for red 
+    new Move(350, -65, 0),
+    //new Move(200, -35, 0),
 
     new IntakeStop,
     new Wait(50),
-    new ShooterAngle(!g_lcd.AtonShootHighFlag, 48, true /*checkPresenceOfBall*/),
-    new ShootBall
+    new ShooterAngle(true, 48, true /*checkPresenceOfBall*/),
+    new ShootBall,
+    new Wait(30)
 };
 
 Action* g_knockConeFirstPos[] = {
-    new Wait(30),
     new TurnToCenter(),
-    new Move(1600, 50),
+    new Move(1650, 50),
     new Move(200, 35),
     new IntakeUp,
     new Wait(20),
@@ -38,7 +42,8 @@ Action* g_knockConeFirstPos[] = {
 };
 
 Action* g_ParkFromFirstPos[] = {
-    new Move(950, -50),
+    new IntakeUp,
+    new Move(850, -50),
     new Wait(30),
     new TurnToCenter(),
     new Move(300, 65),  // first plat: 500
@@ -52,11 +57,17 @@ Action* g_ParkFromFirstPos[] = {
 };
 
 Action* g_ShootFromSecondPos[] = {
+    new Wait(1000),
+    // Shoot the ball
+    new ShooterAngle(false, 108, false /*checkPresenceOfBall*/),
+    new ShootBall,
 };
 
+/*
 Action* g_WaitInsteadOfShot[] = {
     new Wait(450)
 };
+*/
 
 // FYI: It takes about 6 seconds to park
 Action* g_ParkFromSecondPos[] = {

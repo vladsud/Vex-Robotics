@@ -15,7 +15,6 @@ public:
 	bool AtonBlueRight = true;
 	bool AtonFirstPos = true;
 	bool AtonClimbPlatform = false;
-	bool AtonShootHighFlag = true;
 
 	// I do not think it runs...
 	LCD() { Init(); }

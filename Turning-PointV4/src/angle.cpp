@@ -2,7 +2,7 @@
 
 
 // Distance based on front of robot
-constexpr unsigned int Distances[]    {   24 ,  30,  48,   54,    108};
+constexpr float Distances[]    {   24 ,  30,  48,   54,    108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
@@ -49,7 +49,7 @@ static_assert(AnglesMedium[3] < AnglesHigh[3]);
 // static_assert(AnglesMedium[4] < AnglesHigh[4]);
 
 
-constexpr unsigned int CalcAngle(Flag flag, unsigned int distanceInches)
+constexpr unsigned int CalcAngle(Flag flag, float distanceInches)
 {
     if (flag == Flag::Loading)
         return anglerLow;
@@ -64,7 +64,7 @@ constexpr unsigned int CalcAngle(Flag flag, unsigned int distanceInches)
     {
         if (Distances[i] >= distanceInches)
         {
-            return angles[i-1] - (distanceInches - Distances[i-1]) * (angles[i-1] - angles[i]) / (Distances[i] - Distances[i-1]);
+            return angles[i-1] - (distanceInches - Distances[i-1]) * int(angles[i-1] - angles[i]) / (Distances[i] - Distances[i-1]);
         }
     }
 
@@ -73,7 +73,7 @@ constexpr unsigned int CalcAngle(Flag flag, unsigned int distanceInches)
 
 constexpr bool AlmostSameAngle(unsigned int angle1, unsigned int angle2)
 {
-    return abs((int)angle1-(int)angle2) <= 3;
+    return angle1 == angle2;
 }
 
 static_assert(CalcAngle(Flag::Loading, Distances[2]) == anglerLow);
@@ -89,7 +89,7 @@ static_assert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[2]*3 + Distances[
 static_assert(CalcAngle(Flag::Middle, Distances[0]-5) == AnglesMedium[0]);
 static_assert(CalcAngle(Flag::Middle, Distances[0]) == AnglesMedium[0]);
 static_assert(CalcAngle(Flag::Middle, Distances[2]) == AnglesMedium[2]);
-//static_assert(CalcAngle(Flag::Middle, Distances[LastDistanceCount]) == AnglesMedium[LastDistanceCount]);
+static_assert(CalcAngle(Flag::Middle, Distances[LastDistanceCount]) == AnglesMedium[LastDistanceCount]);
 static_assert(CalcAngle(Flag::Middle, Distances[LastDistanceCount]+100) == AnglesMedium[LastDistanceCount]);
 static_assert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2]   + Distances[3]) / 2), (AnglesMedium[2]   + AnglesMedium[3]) / 2));
 static_assert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2]*3 + Distances[3]) / 4), (AnglesMedium[2]*3 + AnglesMedium[3]) / 4));

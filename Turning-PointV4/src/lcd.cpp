@@ -16,10 +16,9 @@ void LCD::Init()
     m_step = 0;
     m_RefreshOnClick = false;
         
-    AtonBlueRight = true;
-    AtonFirstPos = false;
-    AtonClimbPlatform = true;
-    AtonShootHighFlag =  true;
+    AtonBlueRight = false;
+    AtonFirstPos = true;
+    AtonClimbPlatform = false;
 
     lcdInit(uart1);
     lcdClear(uart1);
@@ -40,28 +39,25 @@ void LCD::PrintStepInstructions()
     lcdSetBacklight(uart1, true);
     if (m_step == 0)
         lcdSetText(uart1, 2, "No           Yes");
-    else if (m_step != 4)
+    else if (m_step != 3)
         lcdSetText(uart1, 2, "No    Back   Yes");
 
     switch(m_step)
     {
         case 0:
-            lcdSetText(uart1, 1, "Blue on Right?");
+            lcdSetText(uart1, 2, "Red       Blue");
+            lcdSetText(uart1, 1, "Blue (Right)?");
             break;
         case 1:
             lcdSetText(uart1, 1, "First Pos?");
             break;
         case 2:
-            lcdSetText(uart1, 1, "Shoot High flag?");
-            break;
-        case 3:
             lcdSetText(uart1, 1, "Climb platform?");
             break;
-        case 4:
-            lcdPrint(uart1, 1, "%s, %s, %s", 
+        case 3:
+            lcdPrint(uart1, 1, "%s, %s", 
                 AtonBlueRight ? "Blue" : "Red",
-                AtonFirstPos ? "1st" : "2nd",
-                AtonShootHighFlag ? "High" : (AtonFirstPos ? "Middle" : ""));
+                AtonFirstPos ? "1st" : "2nd");
             lcdPrint(uart1, 2, "%-8s  Cancel", 
                 AtonClimbPlatform ? "Climb" : "No climb");
             break;
@@ -80,12 +76,9 @@ void LCD::SelectAction(bool rigthButton)
             AtonFirstPos = rigthButton;
             break;
         case 2:
-            AtonShootHighFlag = rigthButton;
-            break;
-        case 3:
             AtonClimbPlatform = rigthButton;
             break;
-        case 4:
+        case 3:
             if (!rigthButton) // no-op
                 return;
             m_step = -1;
@@ -131,7 +124,7 @@ void LCD::Update()
         SelectAction(buttons & LCD_BTN_RIGHT);
         return;
     }
-    if (m_step != 0 && m_step != 4)
+    if (m_step != 0 && m_step != 3)
     {
         m_step--;
         PrintStepInstructions();
