@@ -1,15 +1,6 @@
 #include "cycle.h"
 
-void AssertCore(bool condition, const char* message)
-{
-   if (!condition)
-   {
-      printf("\n*** ASSERT: %s ***\n\n", message);
-      g_lcd.PrintMessage(message);
-   }
-}
-
-void LCD::Init()
+LCD::LCD()
 {
     printf("LCD Init\n");
     m_buttons = 0;
@@ -93,12 +84,13 @@ void LCD::Update()
 {
     // save some energy
     m_count++;
-    if (m_count == 1000)
+    /*
+    if (m_count == 1500)
     {
         m_RefreshOnClick = true;
         lcdSetBacklight(uart1, false);
-        lcdClear(uart1);
     }
+    */
 
     int buttons = lcdReadButtons(uart1);
     if (m_buttons == buttons)
@@ -112,7 +104,6 @@ void LCD::Update()
     if (m_RefreshOnClick)
     {
         lcdSetBacklight(uart1, true);
-        PrintStepInstructions();
         return;
     }
 

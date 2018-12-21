@@ -32,23 +32,43 @@
 // Helper function to use both oysticsk
 bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
 void memmove(char* dest, char* src, size_t size);
+bool isAuto();
+bool SmartsOn();
+
+enum class Diagnostics
+{
+   General,
+   Drive,
+   Intake,
+   Angle,
+   Position,
+   Autonomous,
+};
+bool PrintDiagnostics(Diagnostics diag);
 
 #define Assert(f) AssertCore(f, #f)
 void AssertCore(bool condition, const char* message);
+
+#define CountOf(a) (sizeof(a)/sizeof(a[0]))
+#define ReportStatus printf
+
+#define joystickMax 127
 
 inline float abs(float fl)
 {
    return (fl < 0) ? -fl : fl;
 }
 
-bool isAuto();
-bool SmartsOn();
+template <typename T>
+constexpr T max(T a, T b)
+{
+   return a > b ? a : b;
+}
 
-
-#define CountOf(a) (sizeof(a)/sizeof(a[0]))
-#define ReportStatus printf
-
-#define joystickMax 127
+template <typename T> T min(T a, T b)
+{
+   return a > b ? b : a;
+}
 
 
 /*******************************************************************************
@@ -90,13 +110,16 @@ D: left y drive
 * DIGITAL SENSORS
 *
 *******************************************************************************/
-#define leftDriveEncoderTopPort 2
 #define leftDriveEncoderBotPort 1
-#define rightDriveEncoderTopPort 4
+#define leftDriveEncoderTopPort 2
 #define rightDriveEncoderBotPort 3
+#define rightDriveEncoderTopPort 4
+#define sideEncoderBotPort 5
+#define sideEncoderTopPort 6
 
 extern Encoder g_leftDriveEncoder;
 extern Encoder g_rightDriveEncoder;
+extern Encoder g_sideEncoder;
 
 
 /*******************************************************************************

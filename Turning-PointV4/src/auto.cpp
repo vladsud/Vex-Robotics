@@ -15,31 +15,54 @@
 #include "actions.h"
 
 
-// #define TESTING
-
+// *** WARNING ***
+// Always define it for competation!!!! 
+// #define OFFICIAL_RUN
 
 bool g_manualAuto = false;
 
+bool g_testRun = true;
+bool g_autonomousSmartsOn = true;
+bool g_manualSmarts = true;
+
+bool PrintDiagnostics(Diagnostics diag)
+{
+#ifndef OFFICIAL_RUN
+    switch (diag)
+    {
+        case Diagnostics::General:
+            return true;
+        case Diagnostics::Position:
+            // return true;
+        default:
+            return false;
+    }
+#else // OFFICIAL_RUN
+    return false;
+#endif
+}
+
 bool isAuto()
 {
+#ifndef OFFICIAL_RUN
     if (g_manualAuto)
 	    return true;
+#endif // OFFICIAL_RUN
     return isAutonomous();
 }
 
-bool g_smartsOn = true;
 bool SmartsOn()
 {
-    return g_smartsOn && isAuto();
+#ifndef OFFICIAL_RUN
+    if (g_manualSmarts)
+        return true;
+#endif
+    return g_autonomousSmartsOn && isAuto();
 }
 
-LCD g_lcd;
-Main* g_main;
-
+bool g_runAutonomous = false;
 Action* g_actions[100];
 size_t g_actionSize = 0;
-
-bool testAgles = false;
 
 #define AddActions(actions) do {\
     memmove((char*)(g_actions + g_actionSize), (char*)actions, sizeof(actions)); \
@@ -48,65 +71,78 @@ bool testAgles = false;
 
 void autonomous()
 {
-    Main main;
-    g_main = &main;    
+    // Safety net: run autonomous only once!
+    // Siable second run, in case manual auto was still in place when running on competition.
+	if (g_runAutonomous)
+    {
+		g_manualAuto = false;
+        return;
+    }
+    g_runAutonomous = true;
+    if (!isAutonomous())
+		delay(2000);
+
+    if (PrintDiagnostics(Diagnostics::Autonomous))
+        printf("\n*** Autonomous: Start ***\n\n");
+
+    Main& main = GetMain();
     g_actionSize = 0;
 
 // This brings all key actions.
 // It has to be part of function, not global scope, dur to Pros not initializing static/global variables
 #include "ActionLists.h"
 
-    if (g_lcd.AtonFirstPos)
+    if (GetMain().lcd.AtonFirstPos)
     {
-        printf("First Pos\n");
         AddActions(g_actionsFirstPos);
-        if (g_lcd.AtonClimbPlatform)
+        if (GetMain().lcd.AtonClimbPlatform)
             AddActions(g_ParkFromFirstPos);
         else
             AddActions(g_knockConeFirstPos);
     }
     else
     {
-        printf("Second Pos\n");
         AddActions(g_ShootFromSecondPos);
-        /*
-        if (g_lcd.AtonClimbPlatform)
+        if (GetMain().lcd.AtonClimbPlatform)
             AddActions(g_ParkFromSecondPos);
         else
             AddActions(g_knockConeSecondPos);
-        */
     }
 
-#if TESTING
+#ifndef OFFICIAL_RUN
     // Debugging code - should not run in real autonomous
-    if (testAgles && !isAutonomous())
+    if (g_testRun && !isAutonomous())
     {
         g_actionSize = 0;
         AddActions(g_testDrive); // g_testAngles
     }
-#endif // TESTING
+#endif // !OFFICIAL_RUN
 
     g_actions[g_actionSize] = new EndOfAction();
 
     // all system update their counters, like distance counter.
-	main.Update();
+	main.UpdateWithoutWaiting();
+
+    if (PrintDiagnostics(Diagnostics::Autonomous))
+        printf("Auto: First \n\n");
 
     Action** currentAction = g_actions;
     (*currentAction)->StartCore();
 
 	while (true)
 	{
-		delay(10);
 		main.Update();
 
         while ((*currentAction)->ShouldStop())
         {
             (*currentAction)->Stop();
-            printf("\nNext\n\n");
+            if (PrintDiagnostics(Diagnostics::Autonomous))
+                printf("\nAuto: Next\n\n");
             currentAction++;
             (*currentAction)->StartCore();
         }
 	}
 
-    printf("Exit Auto\n");
+    if (PrintDiagnostics(Diagnostics::Autonomous))
+        printf("\n *** Auto: Exit ***\n\n");
 }

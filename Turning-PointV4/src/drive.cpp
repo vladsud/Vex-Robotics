@@ -56,7 +56,8 @@ void Drive::OverrideInputs(int forward, float turn)
     m_overrideForward = forward;
     m_overrideTurn = turn;
 
-    printf("OverrideInputs: %d %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn), (int)keepDirection);
+    if (PrintDiagnostics(Diagnostics::Drive))
+        printf("OverrideInputs: %d %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn), (int)keepDirection);
 
     // We need this to properly count turning on the spot without using gyro.
     // Maybe this will not be needed in the future).
@@ -66,10 +67,9 @@ void Drive::OverrideInputs(int forward, float turn)
 
 void Drive::ResetEncoders()
 {
-    encoderReset(g_leftDriveEncoder);
-    encoderReset(g_rightDriveEncoder);
+    m_encoderBaseLeft = encoderGet(g_leftDriveEncoder);
+    m_encoderBaseRight = encoderGet(g_rightDriveEncoder);
     m_distance = 0;
-    m_distanceTurn = 0;
     m_ErrorIntergral = 0;
     m_gyro = GyroWrapper::Get();
 }
@@ -105,15 +105,13 @@ void Drive::Update()
 
     if (!keepDirection)
         ResetEncoders();
-    // 400 is roughtly one full turn, positive is forward
-    int left = encoderGet(g_leftDriveEncoder);
-    int right = encoderGet(g_rightDriveEncoder);
+
+    // 360 is one full turn, positive is forward
+    int left = encoderGet(g_leftDriveEncoder) - m_encoderBaseLeft;
+    int right = encoderGet(g_rightDriveEncoder) - m_encoderBaseRight;
 
     m_distance = abs(left) + abs(right);
-    m_distanceTurn = left - right;
 
-    // Do not reset m_forward & m_turn on full stop!
-    // that screws up autonomous turning.
     if (turn == 0 && forward == 0)
     {
         SetLeftDrive(0);
@@ -124,36 +122,34 @@ void Drive::Update()
     m_forward = forward;
     m_turn = turn;
 
+    int turnAbs = abs(m_turn);
+    int forwardAbs = abs(m_forward);
+
     bool smartsOn = SmartsOn();
 
     float error;
-    if (true)
-    {
-        // turn is aded to left!
-        // when m_distance = 2*m_forward, we expect left-right to be 2*turn 
-        if (abs(m_turn) < abs(m_forward))
-            error  =  left - right - m_turn * m_distance / abs(m_forward);
-        else if (m_forward == 0)
-            error  =  left + right;
-        else
-            smartsOn = false;
-    }
+    // turn is aded to left!
+    // when m_distance = 2*m_forward, we expect left-right to be 2*turn 
+    if (turnAbs < forwardAbs)
+        error = left - right - m_turn * m_distance / forwardAbs;
+    else if (m_forward == 0)
+        error = left + right;
     else
-    {
-        // 256 ticks is one degree.
-        // We expect turn = 10 to be one degree turn over one cycle (2*forward)
-        // Gyro moves positive counter-clock-wise.
-        // gyroDiff > 0: clock-wise movement
-        int gyroDiff = m_gyro - GyroWrapper::Get();
-        error = (gyroDiff - m_turn * m_distance / m_forward * GyroWrapper::Multiplier / 20) / GyroWrapper::Multiplier;
-    }
+        smartsOn = false;
+
+    // 256 ticks is one degree.
+    // We expect turn = 10 to be one degree turn over one cycle (2*forward)
+    // Gyro moves positive counter-clock-wise.
+    // gyroDiff > 0: clock-wise movement
+    // int gyroDiff = m_gyro - GyroWrapper::Get();
+    // error = (gyroDiff - m_turn * m_distance / m_forward * GyroWrapper::Multiplier / 20) / GyroWrapper::Multiplier;
 
     if (!smartsOn)
     {
         // if we are not moving forward, then we want to put all power to motors to turn
         // But if we are moving forward 100%, we do not want to completely stop one motor if
         // turning 100% to the right - we still want to make forward progress! 
-        int turn = m_turn * (0.6 + 0.4 * abs(m_forward) / driveMotorMaxSpeed);
+        int turn = m_turn * (0.6 + 0.4 * forwardAbs / driveMotorMaxSpeed);
 
         SetLeftDrive(m_forward + turn);
         SetRightDrive(m_forward - turn);
@@ -162,40 +158,50 @@ void Drive::Update()
 
     m_ErrorIntergral += error;
 
-    int errorMultiplier = error * (2 + abs(error) * 0.5) + m_ErrorIntergral * 0.1;
+    int errorMultiplier = error * (10 + abs(error)) / 20; // + m_ErrorIntergral * 0.1;
 
 
     // if we were going forward for a while and then started turning slightly, then there is huge amount of inertia
-    // If we allow unbounded adjustments, then speed of noe motor will drop to zero and below because of this interia,
+    // If we allow unbounded adjustments, then speed of one motor will drop to zero and below because of this interia,
     // causing stop and jerking. Not something we want!
-    int turnAbs = abs(int(m_turn));
-    int forwardAbs = abs(m_forward);
-    if (forwardAbs > turnAbs)
-    {
-        int maxAdjustment = (forwardAbs + turnAbs) / 2;
-        if (errorMultiplier > maxAdjustment)
-            errorMultiplier = maxAdjustment;
-        else if (errorMultiplier < -maxAdjustment)
-            errorMultiplier = -maxAdjustment;
-    }
+    int maxAdjustment = forwardAbs / 3 + turnAbs / 5;
+    if (errorMultiplier > maxAdjustment)
+        errorMultiplier = maxAdjustment;
+    else if (errorMultiplier < -maxAdjustment)
+        errorMultiplier = -maxAdjustment;
 
-    // adjust power on slower motor
-    // positive error with positive forward - left is going too fast
-    // negative error with negative forward - left is going too fast
     int leftAdjustment = 0;
     int rightAdjustment = 0;
-    if (m_forward * error > 0)
-        leftAdjustment = errorMultiplier;
+    if (forward != 0)
+    { 
+        // adjust power on slower motor
+        // positive error with positive forward - left is going too fast
+        // negative error with negative forward - left is going too fast
+        if (forward * errorMultiplier > 0)
+            leftAdjustment = errorMultiplier;
+        else
+            rightAdjustment = errorMultiplier;
+    }
     else
-        rightAdjustment = errorMultiplier;
+    {
+        if (m_turn * errorMultiplier > 0)
+            leftAdjustment = errorMultiplier;
+        else
+            rightAdjustment = -errorMultiplier;
+    }
 
-    /*
-    printf("Drive: encoders: (%d, %d), erorr: (%d, %d), integral: %d, Distance: %d, turn/dist/forw: %d, Gyro diff: %d, Speeds (%d, %d)\n",
-            left, right, int(error), errorMultiplier, int(m_ErrorIntergral), m_distance, int(m_turn * m_distance / m_forward),
-            m_gyro - GyroWrapper::Get(),
-            int(m_forward - leftAdjustment + m_turn),
-            int(m_forward + rightAdjustment - m_turn));
-            */
-    SetLeftDrive(m_forward - leftAdjustment + m_turn);
-    SetRightDrive(m_forward + rightAdjustment - m_turn);
+    int leftMotor = m_forward - leftAdjustment + m_turn;
+    int rightMotor = m_forward + rightAdjustment - m_turn;
+
+    SetLeftDrive(leftMotor);
+    SetRightDrive(rightMotor);
+
+    if (PrintDiagnostics(Diagnostics::Drive))
+    {
+        printf("Drive: encoders: (%d, %d), erorr: (%d, %d), integral: %d, Distance: %d, turn/dist/forw: %d, Gyro diff: %d, Speeds (%d, %d)\n",
+                left, right, int(error), errorMultiplier, int(m_ErrorIntergral), m_distance, int(m_turn * m_distance / m_forward),
+                m_gyro - GyroWrapper::Get(),
+                leftMotor,
+                rightMotor);
+    }
 }

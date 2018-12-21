@@ -146,7 +146,8 @@ void Shooter::KeepMoving()
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
     if (m_fMoving && (m_count >= 200 || (distanceAbs <= 10 && abs(m_diffAdjusted) <= 1)))
     {
-        // printf("STOP: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+        if (PrintDiagnostics(Diagnostics::Angle))
+            printf("STOP: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
         StopMoving();
         return;
     }
@@ -159,7 +160,8 @@ void Shooter::KeepMoving()
             speed = distance * 0.5 + m_diffAdjusted * 4;
         else
             speed = distance * 1.2 + m_diffAdjusted / 5;
-        // printf("MOVE: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+        if (PrintDiagnostics(Diagnostics::Angle))
+            printf("MOVE: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
     }
     else if (distanceAbs >= 10 && m_flag != Flag::Loading)
     {
@@ -167,12 +169,14 @@ void Shooter::KeepMoving()
             speed = distance * 2 + m_diffAdjusted * 6;
         else
             speed = distance * 1 + m_diffAdjusted * 4;
-        // printf("ADJUST: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+        if (PrintDiagnostics(Diagnostics::Angle))
+            printf("ADJUST: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
     }
     else
     {
         // m_count = 0;
-        // printf("NON-MOVING: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, distancurrent - m_angleToMovece, diff, m_diffAdjusted);
+        // if (PrintDiagnostics(Diagnostics::Angle))
+        //  printf("NON-MOVING: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, distancurrent - m_angleToMovece, diff, m_diffAdjusted);
     }
 
     // Go as fat as you can if loading
@@ -322,7 +326,7 @@ void Shooter::Update()
         shooterPreloadPos > ShooterPreloadStart
         );
 
-    if (needPreload != m_preloading)
+    if (PrintDiagnostics(Diagnostics::Angle) && needPreload != m_preloading)
         printf("Preload state: %d\n", needPreload); 
 
     //safety net - if something goes wrong, user needs to have a way to disable preload.

@@ -17,12 +17,9 @@ public:
 	bool AtonClimbPlatform = false;
 
 	// I do not think it runs...
-	LCD() { Init(); }
-	void Init();
+	LCD();
 	void PrintStepInstructions();
 	void SelectAction(bool rigthButton);
 	void Update();
 	void PrintMessage(const char* message);
 };
-
-extern LCD g_lcd;

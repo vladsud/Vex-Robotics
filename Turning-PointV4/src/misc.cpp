@@ -1,4 +1,15 @@
 #include "main.h"
+#include "cycle.h"
+
+void AssertCore(bool condition, const char* message)
+{
+   if (!condition)
+   {
+      printf("\n*** ASSERT: %s ***\n\n", message);
+      GetMain().lcd.PrintMessage(message);
+   }
+}
+
 
 void memmove(char* dest, char* src, size_t size)
 {
@@ -10,7 +21,6 @@ void memmove(char* dest, char* src, size_t size)
         src++;
     }
 }
-
 
 // Scans both joysticks, allowing secondary operator to help with controlling non-driving functions.
 bool joystickGetDigital(unsigned char buttonGroup, unsigned char button)

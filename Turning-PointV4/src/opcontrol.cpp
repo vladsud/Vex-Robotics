@@ -13,12 +13,26 @@
 #include "cycle.h"
 
 void Main::Update()
-{
-	m_count++;
+{	
+	// taskDelayUntil( )is better then delay() as it allows us to "catch up" if we spend too much time in one cycle,
+	// i.e. have consistent frequency of updates.
+	// That said, it assumes that we are missing the tick infrequently.
+	// If it's not the case, we can hog CPU and not allow other tasks to have their share.  
+	// delay(trackerPullTime);
+	taskDelayUntil(&m_LastWakeUp, trackerPullTime); 
 
-	if (m_count % 50 == 0)
+	m_Ticks += trackerPullTime;
+	m_TicksToMainUpdate -= trackerPullTime;
+
+	UpdateWithoutWaiting();
+}
+
+void Main::UpdateWithoutWaiting()
+{
+	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks  % 500) == 0)
 	{
-		printf("Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
+		printf("(%lu) Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
+		m_maxCPUTime,
 		encoderGet(g_leftDriveEncoder),
 		encoderGet(g_rightDriveEncoder),
 		analogRead(anglePotPort),
@@ -27,30 +41,41 @@ void Main::Update()
 		gyroGet(g_gyro),
 		analogRead(lightSensor));
 	}
-	// save power
-	// gyroShutdown(g_gyro);
 
-	g_lcd.Update();
-	drive.Update();
-	intake.Update();
-	shooter.Update();
-	descorer.Update();
+	unsigned long time = micros();
+
+	// has to be the first one!
+	tracker.Update();
+
+	// If this assert fires, than numbers do not represent actual timing.
+	// It's likley not a big deal, but something somwhere might not work because of it.
+	static_assert((trackerPullTime % trackerPullTime) == 0);
+
+	if (m_TicksToMainUpdate <= 0)
+	{
+		m_TicksToMainUpdate = allSystemsPullTime;
+
+		drive.Update();
+		lcd.Update();
+		intake.Update();
+		shooter.Update();
+		descorer.Update();
+	}
+
+	time = micros() - time;
+	m_maxCPUTime = max(m_maxCPUTime, time);
 }
 
 //Operator Control
 void operatorControl()
 {
 	if (isAuto())
-	{
-		delay(2000);
 		autonomous();
-	}
 
-	Main main;
+	Main& main = GetMain();
 	while (true)
 	{
 		main.Update();
-		delay(10);
 	}
 }
 
