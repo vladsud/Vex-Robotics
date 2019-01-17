@@ -1,5 +1,6 @@
 #include "drive.h"
-#include "gyro.h"
+#include "position.h"
+#include "logger.h"
 
 int AdjustSpeed(int speed)
 {
@@ -19,7 +20,7 @@ int Drive::GetMovementJoystick(unsigned char joystick, unsigned char axis, int m
 
     // dead zone on joystick - it can get stuck there even without finger
     // note: 20 is not enough!
-    const int cutoff = 23;
+    const int cutoff = 25;
     if (value <= cutoff)
         return 0;
 
@@ -51,27 +52,22 @@ void Drive::OverrideInputs(int forward, float turn)
 {
     Assert(isAuto());
 
-    bool keepDirection = KeepDrection(forward, turn);
-    // Are you sure in what you do??? Direction will be reset any way
+    if (m_flipX)
+        turn = -turn;
+
     m_overrideForward = forward;
     m_overrideTurn = turn;
 
     if (PrintDiagnostics(Diagnostics::Drive))
-        printf("OverrideInputs: %d %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn), (int)keepDirection);
-
-    // We need this to properly count turning on the spot without using gyro.
-    // Maybe this will not be needed in the future).
-    if (!keepDirection)
-        ResetEncoders();
+        printf("OverrideInputs: %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn));
 }
 
-void Drive::ResetEncoders()
+void Drive::ResetTrackingState()
 {
     m_encoderBaseLeft = encoderGet(g_leftDriveEncoder);
     m_encoderBaseRight = encoderGet(g_rightDriveEncoder);
     m_distance = 0;
     m_ErrorIntergral = 0;
-    m_gyro = GyroWrapper::Get();
 }
 
 void Drive::SetLeftDrive(int speed)
@@ -88,23 +84,51 @@ void Drive::SetRightDrive(int speed)
     motorSet(rightDrivePort2, -speed);
 }
 
-void Drive::DebugDrive()
+void Drive::StartHoldingPosition()
 {
-    // will be used for debugging in the future...
+    m_holdingPosition = true;
+    ResetTrackingState();
+}
+
+void Drive::HoldPosition()
+{
+    int left = encoderGet(g_leftDriveEncoder) - m_encoderBaseLeft;
+    int right = encoderGet(g_rightDriveEncoder) - m_encoderBaseRight;
+    PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
+
+    if (left * info.leftSpeed >= 0)
+        SetLeftDrive(-left*127);
+    else
+        SetLeftDrive(- 30 * Sign(left) -left -info.leftSpeed * 40);
+
+    if (right * info.rightSpeed >= 0)
+        SetLeftDrive(-right*127);
+    else
+        SetLeftDrive(- 30 * Sign(right) -right -info.rightSpeed * 40);
 }
 
 void Drive::Update()
 {
-    // DebugDrive();
-
     //Drive
     int forward = GetForwardAxis();
     int turn = GetTurnAxis();
 
-    bool keepDirection = KeepDrection(forward, turn); 
+    if (m_holdingPosition)
+    {
+        if (forward == 0 && turn == 0)
+        {
+            HoldPosition();
+            return;
+        }
+        m_holdingPosition = false;
+    }
+
+    // It's hard to make thi work in automnomous mode, as sometimes direcitons change as part of single attion.
+    // So each autonomous action resets state manually
+    bool keepDirection = isAuto() || KeepDrection(forward, turn); 
 
     if (!keepDirection)
-        ResetEncoders();
+        ResetTrackingState();
 
     // 360 is one full turn, positive is forward
     int left = encoderGet(g_leftDriveEncoder) - m_encoderBaseLeft;
@@ -137,13 +161,6 @@ void Drive::Update()
     else
         smartsOn = false;
 
-    // 256 ticks is one degree.
-    // We expect turn = 10 to be one degree turn over one cycle (2*forward)
-    // Gyro moves positive counter-clock-wise.
-    // gyroDiff > 0: clock-wise movement
-    // int gyroDiff = m_gyro - GyroWrapper::Get();
-    // error = (gyroDiff - m_turn * m_distance / m_forward * GyroWrapper::Multiplier / 20) / GyroWrapper::Multiplier;
-
     if (!smartsOn)
     {
         // if we are not moving forward, then we want to put all power to motors to turn
@@ -158,13 +175,19 @@ void Drive::Update()
 
     m_ErrorIntergral += error;
 
-    int errorMultiplier = error * (10 + abs(error)) / 20; // + m_ErrorIntergral * 0.1;
-
+    // power is non-linear!
+    int errorMultiplier;
+    if (forwardAbs > 90)
+	errorMultiplier = error * (40 + 8 * abs(error)) / 20; // + m_ErrorIntergral * 0.1;
+    else if (forwardAbs > 60)
+	errorMultiplier = error * (20 + 4 * abs(error)) / 20; // + m_ErrorIntergral * 0.1;
+    else
+	errorMultiplier = error * (10 + abs(error)) / 20; // + m_ErrorIntergral * 0.1;
 
     // if we were going forward for a while and then started turning slightly, then there is huge amount of inertia
     // If we allow unbounded adjustments, then speed of one motor will drop to zero and below because of this interia,
     // causing stop and jerking. Not something we want!
-    int maxAdjustment = forwardAbs / 3 + turnAbs / 5;
+    int maxAdjustment = forwardAbs / 2 + turnAbs / 5;
     if (errorMultiplier > maxAdjustment)
         errorMultiplier = maxAdjustment;
     else if (errorMultiplier < -maxAdjustment)
@@ -198,9 +221,8 @@ void Drive::Update()
 
     if (PrintDiagnostics(Diagnostics::Drive))
     {
-        printf("Drive: encoders: (%d, %d), erorr: (%d, %d), integral: %d, Distance: %d, turn/dist/forw: %d, Gyro diff: %d, Speeds (%d, %d)\n",
+        printf("Drive: encoders: (%d, %d), erorr: (%d, %d), integral: %d, Distance: %d, turn/dist/forw: %d, Speeds (%d, %d)\n",
                 left, right, int(error), errorMultiplier, int(m_ErrorIntergral), m_distance, int(m_turn * m_distance / m_forward),
-                m_gyro - GyroWrapper::Get(),
                 leftMotor,
                 rightMotor);
     }

@@ -1,4 +1,3 @@
-//Created by Jason Zhang, Feburary 9, 2018
 /** @file auto.c
  * @brief File for autonomous code
  *
@@ -11,138 +10,145 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 
-#include "cycle.h"
-#include "actions.h"
+#include "aton.h"
 
 
-// *** WARNING ***
-// Always define it for competation!!!! 
-// #define OFFICIAL_RUN
+AtonMode g_mode = AtonMode::Regular;
 
-bool g_manualAuto = false;
-
-bool g_testRun = true;
+// Variables not to touch - control actual autonomous mode
 bool g_autonomousSmartsOn = true;
-bool g_manualSmarts = true;
+bool g_manualSmarts = false;
+bool g_alreadyRunAutonomous = false;
 
-bool PrintDiagnostics(Diagnostics diag)
-{
-#ifndef OFFICIAL_RUN
-    switch (diag)
-    {
-        case Diagnostics::General:
-            return true;
-        case Diagnostics::Position:
-            // return true;
-        default:
-            return false;
-    }
-#else // OFFICIAL_RUN
-    return false;
-#endif
-}
 
 bool isAuto()
 {
 #ifndef OFFICIAL_RUN
-    if (g_manualAuto)
-	    return true;
+    if (g_mode == AtonMode::ManualAuto || g_mode == AtonMode::TestRun)
+            return true;
 #endif // OFFICIAL_RUN
     return isAutonomous();
 }
 
 bool SmartsOn()
 {
-#ifndef OFFICIAL_RUN
+    // if we enable smarts in manual, then then have to be on in autonomous
+    Assert(!g_manualSmarts || g_autonomousSmartsOn);
     if (g_manualSmarts)
         return true;
-#endif
     return g_autonomousSmartsOn && isAuto();
 }
 
-bool g_runAutonomous = false;
-Action* g_actions[100];
-size_t g_actionSize = 0;
+void SetSkillSelection(bool skills)
+{
+    if (skills)
+        g_mode = AtonMode::Skills;
+    else
+        g_mode = AtonMode::Regular;
+}
 
-#define AddActions(actions) do {\
-    memmove((char*)(g_actions + g_actionSize), (char*)actions, sizeof(actions)); \
-    g_actionSize += CountOf(actions); \
-} while (false)
+void DoCore(Action&& action)
+{
+    while (!action.ShouldStop())
+    {
+        GetMain().Update();
+    }
+    action.Stop();
+}
+
 
 void autonomous()
 {
+#ifndef OFFICIAL_RUN
     // Safety net: run autonomous only once!
     // Siable second run, in case manual auto was still in place when running on competition.
-	if (g_runAutonomous)
+    if (g_alreadyRunAutonomous && !isAutonomous())
     {
-		g_manualAuto = false;
+        g_mode = AtonMode::Regular;
         return;
     }
-    g_runAutonomous = true;
+    g_alreadyRunAutonomous = true;
     if (!isAutonomous())
-		delay(2000);
+        delay(2000);
+#endif
 
-    if (PrintDiagnostics(Diagnostics::Autonomous))
-        printf("\n*** Autonomous: Start ***\n\n");
+    ReportStatus("\n*** Autonomous: Start ***\n\n");
+    ReportStatus ("Time: %d\n", GetMain().GetTime());
 
-    Main& main = GetMain();
-    g_actionSize = 0;
+    Main& main = SetupMain();
 
-// This brings all key actions.
-// It has to be part of function, not global scope, dur to Pros not initializing static/global variables
-#include "ActionLists.h"
-
-    if (GetMain().lcd.AtonFirstPos)
-    {
-        AddActions(g_actionsFirstPos);
-        if (GetMain().lcd.AtonClimbPlatform)
-            AddActions(g_ParkFromFirstPos);
-        else
-            AddActions(g_knockConeFirstPos);
-    }
-    else
-    {
-        AddActions(g_ShootFromSecondPos);
-        if (GetMain().lcd.AtonClimbPlatform)
-            AddActions(g_ParkFromSecondPos);
-        else
-            AddActions(g_knockConeSecondPos);
-    }
+    // all system update their counters, like distance counter.
+    main.UpdateAllSystems();
 
 #ifndef OFFICIAL_RUN
     // Debugging code - should not run in real autonomous
-    if (g_testRun && !isAutonomous())
+    if (g_mode == AtonMode::TestRun && !isAutonomous())
     {
-        g_actionSize = 0;
-        AddActions(g_testDrive); // g_testAngles
+        Do(MoveToPlatform(3650, 85));
+        Do(MoveTimeBased(30, 100));
+        ReportStatus("Second platform\n");
+        Do(MoveToPlatform(3350, 85));
+        Do(MoveTimeBased(40, 200));
+        Do(MoveTimeBased(-30, 100));
+        Do(EndOfAction());
+        return;
     }
 #endif // !OFFICIAL_RUN
 
-    g_actions[g_actionSize] = new EndOfAction();
+    if (g_mode == AtonMode::Skills)
+    {
+        auto& lcd = GetMain().lcd;
+        lcd.AtonBlueRight = false;
+        lcd.AtonFirstPos = true;
+        lcd.AtonClimbPlatform = true;
+    }
 
-    // all system update their counters, like distance counter.
-	main.UpdateWithoutWaiting();
+    // setup coordinates
+    GetMain().tracker.FlipX(GetMain().lcd.AtonBlueRight);
+    GetMain().drive.FlipX(GetMain().lcd.AtonBlueRight);
 
-    if (PrintDiagnostics(Diagnostics::Autonomous))
-        printf("Auto: First \n\n");
+    if (GetMain().lcd.AtonFirstPos)
+        RunAtonFirstPos();
+    else
+        RunAtonSecondPos();
 
-    Action** currentAction = g_actions;
-    (*currentAction)->StartCore();
-
-	while (true)
-	{
-		main.Update();
-
-        while ((*currentAction)->ShouldStop())
-        {
-            (*currentAction)->Stop();
-            if (PrintDiagnostics(Diagnostics::Autonomous))
-                printf("\nAuto: Next\n\n");
-            currentAction++;
-            (*currentAction)->StartCore();
-        }
-	}
+    Do(EndOfAction());
 
     if (PrintDiagnostics(Diagnostics::Autonomous))
         printf("\n *** Auto: Exit ***\n\n");
+}
+
+
+void ShooterSetAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
+{
+    auto flag = hightFlag ? Flag::High : Flag::Middle;
+    // we disable checking for ball only for first action - shooting.
+    Assert(!GetMain().shooter.IsShooting());
+
+   if (!checkPresenceOfBall || GetMain().shooter.BallStatus() != BallPresence::NoBall)
+   {
+       GetMain().shooter.SetFlag(flag);
+       GetMain().shooter.SetDistance(distance);
+       Assert(GetMain().shooter.GetFlagPosition() != Flag::Loading); // importatn for next ShootBall action to be no-op
+   }
+   else
+   {
+       Assert(!GetMain().shooter.IsMovingAngle()); // are we waiting for nothing?
+       Assert(GetMain().shooter.GetFlagPosition() == Flag::Loading); // importatn for next ShootBall action to be no-op
+   }
+}
+
+int CalcAngleToPoint(double x, double y)
+{
+    PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
+    ReportStatus("TurnToPoint: To = (%f, %f), current = (%f, %f)\n", x, y, info.X, info.Y);
+    x = info.X - x;
+    y = info.Y - y;
+    int angle = 0;
+    if (y > 0)
+        angle = atan(x/y) * 180 / 3.14159265358;
+    else if (y < 0)
+        angle = 180 + atan(x/y) * 180 / 3.14159265358;
+    ReportStatus("    vector = (%f, %f): angle = %d\n", x, y, angle);
+    return angle;
 }

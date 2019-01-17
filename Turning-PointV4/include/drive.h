@@ -4,13 +4,14 @@
 class Drive
 {
   int m_forward = 0;
-  float m_turn = 0;
   int m_overrideForward = 0;
-  float m_overrideTurn = 0;
   int m_encoderBaseLeft = 0;
   int m_encoderBaseRight = 0;
-
+  float m_turn = 0;
+  float m_overrideTurn = 0;
   float m_ErrorIntergral = 0;
+  bool m_flipX = false;
+  bool m_holdingPosition = false;
 
   bool KeepDrection(int forward, float turn)
   {
@@ -21,24 +22,25 @@ class Drive
         (m_forward == 0 && forward == 0) ||
         (m_turn == turn && m_forward == forward);
   }
-public:
-  int m_distance = 0;
-  int m_gyro = 0;
 
-public:
-  static int GetMovementJoystick(unsigned char joystick, unsigned char axis, int minValue);
-
+  void HoldPosition();
   int GetForwardAxis();
   float GetTurnAxis();
-
-  Drive() { ResetEncoders(); }
   void SetLeftDrive(int speed);
   void SetRightDrive(int speed);
-  void DebugDrive();
+  static int GetMovementJoystick(unsigned char joystick, unsigned char axis, int minValue);
+
+public:
+  unsigned int m_distance = 0;
+
+public:
+  Drive() { ResetTrackingState(); }
+  void FlipX(bool flip) { m_flipX = flip; }
+  void StartHoldingPosition();
 
   // Forward: Positive turn - turn right (clockwise)
   // Backwards: Positive turn - turn left (clockwise)
   void OverrideInputs(int forward, float turn);
-  void ResetEncoders();
+  void ResetTrackingState();
   void Update();
 };

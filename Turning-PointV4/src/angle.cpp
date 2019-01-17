@@ -1,13 +1,14 @@
 #include "angle.h"
+#include "logger.h"
 
 
 // Distance based on front of robot
-constexpr float Distances[]    {   24 ,  30,  48,   54,    108};
+constexpr float Distances[]    {   24 ,  30,  48,   75,    108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]   {  116,   115,  86,   62,   60};
-constexpr unsigned int AnglesMedium[] {   85,   62,   45,   35,   61};
+constexpr unsigned int AnglesHigh[]   {  116,   100,  74,   80,   80};
+constexpr unsigned int AnglesMedium[] {   85,   62,   37,   35,   40};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances)-1;
 
@@ -17,10 +18,10 @@ constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 }
 
 // Angle potentiometer:
-constexpr unsigned int anglerLow = 0; 
+constexpr unsigned int anglerLow = 3; 
 const unsigned int anglePotentiometerLow = ConvertAngleToPotentiometer(anglerLow);
 const unsigned int anglePotentiometerHigh = 1060;
-
+#if 0
 static_assert(CountOf(Distances) == CountOf(AnglesHigh));
 static_assert(CountOf(Distances) == CountOf(AnglesMedium));
 
@@ -48,6 +49,7 @@ static_assert(AnglesMedium[2] < AnglesHigh[2]);
 static_assert(AnglesMedium[3] < AnglesHigh[3]);
 // static_assert(AnglesMedium[4] < AnglesHigh[4]);
 
+#endif
 
 constexpr unsigned int CalcAngle(Flag flag, float distanceInches)
 {
@@ -139,48 +141,43 @@ void Shooter::KeepMoving()
     distance = diff + m_lastAngleDistance;
     unsigned int distanceAbs = abs(distance);
 
-    m_diffAdjusted = (m_diffAdjusted + diff) / 2;
+    m_diffAdjusted = (m_diffAdjusted * 3 + diff) / 4;
 
     m_count++;
 
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if (m_fMoving && (m_count >= 200 || (distanceAbs <= 10 && abs(m_diffAdjusted) <= 1)))
+    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 10 && abs(m_diffAdjusted) <= 1))
     {
-        if (PrintDiagnostics(Diagnostics::Angle))
-            printf("STOP: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
-        StopMoving();
+	if (m_fMoving)
+	{
+            if (PrintDiagnostics(Diagnostics::Angle))
+                printf("STOP: (%d) Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n\n\n", m_count, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+            StopMoving();
+	}
+        motorSet(anglePort, 0);
         return;
     }
     
-    if (m_fMoving)
+    if (m_fMoving || m_flag != Flag::Loading)
     {
-        if (distance > 0) // going up
-            speed = distance * 1 + m_diffAdjusted * 4.5; //(5 + abs(m_diffAdjusted)/5);
+	if (distanceAbs <= 10)
+            speed = m_diffAdjusted * 10;
+        else if (distance > 0) // going up
+            speed = 23 + distance *2/3 + m_diffAdjusted * 5;
         else if (m_flag != Flag::Loading)
-            speed = distance * 0.5 + m_diffAdjusted * 4;
+            speed = -14 + distance / 2 + m_diffAdjusted * 5;
         else
-            speed = distance * 1.2 + m_diffAdjusted / 5;
+            speed = -25 + distance + m_diffAdjusted * 3; // / 5;
         if (PrintDiagnostics(Diagnostics::Angle))
-            printf("MOVE: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
-    }
-    else if (distanceAbs >= 10 && m_flag != Flag::Loading)
-    {
-        if (distance > 0) // going up
-            speed = distance * 2 + m_diffAdjusted * 6;
-        else
-            speed = distance * 1 + m_diffAdjusted * 4;
-        if (PrintDiagnostics(Diagnostics::Angle))
-            printf("ADJUST: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
-    }
-    else
-    {
-        // m_count = 0;
-        // if (PrintDiagnostics(Diagnostics::Angle))
-        //  printf("NON-MOVING: (%d) Speed: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, distancurrent - m_angleToMovece, diff, m_diffAdjusted);
+	{
+	    if (m_fMoving)
+                printf("ANG MOVE: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+	    else
+                printf("ANG ADJ: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+	}
     }
 
-    // Go as fat as you can if loading
-    const int angleMotorSpeed = (m_flag == Flag::Loading) ? 100 : 80;
+    const int angleMotorSpeed = 100;
 
     if (speed > angleMotorSpeed)
         speed = angleMotorSpeed;
@@ -297,6 +294,9 @@ void Shooter::Update()
     bool userShooting = IsShooting();
     int shooterPreloadPos = analogRead(shooterPreloadPoterntiometer);
 
+    if (userShooting)
+	UpdateIntakeFromShooter(IntakeShoterEvent::Shooting);
+
     // Did we go from zero to 4000 on potentiometer?
     // That means shot was done, and we are starting "normal" preload.
     if (shooterPreloadPos > ShooterPreloadStart)
@@ -306,10 +306,7 @@ void Shooter::Update()
         // To avoid it, we will countinue preloading not looking at potentiometer for a while, and then switch
         // to leverage potentiometer for guidance. 
         if (m_preloadAfterShotCounter > 20)
-        {
-            print("Preloading after full rotation\n");
             m_preloadAfterShotCounter = 20;
-        }
     }
 
     if (m_preloadAfterShotCounter > 0)
@@ -333,7 +330,8 @@ void Shooter::Update()
     // This is done by clicking and releasing shooter button quickly while not in the shooting zone.
     if (needPreload && userShooting && !m_userShooting)
     {
-        print("Disabling preload\n");
+	if (PrintDiagnostics(Diagnostics::Angle))
+            print("Disabling preload\n");
         m_disablePreload = true;
         needPreload = false;
     }
@@ -352,9 +350,9 @@ void Shooter::Update()
             SetFlag(Flag::Middle);
         if (ball == BallPresence::NoBall && m_flag != Flag::Loading)
         {
-            printf("Lost vall\n");
             lostball = true;
             SetFlag(Flag::Loading);
+	    UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
         }
     }
 
@@ -365,7 +363,6 @@ void Shooter::Update()
     // likely in time for next ball to land in shooter, so it's not a big issue. 
     if (userShooting && lostball)
     {
-        print("Ball was shot\n");
         m_disablePreload = false;
         m_overrideShooting = false; // this is signal to autonomous!
         m_preloadAfterShotCounter = 150;

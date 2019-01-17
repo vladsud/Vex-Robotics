@@ -44,7 +44,7 @@ $(COBJ): $(BINDIR)/%.o: %.$(CEXT) $(HEADERS) $(HEADERS_2)
 	@$(CC) $(INCLUDE) $(CFLAGS) -o $@ $<
 
 $(CPPOBJ): $(BINDIR)/%.o: %.$(CPPEXT) $(HEADERS) $(HEADERS_2)
-	@echo CPC $(INCLUDE) $<
+	@echo CPPCC $(INCLUDE) $<
 	@$(CPPCC) $(INCLUDE) $(CPPFLAGS) -o $@ $<
 
 ### End special section ###

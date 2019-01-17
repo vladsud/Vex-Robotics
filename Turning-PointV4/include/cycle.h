@@ -8,6 +8,7 @@
 #include "lcd.h"
 #include "gyro.h"
 #include "position.h"
+#include "Logger.h"
 
 /*******************************************************************************
 * 
@@ -32,18 +33,24 @@ public:
 	GyroWrapper gyro;
 	PositionTracker tracker;
 	LCD lcd;
+	Logger logger;
+
+	Main() : gyro(gyroPort) {}
 
 	// Time is im milliseconds!
 	// But time resolution might be coarser, in the range of 1-10 ms
-	int GetTime() { return m_Ticks; }
-
-   	void UpdateWithoutWaiting();
+	unsigned int GetTime() { return m_Ticks; }
    	void Update();
+	void UpdateAllSystems();
+
+protected:
+	// returns true when it's good time for external system (like autonomous) consume some CPU cycles
+   	bool UpdateWithoutWaiting();
 
 private:
 	unsigned long m_Ticks = 0; // in ms
-	unsigned long m_LastWakeUp = millis();
-	int m_TicksToMainUpdate = 0;
+	unsigned long m_LastWakeUp = 0;
+	int m_TicksToMainUpdate = allSystemsPullTime;
 	unsigned long m_maxCPUTime = 0;
 };
 

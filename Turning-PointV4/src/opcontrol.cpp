@@ -1,35 +1,115 @@
-/** @file opcontrol.c
- * @brief File for operator control code
- *
- * This file should contain the user operatorControl() function and any functions related to it.
- *
- * Any copyright is dedicated to the Public Domain.
- * http://creativecommons.org/publicdomain/zero/1.0/
- *
- * PROS contains FreeRTOS (http://www.freertos.org) whose source code may be
- * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
- */
+
 #include "main.h"
 #include "cycle.h"
+#include "logger.h"
 
-void Main::Update()
-{	
-	// taskDelayUntil( )is better then delay() as it allows us to "catch up" if we spend too much time in one cycle,
-	// i.e. have consistent frequency of updates.
-	// That said, it assumes that we are missing the tick infrequently.
-	// If it's not the case, we can hog CPU and not allow other tasks to have their share.  
-	// delay(trackerPullTime);
-	taskDelayUntil(&m_LastWakeUp, trackerPullTime); 
+static Main* g_main = nullptr;
 
-	m_Ticks += trackerPullTime;
-	m_TicksToMainUpdate -= trackerPullTime;
-
-	UpdateWithoutWaiting();
+Main& SetupMain()
+{
+	if (g_main == nullptr)
+		g_main = new Main();
+	return *g_main;
 }
 
-void Main::UpdateWithoutWaiting()
+Main& GetMain()
 {
-	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks  % 500) == 0)
+  return *g_main;
+}
+
+Logger& GetLogger() { return GetMain().logger; }
+GyroWrapper& GetGyro() { return GetMain().gyro; }
+PositionTracker& GetTracker() { return GetMain().tracker; }
+int GetGyroReading() { return GetTracker().GetGyro(); } 
+
+void UpdateIntakeFromShooter(IntakeShoterEvent event)
+{
+	GetMain().intake.UpdateIntakeFromShooter(event);
+}
+
+
+void AssertCore(bool condition, const char* message)
+{
+   if (!condition)
+   {
+      ReportStatus("\n*** ASSERT: %s ***\n\n", message);
+      GetMain().lcd.PrintMessage(message);
+   }
+}
+
+
+void Main::Update()
+{
+	if (m_LastWakeUp == 0)
+		m_LastWakeUp = millis();
+
+	do
+	{
+		// taskDelayUntil( )is better then delay() as it allows us to "catch up" if we spend too much time in one cycle,
+		// i.e. have consistent frequency of updates.
+		// That said, it assumes that we are missing the tick infrequently.
+		// If it's not the case, we can hog CPU and not allow other tasks to have their share.  
+		taskDelayUntil(&m_LastWakeUp, trackerPullTime); 
+
+		m_Ticks += trackerPullTime;
+		m_TicksToMainUpdate -= trackerPullTime;
+	}
+	while (!UpdateWithoutWaiting());
+}
+
+void Main::UpdateAllSystems()
+{
+	lcd.Update();
+	descorer.Update();
+	intake.Update();
+	shooter.Update();
+	drive.Update();
+
+	gyro.Integrate();
+	tracker.Update();
+}
+
+bool Main::UpdateWithoutWaiting()
+{
+	bool res = false;
+
+	unsigned long time = micros();
+
+	// has to be the first one!
+	gyro.Integrate();
+	tracker.Update();
+	// Trying to check intake more often, as some key pressed are not registered sometimes
+	intake.Update();
+
+	// If this assert fires, than numbers do not represent actual timing.
+	// It's likley not a big deal, but something somwhere might not work because of it.
+	static_assert((trackerPullTime % trackerPullTime) == 0);
+
+	switch(m_TicksToMainUpdate / trackerPullTime)
+	{
+		case 0:
+			static_assert(allSystemsPullTime / trackerPullTime >= 5);
+			m_TicksToMainUpdate = allSystemsPullTime;
+			// cheap sytems are grouped together
+			lcd.Update();
+			descorer.Update();
+			break;
+		case 1:
+			shooter.Update();
+			break;
+		case 2:
+			drive.Update();
+			break;
+		case 3:
+			// Good place for external code to consume some cycles
+			res = true;
+			break;
+	}
+
+	time = micros() - time;
+	m_maxCPUTime = max(m_maxCPUTime, time);
+
+	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
 	{
 		printf("(%lu) Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
 		m_maxCPUTime,
@@ -38,41 +118,22 @@ void Main::UpdateWithoutWaiting()
 		analogRead(anglePotPort),
 		analogRead(ShooterSecondaryPotentiometer),
 		analogRead(shooterPreloadPoterntiometer),
-		gyroGet(g_gyro),
+		GetGyroReading(),
 		analogRead(lightSensor));
 	}
 
-	unsigned long time = micros();
-
-	// has to be the first one!
-	tracker.Update();
-
-	// If this assert fires, than numbers do not represent actual timing.
-	// It's likley not a big deal, but something somwhere might not work because of it.
-	static_assert((trackerPullTime % trackerPullTime) == 0);
-
-	if (m_TicksToMainUpdate <= 0)
-	{
-		m_TicksToMainUpdate = allSystemsPullTime;
-
-		drive.Update();
-		lcd.Update();
-		intake.Update();
-		shooter.Update();
-		descorer.Update();
-	}
-
-	time = micros() - time;
-	m_maxCPUTime = max(m_maxCPUTime, time);
+	return res;
 }
 
 //Operator Control
 void operatorControl()
 {
+#ifndef OFFICIAL_RUN
 	if (isAuto())
 		autonomous();
+#endif
 
-	Main& main = GetMain();
+	Main& main = SetupMain();
 	while (true)
 	{
 		main.Update();

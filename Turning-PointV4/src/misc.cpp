@@ -1,15 +1,4 @@
 #include "main.h"
-#include "cycle.h"
-
-void AssertCore(bool condition, const char* message)
-{
-   if (!condition)
-   {
-      printf("\n*** ASSERT: %s ***\n\n", message);
-      GetMain().lcd.PrintMessage(message);
-   }
-}
-
 
 void memmove(char* dest, char* src, size_t size)
 {

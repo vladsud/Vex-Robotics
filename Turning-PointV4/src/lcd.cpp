@@ -1,16 +1,18 @@
-#include "cycle.h"
+#include "lcd.h"
+#include "api.h"
+#include "main.h"
 
 LCD::LCD()
 {
-    printf("LCD Init\n");
+    // DEfaults for autonomous if LCD selection is not used
+    AtonBlueRight = false;
+    AtonFirstPos = true;
+    AtonClimbPlatform = true;
+
     m_buttons = 0;
     m_step = 0;
     m_RefreshOnClick = false;
         
-    AtonBlueRight = false;
-    AtonFirstPos = true;
-    AtonClimbPlatform = false;
-
     lcdInit(uart1);
     lcdClear(uart1);
     PrintStepInstructions();
@@ -22,6 +24,13 @@ void LCD::PrintMessage(const char* message)
     m_RefreshOnClick = true;
     lcdSetBacklight(uart1, true);
     lcdSetText(uart1, 1, message);
+}
+
+void LCD::SetSkillsMoe()
+{
+    lcdSetText(uart1, 1,  "  SKILLS !!! ");
+    lcdSetText(uart1, 2, "Red       Blue");
+    SetSkillSelection(true);
 }
 
 void LCD::PrintStepInstructions()
@@ -36,8 +45,8 @@ void LCD::PrintStepInstructions()
     switch(m_step)
     {
         case 0:
-            lcdSetText(uart1, 2, "Red       Blue");
-            lcdSetText(uart1, 1, "Blue (Right)?");
+            lcdSetText(uart1, 1, "Left     Right");
+            lcdSetText(uart1, 2, "Red Skill Blue");
             break;
         case 1:
             lcdSetText(uart1, 1, "First Pos?");
@@ -57,10 +66,10 @@ void LCD::PrintStepInstructions()
 
 void LCD::SelectAction(bool rigthButton)
 {
-    printf("SelectAction: %d\n", (int)rigthButton);
     switch (m_step)
     {
         case 0:
+            SetSkillSelection(false);
             AtonBlueRight = rigthButton;
             break;
         case 1:
@@ -82,22 +91,14 @@ void LCD::SelectAction(bool rigthButton)
 
 void LCD::Update()
 {
-    // save some energy
     m_count++;
-    /*
-    if (m_count == 1500)
-    {
-        m_RefreshOnClick = true;
-        lcdSetBacklight(uart1, false);
-    }
-    */
 
     int buttons = lcdReadButtons(uart1);
     if (m_buttons == buttons)
         return;
     m_buttons = buttons;
 
-    printf("LCD: step %d,  buttons: %d, count: %d\n", m_step, buttons, m_count);
+    ReportStatus("LCD: buttons: %d\n", buttons);
 
     m_count = 0;
 
@@ -112,11 +113,19 @@ void LCD::Update()
 
     if (!(buttons & LCD_BTN_CENTER))
     {
+        ReportStatus("LCD: non-center\n");
         SelectAction(buttons & LCD_BTN_RIGHT);
         return;
     }
-    if (m_step != 0 && m_step != 3)
+
+    if (m_step == 0)
     {
+        ReportStatus("LCD: Skills!!!\n");
+	SetSkillsMoe();
+    }
+    else if (m_step != 3)
+    {
+        ReportStatus("LCD: Back\n");
         m_step--;
         PrintStepInstructions();
     }

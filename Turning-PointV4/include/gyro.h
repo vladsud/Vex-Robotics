@@ -3,21 +3,28 @@
 
 class GyroWrapper
 {
+	int32_t m_value = 0;
+	int32_t m_multiplier;
+    uint32_t m_calibValue = 0;
+    uint32_t m_stddev = 0;
+    int32_t m_limit = 0;
+    unsigned long m_lastTime = 0;
+    unsigned char m_port;
+
 public:
-    static const int Multiplier = 256;
-    
-    // Positive is counterclockwise
-    static int Get()
+    // Devide by this nuber to convert gyro value to degrees
+    static const int Multiplier = 1 << 10;
+    int Get() const { return m_value; }
+    void SetAngle(int angle) { m_value = angle; }
+
+    void Integrate();
+    GyroWrapper(unsigned char port, unsigned short multiplier = 0);
+
+    void Flip()
     {
-        // Based on Pros implementaitno - this is 256x of what gyroGet returns!!! 
-        int result = *(int32_t*)g_gyro + 128;
-        int gyroRes = gyroGet(g_gyro);
-        if (abs(result - gyroRes * Multiplier) >= Multiplier)
-        {
-            printf("Gyro does not work: %d, %d\n", result, gyroRes);
-            Assert(false);
-        }
-        return result;
-        // return gyroGet(g_gyro);
+        m_value = -m_value;
+        m_multiplier = -m_multiplier;
     }
 };
+
+GyroWrapper& GetGyro();
