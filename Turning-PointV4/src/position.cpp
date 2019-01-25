@@ -1,5 +1,4 @@
 #include "position.h"
-#include "cache.h"
 #include "logger.h"
 #include <cmath>
 
@@ -9,7 +8,7 @@ Encoder g_sideEncoder = nullptr;
 
 PositionTracker::PositionTracker()
 {
-    g_leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, true);
+    g_leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, false);
     g_rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, true);
     g_sideEncoder = encoderInit(sideEncoderTopPort, sideEncoderBotPort, true);
     encoderReset(g_leftDriveEncoder);

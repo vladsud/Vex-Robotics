@@ -8,11 +8,14 @@ void RunAtonSecondPos()
 {
     GetMain().tracker.SetCoordinates({16.5 - 1, 33 + 48 - 1, -30});
 
+    // prepare shooter
+    SetShooterAngle(false, 108, false /*checkPresenceOfBall*/);
+    Do(WaitShooterAngleToStop());
+
     // give some time for other robot to get out of the way
     Do(Wait(6000));
 
     // Shoot the ball
-    Do(ShooterAngle(false, 108, false /*checkPresenceOfBall*/));
     Do(ShootBall());
 
     if (GetMain().lcd.AtonClimbPlatform)
@@ -22,6 +25,6 @@ void RunAtonSecondPos()
         Do(Turn(-60));
         Do(Wait(200));
         Do(Move(400, 85));
-        Do(MoveToPlatform(3250, 85));
+        MoveToPlatform(false /*twoPlatforms*/);
     }
 }

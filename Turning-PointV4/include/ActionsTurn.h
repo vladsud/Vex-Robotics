@@ -21,7 +21,7 @@ struct TurnPrecise : public Action
         while (m_turn < -180 * GyroWrapper::Multiplier)
             m_turn = m_turn + 360 * GyroWrapper::Multiplier;
 
-        GetMain().drive.ResetTrackingState();
+        m_main.drive.ResetTrackingState();
         m_initialAngle = GetGyroReading();
     }
 
@@ -62,10 +62,10 @@ struct TurnPrecise : public Action
         int actualSpeed = 1000 * GetTracker().LatestPosition(false /*clicks*/).gyroSpeed;
         int idealSpeed = IdealSpeedFromDistance(error);
 
-        if ((idealSpeed == 0 && abs(actualSpeed) <= 3*GyroWrapper::Multiplier) || (m_turn * error < 0 && abs(error) > GyroWrapper::Multiplier / 2))
+        if ((idealSpeed == 0 && abs(actualSpeed) <= 3*GyroWrapper::Multiplier) || (m_turn * sign < 0 && abs(error) > GyroWrapper::Multiplier / 2))
         {
             ReportStatus("   Turn stop! Error: error=%d turn=%d\n", error, m_turn);
-            GetMain().drive.OverrideInputs(0, 0);
+            m_main.drive.OverrideInputs(0, 0);
             return true;
         }
 
@@ -107,8 +107,8 @@ struct TurnPrecise : public Action
 
         m_power = power; // + m_power) / 2;
 
-        ReportStatus("Turn: %d %d %d %d\n", error, idealSpeed, actualSpeed, power);
-        GetMain().drive.OverrideInputs(0, -m_power);
+        // ReportStatus("Turn: %d %d %d %d\n", error, idealSpeed, actualSpeed, power);
+        m_main.drive.OverrideInputs(0, -m_power);
         return false;
     }
 

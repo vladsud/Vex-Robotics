@@ -1,7 +1,17 @@
 #include "aton.h"
 
-int g_midFlagHeight = 69;
-int g_highFlagHeight = 7;
+
+const int distanceToCap = 1900;
+const int angleToShootFlags = -1;
+// distances in inches, the higher the number - the lower is the angle
+const int g_midFlagHeight = 55;
+const int g_highFlagHeight = 55;
+
+const int angleToMoveToFlags = 4;
+const int distanceFlagsToPlatform = -4300;
+
+// used only in recovery mode, if we hit something
+const float inchesToPlatform = 80.0;
 
 // WARNING:
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
@@ -10,112 +20,121 @@ int g_highFlagHeight = 7;
 void RunAtonFirstPos()
 {
     PositionInfo info;
+    auto& main = GetMain();
 
-    GetMain().tracker.SetCoordinates({16, 60, -90});
+    main.tracker.SetCoordinates({16, 60, -90});
 
     // async actions
-    ShooterSetAngle(true /*high*/, g_midFlagHeight, false /*checkPresenceOfBall*/);
+    SetShooterAngle(true /*high*/, g_midFlagHeight, false /*checkPresenceOfBall*/);
 
     //
     // knock the cone
     //
-    Do(Move(50, 40));
-    Do(Move(1300, 85));
-    Do(IntakeUp());
-    Do(Move(200, 20));
-    Do(Wait(300));
-    Do(MoveTimeBased(-18, 100)); // attempt to fully stop, for more accurate back movement
-    Do(MoveExact(-2110));
-    Do(IntakeStop());
+    BLOCK
+    {
+        KeepAngle keeper(-90);
+        unsigned int distance = main.drive.m_distanceFromBeginning;
+
+        Do(Move(distanceToCap-250, 85));
+        IntakeUp();
+        Do(Move(250, 20));
+        Do(Wait(100));
+        Do(MoveTimeBased(-18, 500, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
+
+        // we have hard time picking up the ball, so wait  
+        Do(Wait(100));
+
+        distance = main.drive.m_distanceFromBeginning - distance + 50;
+        ReportStatus("Move back: %d\n", distance);
+        Do(MoveExact(-distance)); // 1800 ?
+        IntakeStop();
+    }
+
 
     //
     // Turn to shoot
     //
-    Do(TurnToAngle(-8));
+    Do(TurnToAngle(angleToShootFlags));
     info = GetTracker().LatestPosition(false /*clicks*/);
     ReportStatus("Shooting: X,Y,A inches: (%f, %f), A = %d\n", info.X, info.Y, info.gyro);
 
     //
     // Shoot the ball
     //
-    Do(ShooterAngle(true /*high*/, g_midFlagHeight, false /*checkPresenceOfBall*/));
+    SetShooterAngle(true /*high*/, g_midFlagHeight, false /*checkPresenceOfBall*/);
+    Do(WaitShooterAngleToStop());
     Do(ShootBall());
-    Do(IntakeUp());
+    IntakeUp();
+    main.shooter.SetDistance(g_highFlagHeight);
     // wait for it to go down & start moving up
-    GetMain().shooter.SetDistance(g_highFlagHeight);
-    Do(WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 5000 : 1500)); 
-    Do(ShooterAngle(false /*high*/, g_highFlagHeight, false /*checkPresenceOfBall*/));
+    Do(WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 5000 : 1000)); 
+    SetShooterAngle(false /*high*/, g_highFlagHeight, true /*checkPresenceOfBall*/);
+    Do(WaitShooterAngleToStop());
     Do(ShootBall());
 
     //
     // Move to lower flag
     //
-    Do(TurnToAngle(GetMain().lcd.AtonBlueRight ? 5 : 7));
-    Do(IntakeUp());
-    Do(Move(100, 35, 0, false /*StopOnColision */));
-    Do(Move(2400, 85, 0, true /*StopOnColision */));
-    Do(Wait(400));
+    BLOCK
+    {
+        KeepAngle keeper(angleToMoveToFlags);
+
+        IntakeUp();
+        Do(Move(2500, 85, 0, true /*StopOnColision */));
+        Do(MoveTimeBased(0, 500, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
+    }
 
     //
     // figure out if we screwd up
     //
-    int distance = -4030;
     info = GetTracker().LatestPosition(true /*clicks*/);
-    printf("Hit wall: X,Y,A clicks: (%f, %f), A = %d\n", info.X, info.Y, info.gyro);
+    ReportStatus("Hit wall: X,Y,A clicks: (%f, %f), A = %d\n", info.X, info.Y, info.gyro);
 
+    int distance = distanceFlagsToPlatform;
+    int distanceAlt;
     if (abs(info.gyro) > 15 * GyroWrapper::Multiplier || info.Y > 12.0 / PositionTracker::inchesPerClick)        
     {
-            puts("Recovery!!!");
-            Do(Wait(300));
-            Do(Move(100, -35, 0, false /*StopOnColision */));
-            Do(Wait(300));
-            puts("   Turning");
+            ReportStatus("Recovery!!!\n");
+            // Do(Move(100, -35, 0, false /*StopOnColision */));
+            // Do(Wait(300));
+            // ReportStatus("   Turning\n");
             Do(TurnToAngle(CalcAngleToPoint(18, 84) + 180));
-            puts("   End of recovery");
+            ReportStatus("   End of recovery");
 
             info = GetTracker().LatestPosition(true /*clicks*/);
-            printf("After recovery: X,Y,A clicks: (%f %f), A = %d\n", info.X, info.Y, info.gyro);
-            distance = int(info.Y - 77.0 / PositionTracker::inchesPerClick) * 2;
+            distanceAlt = int(info.Y - inchesToPlatform / PositionTracker::inchesPerClick) * 2;
+            distance = distanceAlt;
     }
     else
     {
-            int distanceAlt = int(info.Y - 80.0 / PositionTracker::inchesPerClick) * 2;
-            printf("Alternate calculation: %d (should be %d)\n", distanceAlt, distance);
+            distanceAlt = int(info.Y - inchesToPlatform / PositionTracker::inchesPerClick) * 2;
     }
+    ReportStatus("Alternate calculation: %d (should be %d)\n", distanceAlt, distanceFlagsToPlatform);
+    UNUSED_VARIABLE(distanceAlt); // unsed variable in finale build
 
     //
     // Climb platform if neeed
     //
-    if (GetMain().lcd.AtonClimbPlatform)
+    if (main.lcd.AtonClimbPlatform)
     {
-        printf("Moving: %d\n", distance);
-        Do(MoveExact(distance));
-    
-        Do(IntakeStop()); // sometimes it turns off due to ball shaking - very annoying
-        Do(Turn(-90));
-
-        ReportStatus("First platform\n");
-        Do(MoveToPlatform(3650, 85));
-
-        if (g_mode != AtonMode::Skills)
+        BLOCK
         {
-            Do(MoveTimeBased(30, 100));
+            KeepAngle keeper(3); // try to get further out from the wall
+            ReportStatus("Moving: %d\n", distance);
+            Do(MoveExact(distance));
         }
-        else
-        {
-            // SECOND PLATFORM
-            ReportStatus("Second platform\n");
-            Do(MoveToPlatform(3350, 85));
-            Do(MoveTimeBased(40, 200));
-            Do(MoveTimeBased(-30, 100));
-        }
+
+        Do(TurnToAngle(-90));
+        MoveToPlatform(g_mode == AtonMode::Skills); //  || g_mode == AtonMode::ManualAuto);
     }
     else
     {
         ReportStatus("Not climbing platform\n");
-        distance = distance / 2;
-        printf("Moving: %d\n", distance);
+        distance = distanceFlagsToPlatform / 2;
+        ReportStatus("Moving: %d\n", distance);
         Do(MoveExact(distance));
     }
-    Do(IntakeStop());
+
+    IntakeStop();
+
 }

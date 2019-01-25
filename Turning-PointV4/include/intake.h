@@ -12,9 +12,9 @@ public:
     };
 
     void Update();
-    void UpdateIntakeFromShooter(IntakeShoterEvent event);
+    void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown);
     void SetIntakeDirection(Direction direction);
-
+    void ResetState();
 private:
     void SetIntakeMotor(int speed);
 

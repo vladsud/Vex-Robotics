@@ -16,6 +16,7 @@ public:
     static const int Multiplier = 1 << 10;
     int Get() const { return m_value; }
     void SetAngle(int angle) { m_value = angle; }
+    void ResetState() { m_lastTime = millis()-1; } 
 
     void Integrate();
     GyroWrapper(unsigned char port, unsigned short multiplier = 0);

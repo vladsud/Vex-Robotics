@@ -1,6 +1,13 @@
 #include "intake.h"
 #include "logger.h"
 
+void Intake::ResetState()
+{
+    m_power = 0;
+    m_direction = Direction::None;
+    m_doublePressed = false;
+}
+
 void Intake::SetIntakeDirection(Direction direction)
 {
     m_direction = direction;
@@ -8,11 +15,11 @@ void Intake::SetIntakeDirection(Direction direction)
     if (direction == Direction::None)
     {
         m_power = 0;
-	SetIntakeMotor(0);
-	return;
+        SetIntakeMotor(0);
+        return;
     }
 
-    int power = (m_direction == Direction::Up) ? -intakeMotorSpeed : intakeMotorSpeed;
+    int power = (m_direction == Direction::Up) ? -intakeMotorSpeedUp : intakeMotorSpeedDown;
     
     if (power * m_power >= 0)
         m_power = power;
@@ -60,16 +67,19 @@ void Intake::Update()
 }
 
 
-void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event)
+void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown)
 {
     switch (event)
     {
         case IntakeShoterEvent::LostBall:
-	    if (m_direction == Direction::None && !m_doublePressed)
+	    //if (m_direction == Direction::None && !m_doublePressed)
         	SetIntakeDirection(Direction::Up);
 	    break;
 	case IntakeShoterEvent::Shooting:
-        	SetIntakeDirection(Direction::None);
+            if (forceDown)
+        	    SetIntakeDirection(Direction::Down);
+            else
+        	    SetIntakeDirection(Direction::None);
 		break;
     }	
 }

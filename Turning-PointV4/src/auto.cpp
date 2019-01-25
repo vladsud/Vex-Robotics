@@ -13,11 +13,13 @@
 #include "aton.h"
 
 
-AtonMode g_mode = AtonMode::Regular;
+AtonMode g_mode = AtonMode::Regular; // ;
 
 // Variables not to touch - control actual autonomous mode
 bool g_autonomousSmartsOn = true;
 bool g_manualSmarts = false;
+
+
 bool g_alreadyRunAutonomous = false;
 
 
@@ -72,69 +74,75 @@ void autonomous()
         delay(2000);
 #endif
 
-    ReportStatus("\n*** Autonomous: Start ***\n\n");
-    ReportStatus ("Time: %d\n", GetMain().GetTime());
-
     Main& main = SetupMain();
 
     // all system update their counters, like distance counter.
+    main.ResetState();
     main.UpdateAllSystems();
 
-#ifndef OFFICIAL_RUN
-    // Debugging code - should not run in real autonomous
-    if (g_mode == AtonMode::TestRun && !isAutonomous())
-    {
-        Do(MoveToPlatform(3650, 85));
-        Do(MoveTimeBased(30, 100));
-        ReportStatus("Second platform\n");
-        Do(MoveToPlatform(3350, 85));
-        Do(MoveTimeBased(40, 200));
-        Do(MoveTimeBased(-30, 100));
-        Do(EndOfAction());
-        return;
-    }
-#endif // !OFFICIAL_RUN
+    ReportStatus("\n*** Autonomous: Start ***\n\n");
+    auto time = main.GetTime();
+    auto time2 = millis();
 
     if (g_mode == AtonMode::Skills)
     {
-        auto& lcd = GetMain().lcd;
+        auto& lcd = main.lcd;
         lcd.AtonBlueRight = false;
         lcd.AtonFirstPos = true;
         lcd.AtonClimbPlatform = true;
     }
 
     // setup coordinates
-    GetMain().tracker.FlipX(GetMain().lcd.AtonBlueRight);
-    GetMain().drive.FlipX(GetMain().lcd.AtonBlueRight);
+    main.tracker.FlipX(main.lcd.AtonBlueRight);
+    main.drive.FlipX(main.lcd.AtonBlueRight);
 
-    if (GetMain().lcd.AtonFirstPos)
-        RunAtonFirstPos();
+#ifndef OFFICIAL_RUN
+    // Debugging code - should not run in real autonomous
+    if (g_mode == AtonMode::TestRun && !isAutonomous())
+    {
+        MoveToPlatform(true /*twoPlatforms*/);
+        // Do(Turn(90));
+    }
     else
-        RunAtonSecondPos();
+#endif // !OFFICIAL_RUN
+    {
+        if (main.lcd.AtonFirstPos)
+            RunAtonFirstPos();
+        else
+            RunAtonSecondPos();
+    }
+
+    // unused variables in final build
+    UNUSED_VARIABLE(time);  
+    UNUSED_VARIABLE(time2); 
+
+    ReportStatus("\n*** END AUTONOMOUS ***\n\n");
+    ReportStatus ("Time: %d %d \n", main.GetTime()-time, int(millis() - time2));
+    ReportStatus ("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
+
+    GetLogger().Dump();
 
     Do(EndOfAction());
-
-    if (PrintDiagnostics(Diagnostics::Autonomous))
-        printf("\n *** Auto: Exit ***\n\n");
 }
 
 
-void ShooterSetAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
+void SetShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
 {
+    auto& main = GetMain();
     auto flag = hightFlag ? Flag::High : Flag::Middle;
     // we disable checking for ball only for first action - shooting.
-    Assert(!GetMain().shooter.IsShooting());
+    Assert(!main.shooter.IsShooting());
 
-   if (!checkPresenceOfBall || GetMain().shooter.BallStatus() != BallPresence::NoBall)
+   if (!checkPresenceOfBall || main.shooter.BallStatus() != BallPresence::NoBall)
    {
-       GetMain().shooter.SetFlag(flag);
-       GetMain().shooter.SetDistance(distance);
-       Assert(GetMain().shooter.GetFlagPosition() != Flag::Loading); // importatn for next ShootBall action to be no-op
+       main.shooter.SetFlag(flag);
+       main.shooter.SetDistance(distance);
+       Assert(main.shooter.GetFlagPosition() != Flag::Loading); // importatn for next ShootBall action to be no-op
    }
    else
    {
-       Assert(!GetMain().shooter.IsMovingAngle()); // are we waiting for nothing?
-       Assert(GetMain().shooter.GetFlagPosition() == Flag::Loading); // importatn for next ShootBall action to be no-op
+       Assert(!main.shooter.IsMovingAngle()); // are we waiting for nothing?
+       Assert(main.shooter.GetFlagPosition() == Flag::Loading); // importatn for next ShootBall action to be no-op
    }
 }
 
@@ -151,4 +159,18 @@ int CalcAngleToPoint(double x, double y)
         angle = 180 + atan(x/y) * 180 / 3.14159265358;
     ReportStatus("    vector = (%f, %f): angle = %d\n", x, y, angle);
     return angle;
+}
+
+
+void MoveToPlatform(bool twoPlatforms)
+{
+    ReportStatus("First platform\n");
+    Do(MoveToPlatformAction(2700));
+
+    if (twoPlatforms)
+    {
+        ReportStatus("Second platform\n");
+        Do(MoveToPlatformAction(2000));
+        Do(MoveTimeBased(-30, 500, true /*waitForStop*/));
+    }
 }

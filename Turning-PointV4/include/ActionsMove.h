@@ -14,16 +14,16 @@ struct Move : public Action
         // Doing something else is likely slower, and less accurate.
         Assert(forward == 0 || abs(forward) > abs(turn));
 
-        GetMain().drive.ResetTrackingState();
-        GetMain().drive.OverrideInputs(m_forward, m_turn);
+        m_main.drive.ResetTrackingState();
+        m_main.drive.OverrideInputs(m_forward, m_turn);
         
         // important for m_lastDistance!
-	    Assert(GetMain().drive.m_distance == 0);
+	    Assert(m_main.drive.m_distance == 0);
     }
 
     bool ShouldStop() override
     {
-        unsigned int distance = GetMain().drive.m_distance;
+        unsigned int distance = m_main.drive.m_distance;
 	    if (distance > m_lastDistance)
             m_speed = (m_speed + (distance - m_lastDistance)) / 2;
         if (m_maxSpeed < m_speed)
@@ -37,12 +37,12 @@ struct Move : public Action
         }
 
         m_lastDistance = distance;
-        return GetMain().drive.m_distance >= m_distanceToMove;
+        return m_main.drive.m_distance >= m_distanceToMove;
     }
 
     void Stop() override
     {
-        GetMain().drive.OverrideInputs(0, 0);
+        m_main.drive.OverrideInputs(0, 0);
     }
 
 protected:
@@ -55,80 +55,108 @@ protected:
     unsigned int m_lastDistance = 0;
 };
 
-struct MoveToPlatform : public Move
+
+struct MoveToPlatformAction : public Move
 {
     int m_diff = 0;
     int m_diffMax = 0;
     int m_diffMin = 10000; // some big number
     int m_slowCount = 0;
     bool m_fIsLow = false;
+    int m_distanceFirstHit = 0;
 
-    MoveToPlatform(int distance, int forward) : Move(distance, forward) {}
+    int slowDown = 90;
+
+    MoveToPlatformAction(int distance) : Move(distance, 65) {}
 
     bool ShouldStop() override
     {
-        int distance = GetMain().drive.m_distance;
+        int distance = m_main.drive.m_distance * 10;
         m_diff = (m_diff + (distance - (int)m_lastDistance)) / 2;
-	if (m_diffMax < m_diff)
-	    m_diffMax = m_diff;
 
-	if (GetMain().GetTime() - m_timeStart >= 200)
-	{
-	    if (m_diff <= m_diffMax / 2 - 2)
-            {
-	        if (m_diffMin > m_diff)
-	            m_diffMin = m_diff;
-	        if (!m_fIsLow)
-		    ReportStatus("MoveToPlatform: Slow down: dist=%d diff=%d max=%d min=%d\n", distance, m_diff, m_diffMax, m_diffMin);
-            m_fIsLow = true;
-            }
-	}
-        if (m_fIsLow && (/*m_diff >= m_diffMax * 2 / 3 + 2 ||*/ m_diff >= m_diffMin * 3 / 2 + 7))
+        if (m_diffMax < m_diff)
+            m_diffMax = m_diff;
+        if (m_diffMin > m_diff)
+            m_diffMin = m_diff;
+
+        // ReportStatus("MoveToPlatform: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
+
+        if (!m_fIsLow && m_diff <= m_diffMax - slowDown)
         {
-	    ReportStatus("MoveToPlatform: Speed up: dist=%d diff=%d >= min(%d, %d), max=%d, min=%d\n",
-			distance, m_diff, m_diffMax * 2 / 3 + 2, m_diffMin * 3 / 2 + 7, m_diffMax, m_diffMin);
+            ReportStatus("MoveToPlatform: Slow down: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
+            m_diffMin = m_diff;
+            m_fIsLow = true;
+            slowDown = 50;
+            if (m_slowCount == 0)
+            {
+                m_main.drive.OverrideInputs(75, 0);
+                m_distanceFirstHit = distance;
+            }
+        }
+
+        if (m_fIsLow && distance >= m_distanceFirstHit + 910 * 10)
+        {
+            ReportStatus("MoveToPlatform: Stop \n");
+            return true;
+        }
+
+        /*
+        if (m_fIsLow && m_diff >= m_diffMin + 50 && m_diff >= m_diffMax - 50)
+        {
+            ReportStatus("MoveToPlatform: Speed up: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
             m_fIsLow = false;
             m_slowCount++;
-	    m_diffMax = m_diff;
+            m_diffMax = m_diff;
             if (m_slowCount == 2)
-	    {
-	        ReportStatus("MoveToPlatform: Stop (speed up): dist=%d diff=%d max=%d min=%d\n", distance, m_diff, m_diffMax, m_diffMin);
+            {
+                ReportStatus("MoveToPlatform: Stop (speed up): distance: %d, dist from first hit: %d\n", m_main.drive.m_distance, (distance - m_distanceFirstHit) / 10);
                 return true;
-	    }
-        }
+            }
+        }*/
+        
         m_lastDistance = distance;
 
-	// sfety net - did we miss the platform?
-	if (m_slowCount == 0 && !m_fIsLow && distance > 2300 && m_diff >= m_diffMax - 2)
-	{
-	    ReportStatus("MoveToPlatform: Safetyy stop!\n");
-	    return true;
-	}
-	ReportStatus("MoveToPlatform: dist = %d, diff = %d, max  = %d, min = %d\n", distance, m_diff, m_diffMax, m_diffMin);
-
-        if (GetMain().drive.m_distance >= m_distanceToMove)
-	{
-	    ReportStatus("MoveToPlatform: Stop based on disance!\n");
-	    return true;
-	}
-	return false;
+        if (m_main.drive.m_distance >= m_distanceToMove)
+        {
+            ReportStatus("MoveToPlatform: Stop based on disance!\n");
+            return true;
+        }
+	    return false;
     }
 };
 
-struct MoveTimeBased : public Action
+struct MoveTimeBased : public Move
 {
-    int m_speed;
     unsigned int m_time;
-    MoveTimeBased(int speed, int time)
-	: m_speed(speed),
-          m_time(time)
+    unsigned int m_distance = 0;
+    bool m_waitForStop;
+    bool m_first = true;
+
+    MoveTimeBased(int speed, int time, bool waitForStop)
+        : Move(50000, speed),
+          m_time(time),
+          m_waitForStop(waitForStop)
     {
-	GetMain().drive.ResetTrackingState();
-        GetMain().drive.OverrideInputs(m_speed, 0);
     }
-    bool ShouldStop() {  return GetMain().GetTime() - m_timeStart >= m_time; }
-    void Stop() override { GetMain().drive.OverrideInputs(0, 0); }
+    bool ShouldStop()
+    {
+        unsigned int distance = m_main.drive.m_distance;
+        if (m_waitForStop && !m_first && m_distance == distance)
+        {
+            ReportStatus("MoveTimeBased: Time to stop: %d\n", m_main.GetTime() - m_timeStart);
+            return true;
+        }
+        m_distance = distance;
+        m_first = false;
+        if (m_main.GetTime() - m_timeStart >= m_time)
+        {
+            ReportStatus("MoveTimeBased: timed-out: %d\n", m_time);
+            return true;
+        }
+        return false;
+    }
 }; 
+
 
 struct MoveExact : public Action
 {    
@@ -140,16 +168,16 @@ struct MoveExact : public Action
             m_forward = false;
             m_distanceToMove = -m_distanceToMove;
         }
-        GetMain().drive.ResetTrackingState();
-        Assert(GetMain().drive.m_distance == 0);
+        m_main.drive.ResetTrackingState();
+        Assert(m_main.drive.m_distance == 0);
     }
 
     void Stop() override
     {
-        GetMain().drive.OverrideInputs(0, 0);
+        m_main.drive.OverrideInputs(0, 0);
     }
 
-    unsigned int IdealSpeedFromDistance(int distance)
+    int IdealSpeedFromDistance(int distance)
     {
         const int point2 = 1600;
         const int speed2 = 2;
@@ -178,20 +206,19 @@ struct MoveExact : public Action
         if (m_distanceToMove <= 27) // 1/2"
             return true;
 
-	unsigned int distance = GetMain().drive.m_distance;
+        unsigned int distance = m_main.drive.m_distance;
         int error = m_distanceToMove - int(distance);
 
         // positive means counter-clockwise
         PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
         int actualSpeed = 1000 * (info.leftSpeed + info.rightSpeed);
-        if (!m_forward)
-            actualSpeed = -actualSpeed;
         int idealSpeed = IdealSpeedFromDistance(error);
+        if (!m_forward)
+            actualSpeed = -actualSpeed; // make it positive
 
         if (idealSpeed == 0 && abs(actualSpeed) <= 18)
         {
             ReportStatus("MoveExact stop! Error: %d\n", error);
-            GetMain().drive.OverrideInputs(0, 0);
             return true;
         }
 
@@ -208,7 +235,7 @@ struct MoveExact : public Action
         // b) power proportional to ideal speed - the higher maintained speed, the more energy is needed to sustain it.
         // The rest is addressed by difference between nominal and desired speeds
         int power = 0;
-        if (error < 0)
+        if (error < 0 || idealSpeed == 0)
             power = -18 + idealSpeed / 60 + diff / 50;  // Stopping!
         else if (idealSpeed != 0)
             power = 18 + idealSpeed * (25 + idealSpeed / 500) / 2000 + diff / 70; // Moving forward
@@ -221,20 +248,20 @@ struct MoveExact : public Action
             power += maxSpeed / 2;
         }
 
-	// Start slowly, for better accuracy
-	if (distance < 50 && power > 40)
-	    power = 40;
+        // Start slowly, for better accuracy
+        if (distance < 50 && power > 40)
+            power = 40;
 
         if (power > maxSpeed)
             power = maxSpeed;
 
-        // ReportStatus("MoveExact: %d %d %d %d\n", error, idealSpeed, actualSpeed, power);
+        // ReportStatus("MoveExact: %d %d %d %d %d\n", error, actualSpeed, idealSpeed, diff, power);
 
         if (!m_forward)
             power = - power;
         m_power = (power + m_power) / 2;
 
-        GetMain().drive.OverrideInputs(m_power, 0);
+        m_main.drive.OverrideInputs(m_power, 0);
         return false;
     }
 

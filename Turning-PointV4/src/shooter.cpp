@@ -1,4 +1,4 @@
-#include "angle.h"
+#include "shooter.h"
 #include "logger.h"
 
 
@@ -7,8 +7,8 @@ constexpr float Distances[]    {   24 ,  30,  48,   75,    108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]   {  116,   100,  74,   80,   80};
-constexpr unsigned int AnglesMedium[] {   85,   62,   37,   35,   40};
+constexpr unsigned int AnglesHigh[]   {  116,   100,  72,   37,   80};
+constexpr unsigned int AnglesMedium[] {   85,   60,   35,   20,   40};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances)-1;
 
@@ -21,7 +21,7 @@ constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 constexpr unsigned int anglerLow = 3; 
 const unsigned int anglePotentiometerLow = ConvertAngleToPotentiometer(anglerLow);
 const unsigned int anglePotentiometerHigh = 1060;
-#if 0
+
 static_assert(CountOf(Distances) == CountOf(AnglesHigh));
 static_assert(CountOf(Distances) == CountOf(AnglesMedium));
 
@@ -36,7 +36,7 @@ static_assert(Distances[3] < Distances[4]);
 static_assert(AnglesHigh[0] >= AnglesHigh[1]);
 static_assert(AnglesHigh[1] >= AnglesHigh[2]);
 static_assert(AnglesHigh[2] >= AnglesHigh[3]);
-static_assert(AnglesHigh[3] >= AnglesHigh[4]);
+// static_assert(AnglesHigh[3] >= AnglesHigh[4]);
 
 static_assert(AnglesMedium[0] >= AnglesMedium[1]);
 static_assert(AnglesMedium[1] >= AnglesMedium[2]);
@@ -49,7 +49,6 @@ static_assert(AnglesMedium[2] < AnglesHigh[2]);
 static_assert(AnglesMedium[3] < AnglesHigh[3]);
 // static_assert(AnglesMedium[4] < AnglesHigh[4]);
 
-#endif
 
 constexpr unsigned int CalcAngle(Flag flag, float distanceInches)
 {
@@ -274,7 +273,7 @@ BallPresence Shooter::BallStatus()
 //      m_overrideShooting = false (reset)
 // 4) Preloading:
 //      Potentiometer goes from 0 to 4000
-//      m_preloadAfterShotCounter = 20
+//      m_preloadAfterShotCounter = 0
 //      m_preloading = true
 // 5) Preloading - continuation:
 //      m_preloadAfterShotCounter = 0
@@ -294,20 +293,17 @@ void Shooter::Update()
     bool userShooting = IsShooting();
     int shooterPreloadPos = analogRead(shooterPreloadPoterntiometer);
 
+    m_timeSinseShooting++;
     if (userShooting)
-	UpdateIntakeFromShooter(IntakeShoterEvent::Shooting);
+    {
+        m_timeSinseShooting = 0;
+	    UpdateIntakeFromShooter(IntakeShoterEvent::Shooting, m_flag == Flag::Middle && m_distanceInches > Distances[1] /*forceDown*/);
+    }
 
     // Did we go from zero to 4000 on potentiometer?
     // That means shot was done, and we are starting "normal" preload.
-    if (shooterPreloadPos > ShooterPreloadStart)
-    {
-        // We moved from 0 to 4000 (dead zone) on potentiometer
-        // But, there can be some physical jiggering, so we may come back to 0 in next couple updates.
-        // To avoid it, we will countinue preloading not looking at potentiometer for a while, and then switch
-        // to leverage potentiometer for guidance. 
-        if (m_preloadAfterShotCounter > 20)
-            m_preloadAfterShotCounter = 20;
-    }
+     if (ShooterPreloadStart < shooterPreloadPos && shooterPreloadPos < 3500)
+        m_preloadAfterShotCounter = 0;
 
     if (m_preloadAfterShotCounter > 0)
         m_preloadAfterShotCounter--;
@@ -326,11 +322,11 @@ void Shooter::Update()
     if (PrintDiagnostics(Diagnostics::Angle) && needPreload != m_preloading)
         printf("Preload state: %d\n", needPreload); 
 
-    //safety net - if something goes wrong, user needs to have a way to disable preload.
+    // safety net - if something goes wrong, user needs to have a way to disable preload.
     // This is done by clicking and releasing shooter button quickly while not in the shooting zone.
-    if (needPreload && userShooting && !m_userShooting)
+    if (needPreload && userShooting && !m_userShooting && m_preloadAfterShotCounter == 0)
     {
-	if (PrintDiagnostics(Diagnostics::Angle))
+	    if (PrintDiagnostics(Diagnostics::Angle))
             print("Disabling preload\n");
         m_disablePreload = true;
         needPreload = false;
@@ -352,7 +348,7 @@ void Shooter::Update()
         {
             lostball = true;
             SetFlag(Flag::Loading);
-	    UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
+	    UpdateIntakeFromShooter(IntakeShoterEvent::LostBall, false /*forceDown*/);
         }
     }
 
@@ -361,11 +357,11 @@ void Shooter::Update()
     // But having user pressing shoot button and losing the ball is a good indicator we are done.
     // This does not handle case when ball escapes, but shooter still did not fire - we will misfire and reload - 
     // likely in time for next ball to land in shooter, so it's not a big issue. 
-    if (userShooting && lostball)
+    if ((m_timeSinseShooting <= 20 || shooterPreloadPos < ShooterPreloadEnd) && lostball)
     {
         m_disablePreload = false;
         m_overrideShooting = false; // this is signal to autonomous!
-        m_preloadAfterShotCounter = 150;
+        m_preloadAfterShotCounter = 100;
     }
 
     // Check angle direction based on user actions.

@@ -2,9 +2,32 @@
 #include "api.h"
 #include <bits/move.h>
 
-#ifndef OFFICIAL_RUN
+
+#ifdef OFFICIAL_RUN
+
+bool PrintDiagnostics(Diagnostics diag)
+{
+    return false;
+}
+
+
+#else //OFFICIAL_RUN
+
 // #define LOGGING
-#endif
+
+bool PrintDiagnostics(Diagnostics diag)
+{
+    switch (diag)
+    {
+        // case Diagnostics::Autonomous:
+        // case Diagnostics::Drive:
+        // case Diagnostics::General:
+        // case Diagnostics::Angle:
+            return true;
+        default:
+            return false;
+    }
+}
 
 static const char* s_LogEntryNames[(int)LogEntry::Max] = {
     "\nPosition: ",
@@ -19,23 +42,6 @@ static const LogArgTypes* s_Types[(int) LogEntry::Max] = {
     DrivingArgs,
 };
 
-bool PrintDiagnostics(Diagnostics diag)
-{
-#ifndef OFFICIAL_RUN
-    switch (diag)
-    {
-        // case Diagnostics::Autonomous:
-        // case Diagnostics::Drive:
-        // case Diagnostics::General:
-        // case Diagnostics::Angle:
-            return true;
-        default:
-            return false;
-    }
-#else // OFFICIAL_RUN
-    return false;
-#endif
-}
 
 void Logger::Dump()
 {
@@ -79,7 +85,6 @@ void Logger::Dump()
 
 bool Logger::AllocateBuffer(const LogArgTypes* types)
 {
-#ifndef OFFICIAL_RUN
     if (!m_recording)
         return false;
 
@@ -103,10 +108,6 @@ bool Logger::AllocateBuffer(const LogArgTypes* types)
     }
 
     return true;
-
-#else
-    return false;
-#endif
 }
 
 void Logger::Pack(LogArgTypes type, int arg)
@@ -192,3 +193,5 @@ void Logger::Log(LogEntry log, int arg1, int arg2, int arg3)
     Pack(*types++, arg3);
 #endif
 }
+
+#endif //OFFICIAL_RUN

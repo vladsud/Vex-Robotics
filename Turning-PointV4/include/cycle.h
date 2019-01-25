@@ -3,12 +3,12 @@
 #include "main.h"
 
 #include "drive.h"
-#include "intake.h"
-#include "angle.h"
-#include "lcd.h"
 #include "gyro.h"
-#include "position.h"
+#include "intake.h"
+#include "lcd.h"
 #include "Logger.h"
+#include "position.h"
+#include "shooter.h"
 
 /*******************************************************************************
 * 
@@ -17,7 +17,7 @@
 *******************************************************************************/
 class Main
 {
-	// Gyro update every 2ms, so it's useful to have same frequency of updates to get as accurate position info as possible.
+	// Gyro updates every 2ms, so it's useful to have same frequency of updates to get as accurate position info as possible.
 	// Also more often we check sensors, the more precise we capture moment when encoder clicks, allowing us more precise estimation of speed.
 	// Main user of faster update - position trackign code.
 	// But, it can't ft into 1ms, so we use 2ms update cycle
@@ -40,8 +40,10 @@ public:
 	// Time is im milliseconds!
 	// But time resolution might be coarser, in the range of 1-10 ms
 	unsigned int GetTime() { return m_Ticks; }
+	unsigned long GetMaxCycleTime() { return m_maxCPUTime; }
    	void Update();
 	void UpdateAllSystems();
+	void ResetState();
 
 protected:
 	// returns true when it's good time for external system (like autonomous) consume some CPU cycles

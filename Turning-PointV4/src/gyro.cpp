@@ -21,7 +21,7 @@
 
 // Rate noise elimination threshold
 // Default value (equivalence, in Pros implementaiton) is 188, which is 7 degrees / second
-#define RATE_NOISE_LIMIT_ANALOG 188 //138
+#define RATE_NOISE_LIMIT_ANALOG 96 //188
 
 void GyroWrapper::Integrate()
 {
@@ -31,13 +31,12 @@ void GyroWrapper::Integrate()
     reading *= m_multiplier;
     reading = int(reading) - int(m_calibValue);
 
-    if (m_lastTime == 0)
-        m_lastTime = time-1;
+    Assert(m_lastTime != 0);
     int timeDiff = time - m_lastTime;
     m_lastTime = time;
 
-    // Assert(timeDiff != 0);
-    // Assert(timeDiff <= 10); // that would be pretty catastrophic
+    Assert(timeDiff != 0);
+    Assert(timeDiff <= 10); // that would be pretty catastrophic
 
     if (reading >= -m_limit && reading <= m_limit)
         return;

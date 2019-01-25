@@ -22,17 +22,17 @@ GyroWrapper& GetGyro() { return GetMain().gyro; }
 PositionTracker& GetTracker() { return GetMain().tracker; }
 int GetGyroReading() { return GetTracker().GetGyro(); } 
 
-void UpdateIntakeFromShooter(IntakeShoterEvent event)
+void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown)
 {
-	GetMain().intake.UpdateIntakeFromShooter(event);
+	GetMain().intake.UpdateIntakeFromShooter(event, forceDown);
 }
 
 
-void AssertCore(bool condition, const char* message)
+void AssertCore(bool condition, const char* message, const char* file, int line)
 {
    if (!condition)
    {
-      ReportStatus("\n*** ASSERT: %s ***\n\n", message);
+      ReportStatus("\n*** ASSERT: %s:%d: %s ***\n\n", file, line, message);
       GetMain().lcd.PrintMessage(message);
    }
 }
@@ -118,12 +118,23 @@ bool Main::UpdateWithoutWaiting()
 		analogRead(anglePotPort),
 		analogRead(ShooterSecondaryPotentiometer),
 		analogRead(shooterPreloadPoterntiometer),
-		GetGyroReading(),
+		GetGyroReading() * 10 / GyroWrapper::Multiplier,
 		analogRead(lightSensor));
 	}
 
 	return res;
 }
+
+void Main::ResetState()
+{
+	// reset wake-up logic
+	m_LastWakeUp = millis()-1;
+
+	drive.ResetState();
+	intake.ResetState();
+	gyro.ResetState();
+}
+
 
 //Operator Control
 void operatorControl()
@@ -134,6 +145,9 @@ void operatorControl()
 #endif
 
 	Main& main = SetupMain();
+	main.ResetState();
+	main.UpdateAllSystems();
+
 	while (true)
 	{
 		main.Update();

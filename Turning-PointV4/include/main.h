@@ -3,7 +3,7 @@
 
 // *** WARNING ***
 // Always define it for competation!!!! 
-//#define OFFICIAL_RUN
+#define OFFICIAL_RUN
 
 
 
@@ -19,18 +19,25 @@ enum class IntakeShoterEvent
     LostBall,
     Shooting,
 };
-void UpdateIntakeFromShooter(IntakeShoterEvent event);
+void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown);
 void SetSkillSelection(bool skills);
 
-#define Assert(f) AssertCore(f, #f)
-#define AssertSz(f, sz) AssertCore(f, sz)
-void AssertCore(bool condition, const char* message);
+#  define __noop(...)
+
+#ifdef OFFICIAL_RUN
+#  define Assert(f) __noop()
+#  define AssertSz(f, sz) __noop()
+#else
+#  define Assert(f) AssertCore(f, #f, __FILE__, __LINE__)
+#  define AssertSz(f, sz) AssertCore(f, sz, __FILE__, __LINE__)
+void AssertCore(bool condition, const char* message, const char* file, int line);
+#endif
 
 #define CountOf(a) (sizeof(a)/sizeof(a[0]))
+#define UNUSED_VARIABLE(a) (void)a;
 
 #ifdef OFFICIAL_RUN
 #  define ReportStatus __noop
-#  define __noop(...)
 #else
 #  define ReportStatus printf
 #endif // OFFICIAL_RUN
@@ -69,7 +76,8 @@ template <typename T> T min(T a, T b)
 *
 *******************************************************************************/
 #define shooterMotorSpeed 100 // it botherwise burns controller / port
-#define intakeMotorSpeed 90 // same, being protective
+#define intakeMotorSpeedUp 80 // same, being protective
+#define intakeMotorSpeedDown 100 
 #define driveMotorMaxSpeed 127
 
 
@@ -86,15 +94,15 @@ D: left y drive
 *
 *******************************************************************************/
 //DRIVE MOTOR PORTS
-#define leftDrivePortY 2 // middle
-#define leftDrivePort2 4 // back
-#define rightDrivePortY 8
-#define rightDrivePort2 7
+#define leftDrivePortY 4 // middle
+#define leftDrivePort2 3 // back
+#define rightDrivePortY 7
+#define rightDrivePort2 9
 //OTHER MOTOR PORTS
-#define intakePort 9
+#define intakePort 6
 #define descorerPort 5
-#define shooterPort 3   // "C" on extender
-#define anglePort 6
+#define shooterPort 2   // "C" on extender
+#define anglePort 8
 
 
 /*******************************************************************************
@@ -102,12 +110,15 @@ D: left y drive
 * DIGITAL SENSORS
 *
 *******************************************************************************/
+// left back : 1, 2
+#define rightDriveEncoderBotPort 6
+#define rightDriveEncoderTopPort 5
+
 #define leftDriveEncoderBotPort 1
 #define leftDriveEncoderTopPort 2
-#define rightDriveEncoderBotPort 3
-#define rightDriveEncoderTopPort 4
-#define sideEncoderBotPort 5
-#define sideEncoderTopPort 6
+
+#define sideEncoderBotPort 7 // not implemented yet
+#define sideEncoderTopPort 8 // not implemented yet
 
 extern Encoder g_leftDriveEncoder;
 extern Encoder g_rightDriveEncoder;
@@ -119,18 +130,15 @@ extern Encoder g_sideEncoder;
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define ShooterSecondaryPotentiometer 4
 
+#define gyroPort 4
 #define lightSensor 5
-#define lightSensorBallIn 2600
-#define lightSensorBallOut 2900
-
+#  define lightSensorBallIn 2600
+#  define lightSensorBallOut 2900
 #define shooterPreloadPoterntiometer 6
-#define ShooterPreloadEnd 850
-#define ShooterPreloadStart 1050
-
-#define gyroPort 7
-
+#  define ShooterPreloadEnd 850
+#  define ShooterPreloadStart 1050
+#define ShooterSecondaryPotentiometer 7
 #define anglePotPort 8
 
 /*******************************************************************************
