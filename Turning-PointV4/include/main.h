@@ -2,44 +2,42 @@
 #include "API.h"
 
 // *** WARNING ***
-// Always define it for competation!!!! 
+// Always define it for competation!!!!
 #define OFFICIAL_RUN
-
-
 
 // Helper function to use both oysticsk
 bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
-void memmove(char* dest, char* src, size_t size);
+void memmove(char *dest, char *src, size_t size);
 bool isAuto();
 bool SmartsOn();
-class Main& SetupMain();
+class Main &SetupMain();
 
 enum class IntakeShoterEvent
 {
-    LostBall,
-    Shooting,
+   LostBall,
+   Shooting,
 };
 void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown);
 void SetSkillSelection(bool skills);
 
-#  define __noop(...)
+#define __noop(...)
 
 #ifdef OFFICIAL_RUN
-#  define Assert(f) __noop()
-#  define AssertSz(f, sz) __noop()
+#define Assert(f) __noop()
+#define AssertSz(f, sz) __noop()
 #else
-#  define Assert(f) AssertCore(f, #f, __FILE__, __LINE__)
-#  define AssertSz(f, sz) AssertCore(f, sz, __FILE__, __LINE__)
-void AssertCore(bool condition, const char* message, const char* file, int line);
+#define Assert(f) AssertCore(f, #f, __FILE__, __LINE__)
+#define AssertSz(f, sz) AssertCore(f, sz, __FILE__, __LINE__)
+void AssertCore(bool condition, const char *message, const char *file, int line);
 #endif
 
-#define CountOf(a) (sizeof(a)/sizeof(a[0]))
+#define CountOf(a) (sizeof(a) / sizeof(a[0]))
 #define UNUSED_VARIABLE(a) (void)a;
 
 #ifdef OFFICIAL_RUN
-#  define ReportStatus __noop
+#define ReportStatus __noop
 #else
-#  define ReportStatus printf
+#define ReportStatus printf
 #endif // OFFICIAL_RUN
 
 #define joystickMax 127
@@ -64,11 +62,11 @@ constexpr T max(T a, T b)
    return a > b ? a : b;
 }
 
-template <typename T> T min(T a, T b)
+template <typename T>
+T min(T a, T b)
 {
    return a > b ? b : a;
 }
-
 
 /*******************************************************************************
 * 
@@ -77,9 +75,8 @@ template <typename T> T min(T a, T b)
 *******************************************************************************/
 #define shooterMotorSpeed 100 // it botherwise burns controller / port
 #define intakeMotorSpeedUp 80 // same, being protective
-#define intakeMotorSpeedDown 100 
+#define intakeMotorSpeedDown 100
 #define driveMotorMaxSpeed 127
-
 
 /*******************************************************************************
 * 
@@ -99,11 +96,12 @@ D: left y drive
 #define rightDrivePortY 7
 #define rightDrivePort2 9
 //OTHER MOTOR PORTS
-#define intakePort 6
-#define descorerPort 5
-#define shooterPort 2   // "C" on extender
-#define anglePort 8
+#define intakePort1 6
+#define intakePort2 5
 
+#define descorerPort 99
+#define shooterPort 2 // "C" on extender
+#define anglePort 8
 
 /*******************************************************************************
 * 
@@ -124,7 +122,6 @@ extern Encoder g_leftDriveEncoder;
 extern Encoder g_rightDriveEncoder;
 extern Encoder g_sideEncoder;
 
-
 /*******************************************************************************
 * 
 * ANALOG SENSORS
@@ -133,11 +130,11 @@ extern Encoder g_sideEncoder;
 
 #define gyroPort 4
 #define lightSensor 5
-#  define lightSensorBallIn 2600
-#  define lightSensorBallOut 2900
+#define lightSensorBallIn 2600
+#define lightSensorBallOut 2900
 #define shooterPreloadPoterntiometer 6
-#  define ShooterPreloadEnd 850
-#  define ShooterPreloadStart 1050
+#define ShooterPreloadEnd 900
+#define ShooterPreloadStart 1100
 #define ShooterSecondaryPotentiometer 7
 #define anglePotPort 8
 
@@ -146,5 +143,5 @@ extern Encoder g_sideEncoder;
 * JOYSTICK GROUPING
 *
 *******************************************************************************/
-#define JoystickIntakeGroup 6 // Left bottom
+#define JoystickIntakeGroup 6   // Left bottom
 #define JoystickDescorerGroup 5 // Right bottom

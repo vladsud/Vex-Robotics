@@ -62,7 +62,6 @@ void Drive::OverrideInputs(int forward, float turn)
         printf("OverrideInputs: %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn));
 }
 
-
 void Drive::StartTrackingAngle(int angle)
 {
     Assert(!m_trackAngle);
@@ -70,7 +69,7 @@ void Drive::StartTrackingAngle(int angle)
     m_trackAngle = true;
     if (m_flipX)
         angle = -angle;
-    angle *= GyroWrapper::Multiplier; 
+    angle *= GyroWrapper::Multiplier;
 
     AssertSz(abs(angle - GetGyro().Get()) <= 20 * GyroWrapper::Multiplier, "Angle is too far from current one!");
     m_gyro = angle;
@@ -139,14 +138,14 @@ void Drive::HoldPosition()
     PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
 
     if (left * info.leftSpeed >= 0)
-        SetLeftDrive(-left*127);
+        SetLeftDrive(-left * 127);
     else
-        SetLeftDrive(- 30 * Sign(left) -left -info.leftSpeed * 40);
+        SetLeftDrive(-30 * Sign(left) - left - info.leftSpeed * 40);
 
     if (right * info.rightSpeed >= 0)
-        SetLeftDrive(-right*127);
+        SetLeftDrive(-right * 127);
     else
-        SetLeftDrive(- 30 * Sign(right) -right -info.rightSpeed * 40);
+        SetLeftDrive(-30 * Sign(right) - right - info.rightSpeed * 40);
 }
 
 void Drive::Update()
@@ -167,7 +166,7 @@ void Drive::Update()
 
     // It's hard to make this work in automnomous mode, as sometimes direcitons change as part of single attion.
     // So each autonomous action resets state manually
-    bool keepDirection = isAuto() || KeepDrection(forward, turn); 
+    bool keepDirection = isAuto() || KeepDrection(forward, turn);
 
     if (!keepDirection)
         ResetTrackingState();
@@ -176,7 +175,7 @@ void Drive::Update()
     int left = encoderGet(g_leftDriveEncoder);
     int right = encoderGet(g_rightDriveEncoder);
     m_distanceFromBeginning = abs(left) + abs(right);
-    
+
     left -= m_encoderBaseLeft;
     right -= m_encoderBaseRight;
     m_distance = abs(left) + abs(right);
@@ -198,12 +197,12 @@ void Drive::Update()
 
     float error;
     // turn is aded to left!
-    // when m_distance = 2*m_forward, we expect left-right to be 2*turn 
+    // when m_distance = 2*m_forward, we expect left-right to be 2*turn
     Assert(!m_trackAngle || (turnAbs == 0 && smartsOn && isAuto())); // m_trackAngle is used in very limited cases
     if (turnAbs < forwardAbs)
     {
         // Use gyro only in limited cases, until proven to be working well.
-        if (turnAbs == 0 && m_trackAngle) 
+        if (turnAbs == 0 && m_trackAngle)
         {
             // Gyro moves positive counter-clock-wise.
             // gyroDiff > 0: clock-wise movement
@@ -224,7 +223,7 @@ void Drive::Update()
     {
         // if we are not moving forward, then we want to put all power to motors to turn
         // But if we are moving forward 100%, we do not want to completely stop one motor if
-        // turning 100% to the right - we still want to make forward progress! 
+        // turning 100% to the right - we still want to make forward progress!
         int turn = m_turn * (0.6 + 0.4 * forwardAbs / driveMotorMaxSpeed);
 
         SetLeftDrive(m_forward + turn);
@@ -237,11 +236,11 @@ void Drive::Update()
     // power is non-linear!
     int errorMultiplier;
     if (forwardAbs > 90)
-	    errorMultiplier = error * (40 + 8 * abs(error)) / 20; // + m_ErrorIntergral * 0.1;
+        errorMultiplier = error * (40 + 8 * abs(error)) / 20; // + m_ErrorIntergral * 0.1;
     else if (forwardAbs > 60)
-	    errorMultiplier = error * (20 + 4 * abs(error)) / 20; // + m_ErrorIntergral * 0.1;
+        errorMultiplier = error * (20 + 4 * abs(error)) / 20; // + m_ErrorIntergral * 0.1;
     else
-	    errorMultiplier = error * (10 + abs(error)) / 20; // + m_ErrorIntergral * 0.1;
+        errorMultiplier = error * (10 + abs(error)) / 20; // + m_ErrorIntergral * 0.1;
 
     // if we were going forward for a while and then started turning slightly, then there is huge amount of inertia
     // If we allow unbounded adjustments, then speed of one motor will drop to zero and below because of this interia,
@@ -255,7 +254,7 @@ void Drive::Update()
     int leftAdjustment = 0;
     int rightAdjustment = 0;
     if (forward != 0)
-    { 
+    {
         // adjust power on slower motor
         // positive error with positive forward - left is going too fast
         // negative error with negative forward - left is going too fast
@@ -281,12 +280,12 @@ void Drive::Update()
     if (PrintDiagnostics(Diagnostics::Drive))
     {
         printf("Drive: gyro: %d, erorr: (%d, %d), Speeds (%d, %d)\n",
-                // left, right,
-                GetGyro().Get() * 10 / GyroWrapper::Multiplier,
-                int(error), errorMultiplier,
-                // int(m_ErrorIntergral),
-                // m_distance, int(m_turn * m_distance / m_forward),
-                leftMotor,
-                rightMotor);
+               // left, right,
+               GetGyro().Get() * 10 / GyroWrapper::Multiplier,
+               int(error), errorMultiplier,
+               // int(m_ErrorIntergral),
+               // m_distance, int(m_turn * m_distance / m_forward),
+               leftMotor,
+               rightMotor);
     }
 }

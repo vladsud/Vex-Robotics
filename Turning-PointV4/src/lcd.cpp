@@ -12,14 +12,14 @@ LCD::LCD()
     m_buttons = 0;
     m_step = 0;
     m_RefreshOnClick = false;
-        
+
     lcdInit(uart1);
     lcdClear(uart1);
     PrintStepInstructions();
     m_count = 0;
 }
 
-void LCD::PrintMessage(const char* message)
+void LCD::PrintMessage(const char *message)
 {
     m_RefreshOnClick = true;
     lcdSetBacklight(uart1, true);
@@ -28,7 +28,7 @@ void LCD::PrintMessage(const char* message)
 
 void LCD::SetSkillsMoe()
 {
-    lcdSetText(uart1, 1,  "  SKILLS !!! ");
+    lcdSetText(uart1, 1, "  SKILLS !!! ");
     lcdSetText(uart1, 2, "Red       Blue");
     SetSkillSelection(true);
 }
@@ -42,25 +42,25 @@ void LCD::PrintStepInstructions()
     else if (m_step != 3)
         lcdSetText(uart1, 2, "No    Back   Yes");
 
-    switch(m_step)
+    switch (m_step)
     {
-        case 0:
-            lcdSetText(uart1, 1, "Left     Right");
-            lcdSetText(uart1, 2, "Red Skill Blue");
-            break;
-        case 1:
-            lcdSetText(uart1, 1, "First Pos?");
-            break;
-        case 2:
-            lcdSetText(uart1, 1, "Climb platform?");
-            break;
-        case 3:
-            lcdPrint(uart1, 1, "%s, %s", 
-                AtonBlueRight ? "Blue" : "Red",
-                AtonFirstPos ? "1st" : "2nd");
-            lcdPrint(uart1, 2, "%-8s  Cancel", 
-                AtonClimbPlatform ? "Climb" : "No climb");
-            break;
+    case 0:
+        lcdSetText(uart1, 1, "Left     Right");
+        lcdSetText(uart1, 2, "Red Skill Blue");
+        break;
+    case 1:
+        lcdSetText(uart1, 1, "First Pos?");
+        break;
+    case 2:
+        lcdSetText(uart1, 1, "Climb platform?");
+        break;
+    case 3:
+        lcdPrint(uart1, 1, "%s, %s",
+                 AtonBlueRight ? "Blue" : "Red",
+                 AtonFirstPos ? "1st" : "2nd");
+        lcdPrint(uart1, 2, "%-8s  Cancel",
+                 AtonClimbPlatform ? "Climb" : "No climb");
+        break;
     }
 }
 
@@ -68,26 +68,25 @@ void LCD::SelectAction(bool rigthButton)
 {
     switch (m_step)
     {
-        case 0:
-            SetSkillSelection(false);
-            AtonBlueRight = rigthButton;
-            break;
-        case 1:
-            AtonFirstPos = rigthButton;
-            break;
-        case 2:
-            AtonClimbPlatform = rigthButton;
-            break;
-        case 3:
-            if (!rigthButton) // no-op
-                return;
-            m_step = -1;
-            break;
+    case 0:
+        SetSkillSelection(false);
+        AtonBlueRight = rigthButton;
+        break;
+    case 1:
+        AtonFirstPos = rigthButton;
+        break;
+    case 2:
+        AtonClimbPlatform = rigthButton;
+        break;
+    case 3:
+        if (!rigthButton) // no-op
+            return;
+        m_step = -1;
+        break;
     }
     m_step++;
     PrintStepInstructions();
 }
-
 
 void LCD::Update()
 {
@@ -121,7 +120,7 @@ void LCD::Update()
     if (m_step == 0)
     {
         ReportStatus("LCD: Skills!!!\n");
-	SetSkillsMoe();
+        SetSkillsMoe();
     }
     else if (m_step != 3)
     {
@@ -129,6 +128,4 @@ void LCD::Update()
         m_step--;
         PrintStepInstructions();
     }
-
 }
-

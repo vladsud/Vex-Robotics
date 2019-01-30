@@ -19,10 +19,9 @@ class Drive
   {
     // Do not reset m_forward & m_turn on full stop!
     // that screws up autonomous turning.
-    return
-        (m_turn == 0 && turn == 0 && forward * m_forward >= 0) ||
-        (m_forward == 0 && forward == 0) ||
-        (m_turn == turn && m_forward == forward);
+    return (m_turn == 0 && turn == 0 && forward * m_forward >= 0) ||
+           (m_forward == 0 && forward == 0) ||
+           (m_turn == turn && m_forward == forward);
   }
 
   void HoldPosition();

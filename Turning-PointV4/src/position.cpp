@@ -24,7 +24,7 @@ PositionTracker::PositionTracker()
 
     for (int i = 0; i < SamplesToTrack; i++)
     {
-        m_time[i] = time + (SamplesToTrack-i)*PositionTrackingRefreshRate;
+        m_time[i] = time + (SamplesToTrack - i) * PositionTrackingRefreshRate;
 
         m_sensor.leftEncoder[i] = left;
         m_sensor.rightEncoder[i] = right;
@@ -45,7 +45,7 @@ PositionTracker::PositionTracker()
 }
 
 template <typename T1, typename T2>
-void PositionTracker::SmoothSeries(T1* dataIn, T2* dataSpeedOut, unsigned int initialSmoothingRange, unsigned int finalSmoothingRange)
+void PositionTracker::SmoothSeries(T1 *dataIn, T2 *dataSpeedOut, unsigned int initialSmoothingRange, unsigned int finalSmoothingRange)
 {
     // we keep partial sum in the next out element
     T2 sum = dataSpeedOut[m_currentIndex];
@@ -53,16 +53,16 @@ void PositionTracker::SmoothSeries(T1* dataIn, T2* dataSpeedOut, unsigned int in
     sum += dataIn[m_currentIndex];
     // store average
     T2 average = sum / (2 * initialSmoothingRange + 1);
-    dataIn[Index(m_currentIndex-initialSmoothingRange)] = average;
+    dataIn[Index(m_currentIndex - initialSmoothingRange)] = average;
     // create artal sum for next iteration
     sum -= dataIn[Index(m_currentIndex - 2 * initialSmoothingRange)];
-    dataSpeedOut[Index(m_currentIndex+1)] = sum;
-    
+    dataSpeedOut[Index(m_currentIndex + 1)] = sum;
+
     int middleIndex = Index(m_currentIndex - finalSmoothingRange - initialSmoothingRange);
 
     T2 x0 = Value(dataIn, m_currentIndex - 2 * finalSmoothingRange - initialSmoothingRange);
 
-    T2 speed = (average - x0) / (2*finalSmoothingRange);
+    T2 speed = (average - x0) / (2 * finalSmoothingRange);
     dataSpeedOut[middleIndex] = speed;
     dataSpeedOut[m_currentIndex] = speed;
 }
@@ -73,7 +73,7 @@ void PositionTracker::RecalcPosition(int index, unsigned int multiplier)
 
     double arcMoveForward = (m_position.leftSpeed[index] + m_position.rightSpeed[index]) / 2;
     double sideMove = m_position.sideSpeed[index];
-    
+
     int indexPrev = Index(index - multiplier);
     if (arcMoveForward == 0 && sideMove == 0)
     {
@@ -100,10 +100,10 @@ void PositionTracker::RecalcPosition(int index, unsigned int multiplier)
         double angleDiffHalf = gyroSpeed * GyroToRadiants / 2;
         if (abs((int)gyroSpeed) >= GyroWrapper::Multiplier / 16)
         {
-            double sinDiffHalf = sin (angleDiffHalf);
+            double sinDiffHalf = sin(angleDiffHalf);
             double coeff = sinDiffHalf / angleDiffHalf;
             arcMoveForward *= coeff;
-            sideMove = sideMove * coeff + 2 *sinDiffHalf * distanceMiddleWheelFromCenter;
+            sideMove = sideMove * coeff + 2 * sinDiffHalf * distanceMiddleWheelFromCenter;
         }
         double angleHalf = angle - angleDiffHalf;
         double sinA = sin(angleHalf);
@@ -112,12 +112,11 @@ void PositionTracker::RecalcPosition(int index, unsigned int multiplier)
         m_position.Y[index] = m_position.Y[indexPrev] - cosA * arcMoveForward;
         if (sideMove != 0)
         {
-            m_position.X[index] += - cosA * sideMove;
+            m_position.X[index] += -cosA * sideMove;
             m_position.Y[index] += sinA * sideMove;
         }
     }
 }
-
 
 // Based on http://thepilons.ca/wp-content/uploads/2018/10/Tracking.pdf
 // We are missing here third wheel, so we can't account for bumps form the side.
@@ -127,7 +126,7 @@ void PositionTracker::RecalcPosition(int index, unsigned int multiplier)
 // ***         ***
 //      Full in-place turn == 360*3.547 clicks on each wheel.
 //      Or roughly 0.14 degrees per one click.
-//      Gyro, on another hand, 0.004 degree resolution (or 35.5 times better than wheel resolution). 
+//      Gyro, on another hand, 0.004 degree resolution (or 35.5 times better than wheel resolution).
 //      Max full turn in one second == 360 degree/second, measurements per 10ms:
 //          - 25.5 click difference between wheels
 //          - Or 256*3.6 = 921.6 clicks on gyro.
@@ -152,15 +151,15 @@ void PositionTracker::Update()
     unsigned long time = micros();
 
     GetLogger().Log(LogEntry::Position,
-        leftEncoder - m_sensor.leftEncoder[m_currentIndex],
-        rightEncoder - m_sensor.rightEncoder[m_currentIndex],
-        m_gyro - m_sensor.gyro[m_currentIndex]); // sideEncoder
+                    leftEncoder - m_sensor.leftEncoder[m_currentIndex],
+                    rightEncoder - m_sensor.rightEncoder[m_currentIndex],
+                    m_gyro - m_sensor.gyro[m_currentIndex]); // sideEncoder
 
     int i = Index(m_currentIndex + 1);
     m_currentIndex = i;
     m_time[i] = time;
     m_sensor.leftEncoder[i] = leftEncoder;
-    m_sensor.rightEncoder[i] =  rightEncoder;
+    m_sensor.rightEncoder[i] = rightEncoder;
     m_sensor.sideEncoder[i] = sideEncoder;
     m_sensor.gyro[i] = m_gyro;
     m_sensor.shooterAngle[i] = 0;
@@ -169,7 +168,7 @@ void PositionTracker::Update()
     SmoothSeries(m_sensor.rightEncoder, m_position.rightSpeed, c_initialSmoothingRange, c_finalSmoothingRange);
     SmoothSeries(m_sensor.sideEncoder, m_position.sideSpeed, c_initialSmoothingRange, c_finalSmoothingRange);
     SmoothSeries(m_sensor.gyro, m_position.gyroSpeed, 1, 2);
-     // SmoothSeries(m_sensor.shooterAngle, m_position.shooterAngle);
+    // SmoothSeries(m_sensor.shooterAngle, m_position.shooterAngle);
 
     RecalcPosition(Index(m_currentIndex - c_initialSmoothingRange - c_finalSmoothingRange), 1);
     RecalcPosition(m_currentIndex, c_initialSmoothingRange + c_finalSmoothingRange);
@@ -188,15 +187,14 @@ void PositionTracker::Update()
 #endif
 }
 
-
 PositionInfo PositionTracker::LatestPosition(bool clicks)
 {
     PositionInfo info;
-    // we do not recalculate speed for latest item, only for 
-    int index = Index(m_currentIndex-c_initialSmoothingRange);
-    info.leftSpeed  = m_position.leftSpeed[index] / PositionTrackingRefreshRate;
+    // we do not recalculate speed for latest item, only for
+    int index = Index(m_currentIndex - c_initialSmoothingRange);
+    info.leftSpeed = m_position.leftSpeed[index] / PositionTrackingRefreshRate;
     info.rightSpeed = m_position.rightSpeed[index] / PositionTrackingRefreshRate;
-    info.gyroSpeed  = m_position.gyroSpeed[index] / PositionTrackingRefreshRate;
+    info.gyroSpeed = m_position.gyroSpeed[index] / PositionTrackingRefreshRate;
     info.gyro = ::GetGyro().Get();
 
     if (clicks)
@@ -213,13 +211,12 @@ PositionInfo PositionTracker::LatestPosition(bool clicks)
     if (m_flipX)
     {
         info.gyroSpeed = -info.gyroSpeed;
-	info.gyro = -info.gyro;
-	info.X = -info.X;
+        info.gyro = -info.gyro;
+        info.X = -info.X;
     }
 
     return info;
 }
-
 
 void PositionTracker::FlipX(bool flip)
 {

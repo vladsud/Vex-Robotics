@@ -3,40 +3,38 @@
 #include "cycle.h"
 #include "logger.h"
 
-static Main* g_main = nullptr;
+static Main *g_main = nullptr;
 
-Main& SetupMain()
+Main &SetupMain()
 {
 	if (g_main == nullptr)
 		g_main = new Main();
 	return *g_main;
 }
 
-Main& GetMain()
+Main &GetMain()
 {
-  return *g_main;
+	return *g_main;
 }
 
-Logger& GetLogger() { return GetMain().logger; }
-GyroWrapper& GetGyro() { return GetMain().gyro; }
-PositionTracker& GetTracker() { return GetMain().tracker; }
-int GetGyroReading() { return GetTracker().GetGyro(); } 
+Logger &GetLogger() { return GetMain().logger; }
+GyroWrapper &GetGyro() { return GetMain().gyro; }
+PositionTracker &GetTracker() { return GetMain().tracker; }
+int GetGyroReading() { return GetTracker().GetGyro(); }
 
 void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown)
 {
 	GetMain().intake.UpdateIntakeFromShooter(event, forceDown);
 }
 
-
-void AssertCore(bool condition, const char* message, const char* file, int line)
+void AssertCore(bool condition, const char *message, const char *file, int line)
 {
-   if (!condition)
-   {
-      ReportStatus("\n*** ASSERT: %s:%d: %s ***\n\n", file, line, message);
-      GetMain().lcd.PrintMessage(message);
-   }
+	if (!condition)
+	{
+		ReportStatus("\n*** ASSERT: %s:%d: %s ***\n\n", file, line, message);
+		GetMain().lcd.PrintMessage(message);
+	}
 }
-
 
 void Main::Update()
 {
@@ -48,13 +46,12 @@ void Main::Update()
 		// taskDelayUntil( )is better then delay() as it allows us to "catch up" if we spend too much time in one cycle,
 		// i.e. have consistent frequency of updates.
 		// That said, it assumes that we are missing the tick infrequently.
-		// If it's not the case, we can hog CPU and not allow other tasks to have their share.  
-		taskDelayUntil(&m_LastWakeUp, trackerPullTime); 
+		// If it's not the case, we can hog CPU and not allow other tasks to have their share.
+		taskDelayUntil(&m_LastWakeUp, trackerPullTime);
 
 		m_Ticks += trackerPullTime;
 		m_TicksToMainUpdate -= trackerPullTime;
-	}
-	while (!UpdateWithoutWaiting());
+	} while (!UpdateWithoutWaiting());
 }
 
 void Main::UpdateAllSystems()
@@ -85,25 +82,25 @@ bool Main::UpdateWithoutWaiting()
 	// It's likley not a big deal, but something somwhere might not work because of it.
 	static_assert((trackerPullTime % trackerPullTime) == 0);
 
-	switch(m_TicksToMainUpdate / trackerPullTime)
+	switch (m_TicksToMainUpdate / trackerPullTime)
 	{
-		case 0:
-			static_assert(allSystemsPullTime / trackerPullTime >= 5);
-			m_TicksToMainUpdate = allSystemsPullTime;
-			// cheap sytems are grouped together
-			lcd.Update();
-			descorer.Update();
-			break;
-		case 1:
-			shooter.Update();
-			break;
-		case 2:
-			drive.Update();
-			break;
-		case 3:
-			// Good place for external code to consume some cycles
-			res = true;
-			break;
+	case 0:
+		static_assert(allSystemsPullTime / trackerPullTime >= 5);
+		m_TicksToMainUpdate = allSystemsPullTime;
+		// cheap sytems are grouped together
+		lcd.Update();
+		descorer.Update();
+		break;
+	case 1:
+		shooter.Update();
+		break;
+	case 2:
+		drive.Update();
+		break;
+	case 3:
+		// Good place for external code to consume some cycles
+		res = true;
+		break;
 	}
 
 	time = micros() - time;
@@ -112,14 +109,14 @@ bool Main::UpdateWithoutWaiting()
 	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
 	{
 		printf("(%lu) Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
-		m_maxCPUTime,
-		encoderGet(g_leftDriveEncoder),
-		encoderGet(g_rightDriveEncoder),
-		analogRead(anglePotPort),
-		analogRead(ShooterSecondaryPotentiometer),
-		analogRead(shooterPreloadPoterntiometer),
-		GetGyroReading() * 10 / GyroWrapper::Multiplier,
-		analogRead(lightSensor));
+			   m_maxCPUTime,
+			   encoderGet(g_leftDriveEncoder),
+			   encoderGet(g_rightDriveEncoder),
+			   analogRead(anglePotPort),
+			   analogRead(ShooterSecondaryPotentiometer),
+			   analogRead(shooterPreloadPoterntiometer),
+			   GetGyroReading() * 10 / GyroWrapper::Multiplier,
+			   analogRead(lightSensor));
 	}
 
 	return res;
@@ -128,13 +125,12 @@ bool Main::UpdateWithoutWaiting()
 void Main::ResetState()
 {
 	// reset wake-up logic
-	m_LastWakeUp = millis()-1;
+	m_LastWakeUp = millis() - 1;
 
 	drive.ResetState();
 	intake.ResetState();
 	gyro.ResetState();
 }
-
 
 //Operator Control
 void operatorControl()
@@ -144,7 +140,7 @@ void operatorControl()
 		autonomous();
 #endif
 
-	Main& main = SetupMain();
+	Main &main = SetupMain();
 	main.ResetState();
 	main.UpdateAllSystems();
 

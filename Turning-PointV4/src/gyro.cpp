@@ -49,14 +49,15 @@ void GyroWrapper::Integrate()
 
 GyroWrapper::GyroWrapper(unsigned char port, unsigned short multiplier)
     : m_multiplier(multiplier == 0 ? GYRO_MULTIPLIER_DEFAULT : multiplier),
-        m_port(port)
+      m_port(port)
 {
-    // Same as analogCalibrate() 
+    // Same as analogCalibrate()
     uint32_t total = 0;
     const unsigned int Measurements = 1024;
     m_limit = RATE_NOISE_LIMIT_ANALOG * m_multiplier;
 
-    for (unsigned int i = 0; i < Measurements; i++) {
+    for (unsigned int i = 0; i < Measurements; i++)
+    {
         uint32_t value = analogRead(m_port);
         Assert(0 <= value && value <= 4096);
         total += value;

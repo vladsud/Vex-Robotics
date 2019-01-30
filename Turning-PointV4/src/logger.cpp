@@ -2,14 +2,12 @@
 #include "api.h"
 #include <bits/move.h>
 
-
 #ifdef OFFICIAL_RUN
 
 bool PrintDiagnostics(Diagnostics diag)
 {
     return false;
 }
-
 
 #else //OFFICIAL_RUN
 
@@ -23,31 +21,29 @@ bool PrintDiagnostics(Diagnostics diag)
         // case Diagnostics::Drive:
         // case Diagnostics::General:
         // case Diagnostics::Angle:
-            return true;
-        default:
-            return false;
+        return true;
+    default:
+        return false;
     }
 }
 
-static const char* s_LogEntryNames[(int)LogEntry::Max] = {
+static const char *s_LogEntryNames[(int)LogEntry::Max] = {
     "\nPosition: ",
-    "\nDriving: "
-};
+    "\nDriving: "};
 
 LogArgTypes PositionArgs[] = {LogArgTypes::SignedByte, LogArgTypes::SignedByte, LogArgTypes::SignedShort, LogArgTypes::End};
 LogArgTypes DrivingArgs[] = {LogArgTypes::End};
 
-static const LogArgTypes* s_Types[(int) LogEntry::Max] = {
+static const LogArgTypes *s_Types[(int)LogEntry::Max] = {
     PositionArgs,
     DrivingArgs,
 };
 
-
 void Logger::Dump()
 {
-    char buffer[sizeof(int)*3+1];
+    char buffer[sizeof(int) * 3 + 1];
     unsigned long time = micros();
-    Byte* data = m_data;
+    Byte *data = m_data;
 
     int count = 0;
     while (data < m_dataCurr)
@@ -56,10 +52,10 @@ void Logger::Dump()
         int entry = *data++;
         fprint(s_LogEntryNames[entry], stdout);
 
-        Byte time = (Byte)*data++; 
+        Byte time = (Byte)*data++;
         fprint(itoa(time * TimeMultimplier, buffer, 10), stdout);
 
-        const LogArgTypes* types = s_Types[entry];
+        const LogArgTypes *types = s_Types[entry];
         while (*types != LogArgTypes::End)
         {
             fprint(", ", stdout);
@@ -83,7 +79,7 @@ void Logger::Dump()
     m_recording = false;
 }
 
-bool Logger::AllocateBuffer(const LogArgTypes* types)
+bool Logger::AllocateBuffer(const LogArgTypes *types)
 {
     if (!m_recording)
         return false;
@@ -100,7 +96,7 @@ bool Logger::AllocateBuffer(const LogArgTypes* types)
         m_dataCurr = m_data;
     }
 
-    if (m_dataCurr + (LogArgsMax+2) * sizeof(int) >= m_data + TotalBytes)
+    if (m_dataCurr + (LogArgsMax + 2) * sizeof(int) >= m_data + TotalBytes)
     {
         AssertSz(false, "Log is full!");
         m_recording = false;
@@ -112,37 +108,37 @@ bool Logger::AllocateBuffer(const LogArgTypes* types)
 
 void Logger::Pack(LogArgTypes type, int arg)
 {
-    switch(type)
+    switch (type)
     {
-        case LogArgTypes::SignedByte:
-            *m_dataCurr++ = ToLogByte(arg);
-            break;
-        case LogArgTypes::SignedShort:
-            *(signed short*) m_dataCurr = ToLogWord(arg);
-            m_dataCurr += 2;
-            break;
-        case LogArgTypes::End:
-        default:
-            AssertSz(false, "Logger::Pack(): incorrect argument type");
+    case LogArgTypes::SignedByte:
+        *m_dataCurr++ = ToLogByte(arg);
+        break;
+    case LogArgTypes::SignedShort:
+        *(signed short *)m_dataCurr = ToLogWord(arg);
+        m_dataCurr += 2;
+        break;
+    case LogArgTypes::End:
+    default:
+        AssertSz(false, "Logger::Pack(): incorrect argument type");
     }
 }
 
-int Logger::UnPack(Byte*& buffer, LogArgTypes type)
+int Logger::UnPack(Byte *&buffer, LogArgTypes type)
 {
-    switch(type)
+    switch (type)
     {
-        case LogArgTypes::SignedByte:
-            return (signed char)*buffer++;
-        case LogArgTypes::SignedShort:
-        {
-            int res = *(signed short*) buffer;
-            buffer += 2;
-            return res;
-        }
-        case LogArgTypes::End:
-        default:
-            AssertSz(false, "Logger::Pack(): incorrect argument type");
-            return -1;
+    case LogArgTypes::SignedByte:
+        return (signed char)*buffer++;
+    case LogArgTypes::SignedShort:
+    {
+        int res = *(signed short *)buffer;
+        buffer += 2;
+        return res;
+    }
+    case LogArgTypes::End:
+    default:
+        AssertSz(false, "Logger::Pack(): incorrect argument type");
+        return -1;
     }
 }
 
@@ -153,7 +149,7 @@ Byte Logger::GetTime()
         m_lastTime = time;
     time -= m_lastTime;
     m_lastTime += time;
-    if (time > 255*TimeMultimplier)
+    if (time > 255 * TimeMultimplier)
         return 255;
     return time / TimeMultimplier;
 }
@@ -164,7 +160,7 @@ signed char Logger::ToLogByte(int value)
         return 127;
     if (value < -128)
         return -128;
-    return (signed char) value;
+    return (signed char)value;
 }
 
 signed short int Logger::ToLogWord(int value)
@@ -173,13 +169,13 @@ signed short int Logger::ToLogWord(int value)
         return 0x7fff;
     if (value < -0x8000)
         return -0x8000;
-    return (signed short int) value;
+    return (signed short int)value;
 }
 
 void Logger::Log(LogEntry log, int arg1, int arg2, int arg3)
 {
 #ifdef LOGGING
-    const LogArgTypes* types = s_Types[(int)log];
+    const LogArgTypes *types = s_Types[(int)log];
     Assert(types[3] == LogArgTypes::End);
 
     if (!AllocateBuffer(types))

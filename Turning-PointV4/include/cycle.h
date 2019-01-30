@@ -21,11 +21,11 @@ class Main
 	// Also more often we check sensors, the more precise we capture moment when encoder clicks, allowing us more precise estimation of speed.
 	// Main user of faster update - position trackign code.
 	// But, it can't ft into 1ms, so we use 2ms update cycle
-	static const int trackerPullTime = PositionTrackingRefreshRate; // 2 
+	static const int trackerPullTime = PositionTrackingRefreshRate; // 2
 	// For everything else 10ms is sufficient.
 	static const int allSystemsPullTime = 10;
 
-public:
+  public:
 	Drive drive;
 	Intake intake;
 	Descorer descorer;
@@ -41,15 +41,15 @@ public:
 	// But time resolution might be coarser, in the range of 1-10 ms
 	unsigned int GetTime() { return m_Ticks; }
 	unsigned long GetMaxCycleTime() { return m_maxCPUTime; }
-   	void Update();
+	void Update();
 	void UpdateAllSystems();
 	void ResetState();
 
-protected:
+  protected:
 	// returns true when it's good time for external system (like autonomous) consume some CPU cycles
-   	bool UpdateWithoutWaiting();
+	bool UpdateWithoutWaiting();
 
-private:
+  private:
 	unsigned long m_Ticks = 0; // in ms
 	unsigned long m_LastWakeUp = 0;
 	int m_TicksToMainUpdate = allSystemsPullTime;
@@ -61,4 +61,4 @@ private:
 * Functions
 *
 *******************************************************************************/
-extern Main& GetMain();
+extern Main &GetMain();

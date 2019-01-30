@@ -20,7 +20,7 @@ void RunAtonSecondPos()
 
     if (GetMain().lcd.AtonClimbPlatform)
     {
-        Do(Move(700, 50));
+        Do(Move(600, 50));
         Do(Wait(1000));
         Do(Turn(-60));
         Do(Wait(200));

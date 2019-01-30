@@ -12,22 +12,19 @@
 
 #include "aton.h"
 
-
 AtonMode g_mode = AtonMode::Regular; // ;
 
 // Variables not to touch - control actual autonomous mode
 bool g_autonomousSmartsOn = true;
 bool g_manualSmarts = false;
 
-
 bool g_alreadyRunAutonomous = false;
-
 
 bool isAuto()
 {
 #ifndef OFFICIAL_RUN
     if (g_mode == AtonMode::ManualAuto || g_mode == AtonMode::TestRun)
-            return true;
+        return true;
 #endif // OFFICIAL_RUN
     return isAutonomous();
 }
@@ -49,7 +46,7 @@ void SetSkillSelection(bool skills)
         g_mode = AtonMode::Regular;
 }
 
-void DoCore(Action&& action)
+void DoCore(Action &&action)
 {
     while (!action.ShouldStop())
     {
@@ -57,7 +54,6 @@ void DoCore(Action&& action)
     }
     action.Stop();
 }
-
 
 void autonomous()
 {
@@ -74,7 +70,7 @@ void autonomous()
         delay(2000);
 #endif
 
-    Main& main = SetupMain();
+    Main &main = SetupMain();
 
     // all system update their counters, like distance counter.
     main.ResetState();
@@ -86,7 +82,7 @@ void autonomous()
 
     if (g_mode == AtonMode::Skills)
     {
-        auto& lcd = main.lcd;
+        auto &lcd = main.lcd;
         lcd.AtonBlueRight = false;
         lcd.AtonFirstPos = true;
         lcd.AtonClimbPlatform = true;
@@ -111,39 +107,39 @@ void autonomous()
         else
             RunAtonSecondPos();
     }
+    IntakeStop();
 
     // unused variables in final build
-    UNUSED_VARIABLE(time);  
-    UNUSED_VARIABLE(time2); 
+    UNUSED_VARIABLE(time);
+    UNUSED_VARIABLE(time2);
 
     ReportStatus("\n*** END AUTONOMOUS ***\n\n");
-    ReportStatus ("Time: %d %d \n", main.GetTime()-time, int(millis() - time2));
-    ReportStatus ("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
+    ReportStatus("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
+    ReportStatus("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
 
     GetLogger().Dump();
 
     Do(EndOfAction());
 }
 
-
 void SetShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
 {
-    auto& main = GetMain();
+    auto &main = GetMain();
     auto flag = hightFlag ? Flag::High : Flag::Middle;
     // we disable checking for ball only for first action - shooting.
     Assert(!main.shooter.IsShooting());
 
-   if (!checkPresenceOfBall || main.shooter.BallStatus() != BallPresence::NoBall)
-   {
-       main.shooter.SetFlag(flag);
-       main.shooter.SetDistance(distance);
-       Assert(main.shooter.GetFlagPosition() != Flag::Loading); // importatn for next ShootBall action to be no-op
-   }
-   else
-   {
-       Assert(!main.shooter.IsMovingAngle()); // are we waiting for nothing?
-       Assert(main.shooter.GetFlagPosition() == Flag::Loading); // importatn for next ShootBall action to be no-op
-   }
+    if (!checkPresenceOfBall || main.shooter.BallStatus() != BallPresence::NoBall)
+    {
+        main.shooter.SetFlag(flag);
+        main.shooter.SetDistance(distance);
+        Assert(main.shooter.GetFlagPosition() != Flag::Loading); // importatn for next ShootBall action to be no-op
+    }
+    else
+    {
+        Assert(!main.shooter.IsMovingAngle());                   // are we waiting for nothing?
+        Assert(main.shooter.GetFlagPosition() == Flag::Loading); // importatn for next ShootBall action to be no-op
+    }
 }
 
 int CalcAngleToPoint(double x, double y)
@@ -154,13 +150,12 @@ int CalcAngleToPoint(double x, double y)
     y = info.Y - y;
     int angle = 0;
     if (y > 0)
-        angle = atan(x/y) * 180 / 3.14159265358;
+        angle = atan(x / y) * 180 / 3.14159265358;
     else if (y < 0)
-        angle = 180 + atan(x/y) * 180 / 3.14159265358;
+        angle = 180 + atan(x / y) * 180 / 3.14159265358;
     ReportStatus("    vector = (%f, %f): angle = %d\n", x, y, angle);
     return angle;
 }
-
 
 void MoveToPlatform(bool twoPlatforms)
 {

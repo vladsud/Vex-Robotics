@@ -3,8 +3,8 @@
 #include "position.h"
 #include <cmath>
 
-#define Turn(x) TurnPrecise((x) * GyroWrapper::Multiplier)
-#define TurnToAngle(x) TurnPrecise((x) * GyroWrapper::Multiplier - GetGyroReading())
+#define Turn(x) TurnPrecise((x)*GyroWrapper::Multiplier)
+#define TurnToAngle(x) TurnPrecise((x)*GyroWrapper::Multiplier - GetGyroReading())
 #define TurnToPoint(x, y) TurnToAngle(CalcAngleToPoint(x, y))
 
 int CalcAngleToPoint(double x, double y);
@@ -36,9 +36,9 @@ struct TurnPrecise : public Action
         unsigned int distanceAbs = abs(distance);
         int idealSpeed; // gyro ticks per second
         if (distanceAbs > point2)
-            idealSpeed = speed1 + speed2 * (point2-point1);
+            idealSpeed = speed1 + speed2 * (point2 - point1);
         else if (distanceAbs > point1)
-            idealSpeed = speed1 + speed2 * (distanceAbs-point1);
+            idealSpeed = speed1 + speed2 * (distanceAbs - point1);
         else if (distanceAbs > point0)
             idealSpeed = speed1;
         else
@@ -62,7 +62,7 @@ struct TurnPrecise : public Action
         int actualSpeed = 1000 * GetTracker().LatestPosition(false /*clicks*/).gyroSpeed;
         int idealSpeed = IdealSpeedFromDistance(error);
 
-        if ((idealSpeed == 0 && abs(actualSpeed) <= 3*GyroWrapper::Multiplier) || (m_turn * sign < 0 && abs(error) > GyroWrapper::Multiplier / 2))
+        if ((idealSpeed == 0 && abs(actualSpeed) <= 3 * GyroWrapper::Multiplier) || (m_turn * sign < 0 && abs(error) > GyroWrapper::Multiplier / 2))
         {
             ReportStatus("   Turn stop! Error: error=%d turn=%d\n", error, m_turn);
             m_main.drive.OverrideInputs(0, 0);
@@ -77,7 +77,7 @@ struct TurnPrecise : public Action
 
         // Power calculation. Some notes:
         // We want to have smaller impact of speed difference, to keep system stable.
-        // For that reason, bigger kick is comming from 
+        // For that reason, bigger kick is comming from
         // a) "stable" power to jeep motion going - that's fixed size (with right sign)
         // b) power proportional to ideal speed - the higher maintained speed, the more energy is needed to sustain it.
         // The rest is addressed by difference between nominal and desired speeds
@@ -112,9 +112,10 @@ struct TurnPrecise : public Action
         return false;
     }
 
-protected:
+  protected:
     int m_turn;
-private:
+
+  private:
     int m_initialAngle;
     int m_power = 0;
 };

@@ -17,10 +17,10 @@ static const int c_initialSmoothingRange = 3;
 // Also Gyro likely does not need that match smoothing - it intergrates every 2ms, and produces rather good results.
 // At the same time, it should be at least 2 * initialSmoothingRange, otherwise we are smoothing twice same data point, likely at expense of accuracy.
 // And we have huge latency in motor power (15ms), so acceleration unlikely to change that rapidly.
-// 6 or 8 looks good numbers, 10 results in changes being observed  too early / late compared to actual phisics  
+// 6 or 8 looks good numbers, 10 results in changes being observed  too early / late compared to actual phisics
 static const int c_finalSmoothingRange = 8;
 
-// Add two extra to reduce chances of running into prboblems. 
+// Add two extra to reduce chances of running into prboblems.
 static const int SamplesToTrack = 60; //4 + max (2*c_finalSmoothingRange + c_initialSmoothingRange + 1, 2*c_initialSmoothingRange+1);
 
 struct SensorData
@@ -46,7 +46,6 @@ struct PositionData
     int shooterAngle[SamplesToTrack];
 };
 
-
 // This is the structure we expose to other modules
 struct PositionInfo
 {
@@ -68,7 +67,7 @@ struct Coordinates
 // Main class
 class PositionTracker
 {
-public:
+  public:
     static constexpr double Pi = 3.14159265358;
     static constexpr double GyroToRadiants = Pi / GyroWrapper::Multiplier / 180;
     static constexpr double inchesPerClick = 4.11161263 * Pi / 360; // 0.03588
@@ -77,7 +76,7 @@ public:
     static constexpr double distanceMiddleWheelFromCenter = 5.0 / inchesPerClick;
     static constexpr double one_by_wheelDistance = 1 / (distanceRightWheelFromCenter + distanceLeftWheelFromCenter);
 
-private:
+  private:
     int m_gyro = 0;
     int m_count = 0;
     bool m_flipX = false;
@@ -87,7 +86,7 @@ private:
     PositionData m_position;
     int m_currentIndex = 0;
 
-public:
+  public:
     PositionTracker();
     // Recalc. Expensive operation that should happen time to time
     void Update();
@@ -97,21 +96,21 @@ public:
     void FlipX(bool flip);
     int GetGyro();
 
-private:
+  private:
     int Index(int i)
     {
         return (i + SamplesToTrack) % SamplesToTrack;
-    } 
+    }
     void RecalcPosition(int index, unsigned int multiplier);
 
     template <typename T1, typename T2>
-    void SmoothSeries(T1* dataIn, T2* dataSpeedOut, unsigned int initialSmoothingRange, unsigned int finalSmoothingRange);
+    void SmoothSeries(T1 *dataIn, T2 *dataSpeedOut, unsigned int initialSmoothingRange, unsigned int finalSmoothingRange);
 
     template <typename T>
-    T& Value(T* data, int index)
+    T &Value(T *data, int index)
     {
         return data[Index(index)];
     }
 };
 
-PositionTracker& GetTracker();
+PositionTracker &GetTracker();

@@ -5,10 +5,10 @@
 struct Move : public Action
 {
     Move(unsigned int distance, int forward, float turn = 0, bool stopOnCollision = false)
-      : m_distanceToMove(distance),
-        m_forward(forward),
-        m_turn(turn),
-        m_stopOnCollision(stopOnCollision)
+        : m_distanceToMove(distance),
+          m_forward(forward),
+          m_turn(turn),
+          m_stopOnCollision(stopOnCollision)
     {
         // You should either turn on spot, or move forward with small turning.
         // Doing something else is likely slower, and less accurate.
@@ -16,19 +16,19 @@ struct Move : public Action
 
         m_main.drive.ResetTrackingState();
         m_main.drive.OverrideInputs(m_forward, m_turn);
-        
+
         // important for m_lastDistance!
-	    Assert(m_main.drive.m_distance == 0);
+        Assert(m_main.drive.m_distance == 0);
     }
 
     bool ShouldStop() override
     {
         unsigned int distance = m_main.drive.m_distance;
-	    if (distance > m_lastDistance)
+        if (distance > m_lastDistance)
             m_speed = (m_speed + (distance - m_lastDistance)) / 2;
         if (m_maxSpeed < m_speed)
             m_maxSpeed = m_speed;
-        
+
         // Collision?
         if (m_stopOnCollision && m_maxSpeed >= 10 && m_speed < m_maxSpeed / 2)
         {
@@ -45,7 +45,7 @@ struct Move : public Action
         m_main.drive.OverrideInputs(0, 0);
     }
 
-protected:
+  protected:
     unsigned int m_distanceToMove;
     int m_forward;
     float m_turn;
@@ -54,7 +54,6 @@ protected:
     bool m_stopOnCollision;
     unsigned int m_lastDistance = 0;
 };
-
 
 struct MoveToPlatformAction : public Move
 {
@@ -89,7 +88,7 @@ struct MoveToPlatformAction : public Move
             slowDown = 50;
             if (m_slowCount == 0)
             {
-                m_main.drive.OverrideInputs(75, 0);
+                m_main.drive.OverrideInputs(85, 0);
                 m_distanceFirstHit = distance;
             }
         }
@@ -113,7 +112,7 @@ struct MoveToPlatformAction : public Move
                 return true;
             }
         }*/
-        
+
         m_lastDistance = distance;
 
         if (m_main.drive.m_distance >= m_distanceToMove)
@@ -121,7 +120,7 @@ struct MoveToPlatformAction : public Move
             ReportStatus("MoveToPlatform: Stop based on disance!\n");
             return true;
         }
-	    return false;
+        return false;
     }
 };
 
@@ -155,13 +154,12 @@ struct MoveTimeBased : public Move
         }
         return false;
     }
-}; 
-
+};
 
 struct MoveExact : public Action
-{    
+{
     MoveExact(int distance)
-      : m_distanceToMove(distance)
+        : m_distanceToMove(distance)
     {
         if (m_distanceToMove < 0)
         {
@@ -188,9 +186,9 @@ struct MoveExact : public Action
         unsigned int distanceAbs = abs(distance);
         int idealSpeed; // gyro ticks per second
         if (distanceAbs > point2)
-            idealSpeed = speed1 + speed2 * (point2-point1);
+            idealSpeed = speed1 + speed2 * (point2 - point1);
         else if (distance > point1)
-            idealSpeed = speed1 + speed2 * (distanceAbs-point1);
+            idealSpeed = speed1 + speed2 * (distanceAbs - point1);
         else if (distance > point0)
             idealSpeed = speed1;
         else
@@ -216,7 +214,7 @@ struct MoveExact : public Action
         if (!m_forward)
             actualSpeed = -actualSpeed; // make it positive
 
-        if (idealSpeed == 0 && abs(actualSpeed) <= 18)
+        if (idealSpeed == 0 && (abs(actualSpeed) <= 18 || error < 0))
         {
             ReportStatus("MoveExact stop! Error: %d\n", error);
             return true;
@@ -230,13 +228,13 @@ struct MoveExact : public Action
 
         // Power calculation. Some notes:
         // We want to have smaller impact of speed difference, to keep system stable.
-        // For that reason, bigger kick is comming from 
+        // For that reason, bigger kick is comming from
         // a) "stable" power to jeep motion going - that's fixed size (with right sign)
         // b) power proportional to ideal speed - the higher maintained speed, the more energy is needed to sustain it.
         // The rest is addressed by difference between nominal and desired speeds
         int power = 0;
         if (error < 0 || idealSpeed == 0)
-            power = -18 + idealSpeed / 60 + diff / 50;  // Stopping!
+            power = -18 + idealSpeed / 60 + diff / 50; // Stopping!
         else if (idealSpeed != 0)
             power = 18 + idealSpeed * (25 + idealSpeed / 500) / 2000 + diff / 70; // Moving forward
 
@@ -258,16 +256,16 @@ struct MoveExact : public Action
         // ReportStatus("MoveExact: %d %d %d %d %d\n", error, actualSpeed, idealSpeed, diff, power);
 
         if (!m_forward)
-            power = - power;
+            power = -power;
         m_power = (power + m_power) / 2;
 
         m_main.drive.OverrideInputs(m_power, 0);
         return false;
     }
 
-private:
+  private:
     static const int maxSpeed = 85;
     int m_power = 0;
     int m_distanceToMove = 0;
-    bool  m_forward = true;
+    bool m_forward = true;
 };

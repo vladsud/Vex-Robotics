@@ -1,24 +1,23 @@
 #include "shooter.h"
 #include "logger.h"
 
-
 // Distance based on front of robot
-constexpr float Distances[]    {   24 ,  30,  48,   75,    108};
+constexpr float Distances[]{24, 30, 48, 75, 108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]   {  116,   100,  72,   37,   80};
-constexpr unsigned int AnglesMedium[] {   85,   60,   35,   20,   40};
+constexpr unsigned int AnglesHigh[]{130, 120, 95, 72, 80};
+constexpr unsigned int AnglesMedium[]{90, 80, 50, 40, 50};
 
-constexpr unsigned int LastDistanceCount = CountOf(Distances)-1;
+constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
 constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 {
-    return 1860 - angle*5;
+    return 1860 - angle * 5;
 }
 
 // Angle potentiometer:
-constexpr unsigned int anglerLow = 3; 
+constexpr unsigned int anglerLow = 3;
 const unsigned int anglePotentiometerLow = ConvertAngleToPotentiometer(anglerLow);
 const unsigned int anglePotentiometerHigh = 1060;
 
@@ -49,13 +48,12 @@ static_assert(AnglesMedium[2] < AnglesHigh[2]);
 static_assert(AnglesMedium[3] < AnglesHigh[3]);
 // static_assert(AnglesMedium[4] < AnglesHigh[4]);
 
-
 constexpr unsigned int CalcAngle(Flag flag, float distanceInches)
 {
     if (flag == Flag::Loading)
         return anglerLow;
 
-    const unsigned int* angles = (flag == Flag::High) ? AnglesHigh : AnglesMedium;
+    const unsigned int *angles = (flag == Flag::High) ? AnglesHigh : AnglesMedium;
     unsigned int count = CountOf(Distances);
 
     if (Distances[0] >= distanceInches)
@@ -65,11 +63,11 @@ constexpr unsigned int CalcAngle(Flag flag, float distanceInches)
     {
         if (Distances[i] >= distanceInches)
         {
-            return angles[i-1] - (distanceInches - Distances[i-1]) * int(angles[i-1] - angles[i]) / (Distances[i] - Distances[i-1]);
+            return angles[i - 1] - (distanceInches - Distances[i - 1]) * int(angles[i - 1] - angles[i]) / (Distances[i] - Distances[i - 1]);
         }
     }
 
-    return angles[count-1];
+    return angles[count - 1];
 }
 
 constexpr bool AlmostSameAngle(unsigned int angle1, unsigned int angle2)
@@ -79,21 +77,21 @@ constexpr bool AlmostSameAngle(unsigned int angle1, unsigned int angle2)
 
 static_assert(CalcAngle(Flag::Loading, Distances[2]) == anglerLow);
 
-static_assert(CalcAngle(Flag::High, Distances[0]-5) == AnglesHigh[0]);
+static_assert(CalcAngle(Flag::High, Distances[0] - 5) == AnglesHigh[0]);
 static_assert(CalcAngle(Flag::High, Distances[0]) == AnglesHigh[0]);
 static_assert(CalcAngle(Flag::High, Distances[2]) == AnglesHigh[2]);
 static_assert(CalcAngle(Flag::High, Distances[LastDistanceCount]) == AnglesHigh[LastDistanceCount]);
-static_assert(CalcAngle(Flag::High, Distances[LastDistanceCount]+100) == AnglesHigh[LastDistanceCount]);
-static_assert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[2] + Distances[3]) / 2),   (AnglesHigh[2]   + AnglesHigh[3]) / 2));
-static_assert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[2]*3 + Distances[3]) / 4), (AnglesHigh[2]*3 + AnglesHigh[3]) / 4));
+static_assert(CalcAngle(Flag::High, Distances[LastDistanceCount] + 100) == AnglesHigh[LastDistanceCount]);
+static_assert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[2] + Distances[3]) / 2), (AnglesHigh[2] + AnglesHigh[3]) / 2));
+static_assert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[2] * 3 + Distances[3]) / 4), (AnglesHigh[2] * 3 + AnglesHigh[3]) / 4));
 
-static_assert(CalcAngle(Flag::Middle, Distances[0]-5) == AnglesMedium[0]);
+static_assert(CalcAngle(Flag::Middle, Distances[0] - 5) == AnglesMedium[0]);
 static_assert(CalcAngle(Flag::Middle, Distances[0]) == AnglesMedium[0]);
 static_assert(CalcAngle(Flag::Middle, Distances[2]) == AnglesMedium[2]);
 static_assert(CalcAngle(Flag::Middle, Distances[LastDistanceCount]) == AnglesMedium[LastDistanceCount]);
-static_assert(CalcAngle(Flag::Middle, Distances[LastDistanceCount]+100) == AnglesMedium[LastDistanceCount]);
-static_assert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2]   + Distances[3]) / 2), (AnglesMedium[2]   + AnglesMedium[3]) / 2));
-static_assert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2]*3 + Distances[3]) / 4), (AnglesMedium[2]*3 + AnglesMedium[3]) / 4));
+static_assert(CalcAngle(Flag::Middle, Distances[LastDistanceCount] + 100) == AnglesMedium[LastDistanceCount]);
+static_assert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2] + Distances[3]) / 2), (AnglesMedium[2] + AnglesMedium[3]) / 2));
+static_assert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2] * 3 + Distances[3]) / 4), (AnglesMedium[2] * 3 + AnglesMedium[3]) / 4));
 
 // Need to figure out initial position
 Shooter::Shooter()
@@ -147,33 +145,33 @@ void Shooter::KeepMoving()
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
     if ((m_fMoving && m_count >= 200) || (distanceAbs <= 10 && abs(m_diffAdjusted) <= 1))
     {
-	if (m_fMoving)
-	{
+        if (m_fMoving)
+        {
             if (PrintDiagnostics(Diagnostics::Angle))
                 printf("STOP: (%d) Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n\n\n", m_count, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
             StopMoving();
-	}
+        }
         motorSet(anglePort, 0);
         return;
     }
-    
+
     if (m_fMoving || m_flag != Flag::Loading)
     {
-	if (distanceAbs <= 10)
+        if (distanceAbs <= 10)
             speed = m_diffAdjusted * 10;
         else if (distance > 0) // going up
-            speed = 23 + distance *2/3 + m_diffAdjusted * 5;
+            speed = 23 + distance * 2 / 3 + m_diffAdjusted * 5;
         else if (m_flag != Flag::Loading)
             speed = -14 + distance / 2 + m_diffAdjusted * 5;
         else
             speed = -25 + distance + m_diffAdjusted * 3; // / 5;
         if (PrintDiagnostics(Diagnostics::Angle))
-	{
-	    if (m_fMoving)
+        {
+            if (m_fMoving)
                 printf("ANG MOVE: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
-	    else
+            else
                 printf("ANG ADJ: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
-	}
+        }
     }
 
     const int angleMotorSpeed = 100;
@@ -236,7 +234,7 @@ void Shooter::UpdateDistanceControls()
         SetDistance(Distances[3]);
 }
 
-void  Shooter::OverrideSetShooterMode(bool on)
+void Shooter::OverrideSetShooterMode(bool on)
 {
     Assert(isAuto());
     Assert(!on || m_flag != Flag::Loading);
@@ -257,7 +255,7 @@ BallPresence Shooter::BallStatus()
         return BallPresence::NoBall;
     if (ballIn)
         return BallPresence::HasBall;
-    return BallPresence::Unknown; 
+    return BallPresence::Unknown;
 }
 
 // Preloadign/shooting phases:
@@ -286,7 +284,7 @@ BallPresence Shooter::BallStatus()
 //      m_preloading = false;
 void Shooter::Update()
 {
-    // Debug();
+    return;
 
     UpdateDistanceControls();
 
@@ -297,12 +295,12 @@ void Shooter::Update()
     if (userShooting)
     {
         m_timeSinseShooting = 0;
-	    UpdateIntakeFromShooter(IntakeShoterEvent::Shooting, m_flag == Flag::Middle && m_distanceInches > Distances[1] /*forceDown*/);
+        UpdateIntakeFromShooter(IntakeShoterEvent::Shooting, m_flag == Flag::Middle && m_distanceInches > Distances[1] /*forceDown*/);
     }
 
     // Did we go from zero to 4000 on potentiometer?
     // That means shot was done, and we are starting "normal" preload.
-     if (ShooterPreloadStart < shooterPreloadPos && shooterPreloadPos < 3500)
+    if (ShooterPreloadStart < shooterPreloadPos && shooterPreloadPos < 3500)
         m_preloadAfterShotCounter = 0;
 
     if (m_preloadAfterShotCounter > 0)
@@ -312,25 +310,31 @@ void Shooter::Update()
     // Start moving if we are below first stop (ShooterPreloadStart)
     // and keep motors moving to further stop (ShooterPreloadEnd)
     // Physically system will move back until it catches next teath on stopper,
-    // so we need to have some gap in between those stops not to have ssytem continuosly moving up and down. 
-    bool needPreload = !m_disablePreload && (
-        m_preloadAfterShotCounter > 0 ||
-        (m_preloading && shooterPreloadPos > ShooterPreloadEnd) ||
-        shooterPreloadPos > ShooterPreloadStart
-        );
+    // so we need to have some gap in between those stops not to have ssytem continuosly moving up and down.
+    bool needPreload = !m_disablePreload && (m_preloadAfterShotCounter > 0 ||
+                                             (m_preloading && shooterPreloadPos > ShooterPreloadEnd) ||
+                                             shooterPreloadPos > ShooterPreloadStart);
 
     if (PrintDiagnostics(Diagnostics::Angle) && needPreload != m_preloading)
-        printf("Preload state: %d\n", needPreload); 
+        printf("Preload state: %d\n", needPreload);
 
     // safety net - if something goes wrong, user needs to have a way to disable preload.
     // This is done by clicking and releasing shooter button quickly while not in the shooting zone.
     if (needPreload && userShooting && !m_userShooting && m_preloadAfterShotCounter == 0)
     {
-	    if (PrintDiagnostics(Diagnostics::Angle))
+        if (PrintDiagnostics(Diagnostics::Angle))
             print("Disabling preload\n");
         m_disablePreload = true;
         needPreload = false;
     }
+
+    // Extra-caution: do not lose the ball if user was shooting, but this did not result in lost ball.
+    // If ball is lost, then we stop intake from continuing going down.
+    // But if the ball is not lost after shooting, intake will keep going down and we lose the ball.
+    // This prevents that.
+    if (!userShooting && m_userShooting)
+        UpdateIntakeFromShooter(IntakeShoterEvent::LostBall, false /*forceDown*/);
+
     m_userShooting = userShooting;
     m_preloading = needPreload;
 
@@ -338,7 +342,7 @@ void Shooter::Update()
     BallPresence ball = BallStatus();
 
     // User can disable auto-reload by moving angle up / down against system.
-    // If it happens, we set m_Manual = false for this cycle (until readng starts matching user actions) 
+    // If it happens, we set m_Manual = false for this cycle (until readng starts matching user actions)
     bool lostball = false;
     if (!m_Manual)
     {
@@ -348,15 +352,15 @@ void Shooter::Update()
         {
             lostball = true;
             SetFlag(Flag::Loading);
-	    UpdateIntakeFromShooter(IntakeShoterEvent::LostBall, false /*forceDown*/);
+            UpdateIntakeFromShooter(IntakeShoterEvent::LostBall, false /*forceDown*/);
         }
     }
 
     // Did shot just hapened?
     // We can't use potentiometer here, because we are very close to dead zone, so it can jump from 0 to 4000.
     // But having user pressing shoot button and losing the ball is a good indicator we are done.
-    // This does not handle case when ball escapes, but shooter still did not fire - we will misfire and reload - 
-    // likely in time for next ball to land in shooter, so it's not a big issue. 
+    // This does not handle case when ball escapes, but shooter still did not fire - we will misfire and reload -
+    // likely in time for next ball to land in shooter, so it's not a big issue.
     if ((m_timeSinseShooting <= 20 || shooterPreloadPos < ShooterPreloadEnd) && lostball)
     {
         m_disablePreload = false;
@@ -365,8 +369,8 @@ void Shooter::Update()
     }
 
     // Check angle direction based on user actions.
-    bool topFlag =MoveToTopFlagPosition();
-    bool middleFlag =  MoveToMiddleFlagPosition();
+    bool topFlag = MoveToTopFlagPosition();
+    bool middleFlag = MoveToMiddleFlagPosition();
 
     if (MoveToLoadingPosition())
     {

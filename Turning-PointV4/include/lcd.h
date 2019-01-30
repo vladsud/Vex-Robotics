@@ -11,7 +11,8 @@ class LCD
 	int m_step = 0;
 	int m_count;
 	bool m_RefreshOnClick = false;
-public:
+
+  public:
 	bool AtonBlueRight = true;
 	bool AtonFirstPos = true;
 	bool AtonClimbPlatform = false;
@@ -21,6 +22,6 @@ public:
 	void PrintStepInstructions();
 	void SelectAction(bool rigthButton);
 	void Update();
-	void PrintMessage(const char* message);
+	void PrintMessage(const char *message);
 	void SetSkillsMoe();
 };

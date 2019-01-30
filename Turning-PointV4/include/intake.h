@@ -3,7 +3,7 @@
 
 class Intake
 {
-public:
+  public:
     enum class Direction
     {
         None,
@@ -15,15 +15,15 @@ public:
     void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown);
     void SetIntakeDirection(Direction direction);
     void ResetState();
-private:
+
+  private:
     void SetIntakeMotor(int speed);
 
-private:
+  private:
     Direction m_direction = Direction::None;
     bool m_doublePressed = false;
     int m_power = 0;
 };
-
 
 class Descorer
 {
@@ -35,6 +35,7 @@ class Descorer
     };
     int m_count = 0;
     Direction m_direction = Direction::None;
-public:
+
+  public:
     void Update();
 };
