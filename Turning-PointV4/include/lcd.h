@@ -23,5 +23,5 @@ class LCD
 	void SelectAction(bool rigthButton);
 	void Update();
 	void PrintMessage(const char *message);
-	void SetSkillsMoe();
+	void SetSkillsMode();
 };

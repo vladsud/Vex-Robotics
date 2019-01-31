@@ -20,7 +20,7 @@ void Intake::SetIntakeDirection(Direction direction)
     }
 
     int power = (m_direction == Direction::Up) ? -intakeMotorSpeedUp : intakeMotorSpeedDown;
-    
+
     if (power * m_power >= 0)
         m_power = power;
     else
@@ -43,15 +43,15 @@ void Intake::Update()
 
     if (joystickGetDigital(JoystickDescorerGroup, JOY_UP))
     {
-         if (joystickGetDigital(JoystickDescorerGroup, JOY_DOWN) || joystickGetDigital(JoystickIntakeGroup, JOY_UP))
-         {
+        if (joystickGetDigital(JoystickDescorerGroup, JOY_DOWN) || joystickGetDigital(JoystickIntakeGroup, JOY_UP))
+        {
             m_doublePressed = true;
-	    m_direction = Direction::None;
-         }
-	 else
-	 {
-             direction = Direction::Up;
-	 }
+            m_direction = Direction::None;
+        }
+        else
+        {
+            direction = Direction::Up;
+        }
     }
     else if (joystickGetDigital(JoystickDescorerGroup, JOY_DOWN))
     {
@@ -68,22 +68,21 @@ void Intake::Update()
     SetIntakeDirection(direction);
 }
 
-
 void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown)
 {
     switch (event)
     {
-        case IntakeShoterEvent::LostBall:
-	    //if (m_direction == Direction::None && !m_doublePressed)
-        	SetIntakeDirection(Direction::Up);
-	    break;
-	case IntakeShoterEvent::Shooting:
-            if (forceDown)
-        	    SetIntakeDirection(Direction::Down);
-            else
-        	    SetIntakeDirection(Direction::None);
-		break;
-    }	
+    case IntakeShoterEvent::LostBall:
+        //if (m_direction == Direction::None && !m_doublePressed)
+        SetIntakeDirection(Direction::Up);
+        break;
+    case IntakeShoterEvent::Shooting:
+        if (forceDown)
+            SetIntakeDirection(Direction::Down);
+        else
+            SetIntakeDirection(Direction::None);
+        break;
+    }
 }
 
 void Descorer::Update()

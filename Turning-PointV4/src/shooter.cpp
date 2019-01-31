@@ -284,8 +284,6 @@ BallPresence Shooter::BallStatus()
 //      m_preloading = false;
 void Shooter::Update()
 {
-    return;
-
     UpdateDistanceControls();
 
     bool userShooting = IsShooting();

@@ -26,7 +26,7 @@ void LCD::PrintMessage(const char *message)
     lcdSetText(uart1, 1, message);
 }
 
-void LCD::SetSkillsMoe()
+void LCD::SetSkillsMode()
 {
     lcdSetText(uart1, 1, "  SKILLS !!! ");
     lcdSetText(uart1, 2, "Red       Blue");
@@ -120,7 +120,7 @@ void LCD::Update()
     if (m_step == 0)
     {
         ReportStatus("LCD: Skills!!!\n");
-        SetSkillsMoe();
+        SetSkillsMode();
     }
     else if (m_step != 3)
     {
