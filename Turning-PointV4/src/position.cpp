@@ -9,7 +9,7 @@ Encoder g_sideEncoder = nullptr;
 PositionTracker::PositionTracker()
 {
     g_leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, false);
-    g_rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, true);
+    g_rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, false);
     g_sideEncoder = encoderInit(sideEncoderTopPort, sideEncoderBotPort, true);
     encoderReset(g_leftDriveEncoder);
     encoderReset(g_rightDriveEncoder);

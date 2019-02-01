@@ -17,7 +17,7 @@ constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 }
 
 // Angle potentiometer:
-constexpr unsigned int anglerLow = 3;
+constexpr unsigned int anglerLow = 20;
 const unsigned int anglePotentiometerLow = ConvertAngleToPotentiometer(anglerLow);
 const unsigned int anglePotentiometerHigh = 1060;
 

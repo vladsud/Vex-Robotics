@@ -109,8 +109,8 @@ D: left y drive
 *
 *******************************************************************************/
 // left back : 1, 2
-#define rightDriveEncoderBotPort 6
-#define rightDriveEncoderTopPort 5
+#define rightDriveEncoderBotPort 3
+#define rightDriveEncoderTopPort 4
 
 #define leftDriveEncoderBotPort 1
 #define leftDriveEncoderTopPort 2
@@ -133,8 +133,8 @@ extern Encoder g_sideEncoder;
 #define lightSensorBallIn 2600
 #define lightSensorBallOut 2900
 #define shooterPreloadPoterntiometer 6
-#define ShooterPreloadEnd 900
-#define ShooterPreloadStart 1100
+#define ShooterPreloadEnd 950
+#define ShooterPreloadStart 1150
 #define ShooterSecondaryPotentiometer 7
 #define anglePotPort 8
 
