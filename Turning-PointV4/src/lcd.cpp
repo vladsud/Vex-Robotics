@@ -43,30 +43,45 @@ void LCD::PrintStepInstructions()
     float mp = bat.GetMainPower();
     float ep = bat.GetExpanderPower();
     
+    /*
 
     if (m_step == 0)
         lcdSetText(uart1, 2, "    Continue    ");
-    if (m_step == 1)
+    else if (m_step == 2)
         lcdSetText(uart1, 2, "No           Yes");
     else if (m_step != 4)
         lcdSetText(uart1, 2, "No    Back   Yes");
 
-    
+    */
+
+
     switch (m_step)
     {
     case 0:
+        // Print battery level
         lcdPrint(uart1, 1, "%.2f   %.2f", ep, mp);
+
+        lcdSetText(uart1, 2, "    Continue    ");
     case 1:
+        // Choose side
         lcdSetText(uart1, 1, "Left     Right");
+
         lcdSetText(uart1, 2, "Red Skill Blue");
         break;
     case 2:
+        // Select position
         lcdSetText(uart1, 1, "First Pos?");
+
+        lcdSetText(uart1, 2, "No           Yes");
         break;
     case 3:
+        // Select platform
         lcdSetText(uart1, 1, "Climb platform?");
+
+        lcdSetText(uart1, 2, "No    Back   Yes");
         break;
     case 4:
+        // Print auton
         lcdPrint(uart1, 1, "%s, %s",
                  AtonBlueRight ? "Blue" : "Red",
                  AtonFirstPos ? "1st" : "2nd");
@@ -78,6 +93,7 @@ void LCD::PrintStepInstructions()
 
 void LCD::SelectAction(bool rigthButton)
 {
+    // Choose action based on if the button clicked is the right button.
     switch (m_step)
     {
     case 1:
@@ -91,6 +107,7 @@ void LCD::SelectAction(bool rigthButton)
         AtonClimbPlatform = rigthButton;
         break;
     case 4:
+        // Cancel
         if (!rigthButton) // no-op
             return;
         m_step = -1;
@@ -104,7 +121,11 @@ void LCD::Update()
 {
     m_count++;
 
+    // Read button 
+    // Returns a 3 bit integer: 100 is left, 010 is center, 001 is right
     int buttons = lcdReadButtons(uart1);
+
+    // If the button is the same (still pressing), ignore actions
     if (m_buttons == buttons)
         return;
     m_buttons = buttons;
@@ -119,9 +140,11 @@ void LCD::Update()
         return;
     }
 
+    // If nothing is clicked
     if (m_buttons == 0)
         return;
 
+    // If not center select action based on if the button is equal to the right button
     if (!(buttons & LCD_BTN_CENTER))
     {
         ReportStatus("LCD: non-center\n");
@@ -129,12 +152,21 @@ void LCD::Update()
         return;
     }
 
+    // If center is pressed in step 0 then just continue to the next step
     if (m_step == 0)
+    {
+        m_step++;
+    }
+
+    // If presse in step 1 then select skill
+    else if (m_step == 1)
     {
         ReportStatus("LCD: Skills!!!\n");
         SetSkillsMode();
     }
-    else if (m_step != 3)
+
+    // If not the last step go back
+    else if (m_step != 4)
     {
         ReportStatus("LCD: Back\n");
         m_step--;
