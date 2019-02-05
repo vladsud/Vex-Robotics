@@ -147,3 +147,10 @@ extern Encoder g_sideEncoder;
 *******************************************************************************/
 #define JoystickIntakeGroup 6   // Left bottom
 #define JoystickDescorerGroup 5 // Right bottom
+
+/*******************************************************************************
+* 
+* BATTERY PORTS
+*
+*******************************************************************************/
+#define ExpanderBatteryStatus 999
