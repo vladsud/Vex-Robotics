@@ -93,7 +93,7 @@ struct MoveToPlatformAction : public Move
             }
         }
 
-        if (m_fIsLow && distance >= m_distanceFirstHit + 910 * 10)
+        if (m_fIsLow && distance >= m_distanceFirstHit + 1050 * 10)
         {
             ReportStatus("MoveToPlatform: Stop \n");
             return true;
@@ -177,24 +177,24 @@ struct MoveExact : public Action
 
     int IdealSpeedFromDistance(int distance)
     {
-        const int point2 = 1600;
-        const int speed2 = 2;
-        const int point1 = 50;
-        const float speed1 = 50;
-        const int point0 = 30;
+        const unsigned int point2 = 1600;
+        const unsigned int speed2 = 2;
+        const unsigned int point1 = 50;
+        const unsigned int speed1 = 50;
+        const unsigned int point0 = 30;
 
         unsigned int distanceAbs = abs(distance);
         int idealSpeed; // gyro ticks per second
         if (distanceAbs > point2)
             idealSpeed = speed1 + speed2 * (point2 - point1);
-        else if (distance > point1)
+        else if (distanceAbs > point1)
             idealSpeed = speed1 + speed2 * (distanceAbs - point1);
-        else if (distance > point0)
+        else if (distanceAbs > point0)
             idealSpeed = speed1;
         else
             idealSpeed = 0;
 
-        if (distanceAbs < 0)
+        if (distance < 0)
             idealSpeed = -idealSpeed;
         return idealSpeed;
     }

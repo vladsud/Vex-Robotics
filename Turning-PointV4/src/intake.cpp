@@ -19,7 +19,7 @@ void Intake::SetIntakeDirection(Direction direction)
         return;
     }
 
-    int power = (m_direction == Direction::Up) ? -intakeMotorSpeedUp : intakeMotorSpeedDown;
+    int power = (m_direction == Direction::Up) ? intakeMotorSpeedUp : -intakeMotorSpeedDown;
 
     if (power * m_power >= 0)
         m_power = power;
@@ -27,14 +27,14 @@ void Intake::SetIntakeDirection(Direction direction)
         // slow down transition when change in direciton happens
         m_power += Sign(power);
 
-    motorSet(intakePort1, m_power);
-    motorSet(intakePort2, -m_power);
+    SetIntakeMotor(m_power);
+    // motorSet(intakePort2, -m_power);
 }
 
 void Intake::SetIntakeMotor(int speed)
 {
-    motorSet(intakePort1, speed);
-    motorSet(intakePort2, -speed);
+    motorSet(intakePort, speed);
+    // motorSet(intakePort2, -speed);
 }
 
 void Intake::Update()
@@ -89,9 +89,9 @@ void Descorer::Update()
 {
     if (joystickGetDigital(JoystickIntakeGroup, JOY_UP))
     {
-        if (m_direction == Direction::Up || joystickGetDigital(JoystickDescorerGroup, JOY_UP))
+        // if (m_direction == Direction::Up || joystickGetDigital(JoystickDescorerGroup, JOY_UP))
         {
-            m_count++;
+            m_count = 0;
             m_direction = Direction::Up;
             motorSet(descorerPort, 85);
         }
@@ -99,16 +99,27 @@ void Descorer::Update()
     else if (joystickGetDigital(JoystickIntakeGroup, JOY_DOWN))
     {
         m_direction = Direction::Down;
-        m_count++;
-        if (m_count > 75)
-            motorSet(descorerPort, -35);
-        else
-            motorSet(descorerPort, -70);
+        m_count = 0;
+        //if (m_count > 75)
+        //motorSet(descorerPort, -35);
+        //else
+        motorSet(descorerPort, -85);
     }
     else
     {
-        m_direction = Direction::None;
-        m_count = 0;
-        motorSet(descorerPort, -10);
+        m_count++;
+        if (m_count > 20)
+        {
+            motorSet(descorerPort, 0);
+            m_direction = Direction::None;
+        }
+        else if (m_direction == Direction::Up)
+        {
+            motorSet(descorerPort, -15);
+        }
+        else
+        {
+            motorSet(descorerPort, 15);
+        }
     }
 }

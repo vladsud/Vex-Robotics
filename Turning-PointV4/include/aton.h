@@ -43,3 +43,6 @@ struct KeepAngle
     KeepAngle(int angle) { GetMain().drive.StartTrackingAngle(angle); }
     ~KeepAngle() { GetMain().drive.StopTrackingAngle(); }
 };
+
+
+void GoToCapWithBallUnderIt();

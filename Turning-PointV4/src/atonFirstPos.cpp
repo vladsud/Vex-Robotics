@@ -1,20 +1,36 @@
 #include "aton.h"
 
 const int distanceToCap = 1900;
-const int angleToShootFlags = -1;
+const int angleToShootFlags = -3;
 // distances in inches, the higher the number - the lower is the angle
-const int g_midFlagHeight = 51; // 55
-const int g_highFlagHeight = 50;
+const int g_midFlagHeight = 55; // 55
+const int g_highFlagHeight = 55;
 
-const int angleToMoveToFlags = 4;
-const int distanceFlagsToPlatform = -4250;
+const int angleToMoveToFlags = 3;
+const int distanceFlagsToPlatform = -4150;
 
 // used only in recovery mode, if we hit something
 const float inchesToPlatform = 80.0;
 
+// used when shooting middle post when not climbing platform
+const unsigned int g_midFlagHeightDiagonalShot = 65;
+
+
 // WARNING:
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
+
+void GoToCapWithBallUnderIt()
+{
+        Do(Move(distanceToCap - 300, 85));
+        IntakeUp();
+        Do(Move(300, 20));
+        Do(Wait(50));
+        Do(MoveTimeBased(-18, 500, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
+
+        // we have hard time picking up the ball, so wait
+        Do(Wait(100));
+}
 
 void RunAtonFirstPos()
 {
@@ -34,16 +50,9 @@ void RunAtonFirstPos()
         KeepAngle keeper(-90);
         unsigned int distance = main.drive.m_distanceFromBeginning;
 
-        Do(Move(distanceToCap - 300, 85));
-        IntakeUp();
-        Do(Move(300, 20));
-        Do(Wait(100));
-        Do(MoveTimeBased(-18, 500, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
+        GoToCapWithBallUnderIt();
 
-        // we have hard time picking up the ball, so wait
-        Do(Wait(100));
-
-        distance = main.drive.m_distanceFromBeginning - distance + 50;
+        distance = main.drive.m_distanceFromBeginning - distance - 50;
         ReportStatus("Move back: %d\n", distance);
         Do(MoveExact(-distance)); // 1800 ?
         IntakeStop();
@@ -65,10 +74,11 @@ void RunAtonFirstPos()
     IntakeUp();
     main.shooter.SetDistance(g_highFlagHeight);
     // wait for it to go down & start moving up
-    Do(WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 5000 : 1000));
+    Do(WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 5000 : 1500));
     SetShooterAngle(false /*high*/, g_highFlagHeight, false /*checkPresenceOfBall*/);
     Do(WaitShooterAngleToStop());
     Do(ShootBall());
+    IntakeUp();
 
     //
     // Move to lower flag
@@ -77,8 +87,7 @@ void RunAtonFirstPos()
     {
         KeepAngle keeper(angleToMoveToFlags);
 
-        IntakeUp();
-        Do(Move(2500, 85, 0, true /*StopOnColision */));
+         Do(Move(2500, 85, 0, true /*StopOnColision */));
         Do(MoveTimeBased(0, 500, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
     }
 
@@ -127,9 +136,21 @@ void RunAtonFirstPos()
     }
     else
     {
-        ReportStatus("Not climbing platform\n");
-        distance = distanceFlagsToPlatform / 2;
-        ReportStatus("Moving: %d\n", distance);
-        Do(MoveExact(distance));
+        BLOCK
+        {
+            KeepAngle keeper(3); // try to get further out from the wall
+            ReportStatus("Not climbing platform\n");
+            distance -= distanceFlagsToPlatform / 2;
+            ReportStatus("Moving: %d\n", distance);
+            Do(MoveExact(distance));
+        }
+
+        Do(TurnToAngle(-55));
+        SetShooterAngle(false /*high*/, g_midFlagHeightDiagonalShot, true /*checkPresenceOfBall*/);
+        Do(WaitShooterAngleToGoUp(5000));
+        Do(ShootBall());
+
+        Do(TurnToAngle(-60));
+
     }
 }

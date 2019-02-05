@@ -80,12 +80,12 @@ bool Main::UpdateWithoutWaiting()
 
 	// If this assert fires, than numbers do not represent actual timing.
 	// It's likley not a big deal, but something somwhere might not work because of it.
-	static_assert((trackerPullTime % trackerPullTime) == 0);
+	StaticAssert((trackerPullTime % trackerPullTime) == 0);
 
 	switch (m_TicksToMainUpdate / trackerPullTime)
 	{
 	case 0:
-		static_assert(allSystemsPullTime / trackerPullTime >= 5);
+		StaticAssert(allSystemsPullTime / trackerPullTime >= 5);
 		m_TicksToMainUpdate = allSystemsPullTime;
 		// cheap sytems are grouped together
 		lcd.Update();

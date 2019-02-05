@@ -12,7 +12,7 @@
 
 #include "aton.h"
 
-AtonMode g_mode = AtonMode::Regular; // ;
+AtonMode g_mode = AtonMode::Regular;
 
 // Variables not to touch - control actual autonomous mode
 bool g_autonomousSmartsOn = true;

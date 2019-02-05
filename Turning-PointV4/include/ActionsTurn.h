@@ -27,11 +27,11 @@ struct TurnPrecise : public Action
 
     int IdealSpeedFromDistance(int distance)
     {
-        const int point2 = 60 * GyroWrapper::Multiplier;
-        const int speed2 = 4;
-        const int point1 = 6 * GyroWrapper::Multiplier;
-        const int speed1 = 12 * GyroWrapper::Multiplier;
-        const int point0 = GyroWrapper::Multiplier;
+        const unsigned int point2 = 60 * GyroWrapper::Multiplier;
+        const unsigned int speed2 = 4;
+        const unsigned int point1 = 6 * GyroWrapper::Multiplier;
+        const unsigned int speed1 = 12 * GyroWrapper::Multiplier;
+        const unsigned int point0 = GyroWrapper::Multiplier;
 
         unsigned int distanceAbs = abs(distance);
         int idealSpeed; // gyro ticks per second

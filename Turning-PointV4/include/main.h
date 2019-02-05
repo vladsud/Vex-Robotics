@@ -3,7 +3,7 @@
 
 // *** WARNING ***
 // Always define it for competation!!!!
-#define OFFICIAL_RUN
+// #define OFFICIAL_RUN
 
 // Helper function to use both oysticsk
 bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
@@ -42,7 +42,9 @@ void AssertCore(bool condition, const char *message, const char *file, int line)
 
 #define joystickMax 127
 
-inline float abs(float fl)
+#define StaticAssert(a) static_assert(a, #a)
+
+constexpr float abs(float fl)
 {
    return (fl < 0) ? -fl : fl;
 }
@@ -63,7 +65,7 @@ constexpr T max(T a, T b)
 }
 
 template <typename T>
-T min(T a, T b)
+constexpr T min(T a, T b)
 {
    return a > b ? b : a;
 }
@@ -74,7 +76,7 @@ T min(T a, T b)
 *
 *******************************************************************************/
 #define shooterMotorSpeed 100 // it botherwise burns controller / port
-#define intakeMotorSpeedUp 80 // same, being protective
+#define intakeMotorSpeedUp 100 // same, being protective
 #define intakeMotorSpeedDown 100
 #define driveMotorMaxSpeed 127
 
@@ -96,10 +98,10 @@ D: left y drive
 #define rightDrivePortY 7
 #define rightDrivePort2 9
 //OTHER MOTOR PORTS
-#define intakePort1 6
-#define intakePort2 5
+//#define intakePort1 6
+#define intakePort 5
 
-#define descorerPort 99
+#define descorerPort 6
 #define shooterPort 2 // "C" on extender
 #define anglePort 8
 
