@@ -1,10 +1,11 @@
 #include "lcd.h"
 #include "api.h"
 #include "main.h"
+#include "battery.h"
 
 LCD::LCD()
 {
-    // DEfaults for autonomous if LCD selection is not used
+    // Defaults for autonomous if LCD selection is not used
     AtonBlueRight = false;
     AtonFirstPos = true;
     AtonClimbPlatform = true;
@@ -37,24 +38,35 @@ void LCD::PrintStepInstructions()
 {
     m_RefreshOnClick = false;
     lcdSetBacklight(uart1, true);
+
+    Battery bat;
+    float mp = bat.GetMainPower();
+    float ep = bat.GetExpanderPower();
+    
+
     if (m_step == 0)
+        lcdSetText(uart1, 2, "    Continue    ");
+    if (m_step == 1)
         lcdSetText(uart1, 2, "No           Yes");
-    else if (m_step != 3)
+    else if (m_step != 4)
         lcdSetText(uart1, 2, "No    Back   Yes");
 
+    
     switch (m_step)
     {
     case 0:
+        lcdPrint(uart1, 1, "%.2f   %.2f", ep, mp);
+    case 1:
         lcdSetText(uart1, 1, "Left     Right");
         lcdSetText(uart1, 2, "Red Skill Blue");
         break;
-    case 1:
+    case 2:
         lcdSetText(uart1, 1, "First Pos?");
         break;
-    case 2:
+    case 3:
         lcdSetText(uart1, 1, "Climb platform?");
         break;
-    case 3:
+    case 4:
         lcdPrint(uart1, 1, "%s, %s",
                  AtonBlueRight ? "Blue" : "Red",
                  AtonFirstPos ? "1st" : "2nd");
@@ -68,17 +80,17 @@ void LCD::SelectAction(bool rigthButton)
 {
     switch (m_step)
     {
-    case 0:
+    case 1:
         SetSkillSelection(false);
         AtonBlueRight = rigthButton;
         break;
-    case 1:
+    case 2:
         AtonFirstPos = rigthButton;
         break;
-    case 2:
+    case 3:
         AtonClimbPlatform = rigthButton;
         break;
-    case 3:
+    case 4:
         if (!rigthButton) // no-op
             return;
         m_step = -1;
