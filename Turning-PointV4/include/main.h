@@ -153,4 +153,4 @@ extern Encoder g_sideEncoder;
 * BATTERY PORTS
 *
 *******************************************************************************/
-#define ExpanderBatteryStatus 999
+#define ExpanderBatteryStatus 9
