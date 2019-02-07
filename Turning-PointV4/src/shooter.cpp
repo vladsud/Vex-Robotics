@@ -148,7 +148,7 @@ void Shooter::KeepMoving()
         if (m_fMoving)
         {
             if (PrintDiagnostics(Diagnostics::Angle))
-                printf("STOP: (%d) Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n\n\n", m_count, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+                ReportStatus("STOP: (%d) Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n\n\n", m_count, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
             StopMoving();
         }
         motorSet(anglePort, 0);
@@ -168,9 +168,9 @@ void Shooter::KeepMoving()
         if (PrintDiagnostics(Diagnostics::Angle))
         {
             if (m_fMoving)
-                printf("ANG MOVE: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+                ReportStatus("ANG MOVE: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
             else
-                printf("ANG ADJ: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+                ReportStatus("ANG ADJ: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
         }
     }
 
@@ -314,14 +314,14 @@ void Shooter::Update()
                                              shooterPreloadPos > ShooterPreloadStart);
 
     if (PrintDiagnostics(Diagnostics::Angle) && needPreload != m_preloading)
-        printf("Preload state: %d\n", needPreload);
+        ReportStatus("Preload state: %d\n", needPreload);
 
     // safety net - if something goes wrong, user needs to have a way to disable preload.
     // This is done by clicking and releasing shooter button quickly while not in the shooting zone.
     if (needPreload && userShooting && !m_userShooting && m_preloadAfterShotCounter == 0)
     {
         if (PrintDiagnostics(Diagnostics::Angle))
-            print("Disabling preload\n");
+            ReportStatus("Disabling preload\n");
         m_disablePreload = true;
         needPreload = false;
     }

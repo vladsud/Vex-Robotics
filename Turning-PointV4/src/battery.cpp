@@ -3,7 +3,7 @@
 
 
 float Battery::GetMainPower(){
-    return powerLevelMain();
+    return powerLevelMain() / 1000.0;
 }
 
 

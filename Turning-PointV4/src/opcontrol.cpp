@@ -108,7 +108,7 @@ bool Main::UpdateWithoutWaiting()
 
 	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
 	{
-		printf("(%lu) Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
+		ReportStatus("(%lu) Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
 			   m_maxCPUTime,
 			   encoderGet(g_leftDriveEncoder),
 			   encoderGet(g_rightDriveEncoder),

@@ -43,31 +43,31 @@ void LCD::PrintStepInstructions()
     float mp = bat.GetMainPower();
     float ep = bat.GetExpanderPower();
     
-    if (m_step == 0)
-        lcdSetText(uart1, 2, "    Continue    ");
-    else if (m_step == 2)
-        lcdSetText(uart1, 2, "No           Yes");
-    else if (m_step != 4)
-        lcdSetText(uart1, 2, "No    Back   Yes");
-
-
     switch (m_step)
     {
     case 0:
         // Print battery level
-        lcdPrint(uart1, 1, "%.2f   %.2f", ep, mp);
-        printf("test");
+        lcdSetText(uart1, 1, "Main        Exp");
+
+        lcdPrint(uart1, 2, "%.2f  Cont  %.2f", mp, ep);
+        break;
     case 1:
         // Choose side
         lcdSetText(uart1, 1, "Left     Right");
+
+        lcdPrint(uart1, 2, "Red  Skill  Blue");
         break;
     case 2:
         // Select position
         lcdSetText(uart1, 1, "First Pos?");
+
+        lcdSetText(uart1, 2, "No    Back   Yes");
         break;
     case 3:
         // Select platform
         lcdSetText(uart1, 1, "Climb platform?");
+
+        lcdSetText(uart1, 2, "No    Back   Yes");
         break;
     case 4:
         // Print auton
@@ -99,7 +99,7 @@ void LCD::SelectAction(bool rigthButton)
         // Cancel
         if (!rigthButton) // no-op
             return;
-        m_step = 0;
+        m_step = -1;
         break;
     }
     m_step++;
@@ -109,6 +109,15 @@ void LCD::SelectAction(bool rigthButton)
 void LCD::Update()
 {
     m_count++;
+
+    if (m_step == 0 && m_count % 100 == 0)
+    {
+        Battery bat;
+        float mp = bat.GetMainPower();
+        float ep = bat.GetExpanderPower();
+
+        lcdPrint(uart1, 2, "%.2f  Cont  %.2f", mp, ep);
+    }
 
     // Read button 
     // Returns a 3 bit integer: 100 is left, 010 is center, 001 is right
@@ -121,7 +130,7 @@ void LCD::Update()
 
     ReportStatus("LCD: buttons: %d\n", buttons);
 
-    m_count = 0;
+    //m_count = 0;
 
     if (m_RefreshOnClick)
     {
@@ -145,6 +154,7 @@ void LCD::Update()
     if (m_step == 0)
     {
         m_step++;
+        PrintStepInstructions();
     }
 
     // If presse in step 1 then select skill
@@ -152,6 +162,7 @@ void LCD::Update()
     {
         ReportStatus("LCD: Skills!!!\n");
         SetSkillsMode();
+        return;
     }
 
     // If not the last step go back

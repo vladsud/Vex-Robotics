@@ -59,7 +59,7 @@ void Drive::OverrideInputs(int forward, float turn)
     m_overrideTurn = turn;
 
     if (PrintDiagnostics(Diagnostics::Drive))
-        printf("OverrideInputs: %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn));
+        ReportStatus("OverrideInputs: %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn));
 }
 
 void Drive::StartTrackingAngle(int angle)
@@ -279,7 +279,7 @@ void Drive::Update()
 
     if (PrintDiagnostics(Diagnostics::Drive))
     {
-        printf("Drive: gyro: %d, erorr: (%d, %d), Speeds (%d, %d)\n",
+        ReportStatus("Drive: gyro: %d, erorr: (%d, %d), Speeds (%d, %d)\n",
                // left, right,
                GetGyro().Get() * 10 / GyroWrapper::Multiplier,
                int(error), errorMultiplier,
