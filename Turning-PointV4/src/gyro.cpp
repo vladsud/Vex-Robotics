@@ -66,3 +66,12 @@ GyroWrapper::GyroWrapper(unsigned char port, unsigned short multiplier)
 
     m_calibValue = ((uint64_t)total * m_multiplier) / (Measurements / 16);
 }
+
+int AdjustAngle(int angle)
+{
+    while (angle > 180 * GyroWrapper::Multiplier)
+        angle -= - 360 * GyroWrapper::Multiplier;
+    while (angle < -180 * GyroWrapper::Multiplier)
+        angle += 360 * GyroWrapper::Multiplier;
+    return angle;
+}

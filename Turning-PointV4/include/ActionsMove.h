@@ -4,15 +4,24 @@
 
 struct Move : public Action
 {
-    Move(unsigned int distance, int forward, float turn = 0, bool stopOnCollision = false)
-        : m_distanceToMove(distance),
-          m_forward(forward),
-          m_turn(turn),
+    Move(int distance, int forward = 85, bool stopOnCollision = false)
+        : m_forward(forward),
+          m_turn(0),
           m_stopOnCollision(stopOnCollision)
     {
+        if (distance > 0)
+        {
+            m_distanceToMove = distance;
+        }
+        else
+        {
+            m_distanceToMove = -distance;
+            m_forward = -m_forward;
+        }
+        
         // You should either turn on spot, or move forward with small turning.
         // Doing something else is likely slower, and less accurate.
-        Assert(forward == 0 || abs(forward) > abs(turn));
+        Assert(forward == 0 || abs(forward) > abs(m_turn));
 
         m_main.drive.ResetTrackingState();
         m_main.drive.OverrideInputs(m_forward, m_turn);
@@ -32,7 +41,7 @@ struct Move : public Action
         // Collision?
         if (m_stopOnCollision && m_maxSpeed >= 10 && m_speed < m_maxSpeed / 2)
         {
-            ReportStatus("Collision detected: %d %d\n", m_speed, m_maxSpeed);
+            ReportStatus("   Collision detected: speed=%d maxspeed=%d, distance=%d\n", m_speed, m_maxSpeed, distance);
             return true;
         }
 
@@ -64,8 +73,6 @@ struct MoveToPlatformAction : public Move
     bool m_fIsLow = false;
     int m_distanceFirstHit = 0;
 
-    int slowDown = 90;
-
     MoveToPlatformAction(int distance) : Move(distance, 65) {}
 
     bool ShouldStop() override
@@ -80,12 +87,11 @@ struct MoveToPlatformAction : public Move
 
         // ReportStatus("MoveToPlatform: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
 
-        if (!m_fIsLow && m_diff <= m_diffMax - slowDown)
+        if (!m_fIsLow && m_diff <= m_diffMax - 90)
         {
             ReportStatus("MoveToPlatform: Slow down: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
             m_diffMin = m_diff;
             m_fIsLow = true;
-            slowDown = 50;
             if (m_slowCount == 0)
             {
                 m_main.drive.OverrideInputs(85, 0);
@@ -98,20 +104,6 @@ struct MoveToPlatformAction : public Move
             ReportStatus("MoveToPlatform: Stop \n");
             return true;
         }
-
-        /*
-        if (m_fIsLow && m_diff >= m_diffMin + 50 && m_diff >= m_diffMax - 50)
-        {
-            ReportStatus("MoveToPlatform: Speed up: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
-            m_fIsLow = false;
-            m_slowCount++;
-            m_diffMax = m_diff;
-            if (m_slowCount == 2)
-            {
-                ReportStatus("MoveToPlatform: Stop (speed up): distance: %d, dist from first hit: %d\n", m_main.drive.m_distance, (distance - m_distanceFirstHit) / 10);
-                return true;
-            }
-        }*/
 
         m_lastDistance = distance;
 
@@ -140,14 +132,15 @@ struct MoveTimeBased : public Move
     bool ShouldStop()
     {
         unsigned int distance = m_main.drive.m_distance;
-        if (m_waitForStop && !m_first && m_distance == distance)
+        unsigned int timeElapsed = m_main.GetTime() - m_timeStart;
+        if (m_waitForStop && timeElapsed > 20 && m_distance == distance)
         {
-            ReportStatus("MoveTimeBased: Time to stop: %d\n", m_main.GetTime() - m_timeStart);
+            ReportStatus("MoveTimeBased: Time to stop: %d\n", timeElapsed);
             return true;
         }
         m_distance = distance;
         m_first = false;
-        if (m_main.GetTime() - m_timeStart >= m_time)
+        if (timeElapsed >= m_time)
         {
             ReportStatus("MoveTimeBased: timed-out: %d\n", m_time);
             return true;

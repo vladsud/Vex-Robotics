@@ -22,7 +22,7 @@ void RunAtonSecondPos()
         Do(Turn(-60));
         
         Do(Wait(200));
-        Do(Move(400, 85));
+        Do(Move(400));
         MoveToPlatform(false /*twoPlatforms*/);
     }
     else

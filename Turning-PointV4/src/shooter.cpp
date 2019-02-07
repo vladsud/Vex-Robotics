@@ -6,7 +6,7 @@ constexpr float Distances[]{24, 30, 48, 55, 108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]{130, 110, 85, 85, 60};
+constexpr unsigned int AnglesHigh[]{130, 110, 85, 90, 60};
 constexpr unsigned int AnglesMedium[]{90, 80, 55, 48, 55};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
@@ -34,7 +34,7 @@ StaticAssert(Distances[3] < Distances[4]);
 
 StaticAssert(AnglesHigh[0] >= AnglesHigh[1]);
 StaticAssert(AnglesHigh[1] >= AnglesHigh[2]);
-StaticAssert(AnglesHigh[2] >= AnglesHigh[3]);
+//StaticAssert(AnglesHigh[2] >= AnglesHigh[3]);
 // StaticAssert(AnglesHigh[3] >= AnglesHigh[4]);
 
 StaticAssert(AnglesMedium[0] >= AnglesMedium[1]);
@@ -138,33 +138,36 @@ void Shooter::KeepMoving()
     distance = diff + m_lastAngleDistance;
     unsigned int distanceAbs = abs(distance);
 
-    m_diffAdjusted = (m_diffAdjusted * 3 + diff) / 4;
+    // m_diffAdjusted = (m_diffAdjusted * 3 + diff) / 4;
+    m_diffAdjusted = diff;
 
     m_count++;
 
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 10 && abs(m_diffAdjusted) <= 1))
+    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 5 && abs(diff) <= 1))
     {
         if (m_fMoving)
         {
-            if (PrintDiagnostics(Diagnostics::Angle))
+            // if (PrintDiagnostics(Diagnostics::Angle))
                 printf("STOP: (%d) Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n\n\n", m_count, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
             StopMoving();
         }
-        motorSet(anglePort, 0);
+        if (m_flag == Flag::Loading)
+            motorSet(anglePort, 0);
         return;
     }
 
     if (m_fMoving || m_flag != Flag::Loading)
     {
-        if (distanceAbs <= 10)
-            speed = m_diffAdjusted * 10;
+        if (distanceAbs <= 5)
+            speed = 0;
         else if (distance > 0) // going up
-            speed = 18 + distance / 3 + m_diffAdjusted * 5;
+            speed = 30 + distance / 4  + m_diffAdjusted * 4;
         else if (m_flag != Flag::Loading)
-            speed = -12 + distance / 3 + m_diffAdjusted * 5;
+            speed = -18 + distance / 8 + m_diffAdjusted * 5;
         else
-            speed = -25 + distance + m_diffAdjusted * 3; // / 5;
+            speed = -19 + distance / 2 + m_diffAdjusted * 4;
+
         if (PrintDiagnostics(Diagnostics::Angle))
         {
             if (m_fMoving)
@@ -172,7 +175,7 @@ void Shooter::KeepMoving()
             else
                 printf("ANG ADJ: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
         }
-    }
+    } 
 
     const int angleMotorSpeed = 100;
 

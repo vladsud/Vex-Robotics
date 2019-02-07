@@ -12,14 +12,9 @@ int CalcAngleToPoint(double x, double y);
 struct TurnPrecise : public Action
 {
     TurnPrecise(int turn)
-        : m_turn(turn)
+        : m_turn(AdjustAngle(turn))
     {
         ReportStatus("TurnPrecise: %d, curr=%d\n", m_turn / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
-
-        while (m_turn > 180 * GyroWrapper::Multiplier)
-            m_turn = m_turn - 360 * GyroWrapper::Multiplier;
-        while (m_turn < -180 * GyroWrapper::Multiplier)
-            m_turn = m_turn + 360 * GyroWrapper::Multiplier;
 
         m_main.drive.ResetTrackingState();
         m_initialAngle = GetGyroReading();
@@ -92,7 +87,7 @@ struct TurnPrecise : public Action
         // Attempt to fix this condition
         if (errorAbs > 45 * GyroWrapper::Multiplier && abs(actualSpeed) < 5 * GyroWrapper::Multiplier)
         {
-            ReportStatus("   Turn: turning on super charge\n");
+            // ReportStatus("   Turn: turning on super charge\n");
             power *= 3;
         }
 

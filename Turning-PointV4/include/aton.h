@@ -44,5 +44,12 @@ struct KeepAngle
     ~KeepAngle() { GetMain().drive.StopTrackingAngle(); }
 };
 
+void RunSuperSkills();
 
-void GoToCapWithBallUnderIt();
+void MoveExactWithAngle(int distance, int angle);
+void GoToCapWithBallUnderIt(int additionalDistance = 0);
+void ShootTwoBalls();
+void GetBallUnderCapAndReturn();
+void TurnToFlagsAndShootTwoBalls();
+void MoveToLowFlag();
+void TurnToAngleIfNeeded(int angle);

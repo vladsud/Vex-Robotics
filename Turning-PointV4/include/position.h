@@ -93,6 +93,7 @@ class PositionTracker
 
     PositionInfo LatestPosition(bool clicks);
     void SetCoordinates(Coordinates cord);
+    void SetAngle(int degrees);
     void FlipX(bool flip);
     int GetGyro();
 

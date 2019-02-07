@@ -174,6 +174,7 @@ void PositionTracker::Update()
     RecalcPosition(m_currentIndex, c_initialSmoothingRange + c_finalSmoothingRange);
 
     m_count++;
+
 #if 0
     const int halfCycle = 500;
     int udpateCycle = m_count % (2*halfCycle);
@@ -231,24 +232,29 @@ int PositionTracker::GetGyro()
     return angle;
 }
 
+void PositionTracker::SetAngle(int degrees)
+{
+    degrees *= GyroWrapper::Multiplier;
+    if (m_flipX)
+        degrees = -degrees;
+    for (int i = 0; i < SamplesToTrack; i++)
+        m_sensor.gyro[i] = degrees;
+
+    ::GetGyro().SetAngle(degrees);
+}
+
 void PositionTracker::SetCoordinates(Coordinates coord)
 {
-    coord.angle *= GyroWrapper::Multiplier;
+    SetAngle(coord.angle);
     coord.X /= inchesPerClick;
     coord.Y /= inchesPerClick;
 
     if (m_flipX)
-    {
-        coord.angle = -coord.angle;
         coord.X = -coord.X;
-    }
 
     for (int i = 0; i < SamplesToTrack; i++)
     {
-        m_sensor.gyro[i] = coord.angle;
         m_position.X[i] = coord.X;
         m_position.Y[i] = coord.Y;
     }
-
-    ::GetGyro().SetAngle(coord.angle);
 }

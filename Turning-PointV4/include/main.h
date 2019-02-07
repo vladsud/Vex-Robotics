@@ -11,6 +11,7 @@ void memmove(char *dest, char *src, size_t size);
 bool isAuto();
 bool SmartsOn();
 class Main &SetupMain();
+int AdjustAngle(int angle);
 
 enum class IntakeShoterEvent
 {

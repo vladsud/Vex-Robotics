@@ -12,7 +12,7 @@
 
 #include "aton.h"
 
-AtonMode g_mode = AtonMode::Regular;
+AtonMode g_mode = AtonMode::TestRun; //TestRun;
 
 // Variables not to touch - control actual autonomous mode
 bool g_autonomousSmartsOn = true;
@@ -96,8 +96,7 @@ void autonomous()
     // Debugging code - should not run in real autonomous
     if (g_mode == AtonMode::TestRun && !isAutonomous())
     {
-        MoveToPlatform(true /*twoPlatforms*/);
-        // Do(Turn(90));
+        RunSuperSkills();
     }
     else
 #endif // !OFFICIAL_RUN
@@ -168,4 +167,18 @@ void MoveToPlatform(bool twoPlatforms)
         Do(MoveToPlatformAction(2000));
         Do(MoveTimeBased(-30, 500, true /*waitForStop*/));
     }
+}
+
+void MoveExactWithAngle(int distance, int angle)
+{
+    TurnToAngleIfNeeded(angle);
+    KeepAngle keeper(angle);
+    Do(MoveExact(distance));
+}
+
+void TurnToAngleIfNeeded(int angle)
+{
+    int angleDiff = AdjustAngle(GetGyroReading() - angle * GyroWrapper::Multiplier);
+    if (abs(angleDiff) > 10 * GyroWrapper::Multiplier)
+        Do(TurnToAngle(angle));
 }

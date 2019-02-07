@@ -206,8 +206,8 @@ void Drive::Update()
         {
             // Gyro moves positive counter-clock-wise.
             // gyroDiff > 0: clock-wise movement
-            int gyroDiff = m_gyro - GetGyro().Get();
-            error = 10 * gyroDiff / GyroWrapper::Multiplier - m_turn * m_distance / m_forward;
+            int gyroDiff = AdjustAngle(m_gyro - GetGyro().Get());
+            error = 5 * gyroDiff / GyroWrapper::Multiplier - m_turn * m_distance / m_forward;
         }
         else
         {

@@ -46,8 +46,16 @@ struct WaitShooterAngleToGoUp : public Action
     bool ShouldStop() override
     {
         if (m_main.GetTime() - m_timeStart >= m_wait)
+        {
+            ReportStatus("   WaitShooterAngleToGoUp: timed out: %d\n", m_wait);
             return true;
-        return m_main.shooter.GetFlagPosition() != Flag::Loading;
+        }
+        if (m_main.shooter.GetFlagPosition() != Flag::Loading)
+        {
+            ReportStatus("   WaitShooterAngleToGoUp: got ball: time=%d\n", m_main.GetTime() - m_timeStart);
+            return true;
+        }
+        return false;
     }
 };
 
