@@ -47,7 +47,8 @@ struct KeepAngle
 void RunSuperSkills();
 
 void MoveExactWithAngle(int distance, int angle);
-void GoToCapWithBallUnderIt(int additionalDistance = 0);
+void MoveWithAngle(int distance, int angle, int speed = 85);
+void GoToCapWithBallUnderIt(int distance = 0);
 void ShootTwoBalls();
 void GetBallUnderCapAndReturn();
 void TurnToFlagsAndShootTwoBalls();

@@ -20,9 +20,11 @@ const unsigned int g_midFlagHeightDiagonalShot = 65;
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
 
-void GoToCapWithBallUnderIt(int additionalDistance)
+void GoToCapWithBallUnderIt(int distance)
 {
-    Do(Move(distanceToCap + additionalDistance - 300));
+    if (distance == 0)
+        distance = distanceToCap;
+    Do(Move(distance - 300));
     IntakeUp();
     Do(Move(300, 20));
     Do(Wait(50));

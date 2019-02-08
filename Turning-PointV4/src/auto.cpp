@@ -176,6 +176,13 @@ void MoveExactWithAngle(int distance, int angle)
     Do(MoveExact(distance));
 }
 
+void MoveWithAngle(int distance, int angle, int speed)
+{
+    TurnToAngleIfNeeded(angle);
+    KeepAngle keeper(angle);
+    Do(Move(distance, speed));
+}
+
 void TurnToAngleIfNeeded(int angle)
 {
     int angleDiff = AdjustAngle(GetGyroReading() - angle * GyroWrapper::Multiplier);
