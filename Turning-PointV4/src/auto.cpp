@@ -46,7 +46,7 @@ void SetSkillSelection(bool skills)
         g_mode = AtonMode::Regular;
 }
 
-void DoCore(Action &&action)
+void Do(Action &&action)
 {
     while (!action.ShouldStop())
     {
@@ -67,7 +67,7 @@ void autonomous()
     }
     g_alreadyRunAutonomous = true;
     if (!isAutonomous())
-        delay(2000);
+        delay(4000);
 #endif
 
     Main &main = SetupMain();
@@ -84,7 +84,7 @@ void autonomous()
     {
         auto &lcd = main.lcd;
         lcd.AtonBlueRight = false;
-        lcd.AtonFirstPos = true;
+        lcd.AtonFirstPos = false;
         lcd.AtonClimbPlatform = true;
     }
 
@@ -101,7 +101,10 @@ void autonomous()
     else
 #endif // !OFFICIAL_RUN
     {
-        if (main.lcd.AtonFirstPos)
+         // if you remove this (super skills) to run old skills, fix lcd.AtonFirstPos = true above!!!
+        if (g_mode == AtonMode::Skills)
+            RunSuperSkills();
+        else if (main.lcd.AtonFirstPos)
             RunAtonFirstPos();
         else
             RunAtonSecondPos();

@@ -23,26 +23,7 @@ enum class AtonMode
 };
 extern AtonMode g_mode;
 
-void DoCore(Action &&action);
-
-#ifdef OFFICIAL_RUN
-#define Do(x) DoCore(x)
-#else //OFFICIAL_RUN
-#define Do(x)                                          \
-    do                                                 \
-    {                                                  \
-        if (PrintDiagnostics(Diagnostics::Autonomous)) \
-            puts("Next action started");               \
-        DoCore(x);                                     \
-    } while (false)
-#endif //OFFICIAL_RUN
-
-// All streight movements will follow gyro angle as long as this bject is on thw statck
-struct KeepAngle
-{
-    KeepAngle(int angle) { GetMain().drive.StartTrackingAngle(angle); }
-    ~KeepAngle() { GetMain().drive.StopTrackingAngle(); }
-};
+void Do(Action &&action);
 
 void RunSuperSkills();
 
@@ -54,3 +35,4 @@ void GetBallUnderCapAndReturn();
 void TurnToFlagsAndShootTwoBalls();
 void MoveToLowFlag();
 void TurnToAngleIfNeeded(int angle);
+void Do(Action &&action);

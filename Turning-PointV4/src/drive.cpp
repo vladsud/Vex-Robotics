@@ -1,6 +1,7 @@
 #include "drive.h"
 #include "position.h"
 #include "logger.h"
+#include "cycle.h"
 
 int AdjustSpeed(int speed)
 {
@@ -10,6 +11,39 @@ int AdjustSpeed(int speed)
         speed = -driveMotorMaxSpeed;
     return speed;
 }
+
+
+DriveTracker::DriveTracker()
+    : m_main(GetMain()),
+      m_drive(m_main.drive)
+{
+    Assert(isAuto());
+    m_drive.ResetTrackingState();
+    m_drive.StartTracking(this);
+}
+
+DriveTracker::~DriveTracker()
+{
+    Assert(isAuto());
+    m_drive.StopTracking();
+}
+
+
+KeepAngle::KeepAngle(int angle)
+{
+    if (m_drive.IsXFlipped())
+        angle = -angle;
+    angle *= GyroWrapper::Multiplier;
+
+    AssertSz(abs(angle - GetGyro().Get()) <= 20 * GyroWrapper::Multiplier, "Angle is too far from current one!");
+    m_angle = angle;
+}
+
+float KeepAngle::GetError()
+{
+    return (m_angle - GetGyro().Get()) * 5.0 / GyroWrapper::Multiplier;
+}
+
 
 int Drive::GetMovementJoystick(unsigned char joystick, unsigned char axis, int minValue)
 {
@@ -62,31 +96,9 @@ void Drive::OverrideInputs(int forward, float turn)
         ReportStatus("OverrideInputs: %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn));
 }
 
-void Drive::StartTrackingAngle(int angle)
-{
-    Assert(!m_trackAngle);
-    Assert(isAuto());
-    m_trackAngle = true;
-    if (m_flipX)
-        angle = -angle;
-    angle *= GyroWrapper::Multiplier;
-
-    AssertSz(abs(angle - GetGyro().Get()) <= 20 * GyroWrapper::Multiplier, "Angle is too far from current one!");
-    m_gyro = angle;
-
-    ResetTrackingStateCore();
-}
-
-void Drive::StopTrackingAngle()
-{
-    Assert(m_trackAngle);
-    Assert(isAuto());
-    m_trackAngle = false;
-}
-
 void Drive::ResetState()
 {
-    m_trackAngle = false;
+    m_tracker = nullptr;
     m_distanceFromBeginning = 0;
     encoderReset(g_leftDriveEncoder);
     encoderReset(g_rightDriveEncoder);
@@ -94,21 +106,12 @@ void Drive::ResetState()
     ResetTrackingState();
 }
 
-void Drive::ResetTrackingStateCore()
+void Drive::ResetTrackingState()
 {
     m_encoderBaseLeft = encoderGet(g_leftDriveEncoder);
     m_encoderBaseRight = encoderGet(g_rightDriveEncoder);
     m_distance = 0;
     m_ErrorIntergral = 0;
-}
-
-void Drive::ResetTrackingState()
-{
-    ResetTrackingStateCore();
-
-    // if we are tracking angle, then someone external (automnomous) set it - do not override it
-    if (!m_trackAngle)
-        m_gyro = GetGyro().Get();
 }
 
 void Drive::SetLeftDrive(int speed)
@@ -198,16 +201,16 @@ void Drive::Update()
     float error;
     // turn is aded to left!
     // when m_distance = 2*m_forward, we expect left-right to be 2*turn
-    Assert(!m_trackAngle || (turnAbs == 0 && smartsOn && isAuto())); // m_trackAngle is used in very limited cases
+    Assert(m_tracker == nullptr || (turnAbs == 0 && smartsOn && isAuto())); // tracker is used in very limited cases
     if (turnAbs < forwardAbs)
     {
         // Use gyro only in limited cases, until proven to be working well.
-        if (turnAbs == 0 && m_trackAngle)
+        if (turnAbs == 0 && m_tracker != nullptr)
         {
             // Gyro moves positive counter-clock-wise.
             // gyroDiff > 0: clock-wise movement
-            int gyroDiff = AdjustAngle(m_gyro - GetGyro().Get());
-            error = 5 * gyroDiff / GyroWrapper::Multiplier - m_turn * m_distance / m_forward;
+            float gyroDiff = m_tracker->GetError();
+            error = gyroDiff - m_turn * m_distance / m_forward;
         }
         else
         {

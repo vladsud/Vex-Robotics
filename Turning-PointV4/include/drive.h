@@ -1,19 +1,41 @@
 #pragma once
 #include "main.h"
 
+struct DriveTracker
+{
+  DriveTracker();
+  ~DriveTracker();
+  virtual float GetError() { Assert(false); return 0; } // for some reason linker can't find __cxa_pure_virtual
+
+protected:
+  class Main& m_main;
+  class Drive& m_drive;
+};
+
+
+// All streight movements will follow gyro angle as long as this bject is on thw statck
+struct KeepAngle : public DriveTracker
+{
+  KeepAngle(int angle);
+  float GetError() override;
+protected:
+  int m_angle;
+};
+
+
 class Drive
 {
   int m_forward = 0;
   int m_overrideForward = 0;
   int m_encoderBaseLeft = 0;
   int m_encoderBaseRight = 0;
-  int m_gyro = 0;
   float m_turn = 0;
   float m_overrideTurn = 0;
   float m_ErrorIntergral = 0;
   bool m_flipX = false;
   bool m_holdingPosition = false;
-  bool m_trackAngle = false;
+
+  DriveTracker* m_tracker = nullptr;
 
   bool KeepDrection(int forward, float turn)
   {
@@ -30,7 +52,6 @@ class Drive
   void SetLeftDrive(int speed);
   void SetRightDrive(int speed);
   static int GetMovementJoystick(unsigned char joystick, unsigned char axis, int minValue);
-  void ResetTrackingStateCore();
 
 public:
   unsigned int m_distance = 0;
@@ -41,6 +62,7 @@ public:
 public:
   Drive() { ResetTrackingState(); }
   void FlipX(bool flip) { m_flipX = flip; }
+  bool IsXFlipped() const { return m_flipX; }
   void StartHoldingPosition();
 
   // Forward: Positive turn - turn right (clockwise)
@@ -49,7 +71,16 @@ public:
   void ResetTrackingState();
   void Update();
 
-  void StartTrackingAngle(int angle);
-  void StopTrackingAngle();
   void ResetState();
+
+  void StartTracking(DriveTracker* tracker)
+  {
+    Assert(m_tracker == nullptr);
+    m_tracker = tracker;
+  }
+  void StopTracking()
+  {
+    Assert(m_tracker != nullptr);
+    m_tracker = nullptr;
+  }
 };
