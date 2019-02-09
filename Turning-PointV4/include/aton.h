@@ -21,6 +21,7 @@ enum class AtonMode
 #ifndef OFFICIAL_RUN
     TestRun,
     ManualAuto,
+    ManualSkill,
 #endif
 };
 extern AtonMode g_mode;

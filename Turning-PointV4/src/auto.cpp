@@ -12,7 +12,7 @@
 
 #include "aton.h"
 
-AtonMode g_mode = AtonMode::Regular; //TestRun;
+AtonMode g_mode = AtonMode::ManualSkill; //TestRun;
 
 // Variables not to touch - control actual autonomous mode
 bool g_autonomousSmartsOn = true;
@@ -94,7 +94,7 @@ void autonomous()
 
 #ifndef OFFICIAL_RUN
     // Debugging code - should not run in real autonomous
-    if (g_mode == AtonMode::ManualAuto && isAutonomous())
+    if (g_mode == AtonMode::ManualSkill && isAutonomous())
         RunSuperSkills();
     if (g_mode == AtonMode::TestRun && !isAutonomous())
         RunSuperSkills();
