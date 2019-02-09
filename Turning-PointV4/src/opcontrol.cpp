@@ -149,5 +149,3 @@ void operatorControl()
 		main.Update();
 	}
 }
-
-//Created by Jason Zhang, September 22, 2018

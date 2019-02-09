@@ -1,5 +1,6 @@
 #include "aton.h"
-
+#include "atonFirstPos.h"
+/*
 const int distanceToCap = 1900;
 const int angleToShootFlags = -5;
 // distances in inches, the higher the number - the lower is the angle
@@ -14,7 +15,7 @@ const float inchesToPlatform = 80.0;
 
 // used when shooting middle post when not climbing platform
 const unsigned int g_midFlagHeightDiagonalShot = 65;
-
+*/
 
 // WARNING:
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
@@ -49,17 +50,17 @@ void GetBallUnderCapAndReturn()
     IntakeStop();
 }
 
-void ShootTwoBalls()
+void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
 {
     ReportStatus("Shooting 2 balls\n");
-    SetShooterAngle(true /*high*/, g_midFlagHeight, false /*checkPresenceOfBall*/);
+    SetShooterAngle(true /*high*/, midFlagHeight, false /*checkPresenceOfBall*/);
     Do(WaitShooterAngleToStop());
     Do(ShootBall());
     IntakeUp();
-    GetMain().shooter.SetDistance(g_highFlagHeight);
+    GetMain().shooter.SetDistance(highFlagHeight);
     // wait for it to go down & start moving up
     Do(WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 5000 : 1500));
-    SetShooterAngle(false /*high*/, g_highFlagHeight, true /*checkPresenceOfBall*/);
+    SetShooterAngle(false /*high*/, highFlagHeight, true /*checkPresenceOfBall*/);
     Do(WaitShooterAngleToStop());
     Do(ShootBall());
     IntakeUp();

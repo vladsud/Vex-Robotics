@@ -19,7 +19,8 @@ bool PrintDiagnostics(Diagnostics diag)
     {
         // case Diagnostics::Autonomous:
         // case Diagnostics::Drive:
-        // case Diagnostics::General:
+        case Diagnostics::General:
+            true;
         // case Diagnostics::Angle:
         return true;
     default:

@@ -5,6 +5,8 @@
 #include "actionsTurn.h"
 #include "main.h"
 #include "cycle.h"
+#include "atonFirstPos.h"
+
 
 #define BLOCK
 
@@ -30,7 +32,7 @@ void RunSuperSkills();
 void MoveExactWithAngle(int distance, int angle);
 void MoveWithAngle(int distance, int angle, int speed = 85);
 void GoToCapWithBallUnderIt(int distance = 0);
-void ShootTwoBalls();
+void ShootTwoBalls(int midFlagHeight = g_midFlagHeight, int highFlagHeight = g_highFlagHeight);
 void GetBallUnderCapAndReturn();
 void TurnToFlagsAndShootTwoBalls();
 void MoveToLowFlag();

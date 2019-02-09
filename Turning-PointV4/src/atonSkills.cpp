@@ -88,7 +88,7 @@ void RunSuperSkills()
     // Recalibrate, and move to shooting position for second row of flags
     HitWallAndRecalibrate(-(int)distanceFromWall - 50, 0, -90);
     MoveExactWithAngle(2050, -90);
-    Do(TurnToAngle(-25));
+    Do(TurnToAngle(-22));
 
 
 
@@ -105,13 +105,13 @@ void RunSuperSkills()
     MoveExactWithAngle(-350, -90);
     Do(Wait(300));
     IntakeDown();
-    MoveExactWithAngle(1150, -90);
+    MoveExactWithAngle(1200, -90);
 
     //Flip cap 2
-    MoveExactWithAngle(-1650, -90);
+    MoveExactWithAngle(-1700, -90);
     IntakeDown();
     MoveWithAngle(600, 0);
-    MoveWithAngle(600, 0, 18); // slow down a bit
+    MoveWithAngle(500, 0, 30); // slow down a bit
     MoveExactWithAngle(250, 0);
 
 
@@ -119,14 +119,14 @@ void RunSuperSkills()
     ReportStatus("\nGoing after second low flag\n");
 
     // Low flag 2
-    MoveExactWithAngle(1400, -90);
-    HitLowFlagWithRecovery(1200, -1600);
+    MoveExactWithAngle(1250, -90);
+    HitLowFlagWithRecovery(1250, -1650);
 
     //Cap 3
     Do(TurnToAngle(-90));
     IntakeDown();
-    MoveWithAngle(1300, -90);
-    MoveWithAngle(1200, -90, 18); // slow down a bit
+    MoveWithAngle(1900, -90);
+    MoveWithAngle(500, -90, 30); // slow down a bit
     MoveExactWithAngle(250, -90);
 
 
@@ -134,10 +134,12 @@ void RunSuperSkills()
     ReportStatus("\nGoing after 3rd low flag\n");
 
     //Low flag 3, shoot
+    IntakeUp();
     MoveExactWithAngle(-200, -90);
     HitLowFlagWithRecovery(1600, -1850);
     Do(TurnToAngle(-20));
-    ShootTwoBalls();
+    IntakeDown();
+    ShootTwoBalls(60);
 
 
 
