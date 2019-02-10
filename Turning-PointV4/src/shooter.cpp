@@ -17,7 +17,7 @@ constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 }
 
 // Angle potentiometer:
-constexpr unsigned int anglerLow = 20;
+constexpr unsigned int anglerLow = 18;
 const unsigned int anglePotentiometerLow = ConvertAngleToPotentiometer(anglerLow);
 const unsigned int anglePotentiometerHigh = 1060;
 
@@ -130,16 +130,16 @@ void Shooter::KeepMoving()
     int diff = distance - m_lastAngleDistance;
 
     // sometimes we get really wrong readings.
-    if (diff > m_diffAdjusted + 15)
-        diff = m_diffAdjusted + 15;
-    else if (diff < m_diffAdjusted - 15)
-        diff = m_diffAdjusted - 15;
+    if (diff > m_diffAdjusted + 3)
+        diff = m_diffAdjusted + 3;
+    else if (diff < m_diffAdjusted - 3)
+        diff = m_diffAdjusted - 3;
 
     distance = diff + m_lastAngleDistance;
     unsigned int distanceAbs = abs(distance);
 
-    // m_diffAdjusted = (m_diffAdjusted * 3 + diff) / 4;
-    m_diffAdjusted = diff;
+    m_diffAdjusted = (m_diffAdjusted + diff) / 2;
+    // m_diffAdjusted = diff;
 
     m_count++;
 
@@ -149,7 +149,8 @@ void Shooter::KeepMoving()
         if (m_fMoving)
         {
             if (PrintDiagnostics(Diagnostics::Angle))
-                ReportStatus("STOP: (%d) Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n\n\n", m_count, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+                ReportStatus("STOP: (%d) Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n\n\n",
+                    m_count, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
             StopMoving();
         }
         if (m_flag == Flag::Loading)
@@ -159,25 +160,25 @@ void Shooter::KeepMoving()
 
     if (m_fMoving || m_flag != Flag::Loading)
     {
-        if (distanceAbs <= 5)
+        if (distanceAbs <= 8)
             speed = 0;
         else if (distance > 0) // going up
-            speed = 30 + distance / 4  + m_diffAdjusted * 4;
+            speed = 28 + distance / 6  + m_diffAdjusted * 5;
         else if (m_flag != Flag::Loading)
-            speed = -18 + distance / 8 + m_diffAdjusted * 5;
+            speed = -16 + distance / 7 + m_diffAdjusted * 4;
         else
-            speed = -19 + distance / 2 + m_diffAdjusted * 4;
+            speed = -24 + distance / 4 + m_diffAdjusted * 5;
 
         if (PrintDiagnostics(Diagnostics::Angle))
         {
             if (m_fMoving)
-                ReportStatus("ANG MOVE: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+                ReportStatus("ANG: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
             else
-                ReportStatus("ANG ADJ: (%d) Power: %d   Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+                ReportStatus("ANG ADJ: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
         }
     } 
 
-    const int angleMotorSpeed = 100;
+    const int angleMotorSpeed = 75;
 
     if (speed > angleMotorSpeed)
         speed = angleMotorSpeed;
