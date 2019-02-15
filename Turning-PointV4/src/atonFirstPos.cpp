@@ -59,7 +59,7 @@ void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
     IntakeUp();
     GetMain().shooter.SetDistance(highFlagHeight);
     // wait for it to go down & start moving up
-    Do(WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 5000 : 1500));
+    Do(WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 2000 : 1500));
     SetShooterAngle(false /*high*/, highFlagHeight, true /*checkPresenceOfBall*/);
     Do(WaitShooterAngleToStop());
     Do(ShootBall());

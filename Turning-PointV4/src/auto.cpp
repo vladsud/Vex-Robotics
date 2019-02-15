@@ -167,7 +167,7 @@ void MoveToPlatform(bool twoPlatforms)
     if (twoPlatforms)
     {
         ReportStatus("Second platform\n");
-        Do(MoveToPlatformAction(2000));
+        Do(MoveToPlatformAction(2100));
         Do(MoveTimeBased(-30, 500, true /*waitForStop*/));
     }
 }
