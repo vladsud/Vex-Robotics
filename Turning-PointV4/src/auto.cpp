@@ -62,10 +62,11 @@ void Do(Action &&action)
 void autonomous()
 {
     Battery bat;
-    //float mp = bat.GetMainPower();
+    float mp = bat.GetMainPower();
     float ep = bat.GetExpanderPower();
+    ReportStatus("Main Battery Level: %.2f", mp);
     ReportStatus("Expander Battery Level: %.2f", ep);
-    if (ep < 7.0f)
+    if (ep < 7.0f || mp < 7.0f)
     {
         g_enabled = false;
     } 
