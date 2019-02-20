@@ -124,6 +124,9 @@ bool MoveToMiddleFlagPosition()
 //   down: -100
 void Shooter::KeepMoving()
 {
+
+    // distance = error
+    // diff = derivative
     int speed = 0;
     unsigned int current = analogRead(anglePotPort);
     int distance = current - m_angleToMove;
