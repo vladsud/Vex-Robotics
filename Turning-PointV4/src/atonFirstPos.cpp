@@ -44,7 +44,7 @@ void GetBallUnderCapAndReturn()
 
     GoToCapWithBallUnderIt();
 
-    distance = main.drive.m_distanceFromBeginning - distance - 100;
+    distance = main.drive.m_distanceFromBeginning - distance;
     ReportStatus("Move back: %d\n", distance);
     Do(MoveExact(-distance)); // 1800 ?
     IntakeStop();

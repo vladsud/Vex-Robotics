@@ -17,11 +17,10 @@ bool PrintDiagnostics(Diagnostics diag)
 {
     switch (diag)
     {
-        // case Diagnostics::Autonomous:
-        // case Diagnostics::Drive:
-        case Diagnostics::General:
-            true;
-        // case Diagnostics::Angle:
+    // case Diagnostics::Autonomous:
+    // case Diagnostics::Drive:
+    // case Diagnostics::General:
+    case Diagnostics::Angle:
         return true;
     default:
         return false;

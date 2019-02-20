@@ -11,8 +11,12 @@
  */
 
 #include "aton.h"
+#include "battery.h"
 
 AtonMode g_mode = AtonMode::Regular; //TestRun;
+
+// Turn Auton off incase battery isn't plugged in
+bool g_enabled = true;
 
 // Variables not to touch - control actual autonomous mode
 bool g_autonomousSmartsOn = true;
@@ -57,71 +61,87 @@ void Do(Action &&action)
 
 void autonomous()
 {
-#ifndef OFFICIAL_RUN
-    // Safety net: run autonomous only once!
-    // Siable second run, in case manual auto was still in place when running on competition.
-    if (g_alreadyRunAutonomous && !isAutonomous())
+    Battery bat;
+    //float mp = bat.GetMainPower();
+    float ep = bat.GetExpanderPower();
+    ReportStatus("Expander Battery Level: %.2f", ep);
+    if (ep < 7.0f)
     {
-        g_mode = AtonMode::Regular;
-        return;
+        g_enabled = false;
+    } 
+    else 
+    {
+        g_enabled = true;
     }
-    g_alreadyRunAutonomous = true;
-    if (!isAutonomous())
-        delay(4000);
+
+    if (g_enabled)
+    {
+#ifndef OFFICIAL_RUN
+        // Safety net: run autonomous only once!
+        // Siable second run, in case manual auto was still in place when running on competition.
+        if (g_alreadyRunAutonomous && !isAutonomous())
+        {
+            g_mode = AtonMode::Regular;
+            return;
+        }
+        g_alreadyRunAutonomous = true;
+        if (!isAutonomous())
+            delay(4000);
 #endif
 
-    Main &main = SetupMain();
+        Main &main = SetupMain();
 
-    // all system update their counters, like distance counter.
-    main.ResetState();
-    main.UpdateAllSystems();
+        // all system update their counters, like distance counter.
+        main.ResetState();
+        main.UpdateAllSystems();
 
-    ReportStatus("\n*** Autonomous: Start ***\n\n");
-    auto time = main.GetTime();
-    auto time2 = millis();
+        ReportStatus("\n*** Autonomous: Start ***\n\n");
+        auto time = main.GetTime();
+        auto time2 = millis();
 
-    if (g_mode == AtonMode::Skills)
-    {
-        auto &lcd = main.lcd;
-        lcd.AtonBlueRight = false;
-        lcd.AtonFirstPos = false;
-        lcd.AtonClimbPlatform = true;
-    }
+        if (g_mode == AtonMode::Skills)
+        {
+            auto &lcd = main.lcd;
+            lcd.AtonBlueRight = false;
+            lcd.AtonFirstPos = false;
+            lcd.AtonClimbPlatform = true;
+        }
 
-    // setup coordinates
-    main.tracker.FlipX(main.lcd.AtonBlueRight);
-    main.drive.FlipX(main.lcd.AtonBlueRight);
+        // setup coordinates
+        main.tracker.FlipX(main.lcd.AtonBlueRight);
+        main.drive.FlipX(main.lcd.AtonBlueRight);
 
 #ifndef OFFICIAL_RUN
-    // Debugging code - should not run in real autonomous
-    if (g_mode == AtonMode::ManualSkill && isAutonomous())
-        RunSuperSkills();
-    if (g_mode == AtonMode::TestRun && !isAutonomous())
-        RunSuperSkills();
-    else
-#endif // !OFFICIAL_RUN
-    {
-         // if you remove this (super skills) to run old skills, fix lcd.AtonFirstPos = true above!!!
-        if (g_mode == AtonMode::Skills)
+        // Debugging code - should not run in real autonomous
+        if (g_mode == AtonMode::ManualSkill && isAutonomous())
             RunSuperSkills();
-        else if (main.lcd.AtonFirstPos)
-            RunAtonFirstPos();
+        if (g_mode == AtonMode::TestRun && !isAutonomous())
+            RunSuperSkills();
         else
-            RunAtonSecondPos();
+#endif // !OFFICIAL_RUN
+        {
+            // if you remove this (super skills) to run old skills, fix lcd.AtonFirstPos = true above!!!
+            if (g_mode == AtonMode::Skills)
+                RunSuperSkills();
+            else if (main.lcd.AtonFirstPos)
+                RunAtonFirstPos();
+            else
+                RunAtonSecondPos();
+        }
+        IntakeStop();
+
+        // unused variables in final build
+        UNUSED_VARIABLE(time);
+        UNUSED_VARIABLE(time2);
+
+        ReportStatus("\n*** END AUTONOMOUS ***\n\n");
+        ReportStatus("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
+        ReportStatus("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
+
+        GetLogger().Dump();
+
+        Do(EndOfAction());
     }
-    IntakeStop();
-
-    // unused variables in final build
-    UNUSED_VARIABLE(time);
-    UNUSED_VARIABLE(time2);
-
-    ReportStatus("\n*** END AUTONOMOUS ***\n\n");
-    ReportStatus("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
-    ReportStatus("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
-
-    GetLogger().Dump();
-
-    Do(EndOfAction());
 }
 
 void SetShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
