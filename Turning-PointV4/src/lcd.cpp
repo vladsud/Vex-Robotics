@@ -2,6 +2,7 @@
 #include "api.h"
 #include "main.h"
 #include "battery.h"
+#include "aton.h"
 
 LCD::LCD()
 {
@@ -29,9 +30,11 @@ void LCD::PrintMessage(const char *message)
 
 void LCD::SetSkillsMode()
 {
-    lcdSetText(uart1, 1, "  SKILLS !!! ");
-    lcdSetText(uart1, 2, "Red       Blue");
+    lcdSetText(uart1, 1, "    SKILLS!    ");
+    lcdSetText(uart1, 2, "     Cancel     ");
+    // lcdSetText(uart1, 2, "Red       Blue");
     SetSkillSelection(true);
+    Skills = true;
 }
 
 void LCD::PrintStepInstructions()
@@ -42,14 +45,22 @@ void LCD::PrintStepInstructions()
     Battery bat;
     float mp = bat.GetMainPower();
     float ep = bat.GetExpanderPower();
-    
+
     switch (m_step)
     {
     case 0:
-        // Print battery level
-        lcdSetText(uart1, 1, "Main        Exp");
+        if (ep > 7.0f || mp > 7.0f)
+        {
+            // Print battery level
+            lcdSetText(uart1, 1, "Main        Exp");
 
-        lcdPrint(uart1, 2, "%.2f  Cont  %.2f", mp, ep);
+            lcdPrint(uart1, 2, "%.2f  Cont  %.2f", mp, ep);
+        }
+        else
+        {
+            lcdSetText(uart1, 1, "Battery");
+            lcdSetText(uart1, 1, "NOT Connected");
+        }
         break;
     case 1:
         // Choose side
@@ -115,11 +126,26 @@ void LCD::Update()
         Battery bat;
         float mp = bat.GetMainPower();
         float ep = bat.GetExpanderPower();
-
-        lcdPrint(uart1, 2, "%.2f  Cont  %.2f", mp, ep);
+        if (ep > 7.0f || mp > 7.0f)
+        {
+            lcdSetText(uart1, 1, "Main        Exp");
+            lcdPrint(uart1, 2, "%.2f  Cont  %.2f", mp, ep);
+        }
+        else
+        {
+            lcdSetText(uart1, 1, "Battery");
+            lcdSetText(uart1, 2, "NOT Connected");
+        }
     }
 
-    // Read button 
+    // If at first or second step not skills
+    if (m_step == 0 /* || m_step == 1*/)
+    {
+        Skills = false;
+        g_mode = AtonMode::Regular;
+    }
+
+    // Read button
     // Returns a 3 bit integer: 100 is left, 010 is center, 001 is right
     int buttons = lcdReadButtons(uart1);
 
@@ -146,7 +172,10 @@ void LCD::Update()
     if (!(buttons & LCD_BTN_CENTER))
     {
         ReportStatus("LCD: non-center\n");
-        SelectAction(buttons & LCD_BTN_RIGHT);
+        if (!Skills)
+        {
+            SelectAction(buttons & LCD_BTN_RIGHT);
+        }
         return;
     }
 
@@ -160,8 +189,18 @@ void LCD::Update()
     // If presse in step 1 then select skill
     else if (m_step == 1)
     {
-        ReportStatus("LCD: Skills!!!\n");
-        SetSkillsMode();
+        if (!Skills)
+        {
+            ReportStatus("LCD: Skills!!!\n");
+            SetSkillsMode();
+        }
+        else 
+        {
+            ReportStatus("LCD: Back\n");
+            m_step--;
+            PrintStepInstructions();
+            Skills = false;
+        }
         return;
     }
 

@@ -16,6 +16,7 @@ class LCD
 	bool AtonBlueRight = true;
 	bool AtonFirstPos = true;
 	bool AtonClimbPlatform = false;
+	bool Skills = false;
 
 	// I do not think it runs...
 	LCD();
