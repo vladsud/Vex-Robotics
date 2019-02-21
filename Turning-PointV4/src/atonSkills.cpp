@@ -54,11 +54,11 @@ unsigned int HitTheWall(int distanceForward, int angle)
 
     KeepAngle keeper(angle);
 
-    Do(Move(distance, 85, true /*StopOnColision */));
+    Move(distance, 85, true /*StopOnColision */);
     unsigned int distanceTravelled = drive.m_distance;
 
-    Do(MoveTimeBased(35 * Sign(distanceForward), 5000, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
-    Do(Wait(100));
+    MoveTimeBased(35 * Sign(distanceForward), 5000, true /*waitForStop*/); // attempt to fully stop, for more accurate back movement
+    Wait(100);
     distanceTravelled += drive.m_distance;
 
     ReportStatus("   Actually travelled: %d\n", distanceTravelled);
@@ -106,7 +106,7 @@ void RunSuperSkills()
     // Recalibrate angle
     HitTheWall(-(int)distanceFromWall-120, -90);
     ResetPostionAfterHittingWall(true /*leftWall*/);
-    Do(MoveExact(distanceFromWall));
+    MoveExact(distanceFromWall);
 
     // Shooting 2 balls at first row
     TurnToFlagsAndShootTwoBalls();
@@ -125,18 +125,18 @@ void RunSuperSkills()
     ReportStatus("\nShooting second pole\n");
 
     MoveExactWithAngle(2050, -90);
-    Do(TurnToAngle(-24));
+    TurnToAngle(-24);
 
     // Shoot middle pole
     ShootTwoBalls(63, 115);
 
     // pick up ball under cap
-    Do(TurnToAngle(-90));
+    TurnToAngle(-90);
     GoToCapWithBallUnderIt(400);
 
     // Flip cap #1
     MoveExactWithAngle(-350, -90);
-    Do(Wait(300));
+    Wait(300);
     IntakeDown();
     MoveExactWithAngle(1300, -90);
 
@@ -154,7 +154,7 @@ void RunSuperSkills()
     HitLowFlagWithRecovery(1250, -1650, 0, 2);
 
     //Cap 3
-    Do(TurnToAngle(-90));
+    TurnToAngle(-90);
     IntakeDown();
     MoveWithAngle(1580, -90);
     MoveWithAngle(500, -90, 30); // slow down a bit
@@ -166,7 +166,7 @@ void RunSuperSkills()
     IntakeUp();
     MoveExactWithAngle(-200, -90);
     HitLowFlagWithRecovery(1400, -2200);
-    Do(TurnToAngle(-13));
+    TurnToAngle(-13);
     IntakeDown();
     ShootTwoBalls(33, 70);
 
@@ -174,6 +174,6 @@ void RunSuperSkills()
 
     // Climb platform
     MoveExactWithAngle(-2200, 30);
-    Do(TurnToAngle(-270));
+    TurnToAngle(-270);
     MoveToPlatform(true);    
 }

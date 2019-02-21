@@ -4,7 +4,6 @@
 #include <cmath>
 
 #define Turn(x) TurnPrecise((x)*GyroWrapper::Multiplier)
-#define TurnToAngle(x) TurnPrecise((x)*GyroWrapper::Multiplier - GetGyroReading())
 #define TurnToPoint(x, y) TurnToAngle(CalcAngleToPoint(x, y))
 
 int CalcAngleToPoint(double x, double y);

@@ -23,22 +23,22 @@ struct EndOfAction : public Action
     bool ShouldStop() override { return false; }
 };
 
-struct Wait : public Action
+struct WaitAction : public Action
 {
     unsigned int m_wait;
-    Wait(int wait) : m_wait(wait) {}
+    WaitAction(unsigned int wait) : m_wait(wait) {}
     bool ShouldStop() override { return m_main.GetTime() - m_timeStart >= m_wait; }
 };
 
-struct WaitShooterAngleToStop : public Action
+struct WaitShooterAngleToStopAction : public Action
 {
     bool ShouldStop() override { return !m_main.shooter.IsMovingAngle(); }
 };
 
-struct WaitShooterAngleToGoUp : public Action
+struct WaitShooterAngleToGoUpAction : public Action
 {
     unsigned int m_wait;
-    WaitShooterAngleToGoUp(unsigned int maxWait)
+    WaitShooterAngleToGoUpAction(unsigned int maxWait)
         : m_wait(maxWait)
     {
     }
@@ -59,9 +59,9 @@ struct WaitShooterAngleToGoUp : public Action
     }
 };
 
-struct ShootBall : public Action
+struct ShootBallAction : public Action
 {
-    ShootBall()
+    ShootBallAction()
     {
         Assert(!m_main.shooter.IsShooting());
         if (m_main.shooter.GetFlagPosition() != Flag::Loading)

@@ -189,7 +189,7 @@ void MoveToPlatform(bool twoPlatforms)
     {
         ReportStatus("Second platform\n");
         Do(MoveToPlatformAction(2100));
-        Do(MoveTimeBased(-30, 500, true /*waitForStop*/));
+        MoveTimeBased(-30, 500, true /*waitForStop*/);
     }
 }
 
@@ -197,19 +197,19 @@ void MoveExactWithAngle(int distance, int angle)
 {
     TurnToAngleIfNeeded(angle);
     KeepAngle keeper(angle);
-    Do(MoveExact(distance));
+    MoveExact(distance);
 }
 
 void MoveWithAngle(int distance, int angle, int speed)
 {
     TurnToAngleIfNeeded(angle);
     KeepAngle keeper(angle);
-    Do(Move(distance, speed));
+    Move(distance, speed);
 }
 
 void TurnToAngleIfNeeded(int angle)
 {
     int angleDiff = AdjustAngle(GetGyroReading() - angle * GyroWrapper::Multiplier);
     if (abs(angleDiff) > 10 * GyroWrapper::Multiplier)
-        Do(TurnToAngle(angle));
+        TurnToAngle(angle);
 }

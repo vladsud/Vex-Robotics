@@ -10,45 +10,45 @@ void RunAtonSecondPos()
 
    // Shoot the ball
     SetShooterAngle(false, 108, false /*checkPresenceOfBall*/);
-    Do(WaitShooterAngleToStop());
-    Do(Wait(1000));
-    Do(ShootBall());
+    WaitShooterAngleToStop();
+    Wait(1000);
+    ShootBall();
 
     if (GetMain().lcd.AtonClimbPlatform)
     {
-        Do(Wait(6000));
-        Do(Move(700, 50));
-        Do(Wait(1000));
-        Do(Turn(-60));
+        Wait(6000);
+        Move(700, 50);
+        Wait(1000);
+        TurnToAngle(-90);
         
-        Do(Wait(200));
-        Do(Move(400));
+        Wait(200);
+        Move(400);
         MoveToPlatform(false /*twoPlatforms*/);
     }
     else
     {
-        Do(TurnToAngle(-100));
+        TurnToAngle(-100);
         BLOCK
         {
             KeepAngle keeper(-100);
             GoToCapWithBallUnderIt();
         }
 
-        Do(TurnToAngle(-10));
+        TurnToAngle(-10);
         SetShooterAngle(true, 108, false /*checkPresenceOfBall*/);
         IntakeUp();
-        Do(WaitShooterAngleToStop());
-        Do(Wait(5000));
-        Do(ShootBall());
+        WaitShooterAngleToStop();
+        Wait(5000);
+        ShootBall();
 
-        Do(TurnToAngle(-70));
-        Do(Move(500, -60));
+        TurnToAngle(-70);
+        Move(500, -60);
 
         /*
-        Do(TurnToAngle(-140));
+        TurnToAngle(-140);
         IntakeDown();
-        Do(Move(1400, 45));
-        Do(MoveExact(-500));
+        Move(1400, 45);
+        MoveExact(-500);
         */
     }
     

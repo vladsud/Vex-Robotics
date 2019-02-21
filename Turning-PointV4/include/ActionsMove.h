@@ -2,9 +2,9 @@
 #include "actions.h"
 #include "position.h"
 
-struct Move : public Action
+struct MoveAction : public Action
 {
-    Move(int distance, int forward = 85, bool stopOnCollision = false)
+    MoveAction(int distance, int forward, bool stopOnCollision = false)
         : m_forward(forward),
           m_turn(0),
           m_stopOnCollision(stopOnCollision)
@@ -64,7 +64,7 @@ struct Move : public Action
     unsigned int m_lastDistance = 0;
 };
 
-struct MoveToPlatformAction : public Move
+struct MoveToPlatformAction : public MoveAction
 {
     int m_diff = 0;
     int m_diffMax = 0;
@@ -73,7 +73,7 @@ struct MoveToPlatformAction : public Move
     bool m_fIsLow = false;
     int m_distanceFirstHit = 0;
 
-    MoveToPlatformAction(int distance) : Move(distance, 65) {}
+    MoveToPlatformAction(int distance) : MoveAction(distance, 65) {}
 
     bool ShouldStop() override
     {
@@ -116,15 +116,15 @@ struct MoveToPlatformAction : public Move
     }
 };
 
-struct MoveTimeBased : public Move
+struct MoveTimeBasedAction : public MoveAction
 {
     unsigned int m_time;
     unsigned int m_distance = 0;
     bool m_waitForStop;
     bool m_first = true;
 
-    MoveTimeBased(int speed, int time, bool waitForStop)
-        : Move(50000, speed),
+    MoveTimeBasedAction(int speed, int time, bool waitForStop)
+        : MoveAction(50000, speed),
           m_time(time),
           m_waitForStop(waitForStop)
     {
@@ -149,9 +149,9 @@ struct MoveTimeBased : public Move
     }
 };
 
-struct MoveExact : public Action
+struct MoveExactAction : public Action
 {
-    MoveExact(int distance)
+    MoveExactAction(int distance)
         : m_distanceToMove(distance)
     {
         if (m_distanceToMove < 0)

@@ -25,14 +25,14 @@ void GoToCapWithBallUnderIt(int distance)
 {
     if (distance == 0)
         distance = distanceToCap;
-    Do(Move(distance - 300));
+    Move(distance - 300);
     IntakeUp();
-    Do(Move(300, 20));
-    Do(Wait(50));
-    Do(MoveTimeBased(-18, 500, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
+    Move(300, 20);
+    Wait(50);
+    MoveTimeBased(-18, 500, true /*waitForStop*/); // attempt to fully stop, for more accurate back movement
 
     // we have hard time picking up the ball, so wait
-    Do(Wait(100));
+    Wait(100);
 }
 
 void GetBallUnderCapAndReturn()
@@ -46,7 +46,7 @@ void GetBallUnderCapAndReturn()
 
     distance = main.drive.m_distanceFromBeginning - distance;
     ReportStatus("Move back: %d\n", distance);
-    Do(MoveExact(-distance)); // 1800 ?
+    MoveExact(-distance); // 1800 ?
     IntakeStop();
 }
 
@@ -60,21 +60,21 @@ void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
     }
     ReportStatus("Shooting 2 balls\n");
     SetShooterAngle(true /*high*/, midFlagHeight, false /*checkPresenceOfBall*/);
-    Do(WaitShooterAngleToStop());
-    Do(ShootBall());
+    WaitShooterAngleToStop();
+    ShootBall();
     IntakeUp();
     GetMain().shooter.SetDistance(highFlagHeight);
     // wait for it to go down & start moving up
-    Do(WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 2000 : 1500));
+    WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 2000 : 1500);
     SetShooterAngle(false /*high*/, highFlagHeight, true /*checkPresenceOfBall*/);
-    Do(WaitShooterAngleToStop());
-    Do(ShootBall());
+    WaitShooterAngleToStop();
+    ShootBall();
     IntakeUp();
 }
 
 void TurnToFlagsAndShootTwoBalls()
 {
-    Do(TurnToAngle(angleToShootFlags));
+    TurnToAngle(angleToShootFlags);
     ShootTwoBalls();
 }
 
@@ -82,9 +82,9 @@ void MoveToLowFlag()
 {
     KeepAngle keeper(angleToMoveToFlags);
 
-    Do(Move(2200, 85, true /*StopOnColision */));
-    Do(Move(200, 30, true /*StopOnColision */));
-    Do(MoveTimeBased(0, 500, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
+    Move(2200, 85, true /*StopOnColision */);
+    Move(200, 30, true /*StopOnColision */);
+    MoveTimeBased(0, 500, true /*waitForStop*/); // attempt to fully stop, for more accurate back movement
 }
 
 void RunAtonFirstPos()
@@ -123,7 +123,7 @@ void RunAtonFirstPos()
     if (abs(info.gyro) > 15 * GyroWrapper::Multiplier || info.Y > 12.0 / PositionTracker::inchesPerClick)
     {
         ReportStatus("Recovery!!!\n");
-        Do(TurnToAngle(CalcAngleToPoint(18, 84) + 180));
+        TurnToAngle(CalcAngleToPoint(18, 84) + 180);
         ReportStatus("   End of recovery");
 
         info = GetTracker().LatestPosition(true /*clicks*/);
@@ -145,7 +145,7 @@ void RunAtonFirstPos()
         ReportStatus("Moving: %d\n", distance);
         MoveExactWithAngle(distance, 3);  // try to get further out from the wall
 
-        Do(TurnToAngle(-90));
+        TurnToAngle(-90);
         MoveToPlatform(g_mode == AtonMode::Skills); //  || g_mode == AtonMode::ManualAuto);
     }
     else
@@ -155,12 +155,12 @@ void RunAtonFirstPos()
         ReportStatus("Moving: %d\n", distance);
         MoveExactWithAngle(distance, 3);  // try to get further out from the wall
 
-        Do(TurnToAngle(-55));
+        TurnToAngle(-55);
         SetShooterAngle(false /*high*/, g_midFlagHeightDiagonalShot, true /*checkPresenceOfBall*/);
-        Do(WaitShooterAngleToGoUp(5000));
-        Do(ShootBall());
+        WaitShooterAngleToGoUp(5000);
+        ShootBall();
 
-        Do(TurnToAngle(-60));
+        TurnToAngle(-60);
 
     }
 }

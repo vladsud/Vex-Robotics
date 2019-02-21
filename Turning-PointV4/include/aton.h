@@ -39,3 +39,48 @@ void TurnToFlagsAndShootTwoBalls();
 void MoveToLowFlag();
 void TurnToAngleIfNeeded(int angle);
 void Do(Action &&action);
+
+inline void Move(int distance, int forward = 85, bool stopOnCollision = false)
+{
+    Do(MoveAction(distance, forward, stopOnCollision));
+}
+
+inline void MoveExact(int distance)
+{
+    Do(MoveExactAction(distance));
+}
+
+inline void MoveTimeBased(int speed, int time, bool waitForStop)
+{
+    Do(MoveTimeBasedAction(speed, time, waitForStop));
+}
+
+inline void ShootBall()
+{
+    Do(ShootBallAction());
+}
+
+inline void Wait(unsigned int duration)
+{
+    Do(WaitAction(duration));
+}
+
+inline void TurnToAngle(int turn)
+{
+    Do(TurnPrecise(turn * GyroWrapper::Multiplier - GetGyroReading()));
+}
+
+inline void WaitShooterAngleTo()
+{
+    Do(WaitShooterAngleToStopAction());
+}
+
+inline void WaitShooterAngleToGoUp(unsigned int wait)
+{
+    Do(WaitShooterAngleToGoUpAction(wait));
+}
+
+inline void WaitShooterAngleToStop()
+{
+    Do(WaitShooterAngleToStopAction());
+}
