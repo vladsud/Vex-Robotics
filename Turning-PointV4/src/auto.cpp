@@ -13,7 +13,7 @@
 #include "aton.h"
 #include "battery.h"
 
-AtonMode g_mode = AtonMode::Regular; //TestRun;
+AtonMode g_mode = AtonMode::ManualSkill; //TestRun;
 
 // Turn Auton off incase battery isn't plugged in
 bool g_enabled = true;
@@ -64,9 +64,9 @@ void autonomous()
     Battery bat;
     float mp = bat.GetMainPower();
     float ep = bat.GetExpanderPower();
-    ReportStatus("Main Battery Level: %.2f", mp);
+    ReportStatus("Main Battery Level: %.2f" , mp);
     ReportStatus("Expander Battery Level: %.2f", ep);
-    if (ep > 7.0f && mp > 7.0f)
+    if (ep > 6.0f && mp > 6.0f)
     {
         g_enabled = true;
     } 
@@ -116,7 +116,7 @@ void autonomous()
         // Debugging code - should not run in real autonomous
         if (g_mode == AtonMode::ManualSkill && isAutonomous())
             RunSuperSkills();
-        if (g_mode == AtonMode::TestRun && !isAutonomous())
+        else if (g_mode == AtonMode::TestRun && !isAutonomous())
             RunSuperSkills();
         else
 #endif // !OFFICIAL_RUN

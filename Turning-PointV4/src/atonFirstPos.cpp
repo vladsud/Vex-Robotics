@@ -52,6 +52,12 @@ void GetBallUnderCapAndReturn()
 
 void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
 {
+    auto &main = GetMain();
+    if (main.shooter.BallStatus() == BallPresence::NoBall)
+    {
+        IntakeUp();
+        return;
+    }
     ReportStatus("Shooting 2 balls\n");
     SetShooterAngle(true /*high*/, midFlagHeight, false /*checkPresenceOfBall*/);
     Do(WaitShooterAngleToStop());

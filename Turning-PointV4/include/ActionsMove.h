@@ -94,12 +94,12 @@ struct MoveToPlatformAction : public Move
             m_fIsLow = true;
             if (m_slowCount == 0)
             {
-                m_main.drive.OverrideInputs(85, 0);
+                m_main.drive.OverrideInputs(95, 0);
                 m_distanceFirstHit = distance;
             }
         }
 
-        if (m_fIsLow && distance >= m_distanceFirstHit + 1050 * 10)
+        if (m_fIsLow && distance >= m_distanceFirstHit + 1100 * 10)
         {
             ReportStatus("MoveToPlatform: Stop \n");
             return true;

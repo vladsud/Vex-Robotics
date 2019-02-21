@@ -21,7 +21,7 @@
 
 // Rate noise elimination threshold
 // Default value (equivalence, in Pros implementaiton) is 188, which is 7 degrees / second
-#define RATE_NOISE_LIMIT_ANALOG 151 //188
+#define RATE_NOISE_LIMIT_ANALOG 110 //188
 
 void GyroWrapper::Integrate()
 {

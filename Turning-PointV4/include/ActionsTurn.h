@@ -81,7 +81,7 @@ struct TurnPrecise : public Action
         if (idealSpeed == 0)
             power = -Sign(actualSpeed) * 12;
         else
-            power = sign * 24 + (idealSpeed / 40 + diff / 2) / GyroWrapper::Multiplier;
+            power = sign * 26 + (idealSpeed / 40 + diff / 2) / GyroWrapper::Multiplier;
 
         // Sometimes we hit the wall and there is not enough power to turn
         // Attempt to fix this condition

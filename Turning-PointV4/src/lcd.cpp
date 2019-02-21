@@ -120,7 +120,7 @@ void LCD::Update()
         //lcdSetText(uart1, 1, "Main        Exp");
         lcdPrint(uart1, 2, "%.2f  Cont  %.2f", mp, ep);
     }
-    if (ep > 7.0f && mp > 7.0f)
+    if (ep > 6.0f && mp > 6.0f)
     {
         if (m_disable)
         {
@@ -141,7 +141,7 @@ void LCD::Update()
         if (m_step == 0 /* || m_step == 1*/)
         {
             Skills = false;
-            g_mode = AtonMode::Regular;
+            //g_mode = AtonMode::Regular;
         }
 
         // Read button

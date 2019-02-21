@@ -21,7 +21,7 @@ unsigned int HitWallAndRecalibrate(int distanceForward, int distanceBack, int an
     Do(Move(distance, 85, true /*StopOnColision */));
     unsigned int distanceTravelled = drive.m_distance;
 
-    Do(MoveTimeBased(20 * Sign(distanceForward), 5000, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
+    Do(MoveTimeBased(35 * Sign(distanceForward), 5000, true /*waitForStop*/)); // attempt to fully stop, for more accurate back movement
     Do(Wait(100));
     distanceTravelled += drive.m_distance;
 
@@ -36,12 +36,12 @@ unsigned int HitWallAndRecalibrate(int distanceForward, int distanceBack, int an
 }
 
 
-void HitLowFlagWithRecovery(unsigned int distanceForward, int distanceBack, int angleBack = 0)
+void HitLowFlagWithRecovery(unsigned int distanceForward, int distanceBack, int angleBack = 0, int angleForward = 0)
 {
     const int angle = 0;
     Assert(distanceBack < 0); // should have different signs - positive & negative
 
-    unsigned int distance = HitWallAndRecalibrate(distanceForward, 0 /*distanceBack*/, angle, false /*calibrateAngle*/);
+    unsigned int distance = HitWallAndRecalibrate(distanceForward, 0 /*distanceBack*/, angleForward, false /*calibrateAngle*/);
 
     int actualAngle = GetGyro().Get();
     if (abs(actualAngle) > 6 * GyroWrapper::Multiplier || distance + 300 <= distanceForward)
@@ -73,11 +73,10 @@ void RunSuperSkills()
     MoveExactWithAngle(2600, 0);
 
     // Recalibrate angle
-    HitWallAndRecalibrate(-(int)distanceFromWall-50, distanceFromWall, -90);
+    HitWallAndRecalibrate(-(int)distanceFromWall-120, distanceFromWall, -90);
 
     // Shooting 2 balls at first row
     TurnToFlagsAndShootTwoBalls();
-
 
 
     ReportStatus("\nHitting 1st low flag\n");
@@ -90,12 +89,10 @@ void RunSuperSkills()
     MoveExactWithAngle(2050, -90);
     Do(TurnToAngle(-24));
 
-
-
     ReportStatus("\nShooting second pole\n");
-
+    
     // Shoot middle pole
-    ShootTwoBalls(93, 63);
+    ShootTwoBalls(63, 115);
 
     // pick up ball under cap
     Do(TurnToAngle(-90));
@@ -110,41 +107,36 @@ void RunSuperSkills()
     //Flip cap 2
     MoveExactWithAngle(-1800, -90);
     IntakeDown();
-    MoveExactWithAngle(1200, 0);
-
+    MoveExactWithAngle(1300, 0);
 
     ReportStatus("\nGoing after second low flag\n");
 
     // Low flag 2
-    IntakeUp();
-    MoveExactWithAngle(1180, -90);
-    HitLowFlagWithRecovery(1250, -1650);
+    //IntakeUp();
+    MoveExactWithAngle(1140, -90);
+    HitLowFlagWithRecovery(1250, -1650, 0, 2);
 
     //Cap 3
     Do(TurnToAngle(-90));
     IntakeDown();
-    MoveWithAngle(1550, -90);
+    MoveWithAngle(1580, -90);
     MoveWithAngle(500, -90, 30); // slow down a bit
     MoveExactWithAngle(800, -90);
-
-
 
     ReportStatus("\nGoing after 3rd low flag\n");
 
     //Low flag 3, shoot
     IntakeUp();
     MoveExactWithAngle(-200, -90);
-    HitLowFlagWithRecovery(1600, -1850);
-    Do(TurnToAngle(-16));
+    HitLowFlagWithRecovery(1400, -2200);
+    Do(TurnToAngle(-13));
     IntakeDown();
-    ShootTwoBalls(45, 75);
-
-
+    ShootTwoBalls(33, 70);
 
     ReportStatus("\nGoing after platform\n");
 
     // Climb platform
-    MoveExactWithAngle(-2600, 30);
+    MoveExactWithAngle(-2200, 30);
     Do(TurnToAngle(-270));
     MoveToPlatform(true);    
 }

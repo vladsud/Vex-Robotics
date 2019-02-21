@@ -17,11 +17,22 @@ bool PrintDiagnostics(Diagnostics diag)
 {
     switch (diag)
     {
-    // case Diagnostics::Autonomous:
-    // case Diagnostics::General:
-    // case Diagnostics::Drive:
-    case Diagnostics::Angle:
+    /*case Diagnostics::Autonomous:
         return true;
+        break;
+    */
+    case Diagnostics::General:
+        return true;
+        break;
+    /*case Diagnostics::Drive:
+        return true;
+        break;
+    */
+    /*case Diagnostics::Angle:
+       return true;
+       break;
+    */
+
     default:
         return false;
     }
