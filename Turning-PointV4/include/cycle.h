@@ -9,6 +9,7 @@
 #include "Logger.h"
 #include "position.h"
 #include "shooter.h"
+#include "lineTracker.h"
 
 /*******************************************************************************
 * 
@@ -30,12 +31,12 @@ class Main
 	Intake intake;
 	Descorer descorer;
 	Shooter shooter;
-	GyroWrapper gyro;
+	GyroWrapper gyro {gyroPort};
 	PositionTracker tracker;
 	LCD lcd;
 	Logger logger;
-
-	Main() : gyro(gyroPort) {}
+	LineTracker lineTrackerLeft {lineTrackerLeftPort};
+	LineTracker lineTrackerRight {lineTrackerRightPort};
 
 	// Time is im milliseconds!
 	// But time resolution might be coarser, in the range of 1-10 ms

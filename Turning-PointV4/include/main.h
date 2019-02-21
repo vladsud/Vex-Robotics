@@ -45,11 +45,6 @@ void AssertCore(bool condition, const char *message, const char *file, int line)
 
 #define StaticAssert(a) static_assert(a, #a)
 
-constexpr float abs(float fl)
-{
-   return (fl < 0) ? -fl : fl;
-}
-
 inline int Sign(int value)
 {
    if (value < 0)
@@ -71,6 +66,12 @@ constexpr T min(T a, T b)
    return a > b ? b : a;
 }
 
+
+extern Encoder g_leftDriveEncoder;
+extern Encoder g_rightDriveEncoder;
+extern Encoder g_sideEncoder;
+
+
 /*******************************************************************************
 * 
 * MOTOR SPEEDS
@@ -80,6 +81,7 @@ constexpr T min(T a, T b)
 #define intakeMotorSpeedUp 100 // same, being protective
 #define intakeMotorSpeedDown 100
 #define driveMotorMaxSpeed 127
+
 
 /*******************************************************************************
 * 
@@ -93,65 +95,63 @@ C: Shooter
 D: left y drive
 *
 *******************************************************************************/
-//DRIVE MOTOR PORTS
-#define leftDrivePortY 4 // middle
-#define leftDrivePort2 3 // back
-#define rightDrivePortY 7
-#define rightDrivePort2 9
-//OTHER MOTOR PORTS
-//#define intakePort1 6
-#define intakePort 5
-
-#define descorerPort 6
 #define shooterPort 2 // "C" on extender
+#define leftDrivePort2 3 // back
+#define leftDrivePortY 4 // middle
+#define intakePort 5
+#define descorerPort 6
+#define rightDrivePortY 7
 #define anglePort 8
+#define rightDrivePort2 9
+
 
 /*******************************************************************************
 * 
 * DIGITAL SENSORS
 *
 *******************************************************************************/
-// left back : 1, 2
-#define rightDriveEncoderBotPort 3
-#define rightDriveEncoderTopPort 4
-
 #define leftDriveEncoderBotPort 1
 #define leftDriveEncoderTopPort 2
+#define rightDriveEncoderBotPort 3
+#define rightDriveEncoderTopPort 4
 
 #define sideEncoderBotPort 7 // not implemented yet
 #define sideEncoderTopPort 8 // not implemented yet
 
-extern Encoder g_leftDriveEncoder;
-extern Encoder g_rightDriveEncoder;
-extern Encoder g_sideEncoder;
 
 /*******************************************************************************
 * 
 * ANALOG SENSORS
 *
 *******************************************************************************/
-
+#define lineTrackerLeftPort 1
+#define lineTrackerRightPort 2
+#define ExpanderBatteryStatus 3
 #define gyroPort 4
 #define lightSensor 5
-#define lightSensorBallIn 2600
-#define lightSensorBallOut 2900
 #define shooterPreloadPoterntiometer 6
-#define ShooterPreloadEnd 950
-#define ShooterPreloadStart 1150
 #define ShooterSecondaryPotentiometer 7
 #define anglePotPort 8
+
 
 /*******************************************************************************
 * 
 * JOYSTICK GROUPING
 *
 *******************************************************************************/
-#define JoystickIntakeGroup 6   // Left bottom
 #define JoystickDescorerGroup 5 // Right bottom
+#define JoystickIntakeGroup 6   // Left bottom
+
 
 /*******************************************************************************
 * 
-* BATTERY PORTS
+* OTHER CONSTANTS
 *
 *******************************************************************************/
-#define ExpanderBatteryStatus 3
+#define lightSensorBallIn 2600
+#define lightSensorBallOut 2900
+
+#define ShooterPreloadEnd 950
+#define ShooterPreloadStart 1150
+
+#define DistanveBetweenLineSensors 390 // in clicks, rouhly 14"

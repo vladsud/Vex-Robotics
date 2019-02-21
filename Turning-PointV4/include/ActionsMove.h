@@ -1,4 +1,5 @@
 #pragma once
+#include <math.h>
 #include "actions.h"
 #include "position.h"
 
@@ -256,9 +257,83 @@ struct MoveExactAction : public Action
         return false;
     }
 
-  private:
+  protected:
     static const int maxSpeed = 85;
     int m_power = 0;
     int m_distanceToMove = 0;
     bool m_forward = true;
+};
+
+
+struct MoveExactWithLineCorrectionAction : public MoveExactAction
+{
+    MoveExactWithLineCorrectionAction(int fullDistance, unsigned int distanceAfterLine, int angle)
+        : MoveExactAction(fullDistance),
+          m_main(GetMain()),
+          m_distanceAfterLine(distanceAfterLine),
+          m_angle(angle)
+    {
+        Assert(distanceAfterLine > 0);
+        m_main.lineTrackerLeft.Reset();
+        m_main.lineTrackerRight.Reset();
+    }
+
+    bool ShouldStop() override
+    {
+        // Adjust distance based only on one line tracker going over line.
+        // This might be useful in cases where second line tracker will never cross the line.
+        // Like when driving to climb platform.
+        // If we hit line with both trackers, we will re-calibrate distance based on that later on.
+        if (!m_adjustedDistance)
+        {
+            int distance = 0;
+            if (m_main.lineTrackerLeft.HasWhiteLine())
+            {
+                distance = m_main.lineTrackerLeft.GetWhiteLineDistance(false/*pop*/);
+                m_adjustedDistance = true;
+            }
+             if (m_main.lineTrackerRight.HasWhiteLine())
+            {
+                distance = m_main.lineTrackerRight.GetWhiteLineDistance(false/*pop*/);
+                m_adjustedDistance = true;
+            }
+            if (m_adjustedDistance)
+            {
+                ReportStatus("Line correction: Dist: %d -> %d\n", m_distanceToMove - int(distance), m_distanceAfterLine);
+               // m_distanceToMove = m_distanceAfterLine + distance;
+            }
+        }
+        else if (m_fActive && m_main.lineTrackerLeft.HasWhiteLine() && m_main.lineTrackerRight.HasWhiteLine())
+        {
+            m_fActive = false; // ignore any other lines
+            unsigned int left = m_main.lineTrackerLeft.GetWhiteLineDistance(true/*pop*/);
+            unsigned int right = m_main.lineTrackerRight.GetWhiteLineDistance(true/*pop*/);
+            unsigned int distance = m_main.drive.m_distance;
+            
+            int diff = right - left;
+            if (!m_forward)
+                diff = -diff;
+            // if angles are flipped, then m_angle is flipped. SetAngle() will also flip angle to get to real one.
+            if (m_main.drive.IsXFlipped())
+                diff = -diff;
+
+            float angle = atan2(diff, DistanveBetweenLineSensors * 2); // left & right is double of distanve
+            int angleI = angle * 180 / PositionTracker::Pi;
+
+            ReportStatus("Line correction: Dist: %d -> %d\n, angle+: %d", m_distanceToMove - int(distance), m_distanceAfterLine, angleI);
+
+            // m_distanceToMove = m_distanceAfterLine + distance;
+            // m_main.tracker.SetAngle(m_angle + angleI);
+
+        }
+
+        return MoveExactAction::ShouldStop();
+    }
+
+protected:
+    Main& m_main;
+    unsigned int m_distanceAfterLine;
+    int m_angle;
+    bool m_fActive = true;
+    bool m_adjustedDistance = false;
 };
