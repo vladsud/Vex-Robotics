@@ -175,5 +175,5 @@ void RunSuperSkills()
     // Climb platform
     MoveExactWithAngle(-2200, 30);
     TurnToAngle(-270);
-    MoveToPlatform(true);    
+    MoveToPlatform(true);
 }

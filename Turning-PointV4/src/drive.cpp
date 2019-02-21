@@ -2,6 +2,7 @@
 #include "position.h"
 #include "logger.h"
 #include "cycle.h"
+#include <math.h>
 
 int AdjustSpeed(int speed)
 {

@@ -39,6 +39,7 @@ void TurnToFlagsAndShootTwoBalls();
 void MoveToLowFlag();
 void TurnToAngleIfNeeded(int angle);
 void Do(Action &&action);
+void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle);
 
 inline void Move(int distance, int forward = 85, bool stopOnCollision = false)
 {

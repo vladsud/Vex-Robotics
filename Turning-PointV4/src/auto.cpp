@@ -213,3 +213,10 @@ void TurnToAngleIfNeeded(int angle)
     if (abs(angleDiff) > 10 * GyroWrapper::Multiplier)
         TurnToAngle(angle);
 }
+
+void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle)
+{
+    TurnToAngleIfNeeded(angle);
+    KeepAngle keeper(angle);
+    Do(MoveExactWithLineCorrectionAction(fullDistance, distanceAfterLine, angle));
+}
