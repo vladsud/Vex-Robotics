@@ -2,15 +2,51 @@
 
 const unsigned int distanceFromWall = 380;
 
-unsigned int HitWallAndRecalibrate(int distanceForward, int distanceBack, int angle, bool calibrateAngle = true)
+
+void PrintPosition()
+{
+#ifndef OFFICIAL_RUN
+    PositionInfo pos;
+    GetTracker().LatestPosition(true /*clicks*/);
+    ReportStatus("   XY=(%d, %d), A=%d\n", pos.gyro, (int)pos.X, (int)pos.Y);
+#endif
+}
+
+
+void ResetPostionAfterHittingWall(bool leftWall)
+{
+    const float robotHalfSize = 7.0;
+
+    PositionInfo pos;
+    Coordinates coord;
+    PositionTracker& tracker = GetTracker();
+    tracker.LatestPosition(false /*clicks*/);
+    coord.X = pos.X;
+    coord.Y = pos.Y;
+
+    if (leftWall)
+    {
+        coord.angle = -90;
+        coord.X = robotHalfSize;
+    }
+    else
+    {
+        coord.angle = 0;
+        coord.Y = robotHalfSize;
+    }
+
+    tracker.SetCoordinates(coord);
+}
+
+
+unsigned int HitTheWall(int distanceForward, int angle)
 {
     Assert(distanceForward != 0);
-    Assert(distanceForward * distanceBack <= 0); // should have different signs - positive & negative
     Drive& drive = GetMain().drive;
 
     TurnToAngleIfNeeded(angle);
 
-    ReportStatus("Hitting wall: a=%d d1=%d d2=%d\n", angle, distanceForward, distanceBack);
+    ReportStatus("Hitting wall: a=%d d1=%d\n", angle, distanceForward);
 
     int distance = distanceForward * 9 / 10 - Sign(distanceForward) * 250;
     if (distance * distanceForward <= 0)
@@ -27,21 +63,16 @@ unsigned int HitWallAndRecalibrate(int distanceForward, int distanceBack, int an
 
     ReportStatus("   Actually travelled: %d\n", distanceTravelled);
 
-    if (calibrateAngle)
-        GetMain().tracker.SetAngle(angle);
-
-    Do(MoveExact(distanceBack));
-
     return distanceTravelled;
 }
 
 
 void HitLowFlagWithRecovery(unsigned int distanceForward, int distanceBack, int angleBack = 0, int angleForward = 0)
 {
-    const int angle = 0;
     Assert(distanceBack < 0); // should have different signs - positive & negative
 
-    unsigned int distance = HitWallAndRecalibrate(distanceForward, 0 /*distanceBack*/, angleForward, false /*calibrateAngle*/);
+    PrintPosition();
+    unsigned int distance = HitTheWall(distanceForward, angleForward);
 
     int actualAngle = GetGyro().Get();
     if (abs(actualAngle) > 6 * GyroWrapper::Multiplier || distance + 300 <= distanceForward)
@@ -53,7 +84,7 @@ void HitLowFlagWithRecovery(unsigned int distanceForward, int distanceBack, int 
     else
     {
         ReportStatus("    Normal hit: Recovering: a = %d, d = %d, expected d = %d\n", actualAngle, distance, distanceForward);
-        GetMain().tracker.SetAngle(angle);
+        ResetPostionAfterHittingWall(false /*leftWall*/);
     }
 
     MoveExactWithAngle(distanceBack, angleBack);
@@ -73,7 +104,9 @@ void RunSuperSkills()
     MoveExactWithAngle(2600, 0);
 
     // Recalibrate angle
-    HitWallAndRecalibrate(-(int)distanceFromWall-120, distanceFromWall, -90);
+    HitTheWall(-(int)distanceFromWall-120, -90);
+    ResetPostionAfterHittingWall(true /*leftWall*/);
+    Do(MoveExact(distanceFromWall));
 
     // Shooting 2 balls at first row
     TurnToFlagsAndShootTwoBalls();
@@ -85,12 +118,15 @@ void RunSuperSkills()
     HitLowFlagWithRecovery(2750, -2800, 3 /*angleBack*/);
 
     // Recalibrate, and move to shooting position for second row of flags
-    HitWallAndRecalibrate(-(int)distanceFromWall - 50, 0, -90);
+    HitTheWall(-(int)distanceFromWall - 50, -90);
+    ResetPostionAfterHittingWall(true /*leftWall*/);
+
+
+    ReportStatus("\nShooting second pole\n");
+
     MoveExactWithAngle(2050, -90);
     Do(TurnToAngle(-24));
 
-    ReportStatus("\nShooting second pole\n");
-    
     // Shoot middle pole
     ShootTwoBalls(63, 115);
 
@@ -112,6 +148,7 @@ void RunSuperSkills()
     ReportStatus("\nGoing after second low flag\n");
 
     // Low flag 2
+    PrintPosition();
     //IntakeUp();
     MoveExactWithAngle(1140, -90);
     HitLowFlagWithRecovery(1250, -1650, 0, 2);
