@@ -66,13 +66,13 @@ void autonomous()
     float ep = bat.GetExpanderPower();
     ReportStatus("Main Battery Level: %.2f", mp);
     ReportStatus("Expander Battery Level: %.2f", ep);
-    if (ep < 7.0f || mp < 7.0f)
+    if (ep > 7.0f && mp > 7.0f)
     {
-        g_enabled = false;
+        g_enabled = true;
     } 
     else 
     {
-        g_enabled = true;
+        g_enabled = false;
     }
 
     if (g_enabled)

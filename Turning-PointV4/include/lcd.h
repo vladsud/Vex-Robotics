@@ -11,6 +11,7 @@ class LCD
 	int m_step = 0;
 	int m_count;
 	bool m_RefreshOnClick = false;
+	bool m_disable = false;
 
   public:
 	bool AtonBlueRight = true;
