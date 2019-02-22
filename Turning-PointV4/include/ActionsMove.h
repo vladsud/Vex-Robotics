@@ -299,8 +299,8 @@ struct MoveExactWithLineCorrectionAction : public MoveExactAction
             }
             if (m_adjustedDistance)
             {
-                ReportStatus("Line correction: Dist: %d -> %d\n", m_distanceToMove - int(distance), m_distanceAfterLine);
-               // m_distanceToMove = m_distanceAfterLine + distance;
+                ReportStatus("Single line correction: Dist: %d -> %d\n", m_distanceToMove - int(distance), m_distanceAfterLine);
+                m_distanceToMove = m_distanceAfterLine + distance;
             }
         }
         else if (m_fActive && m_main.lineTrackerLeft.HasWhiteLine() && m_main.lineTrackerRight.HasWhiteLine())
@@ -320,10 +320,10 @@ struct MoveExactWithLineCorrectionAction : public MoveExactAction
             float angle = atan2(diff, DistanveBetweenLineSensors * 2); // left & right is double of distanve
             int angleI = angle * 180 / PositionTracker::Pi;
 
-            ReportStatus("Line correction: Dist: %d -> %d\n, angle+: %d", m_distanceToMove - int(distance), m_distanceAfterLine, angleI);
+            ReportStatus("Double line correction: Dist: %d -> %d\n, angle+: %d", m_distanceToMove - int(distance), m_distanceAfterLine, angleI);
 
-            // m_distanceToMove = m_distanceAfterLine + distance;
-            // m_main.tracker.SetAngle(m_angle + angleI);
+            m_distanceToMove = m_distanceAfterLine + distance;
+            m_main.tracker.SetAngle(m_angle + angleI);
 
         }
 
