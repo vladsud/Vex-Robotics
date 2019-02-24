@@ -265,3 +265,65 @@ unsigned int HitTheWall(int distanceForward, int angle)
 
     return distanceTravelled;
 }
+
+void GoToCapWithBallUnderIt(int distance)
+{
+    auto& drive = GetMain().drive;
+    if (distance == 0)
+        distance = distanceToCap;
+    Move(distance - 350);
+    unsigned int distanceTravelled = drive.m_distance;
+    IntakeUp();
+    Move(300, 20);
+    Wait(50);
+    distanceTravelled += drive.m_distance;
+    MoveStop(-18); // attempt to fully stop, for more accurate back movement
+
+    // we have hard time picking up the ball, so wait
+    Wait(100);
+    distanceTravelled += drive.m_distance;
+
+    ReportStatus("GoToCapWithBallUnderIt: distance=%d, expected=%d\n", distanceTravelled, distance);
+}
+
+void GetBallUnderCapAndReturn()
+{
+    auto &main = GetMain();
+
+    KeepAngle keeper(-90);
+    unsigned int distance = main.drive.m_distanceFromBeginning;
+
+    GoToCapWithBallUnderIt();
+
+    distance = main.drive.m_distanceFromBeginning - distance;
+    ReportStatus("Move back: %d\n", distance);
+    MoveExact(-distance); // 1800 ?
+    IntakeStop();
+}
+
+void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
+{
+    auto &main = GetMain();
+    Wait(2500);
+    if (false && main.shooter.BallStatus() != BallPresence::NoBall)
+    {
+        ReportStatus("Shooting 2 balls\n");
+        SetShooterAngle(true /*high*/, midFlagHeight, false /*checkPresenceOfBall*/);
+        WaitShooterAngleToStop();
+        ShootBall();
+        IntakeUp();
+        GetMain().shooter.SetDistance(highFlagHeight);
+        // wait for it to go down & start moving up
+        WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 2000 : 1500);
+        SetShooterAngle(false /*high*/, highFlagHeight, true /*checkPresenceOfBall*/);
+        WaitShooterAngleToStop();
+        ShootBall();
+    }
+    IntakeUp();
+}
+
+void TurnToFlagsAndShootTwoBalls()
+{
+    TurnToAngle(angleToShootFlags);
+    ShootTwoBalls();
+}
