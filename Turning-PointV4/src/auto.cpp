@@ -13,7 +13,18 @@
 #include "aton.h"
 #include "battery.h"
 
-AtonMode g_mode = AtonMode::TestRun;
+enum class AtonMode
+{
+    Regular,
+#ifndef OFFICIAL_RUN
+    TestRun,
+    ManualSkill,
+#endif
+};
+
+#ifndef OFFICIAL_RUN
+AtonMode g_mode = AtonMode::Regular;
+#endif
 
 const  bool g_leverageLineTrackers = true;
 
@@ -29,7 +40,7 @@ bool g_alreadyRunAutonomous = false;
 bool isAuto()
 {
 #ifndef OFFICIAL_RUN
-    if (g_mode == AtonMode::ManualAuto || g_mode == AtonMode::TestRun)
+    if (g_mode == AtonMode::TestRun)
         return true;
 #endif // OFFICIAL_RUN
     return isAutonomous();
@@ -42,14 +53,6 @@ bool SmartsOn()
     if (g_manualSmarts)
         return true;
     return g_autonomousSmartsOn && isAuto();
-}
-
-void SetSkillSelection(bool skills)
-{
-    if (skills)
-        g_mode = AtonMode::Skills;
-    else
-        g_mode = AtonMode::Regular;
 }
 
 void Do(Action &&action)
@@ -102,9 +105,9 @@ void autonomous()
         auto time = main.GetTime();
         auto time2 = millis();
 
-        if (g_mode == AtonMode::Skills)
+        auto &lcd = main.lcd;
+        if (lcd.AtonSkills)
         {
-            auto &lcd = main.lcd;
             lcd.AtonBlueRight = false;
             lcd.AtonFirstPos = false;
             lcd.AtonClimbPlatform = true;
@@ -124,9 +127,9 @@ void autonomous()
 #endif // !OFFICIAL_RUN
         {
             // if you remove this (super skills) to run old skills, fix lcd.AtonFirstPos = true above!!!
-            if (g_mode == AtonMode::Skills)
+            if (lcd.AtonSkills)
                 RunSuperSkills();
-            else if (main.lcd.AtonFirstPos)
+            else if (lcd.AtonFirstPos)
                 RunAtonFirstPos();
             else
                 RunAtonSecondPos();
@@ -314,7 +317,7 @@ void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
         IntakeUp();
         GetMain().shooter.SetDistance(highFlagHeight);
         // wait for it to go down & start moving up
-        WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 2000 : 1500);
+        WaitShooterAngleToGoUp(main.lcd.AtonSkills ? 2000 : 1500);
         SetShooterAngle(false /*high*/, highFlagHeight, true /*checkPresenceOfBall*/);
         WaitShooterAngleToStop();
         ShootBall();
