@@ -76,7 +76,7 @@ void RunAtonFirstPos()
         MoveExactWithAngle(distance, 3);  // try to get further out from the wall
 
         TurnToAngle(-90);
-        MoveToPlatform(g_mode == AtonMode::Skills); //  || g_mode == AtonMode::ManualAuto);
+        MoveToPlatform(main.lcd.AtonSkills);
     }
     else
     {

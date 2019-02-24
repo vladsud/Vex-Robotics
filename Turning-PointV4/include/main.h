@@ -19,7 +19,6 @@ enum class IntakeShoterEvent
    Shooting,
 };
 void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown);
-void SetSkillSelection(bool skills);
 
 #define __noop(...)
 

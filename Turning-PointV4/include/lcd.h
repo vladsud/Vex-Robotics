@@ -10,14 +10,13 @@ class LCD
 	int m_buttons = 0;
 	int m_step = 0;
 	int m_count;
-	bool m_RefreshOnClick = false;
 	bool m_disable = false;
 
   public:
-	bool AtonBlueRight = true;
+	bool AtonBlueRight = false;
 	bool AtonFirstPos = true;
-	bool AtonClimbPlatform = false;
-	bool Skills = false;
+	bool AtonClimbPlatform = true;
+	bool AtonSkills = false;
 
 	// I do not think it runs...
 	LCD();
@@ -25,5 +24,4 @@ class LCD
 	void SelectAction(bool rigthButton);
 	void Update();
 	void PrintMessage(const char *message);
-	void SetSkillsMode();
 };
