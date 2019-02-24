@@ -2,18 +2,29 @@
 #include "main.h"
 #include "cycle.h"
 
+
 LineTracker::LineTracker(unsigned int port)
     : m_port(port)
 {
-    Reset();
+    ReportStatus("Line %d init: %d\n", m_port, analogRead(m_port));
+    ResetCore();
+}
+
+void LineTracker::ResetCore()
+{
+    m_status = Status::None;
+    for (unsigned int i = 0; i < CountOf(m_times); i++)
+        m_times[i] = 0;
+    m_timesIndex = 0;
+    m_minvalue = 4000;
 }
 
 void LineTracker::Reset()
 {
-    m_status = Status::None;
-    for (unsigned int i = 0; i < CountOf(m_times); i++)
-        m_times[i] = TimeNone;
-    m_timesIndex = 0;
+    ResetCore();
+    // It's important to do update right away, to detect if we are starting on white/red. 
+    Assert(GetMain().drive.m_distance == 0);
+    Update();
 }
 
 void LineTracker::Shift(unsigned int elements)
@@ -30,26 +41,41 @@ void LineTracker::Push(bool white)
     if (m_timesIndex == CountOf(m_times))
         Shift(1);
     m_times[m_timesIndex] = GetMain().drive.m_distance;
-    ReportStatus("Line hit: port=%d, dist=%d\n", m_port, m_times[m_timesIndex]);
     m_timesIndex++;
 }
 
 void LineTracker::Update()
 {
-    unsigned int value = analogRead(m_port);
+    int value = analogRead(m_port);
+    if (m_minvalue > value)
+        m_minvalue = value;
 
+    // ReportStatus("L%d: %d\n", m_port, value);
     StaticAssert(WhiteLevel < BlackLevel);
 
     if (m_status != Status::HitBlack && value > BlackLevel)
     {
-        m_status = Status::HitBlack;
         Push(false/*white*/);
+        if (m_status == Status::HitWhite)
+        {
+            // ReportStatus("   Black line hit: port=%d, dist=%d, birghtness=%d\n", m_port, m_times[m_timesIndex-1], value);
+        }
+        m_status = Status::HitBlack;
     }
 
     if (m_status != Status::HitWhite && value < WhiteLevel)
     {
-        m_status = Status::HitWhite;
         Push(true/*white*/);
+        if (m_times[m_timesIndex-1] == 0)
+        {
+            m_timesIndex--;
+            // ReportStatus("   Starting on white: port=%d, brightness=%d\n", m_port, value);
+        }
+        else
+        {
+            // ReportStatus("   White line hit: port=%d, dist=%d, brightness=%d\n", m_port, m_times[m_timesIndex-1], value);
+        }
+        m_status = Status::HitWhite;
     }
 }
 
@@ -62,7 +88,7 @@ int LineTracker::IndexForWhiteLine()
     if (((m_timesIndex % 2) == 1) == (m_status == Status::HitBlack))
         index++;
 
-    if (index + 2 > m_timesIndex)
+    if (index + 1 > m_timesIndex)
         return -1;
 
     return index;
@@ -75,14 +101,26 @@ unsigned int LineTracker::GetWhiteLineDistance(bool pop)
     if (index == -1)
         return 0;
 
-    unsigned int result = (m_times[index] + m_times[index+1]) / 2;
+    // unsigned int result = (m_times[index] + m_times[index+1]) / 2;
+    unsigned int result = m_times[index];
     if (pop)
-        Shift(index+2);
+        Shift(index+1);
     return result;
 }
 
-bool LineTracker::HasWhiteLine()
+bool LineTracker::HasWhiteLine(int shouldHaveTravelled)
 {
-    Update();
-    return IndexForWhiteLine() >= 0;
+    int index = IndexForWhiteLine();
+    if (index == -1)
+        return false;
+
+    if (abs(shouldHaveTravelled - (int)m_times[index]) > 400)
+    {
+        ReportStatus("Single line correction IGNORED: Travelled: %d, should: %d\n",
+            m_times[index], shouldHaveTravelled);
+        Shift(index+1);
+        return false;
+    }
+
+    return true;
 }

@@ -3,11 +3,12 @@
 #include "actions.h"
 #include "position.h"
 
+extern const  bool g_leverageLineTrackers;
+
 struct MoveAction : public Action
 {
-    MoveAction(int distance, int forward, bool stopOnCollision = false)
+    MoveAction(int distance, int forward = 85, bool stopOnCollision = false)
         : m_forward(forward),
-          m_turn(0),
           m_stopOnCollision(stopOnCollision)
     {
         if (distance > 0)
@@ -20,12 +21,8 @@ struct MoveAction : public Action
             m_forward = -m_forward;
         }
         
-        // You should either turn on spot, or move forward with small turning.
-        // Doing something else is likely slower, and less accurate.
-        Assert(forward == 0 || abs(forward) > abs(m_turn));
-
         m_main.drive.ResetTrackingState();
-        m_main.drive.OverrideInputs(m_forward, m_turn);
+        m_main.drive.OverrideInputs(m_forward, 0/*turn*/);
 
         // important for m_lastDistance!
         Assert(m_main.drive.m_distance == 0);
@@ -34,20 +31,39 @@ struct MoveAction : public Action
     bool ShouldStop() override
     {
         unsigned int distance = m_main.drive.m_distance;
-        if (distance > m_lastDistance)
-            m_speed = (m_speed + (distance - m_lastDistance)) / 2;
-        if (m_maxSpeed < m_speed)
-            m_maxSpeed = m_speed;
 
-        // Collision?
-        if (m_stopOnCollision && m_maxSpeed >= 10 && m_speed < m_maxSpeed / 2)
+        if (m_stopOnCollision)
         {
-            ReportStatus("   Collision detected: speed=%d maxspeed=%d, distance=%d\n", m_speed, m_maxSpeed, distance);
-            return true;
+            m_speed = (m_speed + (int)distance - (int)m_lastDistance) / 2;
+            if (m_maxSpeed < m_speed)
+                m_maxSpeed = m_speed;
+
+            // We used the distance of the wheel that travelled the least in determining stop
+            // This is the only indicator we have when ball gets under one of the sides and lifts
+            // that side, thus allowing wheel on that side to spin freely wihtout robot moving
+            // We use the other wheel to figure out that it actully is stuck.
+            unsigned int minWheel = m_main.drive.MinWheelDistanceTravelled();
+
+            // Collision?
+            if (m_stopOnCollision &&
+                ((m_maxSpeed >= speedToGainBeforeStop && m_speed < m_maxSpeed / 2) ||
+                (distance >= 100 && minWheel <= m_lastMinWheel+1)))
+            {
+                // ReportStatus("   Collision detected: speed=%d maxspeed=%d, distance=%d, exp distance=%d\n", m_speed, m_maxSpeed, distance, m_distanceToMove);
+                return true;
+            }
+            m_lastMinWheel = minWheel;
         }
 
         m_lastDistance = distance;
-        return m_main.drive.m_distance >= m_distanceToMove;
+        if (m_main.drive.m_distance < m_distanceToMove)
+            return false;
+        /*
+        if (m_stopOnCollision)
+            ReportStatus("Move did not hit wall: dist = %d, speed=%d maxspeed=%d\n",
+                m_distanceToMove, m_speed, m_maxSpeed);
+        */
+        return true;
     }
 
     void Stop() override
@@ -56,13 +72,15 @@ struct MoveAction : public Action
     }
 
   protected:
+    const int speedToGainBeforeStop = 10;
     unsigned int m_distanceToMove;
     int m_forward;
-    float m_turn;
-    int m_speed = 0;
+    unsigned int m_lastDistance = 0;
     int m_maxSpeed = 0;
     bool m_stopOnCollision;
-    unsigned int m_lastDistance = 0;
+private:
+    int m_speed = 0;
+    unsigned int m_lastMinWheel = 0;
 };
 
 struct MoveToPlatformAction : public MoveAction
@@ -90,19 +108,19 @@ struct MoveToPlatformAction : public MoveAction
 
         if (!m_fIsLow && m_diff <= m_diffMax - 90)
         {
-            ReportStatus("MoveToPlatform: Slow down: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
+            // ReportStatus("MoveToPlatform: Slow down: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
             m_diffMin = m_diff;
             m_fIsLow = true;
             if (m_slowCount == 0)
             {
-                m_main.drive.OverrideInputs(95, 0);
+                m_main.drive.OverrideInputs(100, 0);
                 m_distanceFirstHit = distance;
             }
         }
 
-        if (m_fIsLow && distance >= m_distanceFirstHit + 1100 * 10)
+        if (m_fIsLow && distance >= m_distanceFirstHit + 1200 * 10)
         {
-            ReportStatus("MoveToPlatform: Stop \n");
+            // ReportStatus("MoveToPlatform: Stop \n");
             return true;
         }
 
@@ -120,33 +138,35 @@ struct MoveToPlatformAction : public MoveAction
 struct MoveTimeBasedAction : public MoveAction
 {
     unsigned int m_time;
-    unsigned int m_distance = 0;
-    bool m_waitForStop;
-    bool m_first = true;
 
-    MoveTimeBasedAction(int speed, int time, bool waitForStop)
-        : MoveAction(50000, speed),
-          m_time(time),
-          m_waitForStop(waitForStop)
+    MoveTimeBasedAction(int speed, int time, bool stopOnCollision)
+        : MoveAction(50000, speed, stopOnCollision),
+          m_time(time)
     {
     }
+
     bool ShouldStop()
     {
-        unsigned int distance = m_main.drive.m_distance;
         unsigned int timeElapsed = m_main.GetTime() - m_timeStart;
-        if (m_waitForStop && timeElapsed > 20 && m_distance == distance)
-        {
-            ReportStatus("MoveTimeBased: Time to stop: %d\n", timeElapsed);
-            return true;
-        }
-        m_distance = distance;
-        m_first = false;
+
+        // We should stop right away if we are not moving!
+        // This is different from behaviour of MoveAction, that 
+        // expects that it will be able to gain some speed before hitting the wall
+        if (timeElapsed > 20)
+            m_maxSpeed = speedToGainBeforeStop;
+
         if (timeElapsed >= m_time)
         {
-            ReportStatus("MoveTimeBased: timed-out: %d\n", m_time);
+            ReportStatus("   MoveTimeBased: timed-out: %d\n", m_time);
             return true;
         }
-        return false;
+
+        bool res = MoveAction::ShouldStop();
+        if (!res)
+            return false;
+
+        ReportStatus("   MoveTimeBased: Time to stop: %d out of %d\n", timeElapsed, m_time);
+        return true;
     }
 };
 
@@ -210,7 +230,8 @@ struct MoveExactAction : public Action
 
         if (idealSpeed == 0 && (abs(actualSpeed) <= 18 || error < 0))
         {
-            ReportStatus("MoveExact stop! Error: %d\n", error);
+            if (abs(error) > 30)
+                ReportStatus("MoveExact stop! Error: %d\n", error);
             return true;
         }
 
@@ -265,54 +286,57 @@ struct MoveExactAction : public Action
 };
 
 
-struct MoveExactWithLineCorrectionAction : public MoveExactAction
+template<typename TMoveAction>
+struct MoveExactWithLineCorrectionAction : public TMoveAction
 {
     MoveExactWithLineCorrectionAction(int fullDistance, unsigned int distanceAfterLine, int angle)
-        : MoveExactAction(fullDistance),
+        : TMoveAction(fullDistance),
           m_main(GetMain()),
           m_distanceAfterLine(distanceAfterLine),
           m_angle(angle)
     {
-        Assert(distanceAfterLine > 0);
+        Assert(distanceAfterLine >= 0);
         m_main.lineTrackerLeft.Reset();
         m_main.lineTrackerRight.Reset();
     }
 
     bool ShouldStop() override
     {
+        int shouldHaveTravelled = TMoveAction::m_distanceToMove - (int)m_distanceAfterLine;        
+
         // Adjust distance based only on one line tracker going over line.
         // This might be useful in cases where second line tracker will never cross the line.
         // Like when driving to climb platform.
         // If we hit line with both trackers, we will re-calibrate distance based on that later on.
         if (!m_adjustedDistance)
         {
-            int distance = 0;
-            if (m_main.lineTrackerLeft.HasWhiteLine())
+            unsigned int distance = 0;
+            if (m_main.lineTrackerLeft.HasWhiteLine(shouldHaveTravelled))
             {
                 distance = m_main.lineTrackerLeft.GetWhiteLineDistance(false/*pop*/);
                 m_adjustedDistance = true;
             }
-             if (m_main.lineTrackerRight.HasWhiteLine())
+            if (m_main.lineTrackerRight.HasWhiteLine(shouldHaveTravelled))
             {
                 distance = m_main.lineTrackerRight.GetWhiteLineDistance(false/*pop*/);
                 m_adjustedDistance = true;
             }
             if (m_adjustedDistance)
             {
-                ReportStatus("Single line correction: Dist: %d -> %d\n", m_distanceToMove - int(distance), m_distanceAfterLine);
-                m_distanceToMove = m_distanceAfterLine + distance;
+                ReportStatus("Single line correction: travelled: %d, Dist: %d -> %d\n",
+                    distance, TMoveAction::m_distanceToMove - distance, m_distanceAfterLine + 50);
+                if (g_leverageLineTrackers)
+                    TMoveAction::m_distanceToMove = m_distanceAfterLine + 50 + distance;
             }
         }
-        else if (m_fActive && m_main.lineTrackerLeft.HasWhiteLine() && m_main.lineTrackerRight.HasWhiteLine())
+        else if (m_fActive && m_main.lineTrackerLeft.HasWhiteLine(shouldHaveTravelled) && m_main.lineTrackerRight.HasWhiteLine(shouldHaveTravelled))
         {
             m_fActive = false; // ignore any other lines
             unsigned int left = m_main.lineTrackerLeft.GetWhiteLineDistance(true/*pop*/);
             unsigned int right = m_main.lineTrackerRight.GetWhiteLineDistance(true/*pop*/);
-            unsigned int distance = m_main.drive.m_distance;
+            unsigned int distance = (left + right) / 2;
             
             int diff = right - left;
-            if (!m_forward)
-                diff = -diff;
             // if angles are flipped, then m_angle is flipped. SetAngle() will also flip angle to get to real one.
             if (m_main.drive.IsXFlipped())
                 diff = -diff;
@@ -320,14 +344,23 @@ struct MoveExactWithLineCorrectionAction : public MoveExactAction
             float angle = atan2(diff, DistanveBetweenLineSensors * 2); // left & right is double of distanve
             int angleI = angle * 180 / PositionTracker::Pi;
 
-            ReportStatus("Double line correction: Dist: %d -> %d\n, angle+: %d", m_distanceToMove - int(distance), m_distanceAfterLine, angleI);
+            ReportStatus("Double line correction: travelled: %d, Dist: %d -> %d, angle+: %d\n",
+                distance, TMoveAction::m_distanceToMove - int(distance), m_distanceAfterLine, angleI);
 
-            m_distanceToMove = m_distanceAfterLine + distance;
-            m_main.tracker.SetAngle(m_angle + angleI);
-
+            if (g_leverageLineTrackers)
+            {
+                TMoveAction::m_distanceToMove = m_distanceAfterLine + distance;
+                m_main.tracker.SetAngle(m_angle - angleI);
+            }
         }
 
-        return MoveExactAction::ShouldStop();
+        bool res = TMoveAction::ShouldStop();
+        if (res && m_fActive)
+        {
+            ReportStatus("Line correction did not happen! Max brightness: %d,  %d\n",
+                m_main.lineTrackerLeft.MinValue(), m_main.lineTrackerRight.MinValue());
+        }
+        return res;
     }
 
 protected:

@@ -6,9 +6,8 @@ const unsigned int distanceFromWall = 380;
 void PrintPosition()
 {
 #ifndef OFFICIAL_RUN
-    PositionInfo pos;
-    GetTracker().LatestPosition(true /*clicks*/);
-    ReportStatus("   XY=(%d, %d), A=%d\n", pos.gyro, (int)pos.X, (int)pos.Y);
+    // PositionInfo pos = GetTracker().LatestPosition(true /*clicks*/);
+    // ReportStatus("   XY=(%d, %d), A=%d\n", pos.gyro, (int)pos.X, (int)pos.Y);
 #endif
 }
 
@@ -39,55 +38,38 @@ void ResetPostionAfterHittingWall(bool leftWall)
 }
 
 
-unsigned int HitTheWall(int distanceForward, int angle)
+bool HitLowFlagWithRecovery(unsigned int distanceForward, int distanceBack, int angleBack = 0, int angleForward = 0)
 {
-    Assert(distanceForward != 0);
-    Drive& drive = GetMain().drive;
-
-    TurnToAngleIfNeeded(angle);
-
-    ReportStatus("Hitting wall: a=%d d1=%d\n", angle, distanceForward);
-
-    int distance = distanceForward * 9 / 10 - Sign(distanceForward) * 250;
-    if (distance * distanceForward <= 0)
-        distance = Sign(distanceForward) * 100;
-
-    KeepAngle keeper(angle);
-
-    Move(distance, 85, true /*StopOnColision */);
-    unsigned int distanceTravelled = drive.m_distance;
-
-    MoveTimeBased(35 * Sign(distanceForward), 5000, true /*waitForStop*/); // attempt to fully stop, for more accurate back movement
-    Wait(100);
-    distanceTravelled += drive.m_distance;
-
-    ReportStatus("   Actually travelled: %d\n", distanceTravelled);
-
-    return distanceTravelled;
-}
-
-
-void HitLowFlagWithRecovery(unsigned int distanceForward, int distanceBack, int angleBack = 0, int angleForward = 0)
-{
-    Assert(distanceBack < 0); // should have different signs - positive & negative
+    // should have different signs - positive & negative
+    Assert(distanceForward > 0);
+    Assert(distanceBack < 0);
 
     PrintPosition();
     unsigned int distance = HitTheWall(distanceForward, angleForward);
 
+    bool recovery = false;   
     int actualAngle = GetGyro().Get();
-    if (abs(actualAngle) > 6 * GyroWrapper::Multiplier || distance + 300 <= distanceForward)
+    if (abs(actualAngle) > 5 * GyroWrapper::Multiplier || distance + 300 <= distanceForward)
     {
-        ReportStatus("    !!! HitLowFlagWithRecovery: Recovering: a = %d, d = %d, expected d = %d\n", actualAngle, distance, distanceForward);
-        if (distance < distanceForward)
-            distanceBack -= (distanceForward - distance);
+        recovery = true;
+        unsigned int distanceAdj = 300; // min adjustment - wheels quite often spin without much movement
+        if (distance + distanceAdj < distanceForward)
+            distanceAdj = distanceForward - distance;
+        distanceBack += distanceAdj; // distanceBack is negative
+
+        ReportStatus("    !!! HitLowFlagWithRecovery: Recovering: a = %d, d = %d, expected d = %d, adj back = %d\n",
+            actualAngle / GyroWrapper::Multiplier, distance, distanceForward, distanceAdj);
     }
     else
     {
-        ReportStatus("    Normal hit: Recovering: a = %d, d = %d, expected d = %d\n", actualAngle, distance, distanceForward);
+        // ReportStatus("    Normal hit: a = %d, d = %d, expected d = %d\n", actualAngle / GyroWrapper::Multiplier, distance, distanceForward);
         ResetPostionAfterHittingWall(false /*leftWall*/);
     }
 
-    MoveExactWithAngle(distanceBack, angleBack);
+    // not using MoveExactWithAngle() here as we should avoid turning - we may get stuck
+    KeepAngle keeper(angleBack);
+    MoveExact(distanceBack);
+    return recovery;
 }
 
 
@@ -98,33 +80,42 @@ void RunSuperSkills()
 
     // Pick up the first ball
     GoToCapWithBallUnderIt();
-    MoveExactWithAngle(-1930, -90);
+    // MoveExactWithLineCorrection(-2200, 450, -90);
+    MoveExactWithAngle(-2200, -90);
 
     // Move in front of first flags
-    MoveExactWithAngle(2600, 0);
+    MoveExactWithLineCorrection(2500, 730, -1);
 
+#if 0
     // Recalibrate angle
-    HitTheWall(-(int)distanceFromWall-120, -90);
+    HitTheWall(-(int)distanceFromWall-80, -90);
     ResetPostionAfterHittingWall(true /*leftWall*/);
     MoveExact(distanceFromWall);
+#endif
 
     // Shooting 2 balls at first row
     TurnToFlagsAndShootTwoBalls();
 
-
     ReportStatus("\nHitting 1st low flag\n");
 
     // Hit low flag and come back
-    HitLowFlagWithRecovery(2750, -2800, 3 /*angleBack*/);
+    bool recovery = HitLowFlagWithRecovery(3200, -2800, 3 /*angleBack*/);
 
     // Recalibrate, and move to shooting position for second row of flags
-    HitTheWall(-(int)distanceFromWall - 50, -90);
-    ResetPostionAfterHittingWall(true /*leftWall*/);
-
+    if (recovery)
+    {
+        HitTheWall(-(int)distanceFromWall - 200, -90);
+        ResetPostionAfterHittingWall(true /*leftWall*/);
+        MoveExactWithAngle(1900, -90);
+    }
+    else
+    {
+        MoveExactWithAngle(1900 - distanceFromWall + 100, -90);
+    }
+    
 
     ReportStatus("\nShooting second pole\n");
 
-    MoveExactWithAngle(2050, -90);
     TurnToAngle(-24);
 
     // Shoot middle pole
@@ -132,40 +123,44 @@ void RunSuperSkills()
 
     // pick up ball under cap
     TurnToAngle(-90);
-    GoToCapWithBallUnderIt(400);
+    GoToCapWithBallUnderIt(500);
 
     // Flip cap #1
-    MoveExactWithAngle(-350, -90);
-    Wait(300);
+    MoveExactWithAngle(-300, -90);
+    WaitShooterAngleToGoUp(1000); // wait for the ball
+    
     IntakeDown();
-    MoveExactWithAngle(1300, -90);
+    MoveWithAngle(500, -90, 40);
+    MoveExactWithLineCorrection(800, 25, -90);
 
-    //Flip cap 2
-    MoveExactWithAngle(-1800, -90);
+    // Flip cap 2
+    MoveExactWithAngle(-1850, -90);
     IntakeDown();
-    MoveExactWithAngle(1300, 0);
+    MoveWithAngle(500, 0, 40);
+    MoveExactWithAngle(800, 0);
+    MoveWithAngle(-100, 0, 45);
 
     ReportStatus("\nGoing after second low flag\n");
 
     // Low flag 2
     PrintPosition();
     //IntakeUp();
-    MoveExactWithAngle(1140, -90);
-    HitLowFlagWithRecovery(1250, -1650, 0, 2);
+    MoveExactWithAngle(1250, -90);
+    HitLowFlagWithRecovery(1800, -1600, 0 /*angleBack*/, 0 /*angleForward*/);
 
-    //Cap 3
-    TurnToAngle(-90);
+    // Cap 3
     IntakeDown();
-    MoveWithAngle(1580, -90);
-    MoveWithAngle(500, -90, 30); // slow down a bit
+    MoveWithLineCorrection(1500, 930, -90);
+    MoveWithAngle(600, -90, 35); // slow down a bit
     MoveExactWithAngle(800, -90);
+
 
     ReportStatus("\nGoing after 3rd low flag\n");
 
     //Low flag 3, shoot
     IntakeUp();
-    MoveExactWithAngle(-200, -90);
-    HitLowFlagWithRecovery(1400, -2200);
+    MoveExactWithAngle(-300, -90);
+    HitLowFlagWithRecovery(1700, -2200);
     TurnToAngle(-13);
     IntakeDown();
     ShootTwoBalls(33, 70);
@@ -173,7 +168,7 @@ void RunSuperSkills()
     ReportStatus("\nGoing after platform\n");
 
     // Climb platform
-    MoveExactWithAngle(-2200, 30);
+    MoveExactWithAngle(-2300, 33);
     TurnToAngle(-270);
     MoveToPlatform(true);
 }

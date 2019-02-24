@@ -29,6 +29,8 @@ class Drive
   int m_overrideForward = 0;
   int m_encoderBaseLeft = 0;
   int m_encoderBaseRight = 0;
+  int m_left = 0;
+  int m_right = 0;
   float m_turn = 0;
   float m_overrideTurn = 0;
   float m_ErrorIntergral = 0;
@@ -60,9 +62,13 @@ public:
   unsigned int m_distanceFromBeginning = 0;
 
 public:
-  Drive() { ResetTrackingState(); }
+  Drive() { ResetState(); }
   void FlipX(bool flip) { m_flipX = flip; }
   bool IsXFlipped() const { return m_flipX; }
+  unsigned int MinWheelDistanceTravelled()
+  {
+    return min(abs(m_left), abs(m_right));
+  }
   void StartHoldingPosition();
 
   // Forward: Positive turn - turn right (clockwise)
@@ -70,6 +76,7 @@ public:
   void OverrideInputs(int forward, float turn);
   void ResetTrackingState();
   void Update();
+  void UpdateDistanes();
 
   void ResetState();
 

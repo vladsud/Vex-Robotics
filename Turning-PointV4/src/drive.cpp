@@ -112,6 +112,8 @@ void Drive::ResetTrackingState()
     m_encoderBaseLeft = encoderGet(g_leftDriveEncoder);
     m_encoderBaseRight = encoderGet(g_rightDriveEncoder);
     m_distance = 0;
+    m_left = 0;
+    m_right = 0;
     m_ErrorIntergral = 0;
 }
 
@@ -152,6 +154,17 @@ void Drive::HoldPosition()
         SetLeftDrive(-30 * Sign(right) - right - info.rightSpeed * 40);
 }
 
+void Drive::UpdateDistanes()
+{
+    m_left = encoderGet(g_leftDriveEncoder);
+    m_right = encoderGet(g_rightDriveEncoder);
+    m_distanceFromBeginning = abs(m_left) + abs(m_right);
+
+    m_left -= m_encoderBaseLeft;
+    m_right -= m_encoderBaseRight;
+    m_distance = abs(m_left) + abs(m_right);    
+}
+
 void Drive::Update()
 {
     //Drive
@@ -175,14 +188,7 @@ void Drive::Update()
     if (!keepDirection)
         ResetTrackingState();
 
-    // 360 is one full turn, positive is forward
-    int left = encoderGet(g_leftDriveEncoder);
-    int right = encoderGet(g_rightDriveEncoder);
-    m_distanceFromBeginning = abs(left) + abs(right);
-
-    left -= m_encoderBaseLeft;
-    right -= m_encoderBaseRight;
-    m_distance = abs(left) + abs(right);
+    UpdateDistanes();
 
     if (turn == 0 && forward == 0)
     {
@@ -215,11 +221,11 @@ void Drive::Update()
         }
         else
         {
-            error = left - right - m_turn * m_distance / forwardAbs;
+            error = m_left - m_right - m_turn * m_distance / forwardAbs;
         }
     }
     else if (m_forward == 0)
-        error = left + right;
+        error = m_left + m_right;
     else
         smartsOn = false;
 

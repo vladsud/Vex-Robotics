@@ -13,7 +13,7 @@ struct TurnPrecise : public Action
     TurnPrecise(int turn)
         : m_turn(AdjustAngle(turn))
     {
-        ReportStatus("TurnPrecise: %d, curr=%d\n", m_turn / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
+        // ReportStatus("TurnPrecise: %d, curr=%d\n", m_turn / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
 
         m_main.drive.ResetTrackingState();
         m_initialAngle = GetGyroReading();
@@ -58,7 +58,8 @@ struct TurnPrecise : public Action
 
         if ((idealSpeed == 0 && abs(actualSpeed) <= 3 * GyroWrapper::Multiplier) || (m_turn * sign < 0 && abs(error) > GyroWrapper::Multiplier / 2))
         {
-            ReportStatus("   Turn stop! Error: error=%d turn=%d\n", error, m_turn);
+            if (abs(error) >= GyroWrapper::Multiplier)
+                ReportStatus("   Turn stop! Error: error=%d turn=%d\n", error, m_turn);
             m_main.drive.OverrideInputs(0, 0);
             return true;
         }

@@ -1,7 +1,7 @@
 #pragma once
 #include "main.h"
 
-const int distanceToCap = 1900;
+const int distanceToCap = 1950;
 const int angleToShootFlags = -5;
 // distances in inches, the higher the number - the lower is the angle
 const int g_midFlagHeight = 55; // 55

@@ -13,7 +13,9 @@
 #include "aton.h"
 #include "battery.h"
 
-AtonMode g_mode = AtonMode::ManualSkill; //TestRun;
+AtonMode g_mode = AtonMode::TestRun;
+
+const  bool g_leverageLineTrackers = true;
 
 // Turn Auton off incase battery isn't plugged in
 bool g_enabled = true;
@@ -64,8 +66,8 @@ void autonomous()
     Battery bat;
     float mp = bat.GetMainPower();
     float ep = bat.GetExpanderPower();
-    ReportStatus("Main Battery Level: %.2f" , mp);
-    ReportStatus("Expander Battery Level: %.2f", ep);
+    ReportStatus("Main Battery Level: %.2f\n" , mp);
+    ReportStatus("Expander Battery Level: %.2f\n", ep);
     if (ep > 6.0f && mp > 6.0f)
     {
         g_enabled = true;
@@ -182,14 +184,14 @@ int CalcAngleToPoint(double x, double y)
 
 void MoveToPlatform(bool twoPlatforms)
 {
-    ReportStatus("First platform\n");
+    // ReportStatus("First platform\n");
     Do(MoveToPlatformAction(2700));
 
     if (twoPlatforms)
     {
-        ReportStatus("Second platform\n");
-        Do(MoveToPlatformAction(2100));
-        MoveTimeBased(-30, 500, true /*waitForStop*/);
+        // ReportStatus("Second platform\n");
+        Do(MoveToPlatformAction(2250));
+        MoveStop(-30);
     }
 }
 
@@ -218,5 +220,48 @@ void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLin
 {
     TurnToAngleIfNeeded(angle);
     KeepAngle keeper(angle);
-    Do(MoveExactWithLineCorrectionAction(fullDistance, distanceAfterLine, angle));
+    Do(MoveExactWithLineCorrectionAction<MoveExactAction>(fullDistance, distanceAfterLine, angle));
+}
+
+void MoveWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle)
+{
+    TurnToAngleIfNeeded(angle);
+    KeepAngle keeper(angle);
+    Do(MoveExactWithLineCorrectionAction<MoveAction>(fullDistance, distanceAfterLine, angle));
+}
+
+unsigned int HitTheWall(int distanceForward, int angle)
+{
+    Assert(distanceForward != 0);
+    Drive& drive = GetMain().drive;
+
+    TurnToAngleIfNeeded(angle);
+
+    ReportStatus("Hitting wall: a=%d d1=%d\n", angle, distanceForward);
+
+    int distance = distanceForward * 80 / 100 - Sign(distanceForward) * 300;
+
+    if (distance * distanceForward <= 0)
+        distance = Sign(distanceForward) * 100;
+
+    KeepAngle keeper(angle);
+
+    Move(distance, 85, true /*StopOnColision */);
+    unsigned int distanceTravelled = drive.m_distance;
+
+    // attempt to fully stop, for more accurate back movement
+    int time = distance > 1000 ? 300 : 100;
+    MoveTimeBased(12 * Sign(distanceForward), time, true /*waitForStop*/);
+    distanceTravelled += drive.m_distance;
+
+    MoveTimeBased(25 * Sign(distanceForward), 2000, true /*waitForStop*/);
+    distanceTravelled += drive.m_distance;
+
+    // MoveTimeBased(30 * Sign(distanceForward), 100, false /*waitForStop*/);
+    Wait(300);
+    distanceTravelled += drive.m_distance;
+
+    ReportStatus("   HitTheWall: Actually travelled: %d out of %d\n", distanceTravelled, distanceForward);
+
+    return distanceTravelled;
 }

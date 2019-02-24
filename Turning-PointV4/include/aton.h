@@ -26,6 +26,7 @@ enum class AtonMode
 };
 extern AtonMode g_mode;
 
+
 void Do(Action &&action);
 
 void RunSuperSkills();
@@ -40,6 +41,9 @@ void MoveToLowFlag();
 void TurnToAngleIfNeeded(int angle);
 void Do(Action &&action);
 void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle);
+void MoveWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle);
+
+unsigned int HitTheWall(int distanceForward, int angle);
 
 inline void Move(int distance, int forward = 85, bool stopOnCollision = false)
 {
@@ -84,4 +88,9 @@ inline void WaitShooterAngleToGoUp(unsigned int wait)
 inline void WaitShooterAngleToStop()
 {
     Do(WaitShooterAngleToStopAction());
+}
+
+inline void MoveStop(int power)
+{
+    MoveTimeBased(power, 500, true /*waitForStop*/);
 }

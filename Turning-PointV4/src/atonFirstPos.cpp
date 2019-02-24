@@ -1,21 +1,5 @@
 #include "aton.h"
 #include "atonFirstPos.h"
-/*
-const int distanceToCap = 1900;
-const int angleToShootFlags = -5;
-// distances in inches, the higher the number - the lower is the angle
-const int g_midFlagHeight = 55; // 55
-const int g_highFlagHeight = 55;
-
-const int angleToMoveToFlags = 0;
-const int distanceFlagsToPlatform = -4150;
-
-// used only in recovery mode, if we hit something
-const float inchesToPlatform = 80.0;
-
-// used when shooting middle post when not climbing platform
-const unsigned int g_midFlagHeightDiagonalShot = 65;
-*/
 
 // WARNING:
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
@@ -23,16 +7,22 @@ const unsigned int g_midFlagHeightDiagonalShot = 65;
 
 void GoToCapWithBallUnderIt(int distance)
 {
+    auto& drive = GetMain().drive;
     if (distance == 0)
         distance = distanceToCap;
-    Move(distance - 300);
+    Move(distance - 350);
+    unsigned int distanceTravelled = drive.m_distance;
     IntakeUp();
     Move(300, 20);
     Wait(50);
-    MoveTimeBased(-18, 500, true /*waitForStop*/); // attempt to fully stop, for more accurate back movement
+    distanceTravelled += drive.m_distance;
+    MoveStop(-18); // attempt to fully stop, for more accurate back movement
 
     // we have hard time picking up the ball, so wait
     Wait(100);
+    distanceTravelled += drive.m_distance;
+
+    ReportStatus("GoToCapWithBallUnderIt: distance=%d, expected=%d\n", distanceTravelled, distance);
 }
 
 void GetBallUnderCapAndReturn()
@@ -53,22 +43,21 @@ void GetBallUnderCapAndReturn()
 void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
 {
     auto &main = GetMain();
-    if (main.shooter.BallStatus() == BallPresence::NoBall)
+    Wait(2500);
+    if (false && main.shooter.BallStatus() != BallPresence::NoBall)
     {
+        ReportStatus("Shooting 2 balls\n");
+        SetShooterAngle(true /*high*/, midFlagHeight, false /*checkPresenceOfBall*/);
+        WaitShooterAngleToStop();
+        ShootBall();
         IntakeUp();
-        return;
+        GetMain().shooter.SetDistance(highFlagHeight);
+        // wait for it to go down & start moving up
+        WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 2000 : 1500);
+        SetShooterAngle(false /*high*/, highFlagHeight, true /*checkPresenceOfBall*/);
+        WaitShooterAngleToStop();
+        ShootBall();
     }
-    ReportStatus("Shooting 2 balls\n");
-    SetShooterAngle(true /*high*/, midFlagHeight, false /*checkPresenceOfBall*/);
-    WaitShooterAngleToStop();
-    ShootBall();
-    IntakeUp();
-    GetMain().shooter.SetDistance(highFlagHeight);
-    // wait for it to go down & start moving up
-    WaitShooterAngleToGoUp(g_mode == AtonMode::Skills ? 2000 : 1500);
-    SetShooterAngle(false /*high*/, highFlagHeight, true /*checkPresenceOfBall*/);
-    WaitShooterAngleToStop();
-    ShootBall();
     IntakeUp();
 }
 
@@ -80,11 +69,14 @@ void TurnToFlagsAndShootTwoBalls()
 
 void MoveToLowFlag()
 {
+#if 0
     KeepAngle keeper(angleToMoveToFlags);
 
     Move(2200, 85, true /*StopOnColision */);
     Move(200, 30, true /*StopOnColision */);
-    MoveTimeBased(0, 500, true /*waitForStop*/); // attempt to fully stop, for more accurate back movement
+    MoveStop(0); // attempt to fully stop, for more accurate back movement
+#endif
+    HitTheWall(2400, angleToMoveToFlags);
 }
 
 void RunAtonFirstPos()

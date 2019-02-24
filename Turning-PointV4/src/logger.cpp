@@ -21,9 +21,11 @@ bool PrintDiagnostics(Diagnostics diag)
         return true;
         break;
     */
+   /*
     case Diagnostics::General:
         return true;
         break;
+    */
     /*case Diagnostics::Drive:
         return true;
         break;

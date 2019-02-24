@@ -75,6 +75,13 @@ bool Main::UpdateWithoutWaiting()
 	// has to be the first one!
 	gyro.Integrate();
 	tracker.Update();
+
+	// We go through line very quickly, so we do not have enough precision if we check it
+	// every 10 ms.
+	drive.UpdateDistanes();
+	lineTrackerLeft.Update();
+	lineTrackerRight.Update();
+
 	// Trying to check intake more often, as some key pressed are not registered sometimes
 	intake.Update();
 

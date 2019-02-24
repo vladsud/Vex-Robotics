@@ -8,7 +8,8 @@ public:
     void Reset();
     void Update();
     unsigned int GetWhiteLineDistance(bool pop);
-    bool HasWhiteLine();
+    bool HasWhiteLine(int distanceToTravel);
+    int MinValue() { return m_minvalue; }
 
 protected:
     enum class Status
@@ -20,16 +21,17 @@ protected:
     void Push(bool white);
     void Shift(unsigned int elements);
     int IndexForWhiteLine();
+    void ResetCore();
 
 protected:
-    constexpr static unsigned int WhiteLevel = 2500;
-    constexpr static unsigned int BlackLevel = 3000;
-    constexpr static unsigned int TimeNone = 0;
+    constexpr static int WhiteLevel = 1200;
+    constexpr static int BlackLevel = 2000;
 
     unsigned int m_times[8];
     unsigned int m_timesIndex = 0;
 
     unsigned int m_port = 0;
+    int m_minvalue = 4000;
 
     Status m_status = Status::None;
 };
