@@ -80,8 +80,8 @@ void RunSuperSkills()
 
     // Pick up the first ball
     GoToCapWithBallUnderIt();
-    // MoveExactWithLineCorrection(-2200, 450, -90);
-    MoveExactWithAngle(-2200, -90);
+    // MoveExactWithLineCorrection(-2100, 450, -90);
+    MoveExactWithAngle(-2100, -90);
 
     // Move in front of first flags
     MoveExactWithLineCorrection(2500, 730, -1);

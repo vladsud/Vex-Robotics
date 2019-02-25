@@ -76,7 +76,7 @@ extern Encoder g_sideEncoder;
 * MOTOR SPEEDS
 *
 *******************************************************************************/
-#define shooterMotorSpeed 100 // it botherwise burns controller / port
+#define shooterMotorSpeed 100 // it otherwise burns controller / port
 #define intakeMotorSpeedUp 100 // same, being protective
 #define intakeMotorSpeedDown 100
 #define driveMotorMaxSpeed 127

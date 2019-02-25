@@ -7,6 +7,8 @@ extern const  bool g_leverageLineTrackers;
 
 struct MoveAction : public Action
 {
+    const char* Name() override { return "MoveAction"; }
+
     MoveAction(int distance, int forward = 85, bool stopOnCollision = false)
         : m_forward(forward),
           m_stopOnCollision(stopOnCollision)
@@ -47,7 +49,7 @@ struct MoveAction : public Action
             // Collision?
             if (m_stopOnCollision &&
                 ((m_maxSpeed >= speedToGainBeforeStop && m_speed < m_maxSpeed / 2) ||
-                (distance >= 100 && minWheel <= m_lastMinWheel+1)))
+                ((distance >= 100 || m_main.GetTime() - m_timeStart >= 100) && minWheel <= m_lastMinWheel+1)))
             {
                 // ReportStatus("   Collision detected: speed=%d maxspeed=%d, distance=%d, exp distance=%d\n", m_speed, m_maxSpeed, distance, m_distanceToMove);
                 return true;
@@ -92,7 +94,9 @@ struct MoveToPlatformAction : public MoveAction
     bool m_fIsLow = false;
     int m_distanceFirstHit = 0;
 
-    MoveToPlatformAction(int distance) : MoveAction(distance, 65) {}
+    const char* Name() override { return "MoveToPlatformAction"; }
+
+    MoveToPlatformAction(int distance) : MoveAction(distance, 85) {}
 
     bool ShouldStop() override
     {
@@ -172,6 +176,8 @@ struct MoveTimeBasedAction : public MoveAction
 
 struct MoveExactAction : public Action
 {
+    const char* Name() override { return "MoveExactAction"; }
+
     MoveExactAction(int distance)
         : m_distanceToMove(distance)
     {
@@ -192,9 +198,9 @@ struct MoveExactAction : public Action
     int IdealSpeedFromDistance(int distance)
     {
         const unsigned int point2 = 1600;
-        const unsigned int speed2 = 2;
+        const float speed2 = 2.5;
         const unsigned int point1 = 50;
-        const unsigned int speed1 = 50;
+        const unsigned int speed1 = 60;
         const unsigned int point0 = 30;
 
         unsigned int distanceAbs = abs(distance);
@@ -228,7 +234,7 @@ struct MoveExactAction : public Action
         if (!m_forward)
             actualSpeed = -actualSpeed; // make it positive
 
-        if (idealSpeed == 0 && (abs(actualSpeed) <= 18 || error < 0))
+        if ((idealSpeed == 0 && abs(actualSpeed) <= 18) || error < 0)
         {
             if (abs(error) > 30)
                 ReportStatus("MoveExact stop! Error: %d\n", error);
@@ -279,7 +285,7 @@ struct MoveExactAction : public Action
     }
 
   protected:
-    static const int maxSpeed = 85;
+    static const int maxSpeed = 100;
     int m_power = 0;
     int m_distanceToMove = 0;
     bool m_forward = true;

@@ -5,23 +5,14 @@
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
 
-void MoveToLowFlag()
-{
-#if 0
-    KeepAngle keeper(angleToMoveToFlags);
-
-    Move(2200, 85, true /*StopOnColision */);
-    Move(200, 30, true /*StopOnColision */);
-    MoveStop(0); // attempt to fully stop, for more accurate back movement
-#endif
-    HitTheWall(2400, angleToMoveToFlags);
-}
-
 void RunAtonFirstPos()
 {
-    PositionInfo info;
     auto &main = GetMain();
+    auto timeStart = main.GetTime();
+    ReportStatus("\n   Time: %d\n\n", timeStart);
 
+    PositionInfo info;
+ 
     main.tracker.SetCoordinates({16, 60, -90});
 
     // async actions
@@ -36,11 +27,18 @@ void RunAtonFirstPos()
     // Turn to shoot, shoot
     //
     TurnToFlagsAndShootTwoBalls();
+    IntakeUp();
 
     //
     // Move to lower flag
     //
-    MoveToLowFlag();
+    BLOCK
+    {
+        KeepAngle keeper(angleToMoveToFlags);
+        Move(2200, 110, true /*StopOnColision */);
+        Move(400, 30, true /*StopOnColision */);
+        MoveStop(0); // attempt to fully stop, for more accurate back movement
+    }
 
     //
     // figure out if we screwd up
@@ -72,11 +70,31 @@ void RunAtonFirstPos()
     //
     if (main.lcd.AtonClimbPlatform)
     {
-        ReportStatus("Moving: %d\n", distance);
-        MoveExactWithAngle(distance, 3);  // try to get further out from the wall
+        SetShooterAngle(false /*high*/, 55, false /*checkPresenceOfBall*/);
 
-        TurnToAngle(-90);
+        ReportStatus("Moving: %d\n", distance + 300);
+        MoveExactWithAngle(distance, 14, false /*allowTurning*/);  // try to get further out from the wall
+
+        bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
+        auto time = main.GetTime();
+        ReportStatus("\n   Time before diagonal shot: %d, Ball: %d\n\n", time, (int)hasBall);
+        bool shooting = hasBall && (time < 11000);
+        if (shooting)
+        {
+            TurnToAngle(-28);
+            ShootBall();
+        }
+        TurnToAngle(-91);
         MoveToPlatform(main.lcd.AtonSkills);
+
+        if (shooting)
+        {
+            int time2 = main.GetTime() - time;
+            if (time2 < 4000)
+                printf("Took %d to shoot and climb\n", time2);
+            else
+                printf("!!! WARNING: Took too long (%d) to shoot and climb\n", time2);            
+        }
     }
     else
     {

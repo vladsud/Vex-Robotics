@@ -23,7 +23,7 @@ enum class AtonMode
 };
 
 #ifndef OFFICIAL_RUN
-AtonMode g_mode = AtonMode::Regular;
+AtonMode g_mode = AtonMode::TestRun;
 #endif
 
 const  bool g_leverageLineTrackers = true;
@@ -57,11 +57,13 @@ bool SmartsOn()
 
 void Do(Action &&action)
 {
+    // auto time = millis();
     while (!action.ShouldStop())
     {
         GetMain().Update();
     }
     action.Stop();
+    // ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
 }
 
 void autonomous()
@@ -141,8 +143,8 @@ void autonomous()
         UNUSED_VARIABLE(time2);
 
         ReportStatus("\n*** END AUTONOMOUS ***\n\n");
-        ReportStatus("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
-        ReportStatus("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
+        printf("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
+        printf("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
 
         GetLogger().Dump();
 
@@ -198,9 +200,10 @@ void MoveToPlatform(bool twoPlatforms)
     }
 }
 
-void MoveExactWithAngle(int distance, int angle)
+void MoveExactWithAngle(int distance, int angle, bool allowTurning /*= true*/)
 {
-    TurnToAngleIfNeeded(angle);
+    if (allowTurning)
+        TurnToAngleIfNeeded(angle);
     KeepAngle keeper(angle);
     MoveExact(distance);
 }
@@ -274,16 +277,16 @@ void GoToCapWithBallUnderIt(int distance)
     auto& drive = GetMain().drive;
     if (distance == 0)
         distance = distanceToCap;
-    Move(distance - 350);
+    Move(distance - 400, 110);
     unsigned int distanceTravelled = drive.m_distance;
     IntakeUp();
     Move(300, 20);
-    Wait(50);
+    // Wait(50);
     distanceTravelled += drive.m_distance;
     MoveStop(-18); // attempt to fully stop, for more accurate back movement
 
     // we have hard time picking up the ball, so wait
-    Wait(100);
+    // Wait(100);
     distanceTravelled += drive.m_distance;
 
     ReportStatus("GoToCapWithBallUnderIt: distance=%d, expected=%d\n", distanceTravelled, distance);
@@ -298,7 +301,7 @@ void GetBallUnderCapAndReturn()
 
     GoToCapWithBallUnderIt();
 
-    distance = main.drive.m_distanceFromBeginning - distance;
+    distance = main.drive.m_distanceFromBeginning - distance + 200;
     ReportStatus("Move back: %d\n", distance);
     MoveExact(-distance); // 1800 ?
     IntakeStop();
@@ -307,8 +310,7 @@ void GetBallUnderCapAndReturn()
 void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
 {
     auto &main = GetMain();
-    Wait(2500);
-    if (false && main.shooter.BallStatus() != BallPresence::NoBall)
+    if (main.shooter.BallStatus() != BallPresence::NoBall)
     {
         ReportStatus("Shooting 2 balls\n");
         SetShooterAngle(true /*high*/, midFlagHeight, false /*checkPresenceOfBall*/);

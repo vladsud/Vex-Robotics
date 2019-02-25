@@ -16,6 +16,7 @@ struct Action
     Action() { m_timeStart = m_main.GetTime(); }
     virtual bool ShouldStop() { return true; }
     virtual void Stop() {}
+    virtual const char* Name() { return "unknown"; }
 };
 
 struct EndOfAction : public Action
@@ -33,6 +34,7 @@ struct WaitAction : public Action
 struct WaitShooterAngleToStopAction : public Action
 {
     bool ShouldStop() override { return !m_main.shooter.IsMovingAngle(); }
+    const char* Name() override { return "WaitShooterAngleToStopAction"; }
 };
 
 struct WaitShooterAngleToGoUpAction : public Action
@@ -57,6 +59,8 @@ struct WaitShooterAngleToGoUpAction : public Action
         }
         return false;
     }
+
+    const char* Name() override { return "WaitShooterAngleToGoUpAction"; }
 };
 
 struct ShootBallAction : public Action
@@ -76,4 +80,5 @@ struct ShootBallAction : public Action
         // This should be not needed, but might be needed in the future (if we add safety in the form of time-based shooter off)
         m_main.shooter.SetFlag(Flag::Loading);
     }
+    const char* Name() override { return "ShootBallAction"; }
 };

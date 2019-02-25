@@ -10,6 +10,8 @@ int CalcAngleToPoint(double x, double y);
 
 struct TurnPrecise : public Action
 {
+    const char* Name() override { return "TurnPrecise"; }
+
     TurnPrecise(int turn)
         : m_turn(AdjustAngle(turn))
     {
@@ -91,7 +93,7 @@ struct TurnPrecise : public Action
             power *= 3;
         }
 
-        int maxSpeed = 85;
+        int maxSpeed = 100;
         if (errorAbs <= 3 * GyroWrapper::Multiplier)
             maxSpeed = 25;
 
