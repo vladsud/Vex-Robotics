@@ -23,7 +23,7 @@ enum class AtonMode
 };
 
 #ifndef OFFICIAL_RUN
-AtonMode g_mode = AtonMode::TestRun;
+AtonMode g_mode = AtonMode::Regular;
 #endif
 
 const  bool g_leverageLineTrackers = true;

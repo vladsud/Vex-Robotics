@@ -2,12 +2,12 @@
 #include "logger.h"
 
 // Distance based on front of robot
-constexpr float Distances[]{24, 30, 48, 55, 108};
+constexpr float Distances[]{24, 30, 48, 55, 78, 108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]{120, 110, 85, 90, 60};
-constexpr unsigned int AnglesMedium[]{90, 80, 55, 48, 55};
+constexpr unsigned int AnglesHigh[]{120, 110, 85, 80, 60, 60};
+constexpr unsigned int AnglesMedium[]{90, 74, 50, 46, 40, 55};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -133,21 +133,20 @@ void Shooter::KeepMoving()
     int diff = distance - m_lastAngleDistance;
 
     // sometimes we get really wrong readings.
-    if (diff > m_diffAdjusted + 3)
-        diff = m_diffAdjusted + 3;
-    else if (diff < m_diffAdjusted - 3)
-        diff = m_diffAdjusted - 3;
+    if (diff > m_diffAdjusted + 2)
+        diff = m_diffAdjusted + 2;
+    else if (diff < m_diffAdjusted - 2)
+        diff = m_diffAdjusted - 2;
 
     distance = diff + m_lastAngleDistance;
     unsigned int distanceAbs = abs(distance);
 
-    m_diffAdjusted = (m_diffAdjusted + diff) / 2;
-    // m_diffAdjusted = diff;
+    m_diffAdjusted = diff;
 
     m_count++;
 
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 10 && abs(diff) <= 1) || (distance > 0 && m_flag == Flag::Loading))
+    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 10 && abs(diff) <= 5) || (distance > 0 && m_flag == Flag::Loading))
     {
         if (m_fMoving)
         {
@@ -156,35 +155,37 @@ void Shooter::KeepMoving()
                     m_count, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
             StopMoving();
         }
-        if (m_flag == Flag::Loading)
+        // if (m_flag == Flag::Loading)
             motorSet(anglePort, 0);
         return;
     }
 
-    if (m_fMoving || m_flag != Flag::Loading)
+    if (m_fMoving && m_flag == Flag::Loading)
     {
-        if (distance > 0 && m_flag == Flag::Loading) // do not go up in loading position
+        if (distance > 0)
             speed = 0;
-        else if (m_flag == Flag::Loading)
+        else
             speed = -26 + distance / 4 + m_diffAdjusted * 4;
-        else if (distance > 10) // going up
-            speed = 22 + (distance - 10) / 3  + m_diffAdjusted * 4;
-        else if (distance > 0) // already there
-            speed = 0;
-        else  // going down, overshoot
-            speed = -20 + distance / 5 + m_diffAdjusted * 4;
+    }
+    else if (distance > 10) // going up
+        speed = 18 + distance / 3  + m_diffAdjusted * 5 / 2;
+    else if (distance > 0) // already there
+        speed = m_fMoving ? -10 : 0;
+    else if (!m_fMoving && distance > -10)
+        speed = 0;
+    else  // going down, overshoot
+        speed = -20 + distance / 5 + m_diffAdjusted * 3;
 
-        if (speed * distance < 0 && distanceAbs > 20)
-            speed = 0;
+    if (speed * distance < 0 && distanceAbs > 20)
+        speed = 0;
 
-        if (PrintDiagnostics(Diagnostics::Angle))
-        {
-            if (m_fMoving)
-                ReportStatus("ANG: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
-            else if (speed != 0)
-                ReportStatus("ANG ADJ: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
-        }
-    } 
+    if (PrintDiagnostics(Diagnostics::Angle))
+    {
+        if (m_fMoving)
+            ReportStatus("ANG: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
+        else if (speed != 0)
+            ReportStatus("ANG ADJ: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
+    }
 
     const int angleMotorSpeed = 75;
 
