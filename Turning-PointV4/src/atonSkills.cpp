@@ -116,10 +116,12 @@ void RunSuperSkills()
 
     ReportStatus("\nShooting second pole\n");
 
-    TurnToAngle(-24);
-
-    // Shoot middle pole
-    ShootTwoBalls(63, 115);
+    if (main.shooter.BallStatus() != BallPresence::NoBall)
+    {
+        TurnToAngle(-24);
+        // Shoot middle pole
+        ShootTwoBalls(63, 115);
+    }
 
     // pick up ball under cap
     TurnToAngle(-90);

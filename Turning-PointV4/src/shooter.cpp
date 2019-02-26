@@ -339,16 +339,6 @@ void Shooter::Update()
         needPreload = false;
     }
 
-    // We can tell intake to go down when shooting to clear space for the ball that we are about to shoot.
-    // But if user stopped shooting, then we want to keep second ball and not lose it, thus we need to let intake know
-    // about this event and start moving up. Similar logic exists for when we lose ball (as result of shooting),
-    // but this case is required for case when the ball was not shot
-    if (!userShooting && m_userShooting)
-        UpdateIntakeFromShooter(IntakeShoterEvent::LostBall, false /*forceDown*/);
-
-    m_userShooting = userShooting;
-    m_preloading = needPreload;
-
     // Check if we can detect ball present.
     BallPresence ball = BallStatus();
 
@@ -366,6 +356,18 @@ void Shooter::Update()
             UpdateIntakeFromShooter(IntakeShoterEvent::LostBall, false /*forceDown*/);
         }
     }
+
+    // We tell intake to go down when shooting to clear space for the ball that we are about to shoot.
+    // But if user stopped shooting, then we want to keep second ball and not lose it, thus we need to let intake know
+    // about this event and start moving up. Similar logic exists for when we lose ball (as result of shooting),
+    // but this case is required for case when the ball was not shot
+    // Note that we do not want to do this in autonomouns / when we lost a ball, as this happens after we moved to nezt step,
+    // and thus we can overwrite autonomous command that instructed intake to go down.
+    if (!userShooting && m_userShooting && !isAuto())
+        UpdateIntakeFromShooter(IntakeShoterEvent::LostBall, false /*forceDown*/);
+
+    m_userShooting = userShooting;
+    m_preloading = needPreload;
 
     // Did shot just hapened?
     // We can't use potentiometer here, because we are very close to dead zone, so it can jump from 0 to 4000.

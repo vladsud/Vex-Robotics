@@ -7,7 +7,6 @@
 
 // Helper function to use both oysticsk
 bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
-void memmove(char *dest, char *src, size_t size);
 bool isAuto();
 bool SmartsOn();
 class Main &SetupMain();

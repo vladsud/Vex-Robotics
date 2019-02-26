@@ -8,8 +8,6 @@
 void RunAtonFirstPos()
 {
     auto &main = GetMain();
-    auto timeStart = main.GetTime();
-    ReportStatus("\n   Time: %d\n\n", timeStart);
 
     PositionInfo info;
  
@@ -99,16 +97,21 @@ void RunAtonFirstPos()
     else
     {
         ReportStatus("Not climbing platform\n");
-        distance -= distanceFlagsToPlatform / 2;
+        distance += 1400;
         ReportStatus("Moving: %d\n", distance);
-        MoveExactWithAngle(distance, 3);  // try to get further out from the wall
+        MoveExactWithAngle(distance, 5);  // try to get further out from the wall
 
-        TurnToAngle(-55);
-        SetShooterAngle(false /*high*/, g_midFlagHeightDiagonalShot, true /*checkPresenceOfBall*/);
-        WaitShooterAngleToGoUp(5000);
+        WaitShooterAngleToGoUp(1000);
+        SetShooterAngle(true /*high*/, g_midFlagHeightDiagonalShot, true /*checkPresenceOfBall*/);
+
+        TurnToAngle(-48);
+        WaitShooterAngleToStop();
         ShootBall();
 
-        TurnToAngle(-60);
+        IntakeDown();
+        MoveWithAngle(1000, -48, 65);
+        MoveExactWithAngle(1000, -48, false /*allowTurning*/);
 
+        MoveWithAngle(-400, -48);
     }
 }

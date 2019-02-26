@@ -16,26 +16,23 @@
 enum class AtonMode
 {
     Regular,
+    SkillsInManual,
 #ifndef OFFICIAL_RUN
     TestRun,
     ManualSkill,
 #endif
 };
 
-#ifndef OFFICIAL_RUN
-AtonMode g_mode = AtonMode::Regular;
-#endif
+AtonMode g_mode = AtonMode::TestRun;
 
 const  bool g_leverageLineTrackers = true;
 
-// Turn Auton off incase battery isn't plugged in
-bool g_enabled = true;
-
 // Variables not to touch - control actual autonomous mode
-bool g_autonomousSmartsOn = true;
-bool g_manualSmarts = false;
+const bool g_autonomousSmartsOn = true;
+const bool g_manualSmarts = false;
 
 bool g_alreadyRunAutonomous = false;
+
 
 bool isAuto()
 {
@@ -43,8 +40,11 @@ bool isAuto()
     if (g_mode == AtonMode::TestRun)
         return true;
 #endif // OFFICIAL_RUN
+    if (g_mode == AtonMode::SkillsInManual)
+        return true;
     return isAutonomous();
 }
+
 
 bool SmartsOn()
 {
@@ -55,16 +55,46 @@ bool SmartsOn()
     return g_autonomousSmartsOn && isAuto();
 }
 
+
 void Do(Action &&action)
 {
     // auto time = millis();
     while (!action.ShouldStop())
     {
         GetMain().Update();
+
+        // Check if we have bailed out of autonomous mode in manual skills (some key was pressed on joystick)
+        if (g_mode == AtonMode::Regular)
+        {
+            ReportStatus("\n!!! Switching to manual mode!\n");
+            Assert(!isAuto());
+            operatorControl(); // this does not return!
+            ReportStatus("\n!!! Error: Should never get back from opControl()!\n");
+        }
     }
     action.Stop();
     // ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
 }
+
+
+// Scans both joysticks, allowing secondary operator to help with controlling non-driving functions.
+bool joystickGetDigital(unsigned char buttonGroup, unsigned char button)
+{
+    bool result = ::joystickGetDigital(1, buttonGroup, button) || ::joystickGetDigital(2, buttonGroup, button);
+    
+    // if we are running autonous code in non-aiutonomous mode, then allow user to bail out.
+    // this is very useful to run autonomous skills in manual skills mode.
+    if (result && g_mode != AtonMode::Regular)
+    {
+        ReportStatus("\n!!! Cancelling autonomous mode (%d %d), running opControl()!\n", (int)buttonGroup, (int)button);
+        Assert(isAuto());
+        Assert(!isAutonomous());
+        g_mode = AtonMode::Regular;
+        Assert(!isAuto());
+    }
+    return result;
+}
+
 
 void autonomous()
 {
@@ -73,84 +103,90 @@ void autonomous()
     float ep = bat.GetExpanderPower();
     ReportStatus("Main Battery Level: %.2f\n" , mp);
     ReportStatus("Expander Battery Level: %.2f\n", ep);
-    if (ep > 6.0f && mp > 6.0f)
+    if (ep <= 6.0f || mp <= 6.0f)
     {
-        g_enabled = true;
-    } 
-    else 
-    {
-        g_enabled = false;
+        ReportStatus("\nERROR: LOW OR NO BATTERY\n");
+        return;
     }
 
-    if (g_enabled)
+    // Safety net: run autonomous only once!
+    // In case manual auto was still in place when running on competition.
+    if (g_alreadyRunAutonomous && !isAutonomous())
     {
+        ReportStatus("\n!!! Safety: running second aton, switching to manaul mode!\n");
+        g_mode = AtonMode::Regular;
+        return;
+    }
+
+    g_alreadyRunAutonomous = true;
+
 #ifndef OFFICIAL_RUN
-        // Safety net: run autonomous only once!
-        // Siable second run, in case manual auto was still in place when running on competition.
-        if (g_alreadyRunAutonomous && !isAutonomous())
-        {
-            g_mode = AtonMode::Regular;
-            return;
-        }
-        g_alreadyRunAutonomous = true;
-        if (!isAutonomous())
-            delay(4000);
+    if (g_mode == AtonMode::TestRun)
+        delay(4000);
 #endif
 
-        Main &main = SetupMain();
+    ReportStatus("\n*** Autonomous: Start ***\n\n");
 
-        // all system update their counters, like distance counter.
-        main.ResetState();
-        main.UpdateAllSystems();
+    Main &main = SetupMain();
+    auto time = main.GetTime();
+    auto time2 = millis();
 
-        ReportStatus("\n*** Autonomous: Start ***\n\n");
-        auto time = main.GetTime();
-        auto time2 = millis();
+    // all system update their counters, like distance counter.
+    main.ResetState();
+    main.UpdateAllSystems();
 
-        auto &lcd = main.lcd;
-        if (lcd.AtonSkills)
-        {
-            lcd.AtonBlueRight = false;
-            lcd.AtonFirstPos = false;
-            lcd.AtonClimbPlatform = true;
-        }
+    auto &lcd = main.lcd;
 
-        // setup coordinates
-        main.tracker.FlipX(main.lcd.AtonBlueRight);
-        main.drive.FlipX(main.lcd.AtonBlueRight);
+    if (g_mode == AtonMode::SkillsInManual)
+        lcd.AtonSkills = true;
+
+    if (lcd.AtonSkills)
+    {
+        lcd.AtonBlueRight = false;
+        lcd.AtonFirstPos = false;
+        lcd.AtonClimbPlatform = true;
+    }
+
+    // setup coordinates
+    main.tracker.FlipX(main.lcd.AtonBlueRight);
+    main.drive.FlipX(main.lcd.AtonBlueRight);
 
 #ifndef OFFICIAL_RUN
-        // Debugging code - should not run in real autonomous
-        if (g_mode == AtonMode::ManualSkill && isAutonomous())
-            RunSuperSkills();
-        else if (g_mode == AtonMode::TestRun && !isAutonomous())
-            RunSuperSkills();
-        else
-#endif // !OFFICIAL_RUN
-        {
-            // if you remove this (super skills) to run old skills, fix lcd.AtonFirstPos = true above!!!
-            if (lcd.AtonSkills)
-                RunSuperSkills();
-            else if (lcd.AtonFirstPos)
-                RunAtonFirstPos();
-            else
-                RunAtonSecondPos();
-        }
-        IntakeStop();
-
-        // unused variables in final build
-        UNUSED_VARIABLE(time);
-        UNUSED_VARIABLE(time2);
-
-        ReportStatus("\n*** END AUTONOMOUS ***\n\n");
-        printf("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
-        printf("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
-
-        GetLogger().Dump();
-
-        Do(EndOfAction());
+    // Debugging code - should not run in real autonomous
+    if (g_mode == AtonMode::ManualSkill && isAutonomous())
+        RunSuperSkills();
+    else if (g_mode == AtonMode::TestRun && !isAutonomous())
+    {
+        lcd.AtonClimbPlatform = false;
+        RunAtonFirstPos();
+        // RunSuperSkills();
     }
+    else
+#endif // !OFFICIAL_RUN
+    {
+        // if you remove this (super skills) to run old skills, fix lcd.AtonFirstPos = true above!!!
+        if (lcd.AtonSkills)
+            RunSuperSkills();
+        else if (lcd.AtonFirstPos)
+            RunAtonFirstPos();
+        else
+            RunAtonSecondPos();
+    }
+    IntakeStop();
+
+    // unused variables in final build
+    UNUSED_VARIABLE(time);
+    UNUSED_VARIABLE(time2);
+
+    ReportStatus("\n*** END AUTONOMOUS ***\n\n");
+    printf("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
+    printf("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
+
+    GetLogger().Dump();
+
+    Do(EndOfAction());
 }
+
 
 void SetShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
 {
@@ -172,6 +208,7 @@ void SetShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
     }
 }
 
+
 int CalcAngleToPoint(double x, double y)
 {
     PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
@@ -187,6 +224,7 @@ int CalcAngleToPoint(double x, double y)
     return angle;
 }
 
+
 void MoveToPlatform(bool twoPlatforms)
 {
     // ReportStatus("First platform\n");
@@ -200,6 +238,7 @@ void MoveToPlatform(bool twoPlatforms)
     }
 }
 
+
 void MoveExactWithAngle(int distance, int angle, bool allowTurning /*= true*/)
 {
     if (allowTurning)
@@ -208,12 +247,14 @@ void MoveExactWithAngle(int distance, int angle, bool allowTurning /*= true*/)
     MoveExact(distance);
 }
 
+
 void MoveWithAngle(int distance, int angle, int speed)
 {
     TurnToAngleIfNeeded(angle);
     KeepAngle keeper(angle);
     Move(distance, speed);
 }
+
 
 void TurnToAngleIfNeeded(int angle)
 {
@@ -222,6 +263,7 @@ void TurnToAngleIfNeeded(int angle)
         TurnToAngle(angle);
 }
 
+
 void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle)
 {
     TurnToAngleIfNeeded(angle);
@@ -229,12 +271,14 @@ void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLin
     Do(MoveExactWithLineCorrectionAction<MoveExactAction>(fullDistance, distanceAfterLine, angle));
 }
 
+
 void MoveWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle)
 {
     TurnToAngleIfNeeded(angle);
     KeepAngle keeper(angle);
     Do(MoveExactWithLineCorrectionAction<MoveAction>(fullDistance, distanceAfterLine, angle));
 }
+
 
 unsigned int HitTheWall(int distanceForward, int angle)
 {
@@ -272,8 +316,11 @@ unsigned int HitTheWall(int distanceForward, int angle)
     return distanceTravelled;
 }
 
+
 void GoToCapWithBallUnderIt(int distance)
 {
+    KeepAngle keeper(-90);
+
     auto& drive = GetMain().drive;
     if (distance == 0)
         distance = distanceToCap;
@@ -292,20 +339,22 @@ void GoToCapWithBallUnderIt(int distance)
     ReportStatus("GoToCapWithBallUnderIt: distance=%d, expected=%d\n", distanceTravelled, distance);
 }
 
+
 void GetBallUnderCapAndReturn()
 {
     auto &main = GetMain();
 
-    KeepAngle keeper(-90);
     unsigned int distance = main.drive.m_distanceFromBeginning;
 
     GoToCapWithBallUnderIt();
 
     distance = main.drive.m_distanceFromBeginning - distance + 200;
     ReportStatus("Move back: %d\n", distance);
+    KeepAngle keeper(-90);
     MoveExact(-distance); // 1800 ?
     IntakeStop();
 }
+
 
 void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
 {
@@ -326,6 +375,7 @@ void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
     }
     IntakeUp();
 }
+
 
 void TurnToFlagsAndShootTwoBalls()
 {

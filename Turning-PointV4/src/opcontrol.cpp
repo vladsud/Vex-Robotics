@@ -142,10 +142,9 @@ void Main::ResetState()
 //Operator Control
 void operatorControl()
 {
-#ifndef OFFICIAL_RUN
+	// This is required for testing purposes, but also for auto-Skills run in manual modde 
 	if (isAuto())
 		autonomous();
-#endif
 
 	Main &main = SetupMain();
 	main.ResetState();
