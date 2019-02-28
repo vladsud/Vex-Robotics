@@ -412,10 +412,12 @@ void Shooter::Update()
     if (userShooting || needPreload || m_preloadAfterShotCounter > 0)
     {
         motorSet(shooterPort, shooterMotorSpeed);
+		motorSet(shooter2Port, shooterMotorSpeed);
     }
     else
     {
         motorSet(shooterPort, 0);
+		motorSet(shooter2Port, 0);
     }
 
     // Keep moving angle to rigth position

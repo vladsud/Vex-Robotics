@@ -93,11 +93,12 @@ C: Shooter
 D: left y drive
 *
 *******************************************************************************/
-#define shooterPort 2 // "C" on extender
+#define shooterPort 2 // 2 // "C" on extender
+#define shooter2Port 6
 #define leftDrivePort2 3 // back
 #define leftDrivePortY 4 // middle
 #define intakePort 5
-#define descorerPort 6
+#define descorerPort 99
 #define rightDrivePortY 7
 #define anglePort 8
 #define rightDrivePort2 9
