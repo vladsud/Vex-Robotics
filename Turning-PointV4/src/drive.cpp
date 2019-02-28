@@ -80,7 +80,7 @@ float Drive::GetTurnAxis()
     if (isAuto())
         return m_overrideTurn;
     // convert joystick metric to drive metric
-    return -GetMovementJoystick(1, 1, 25) * driveMotorMaxSpeed / joystickMax;
+    return -GetMovementJoystick(1, 1, 37) * driveMotorMaxSpeed / joystickMax;
 }
 
 void Drive::OverrideInputs(int forward, float turn)

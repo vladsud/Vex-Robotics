@@ -119,6 +119,21 @@ bool MoveToMiddleFlagPosition()
     return joystickGetDigital(7, JOY_RIGHT);
 }
 
+bool Shooter::IsShooting()
+{
+    if (m_flag == Flag::Loading)
+        return false;
+
+    // Allow "shoot" button to be pressed all the time and shoot once angle is settled
+    if (m_fMoving)
+    {
+        Assert(!m_overrideShooting); // atonomous should always wait till angle is settled. 
+        return false;
+    }
+    return m_overrideShooting || joystickGetDigital(7, JOY_LEFT);
+}
+ 
+
 // Motors:
 //   up: 100
 //   down: -100

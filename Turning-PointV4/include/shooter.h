@@ -51,7 +51,7 @@ public:
 
   void OverrideSetShooterMode(bool on);
   bool IsMovingAngle() { return m_fMoving; }
-  bool IsShooting() { return (joystickGetDigital(7, JOY_LEFT) || m_overrideShooting) && m_flag != Flag::Loading; }
+  bool IsShooting();
   BallPresence BallStatus();
   Flag GetFlagPosition() { return m_flag; }
 };
