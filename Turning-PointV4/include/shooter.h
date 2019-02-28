@@ -22,7 +22,7 @@ class Shooter
   Flag m_flag = Flag::Loading;
 
   // it is recalculated in constructor, so value does not matter that much
-  unsigned int m_angleToMove = 0;
+  unsigned int m_angleToMove = 1500;
   unsigned int m_count = 0;
   unsigned int m_lastAngleDistance = 0;
   int m_diffAdjusted = 0;

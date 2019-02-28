@@ -96,6 +96,7 @@ StaticAssert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2] * 3 + Distanc
 // Need to figure out initial position
 Shooter::Shooter()
 {
+    m_distanceInches = Distances[2];
     StartMoving();
 }
 
