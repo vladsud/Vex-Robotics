@@ -148,20 +148,21 @@ void Shooter::KeepMoving()
     int diff = distance - m_lastAngleDistance;
 
     // sometimes we get really wrong readings.
-    if (diff > m_diffAdjusted + 2)
-        diff = m_diffAdjusted + 2;
-    else if (diff < m_diffAdjusted - 2)
-        diff = m_diffAdjusted - 2;
+    if (diff > m_diffAdjusted + 5)
+        diff = m_diffAdjusted + 5;
+    else if (diff < m_diffAdjusted - 5)
+        diff = m_diffAdjusted - 5;
 
     distance = diff + m_lastAngleDistance;
+
     unsigned int distanceAbs = abs(distance);
 
-    m_diffAdjusted = diff;
+    m_diffAdjusted = diff; // (diff + m_diffAdjusted) / 2;
 
     m_count++;
 
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 10 && abs(diff) <= 5) || (distance > 0 && m_flag == Flag::Loading))
+    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 10 && abs(m_diffAdjusted) <= 3) || (distance > 0 && m_flag == Flag::Loading))
     {
         if (m_fMoving)
         {
@@ -182,17 +183,27 @@ void Shooter::KeepMoving()
         else
             speed = -26 + distance / 4 + m_diffAdjusted * 4;
     }
+    else if (distance > 40) // going up
+        speed = 18 + distance / 4 + m_diffAdjusted * 2;
     else if (distance > 10) // going up
-        speed = 18 + distance / 3  + m_diffAdjusted * 5 / 2;
+        speed = 18 + distance / 4  + m_diffAdjusted * 4;
     else if (distance > 0) // already there
         speed = m_fMoving ? -10 : 0;
     else if (!m_fMoving && distance > -10)
         speed = 0;
     else  // going down, overshoot
-        speed = -20 + distance / 5 + m_diffAdjusted * 3;
+        speed = -20 + distance / 3 + m_diffAdjusted * 3;
+
 
     if (speed * distance < 0 && distanceAbs > 20)
         speed = 0;
+
+    const int angleMotorSpeed = distanceAbs > 20 ? 75 : 20;
+
+    if (speed > angleMotorSpeed)
+        speed = angleMotorSpeed;
+    else if (speed < -angleMotorSpeed)
+        speed = -angleMotorSpeed;
 
     if (PrintDiagnostics(Diagnostics::Angle))
     {
@@ -201,13 +212,6 @@ void Shooter::KeepMoving()
         else if (speed != 0)
             ReportStatus("ANG ADJ: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
     }
-
-    const int angleMotorSpeed = 75;
-
-    if (speed > angleMotorSpeed)
-        speed = angleMotorSpeed;
-    else if (speed < -angleMotorSpeed)
-        speed = -angleMotorSpeed;
 
     motorSet(anglePort, speed);
 
