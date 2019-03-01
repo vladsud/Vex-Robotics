@@ -55,16 +55,22 @@ bool SmartsOn()
     return g_autonomousSmartsOn && isAuto();
 }
 
+void StartSkillsinManual()
+{
+    g_mode = AtonMode::SkillsInManual;
+    Assert(isAuto());
+}
+
 
 void Do(Action &&action)
 {
-    // auto time = millis();
+    auto time = millis();
     while (!action.ShouldStop())
     {
         GetMain().Update();
 
         // Check if we have bailed out of autonomous mode in manual skills (some key was pressed on joystick)
-        if (g_mode == AtonMode::Regular)
+        if (g_mode == AtonMode::Regular && !isAutonomous())
         {
             ReportStatus("\n!!! Switching to manual mode!\n");
             Assert(!isAuto());
@@ -73,7 +79,7 @@ void Do(Action &&action)
         }
     }
     action.Stop();
-    // ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
+    ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
 }
 
 

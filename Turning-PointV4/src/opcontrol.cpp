@@ -96,7 +96,7 @@ bool Main::UpdateWithoutWaiting()
 		m_TicksToMainUpdate = allSystemsPullTime;
 		// cheap sytems are grouped together
 		lcd.Update();
-		descorer.Update();
+		// descorer.Update();
 		break;
 	case 1:
 		shooter.Update();
@@ -142,9 +142,15 @@ void Main::ResetState()
 //Operator Control
 void operatorControl()
 {
+	if (joystickGetDigital(JoystickIntakeGroup, JOY_UP) && joystickGetDigital(JoystickIntakeGroup, JOY_DOWN))
+		StartSkillsinManual();
+
 	// This is required for testing purposes, but also for auto-Skills run in manual modde 
 	if (isAuto())
+	{
+		Assert(!isAutonomous());
 		autonomous();
+	}
 
 	Main &main = SetupMain();
 	main.ResetState();

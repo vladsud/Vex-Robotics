@@ -11,6 +11,7 @@ bool isAuto();
 bool SmartsOn();
 class Main &SetupMain();
 int AdjustAngle(int angle);
+void StartSkillsinManual();
 
 enum class IntakeShoterEvent
 {
