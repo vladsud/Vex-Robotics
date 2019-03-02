@@ -194,7 +194,7 @@ void Shooter::KeepMoving()
     else if (distance > 40) // going up
         speed = 20 + distance / 4 + m_diffAdjusted * 2;
     else if (distance > 10) // going up
-        speed = 24 + distance / 4  + m_diffAdjusted * 3;
+        speed = 22 + distance / 5  + m_diffAdjusted * 3;
     else if (distance > 0) // already there
         speed = m_fMoving ? -10 : 0;
     else if (!m_fMoving && distance > -10)
