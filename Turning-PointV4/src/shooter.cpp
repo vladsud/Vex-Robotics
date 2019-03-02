@@ -6,8 +6,8 @@ constexpr float Distances[]{24, 30, 48, 55, 78, 108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]{120, 110, 85, 80, 60, 60};
-constexpr unsigned int AnglesMedium[]{90, 74, 50, 46, 40, 55};
+constexpr unsigned int AnglesHigh[]{120, 110, 95, 90, 60, 80};
+constexpr unsigned int AnglesMedium[]{90, 74, 55, 48, 40, 55};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -134,13 +134,20 @@ bool Shooter::IsShooting()
     return m_overrideShooting || joystickGetDigital(7, JOY_LEFT);
 }
  
+bool Shooter::IsMovingAngle()
+{
+    if (m_fMoving)
+        return true;
+    unsigned int dist = abs(analogRead(anglePotPort) - (int)m_angleToMove);
+    ReportStatus("Angle dist: %d\n", dist);
+    return dist > 10;
+}
 
 // Motors:
 //   up: 100
 //   down: -100
 void Shooter::KeepMoving()
 {
-
     // distance = error
     // diff = derivative
     int speed = 0;
@@ -168,8 +175,8 @@ void Shooter::KeepMoving()
         if (m_fMoving)
         {
             if (PrintDiagnostics(Diagnostics::Angle))
-                ReportStatus("STOP: (%d) Dest: %d   Reading: %d, Distance: %d, Diff: %d, DiffAdj: %d\n\n\n",
-                    m_count, m_angleToMove, current, current - m_angleToMove, diff, m_diffAdjusted);
+                ReportStatus("STOP: (%d) Dest: %d   Reading: %d, Distance: %d/%d, Diff: %d, DiffAdj: %d\n\n\n",
+                    m_count, m_angleToMove, current, current - m_angleToMove, distance, diff, m_diffAdjusted);
             StopMoving();
         }
         // if (m_flag == Flag::Loading)
@@ -185,15 +192,15 @@ void Shooter::KeepMoving()
             speed = -26 + distance / 4 + m_diffAdjusted * 4;
     }
     else if (distance > 40) // going up
-        speed = 18 + distance / 4 + m_diffAdjusted * 2;
+        speed = 20 + distance / 4 + m_diffAdjusted * 2;
     else if (distance > 10) // going up
-        speed = 18 + distance / 4  + m_diffAdjusted * 4;
+        speed = 24 + distance / 4  + m_diffAdjusted * 3;
     else if (distance > 0) // already there
         speed = m_fMoving ? -10 : 0;
     else if (!m_fMoving && distance > -10)
         speed = 0;
     else  // going down, overshoot
-        speed = -20 + distance / 3 + m_diffAdjusted * 3;
+        speed = -20 + distance / 3 + m_diffAdjusted * 2;
 
 
     if (speed * distance < 0 && distanceAbs > 20)
@@ -243,6 +250,7 @@ void Shooter::SetDistance(unsigned int distance)
 {
     if (m_distanceInches == distance)
         return;
+    ReportStatus("Shooter distance (%d)s: %d\n", millis(), distance);
     m_distanceInches = distance;
     StartMoving();
 }
@@ -251,6 +259,7 @@ void Shooter::SetFlag(Flag flag)
 {
     if (m_flag == flag)
         return;
+    ReportStatus("Shooter flag (%d): %d\n", millis(), (int)flag);
     m_flag = flag;
     StartMoving();
 }
@@ -428,8 +437,24 @@ void Shooter::Update()
         SetFlag(topFlag ? Flag::High : Flag::Middle);
     }
 
+    bool shooting = userShooting || needPreload || m_preloadAfterShotCounter > 0;
+    if (userShooting && !isAuto() && m_flag == Flag::Middle && m_distanceInches >= Distances[2])
+    {
+        if (m_shooterWait == 0)
+        {
+            m_shooterWait = 10;
+        }
+        m_shooterWait++;
+        if (m_shooterWait < 25)
+            shooting = false;
+    }
+    else
+    {
+        m_shooterWait = 0;
+    }
+    
     // Shooter motor.
-    if (userShooting || needPreload || m_preloadAfterShotCounter > 0)
+    if (shooting)
     {
         motorSet(shooterPort, shooterMotorSpeed);
 		motorSet(shooter2Port, shooterMotorSpeed);

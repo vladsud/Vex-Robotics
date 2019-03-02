@@ -41,8 +41,12 @@ void Intake::Update()
 {
     Direction direction = m_direction;
 
+    if (joystickGetDigital(JoystickIntakeGroup, JOY_DOWN))
+        m_downABit = 50;
+    
     if (joystickGetDigital(JoystickDescorerGroup, JOY_UP))
     {
+        m_downABit = 0;
         if (joystickGetDigital(JoystickDescorerGroup, JOY_DOWN) || joystickGetDigital(JoystickIntakeGroup, JOY_UP))
         {
             m_doublePressed = true;
@@ -55,6 +59,7 @@ void Intake::Update()
     }
     else if (joystickGetDigital(JoystickDescorerGroup, JOY_DOWN))
     {
+        m_downABit = 0;
         direction = Direction::Down;
     }
     else
@@ -64,6 +69,12 @@ void Intake::Update()
 
     if (m_doublePressed)
         direction = m_direction;
+
+    if (m_downABit > 0)
+    {
+        m_downABit--;
+        direction = (m_downABit == 0) ? Direction::None : Direction::Down;
+    }
 
     SetIntakeDirection(direction);
 }

@@ -33,8 +33,22 @@ struct WaitAction : public Action
 
 struct WaitShooterAngleToStopAction : public Action
 {
-    bool ShouldStop() override { return !m_main.shooter.IsMovingAngle(); }
+    WaitShooterAngleToStopAction(unsigned int maxTime)
+      : m_maxTime(maxTime)
+    {}
+    bool ShouldStop() override
+    {
+        if (GetMain().GetTime() - m_timeStart > m_maxTime)
+            return true;
+         return !m_main.shooter.IsMovingAngle();
+    }
+    void Stop() override
+    {
+        ReportStatus("Waited for angle to stop: %d / %d\n", GetMain().GetTime() - m_timeStart, m_maxTime);
+    }
     const char* Name() override { return "WaitShooterAngleToStopAction"; }
+private:
+    unsigned int m_maxTime;
 };
 
 struct WaitShooterAngleToGoUpAction : public Action

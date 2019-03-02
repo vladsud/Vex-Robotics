@@ -1,6 +1,10 @@
 #include "aton.h"
 
 const unsigned int distanceFromWall = 380;
+const unsigned int midSecondFlagDistance = 53;
+const unsigned int highSecondFlagDistance = 55;
+const unsigned int midThirdFlagDistance = 33;
+const unsigned int highThirdFlagDistance = 70;
 
 
 void PrintPosition()
@@ -78,13 +82,16 @@ void RunSuperSkills()
     auto &main = GetMain();
     main.tracker.SetCoordinates({16, 60+24, -90});
 
+    // async actions
+    SetShooterAngle(true /*high*/, g_highFlagHeight-2, false /*checkPresenceOfBall*/);
+
     // Pick up the first ball
-    GoToCapWithBallUnderIt();
+    GoToCapWithBallUnderIt(distanceToCap);
     // MoveExactWithLineCorrection(-2100, 450, -90);
     MoveExactWithAngle(-2100, -90);
 
     // Move in front of first flags
-    MoveExactWithLineCorrection(2500, 730, -1);
+    MoveExactWithLineCorrection(2550, 700, 0);
 
 #if 0
     // Recalibrate angle
@@ -94,7 +101,11 @@ void RunSuperSkills()
 #endif
 
     // Shooting 2 balls at first row
-    TurnToFlagsAndShootTwoBalls();
+    TurnToAngle(angleToShootFlags+1);
+    ShootTwoBalls(g_highFlagHeight-2, g_midFlagHeight-5);
+
+    // Preset for net shooting
+    main.shooter.SetDistance(highSecondFlagDistance);
 
     ReportStatus("\nHitting 1st low flag\n");
 
@@ -102,11 +113,11 @@ void RunSuperSkills()
     bool recovery = HitLowFlagWithRecovery(3200, -2800, 3 /*angleBack*/);
 
     // Recalibrate, and move to shooting position for second row of flags
-    if (recovery)
+    if (true || recovery)
     {
-        HitTheWall(-(int)distanceFromWall - 200, -90);
+        HitTheWall(-(int)distanceFromWall - 150, -90);
         ResetPostionAfterHittingWall(true /*leftWall*/);
-        MoveExactWithAngle(1900, -90);
+        MoveExactWithAngle(1800, -90);
     }
     else
     {
@@ -120,15 +131,19 @@ void RunSuperSkills()
     {
         TurnToAngle(-24);
         // Shoot middle pole
-        ShootTwoBalls(63, 115);
+        Wait(1000);
+        ShootTwoBalls(highSecondFlagDistance, midSecondFlagDistance);
     }
+
+    // Preset for net shooting
+    main.shooter.SetDistance(midThirdFlagDistance);
 
     // pick up ball under cap
     TurnToAngle(-90);
-    GoToCapWithBallUnderIt(500);
+    GoToCapWithBallUnderIt(600);
 
     // Flip cap #1
-    MoveExactWithAngle(-300, -90);
+    MoveExactWithAngle(-400, -90);
     WaitShooterAngleToGoUp(1000); // wait for the ball
     
     IntakeDown();
@@ -147,12 +162,22 @@ void RunSuperSkills()
     // Low flag 2
     PrintPosition();
     //IntakeUp();
-    MoveExactWithAngle(1250, -90);
+
+    if (false)
+    {
+        MoveExactWithAngle(1200, -90);
+    }
+    else
+    {
+        MoveExactWithLineCorrection(2000, 100, -90);
+        MoveExactWithAngle(-550, -90);
+    }
+    
     HitLowFlagWithRecovery(1800, -1600, 0 /*angleBack*/, 0 /*angleForward*/);
 
     // Cap 3
     IntakeDown();
-    MoveWithLineCorrection(1500, 930, -90);
+    MoveWithLineCorrection(1550, 930, -90);
     MoveWithAngle(600, -90, 35); // slow down a bit
     MoveExactWithAngle(800, -90);
 
@@ -165,12 +190,20 @@ void RunSuperSkills()
     HitLowFlagWithRecovery(1700, -2200);
     TurnToAngle(-13);
     IntakeDown();
-    ShootTwoBalls(33, 70);
+    Wait(1000);
+    ShootOneBall(true/*high*/, midThirdFlagDistance, false /*checkBallPresence*/);
+
+    if (false)
+    {
+        TurnToAngle(100);
+        GoToCapWithBallUnderIt(800, 100);
+        MoveExactWithAngle(-800, 100);
+    }
 
     ReportStatus("\nGoing after platform\n");
 
     // Climb platform
-    MoveExactWithAngle(-2300, 33);
+    MoveExactWithAngle(-2200, 33);
     TurnToAngle(-270);
     MoveToPlatform(true);
 }

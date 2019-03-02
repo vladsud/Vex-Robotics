@@ -9,7 +9,7 @@ void RunAtonSecondPos()
     GetMain().tracker.SetCoordinates({16.5 - 1, 33 + 48 - 1, -30});
 
    // Shoot the ball
-    SetShooterAngle(false, 108, false /*checkPresenceOfBall*/);
+    SetShooterAngle(true, 108, false /*checkPresenceOfBall*/);
     WaitShooterAngleToStop();
     Wait(1000);
     ShootBall();
@@ -31,11 +31,13 @@ void RunAtonSecondPos()
         BLOCK
         {
             KeepAngle keeper(-100);
-            GoToCapWithBallUnderIt();
+            GoToCapWithBallUnderIt(distanceToCap+150, -100);
+            Wait(500);
+            MoveExact(-100);
         }
 
         TurnToAngle(-10);
-        SetShooterAngle(true, 108, false /*checkPresenceOfBall*/);
+        SetShooterAngle(false, 108, false /*checkPresenceOfBall*/);
         IntakeUp();
         WaitShooterAngleToStop();
         Wait(5000);

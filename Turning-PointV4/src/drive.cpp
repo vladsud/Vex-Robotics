@@ -42,7 +42,7 @@ KeepAngle::KeepAngle(int angle)
 
 float KeepAngle::GetError()
 {
-    return (m_angle - GetGyro().Get()) * 5.0 / GyroWrapper::Multiplier;
+    return (m_angle - GetGyro().Get()) * 6.0 / GyroWrapper::Multiplier;
 }
 
 

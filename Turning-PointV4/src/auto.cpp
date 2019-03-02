@@ -64,7 +64,7 @@ void StartSkillsinManual()
 
 void Do(Action &&action)
 {
-    auto time = millis();
+    // auto time = millis();
     while (!action.ShouldStop())
     {
         GetMain().Update();
@@ -79,7 +79,7 @@ void Do(Action &&action)
         }
     }
     action.Stop();
-    ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
+    // ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
 }
 
 
@@ -163,8 +163,9 @@ void autonomous()
         RunSuperSkills();
     else if (g_mode == AtonMode::TestRun && !isAutonomous())
     {
-        lcd.AtonClimbPlatform = false;
+        // lcd.AtonClimbPlatform = false;
         RunAtonFirstPos();
+        // RunAtonSecondPos();
         // RunSuperSkills();
     }
     else
@@ -323,9 +324,9 @@ unsigned int HitTheWall(int distanceForward, int angle)
 }
 
 
-void GoToCapWithBallUnderIt(int distance)
+void GoToCapWithBallUnderIt(int distance, int angle)
 {
-    KeepAngle keeper(-90);
+    KeepAngle keeper(angle);
 
     auto& drive = GetMain().drive;
     if (distance == 0)
@@ -339,7 +340,7 @@ void GoToCapWithBallUnderIt(int distance)
     MoveStop(-18); // attempt to fully stop, for more accurate back movement
 
     // we have hard time picking up the ball, so wait
-    // Wait(100);
+    Wait(150);
     distanceTravelled += drive.m_distance;
 
     ReportStatus("GoToCapWithBallUnderIt: distance=%d, expected=%d\n", distanceTravelled, distance);
@@ -352,7 +353,7 @@ void GetBallUnderCapAndReturn()
 
     unsigned int distance = main.drive.m_distanceFromBeginning;
 
-    GoToCapWithBallUnderIt();
+    GoToCapWithBallUnderIt(distanceToCap);
 
     distance = main.drive.m_distanceFromBeginning - distance + 200;
     ReportStatus("Move back: %d\n", distance);
@@ -362,29 +363,27 @@ void GetBallUnderCapAndReturn()
 }
 
 
-void ShootTwoBalls(int midFlagHeight, int highFlagHeight)
+void ShootOneBall(bool high, int distance, bool checkBallPresence)
 {
     auto &main = GetMain();
+    ReportStatus("Waiting for angle to go up: %ld\n", millis());
+    WaitShooterAngleToGoUp(2000);
     if (main.shooter.BallStatus() != BallPresence::NoBall)
     {
-        ReportStatus("Shooting 2 balls\n");
-        SetShooterAngle(true /*high*/, midFlagHeight, false /*checkPresenceOfBall*/);
-        WaitShooterAngleToStop();
-        ShootBall();
-        IntakeUp();
-        GetMain().shooter.SetDistance(highFlagHeight);
-        // wait for it to go down & start moving up
-        WaitShooterAngleToGoUp(main.lcd.AtonSkills ? 2000 : 1500);
-        SetShooterAngle(false /*high*/, highFlagHeight, true /*checkPresenceOfBall*/);
-        WaitShooterAngleToStop();
+        SetShooterAngle(high, distance, checkBallPresence);
+        ReportStatus("Waiting for angle to stop: %ld\n", millis());
+        WaitShooterAngleToStop(main.lcd.AtonSkills ? 4000: 1000);
+        ReportStatus("Shooting: %ld\n", millis());
+        Wait(300);
         ShootBall();
     }
     IntakeUp();
 }
 
-
-void TurnToFlagsAndShootTwoBalls()
+void ShootTwoBalls(int highFlagDistance, int midFlagDistance)
 {
-    TurnToAngle(angleToShootFlags);
-    ShootTwoBalls();
+    ReportStatus("Shooting 2 balls\n");
+    ShootOneBall(true /*high*/, highFlagDistance, false /*checkPresenceOfBall*/);
+    ShootOneBall(false /*high*/, midFlagDistance, true /*checkPresenceOfBall*/);
+    IntakeUp();
 }

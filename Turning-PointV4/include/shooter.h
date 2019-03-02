@@ -29,6 +29,7 @@ class Shooter
   int m_preLoadCount = 0;
   int m_preloadAfterShotCounter = 0;
   unsigned int m_timeSinseShooting = 0;
+  unsigned int m_shooterWait = 0;
 
   bool m_fMoving = false;
   bool m_Manual = false;
@@ -50,7 +51,7 @@ public:
   void SetFlag(Flag flag);
 
   void OverrideSetShooterMode(bool on);
-  bool IsMovingAngle() { return m_fMoving; }
+  bool IsMovingAngle();
   bool IsShooting();
   BallPresence BallStatus();
   Flag GetFlagPosition() { return m_flag; }

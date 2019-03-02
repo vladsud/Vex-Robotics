@@ -17,8 +17,9 @@ void Do(Action &&action);
 void RunSuperSkills();
 void MoveExactWithAngle(int distance, int angle, bool allowTurning = true);
 void MoveWithAngle(int distance, int angle, int speed = 85);
-void GoToCapWithBallUnderIt(int distance = 0);
-void ShootTwoBalls(int midFlagHeight = g_midFlagHeight, int highFlagHeight = g_highFlagHeight);
+void GoToCapWithBallUnderIt(int distance, int angle = -90);
+void ShootOneBall(bool high, int distance, bool checkBallPresence = true);
+void ShootTwoBalls(int highFlagDistance, int midFlagDistance);
 void GetBallUnderCapAndReturn();
 void TurnToFlagsAndShootTwoBalls();
 void MoveToLowFlag();
@@ -59,19 +60,14 @@ inline void TurnToAngle(int turn)
     Do(TurnPrecise(turn * GyroWrapper::Multiplier - GetGyroReading()));
 }
 
-inline void WaitShooterAngleTo()
-{
-    Do(WaitShooterAngleToStopAction());
-}
-
 inline void WaitShooterAngleToGoUp(unsigned int wait)
 {
     Do(WaitShooterAngleToGoUpAction(wait));
 }
 
-inline void WaitShooterAngleToStop()
+inline void WaitShooterAngleToStop(unsigned int maxTime = 1000)
 {
-    Do(WaitShooterAngleToStopAction());
+    Do(WaitShooterAngleToStopAction(maxTime));
 }
 
 inline void MoveStop(int power)
