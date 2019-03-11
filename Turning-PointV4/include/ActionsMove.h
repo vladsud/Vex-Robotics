@@ -49,7 +49,7 @@ struct MoveAction : public Action
             // Collision?
             if (m_stopOnCollision &&
                 ((m_maxSpeed >= speedToGainBeforeStop && m_speed < m_maxSpeed / 2) ||
-                ((distance >= 200 || m_main.GetTime() - m_timeStart >= 200) && minWheel <= m_lastMinWheel+1)))
+                ((distance >= 500 || m_main.GetTime() - m_timeStart >= 400) && minWheel <= m_lastMinWheel+1)))
             {
                 // ReportStatus("   Collision detected: speed=%d maxspeed=%d, distance=%d, exp distance=%d\n", m_speed, m_maxSpeed, distance, m_distanceToMove);
                 return true;

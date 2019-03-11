@@ -6,8 +6,8 @@ constexpr float Distances[]{24, 30, 48, 55, 78, 108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]{120, 110, 95, 90, 60, 80};
-constexpr unsigned int AnglesMedium[]{90, 74, 55, 48, 40, 55};
+constexpr unsigned int AnglesHigh[]{120, 110, 80, 90, 60, 80};
+constexpr unsigned int AnglesMedium[]{90, 74, 50, 48, 40, 55};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -191,22 +191,22 @@ void Shooter::KeepMoving()
         else
             speed = -26 + distance / 4 + m_diffAdjusted * 4;
     }
-    else if (distance > 40) // going up
+    else if (distance > 50) // going up
         speed = 20 + distance / 4 + m_diffAdjusted * 2;
-    else if (distance > 10) // going up
-        speed = 22 + distance / 5  + m_diffAdjusted * 3;
+    else if (distance > 30) // going up
+        speed = 15 + distance / 5  + m_diffAdjusted * 3;
     else if (distance > 0) // already there
         speed = m_fMoving ? -10 : 0;
     else if (!m_fMoving && distance > -10)
         speed = 0;
     else  // going down, overshoot
-        speed = -20 + distance / 3 + m_diffAdjusted * 2;
+        speed = -10 + distance / 3 + m_diffAdjusted * 2;
 
 
     if (speed * distance < 0 && distanceAbs > 20)
         speed = 0;
 
-    const int angleMotorSpeed = distanceAbs > 20 ? 75 : 20;
+    const int angleMotorSpeed = distanceAbs > 50 ? 75 : 20;
 
     if (speed > angleMotorSpeed)
         speed = angleMotorSpeed;

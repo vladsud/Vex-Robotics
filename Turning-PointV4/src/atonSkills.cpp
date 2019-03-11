@@ -87,13 +87,13 @@ void RunSuperSkills()
 
     // Pick up the first ball
     GoToCapWithBallUnderIt(distanceToCap);
-    // MoveExactWithLineCorrection(-2100, 450, -90);
+    // MoveExactWithLineCoprrection(-2100, 450, -90);
     MoveExactWithAngle(-2100, -90);
 
     // Move in front of first flags
     MoveExactWithLineCorrection(2550, 700, 0);
 
-#if 0
+#if 1
     // Recalibrate angle
     HitTheWall(-(int)distanceFromWall-80, -90);
     ResetPostionAfterHittingWall(true /*leftWall*/);
@@ -101,7 +101,7 @@ void RunSuperSkills()
 #endif
 
     // Shooting 2 balls at first row
-    TurnToAngle(angleToShootFlags+1);
+    TurnToAngle(-2 /*angleToShootFlags+1*/);
     ShootTwoBalls(g_highFlagHeight-2, g_midFlagHeight-5);
 
     // Preset for net shooting
@@ -110,14 +110,14 @@ void RunSuperSkills()
     ReportStatus("\nHitting 1st low flag\n");
 
     // Hit low flag and come back
-    bool recovery = HitLowFlagWithRecovery(3200, -2800, 3 /*angleBack*/);
+    bool recovery = HitLowFlagWithRecovery(3200, -2850, 4 /*angleBack*/);
 
     // Recalibrate, and move to shooting position for second row of flags
     if (true || recovery)
     {
         HitTheWall(-(int)distanceFromWall - 150, -90);
         ResetPostionAfterHittingWall(true /*leftWall*/);
-        MoveExactWithAngle(1800, -90);
+        MoveExactWithAngle(1750, -90);
     }
     else
     {
@@ -129,7 +129,7 @@ void RunSuperSkills()
 
     if (main.shooter.BallStatus() != BallPresence::NoBall)
     {
-        TurnToAngle(-24);
+        TurnToAngle(-25);
         // Shoot middle pole
         Wait(1000);
         ShootTwoBalls(highSecondFlagDistance, midSecondFlagDistance);
@@ -140,7 +140,7 @@ void RunSuperSkills()
 
     // pick up ball under cap
     TurnToAngle(-90);
-    GoToCapWithBallUnderIt(600);
+    GoToCapWithBallUnderIt(650);
 
     // Flip cap #1
     MoveExactWithAngle(-400, -90);
@@ -170,14 +170,14 @@ void RunSuperSkills()
     else
     {
         MoveExactWithLineCorrection(2000, 100, -90);
-        MoveExactWithAngle(-550, -90);
+        MoveExactWithAngle(-600, -90);
     }
     
     HitLowFlagWithRecovery(1800, -1600, 0 /*angleBack*/, 0 /*angleForward*/);
 
     // Cap 3
     IntakeDown();
-    MoveWithLineCorrection(1550, 930, -90);
+    MoveWithLineCorrection(1550, 980, -90);
     MoveWithAngle(600, -90, 35); // slow down a bit
     MoveExactWithAngle(800, -90);
 
@@ -203,7 +203,7 @@ void RunSuperSkills()
     ReportStatus("\nGoing after platform\n");
 
     // Climb platform
-    MoveExactWithAngle(-2200, 33);
+    MoveExactWithAngle(-2110, 30);
     TurnToAngle(-270);
     MoveToPlatform(true);
 }

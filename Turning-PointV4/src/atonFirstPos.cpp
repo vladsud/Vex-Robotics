@@ -46,7 +46,7 @@ void RunAtonFirstPos()
     BLOCK
     {
         KeepAngle keeper(angleToMoveToFlags);
-        Move(2200, 110, true /*StopOnColision */);
+        Move(2200, 110, false /*StopOnColision */);
         Move(400, 30, true /*StopOnColision */);
         MoveStop(0); // attempt to fully stop, for more accurate back movement
     }
@@ -82,7 +82,7 @@ void RunAtonFirstPos()
     if (main.lcd.AtonClimbPlatform)
     {
         ReportStatus("Moving: %d\n", distance + 500);
-        MoveExactWithAngle(distance, 13, false /*allowTurning*/);  // try to get further out from the wall
+        MoveExactWithAngle(distance + 200, 10, false /*allowTurning*/);  // try to get further out from the wall
 
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
         auto time = main.GetTime() - timeBegin;
@@ -90,7 +90,7 @@ void RunAtonFirstPos()
         bool shooting = hasBall && (time < 11000);
         if (shooting)
         {
-            TurnToAngle(-30);
+            TurnToAngle(-26);
             ShootOneBall(true/*high*/, distanceSecondFlag, false /*checkBallPresence*/);
         }
         TurnToAngle(-91);

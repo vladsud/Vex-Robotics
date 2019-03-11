@@ -302,8 +302,7 @@ unsigned int HitTheWall(int distanceForward, int angle)
         distance = Sign(distanceForward) * 100;
 
     KeepAngle keeper(angle);
-
-    Move(distance, 85, true /*StopOnColision */);
+    Move(distance, 85, GetMain().lcd.AtonSkills /*StopOnColision */);
     unsigned int distanceTravelled = drive.m_distance;
 
     // attempt to fully stop, for more accurate back movement
