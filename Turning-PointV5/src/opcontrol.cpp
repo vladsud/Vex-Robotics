@@ -14,7 +14,8 @@ void opcontrol() {
 
 	while (true)
 	{
-		drive.arcade(controller.getAnalog(ControllerAnalog::leftY), controller.getAnalog(ControllerAnalog::rightX));
+		drive.arcade(controller.getAnalog(ControllerAnalog::leftY),
+			controller.getAnalog(ControllerAnalog::rightX));
 		pros::Task::delay(10);
 	}
 }
