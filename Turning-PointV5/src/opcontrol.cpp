@@ -2,11 +2,15 @@
 #include "okapi/api.hpp"
 
 using namespace okapi;
+#define LEFTMOTORPORT1 1
+#define LEFTMOTORPORT2 2
+
+#define RIGHTMOTORPORT1 9
+#define RIGHTMOTORPORT2 10
+
 
 auto drive = ChassisControllerFactory::create(
-	1, 10,
-	AbstractMotor::gearset::green,
-	{4_in, 11.5_in}
+	{LEFTMOTORPORT1, LEFTMOTORPORT2}, {RIGHTMOTORPORT1, RIGHTMOTORPORT2}
 );
 
 void opcontrol() {
