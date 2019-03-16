@@ -6,12 +6,16 @@
 // #define OFFICIAL_RUN
 
 // Helper function to use both oysticsk
-bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
+//bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
 bool isAuto();
 bool SmartsOn();
 class Main &SetupMain();
 int AdjustAngle(int angle);
 void StartSkillsinManual();
+
+void operatorControl();
+void autonomous();
+void initialize();
 
 enum class IntakeShoterEvent
 {
@@ -71,8 +75,9 @@ extern Encoder g_rightDriveEncoder;
 extern Encoder g_sideEncoder;
 
 
+
 /*******************************************************************************
-* 
+*
 * MOTOR SPEEDS
 *
 *******************************************************************************/
@@ -83,14 +88,14 @@ extern Encoder g_sideEncoder;
 
 
 /*******************************************************************************
-* 
+*
 * MOTOR PORTS
 *    Externder: 2-5
 
 Extender::
 A: Descorrer
 B: Back left drive
-C: Shooter 
+C: Shooter
 D: left y drive
 *
 *******************************************************************************/
@@ -106,7 +111,7 @@ D: left y drive
 
 
 /*******************************************************************************
-* 
+*
 * DIGITAL SENSORS
 *
 *******************************************************************************/
@@ -120,7 +125,7 @@ D: left y drive
 
 
 /*******************************************************************************
-* 
+*
 * ANALOG SENSORS
 *
 *******************************************************************************/
@@ -135,7 +140,7 @@ D: left y drive
 
 
 /*******************************************************************************
-* 
+*
 * JOYSTICK GROUPING
 *
 *******************************************************************************/
@@ -144,7 +149,7 @@ D: left y drive
 
 
 /*******************************************************************************
-* 
+*
 * OTHER CONSTANTS
 *
 *******************************************************************************/

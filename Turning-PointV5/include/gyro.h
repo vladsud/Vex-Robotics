@@ -1,6 +1,8 @@
 #pragma once
 #include "main.h"
 
+using namespace pros;
+
 class GyroWrapper
 {
     int32_t m_value = 0;

@@ -3,10 +3,10 @@
 
 
 float Battery::GetMainPower(){
-    return powerLevelMain() / 1000.0;
+    return battery_get_capacity() / 1000.0;
 }
 
-
+/*
 float Battery::GetExpanderPower(){
     // Need to plug in status to a port
     float rawPower = (float)analogRead(ExpanderBatteryStatus);
@@ -18,3 +18,4 @@ float Battery::GetExpanderPower(){
 float Battery::GetBackupPower(){
     return powerLevelBackup();
 }
+*/

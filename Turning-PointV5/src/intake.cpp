@@ -44,10 +44,10 @@ void Intake::Update()
     if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
         m_downABit = 50;
 
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
+    if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
         m_downABit = 0;
-        if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2) || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2) || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
         {
             m_doublePressed = true;
             m_direction = Direction::None;
@@ -57,7 +57,7 @@ void Intake::Update()
             direction = Direction::Up;
         }
     }
-    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
+    else if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
         m_downABit = 0;
         direction = Direction::Down;
@@ -98,7 +98,7 @@ void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown)
 
 void Descorer::Update()
 {
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+    if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
     {
         // if (m_direction == Direction::Up || joystickGetDigital(JoystickDescorerGroup, JOY_UP))
         {
@@ -107,7 +107,7 @@ void Descorer::Update()
             motor_move(descorerPort, 85);
         }
     }
-    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
+    else if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
     {
         m_direction = Direction::Down;
         m_count = 0;

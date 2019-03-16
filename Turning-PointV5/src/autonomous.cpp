@@ -42,7 +42,7 @@ bool isAuto()
 #endif // OFFICIAL_RUN
     if (g_mode == AtonMode::SkillsInManual)
         return true;
-    return isAutonomous();
+    return competition_is_autonomous();
 }
 
 
@@ -70,7 +70,7 @@ void Do(Action &&action)
         GetMain().Update();
 
         // Check if we have bailed out of autonomous mode in manual skills (some key was pressed on joystick)
-        if (g_mode == AtonMode::Regular && !isAutonomous())
+        if (g_mode == AtonMode::Regular && !competition_is_autonomous())
         {
             ReportStatus("\n!!! Switching to manual mode!\n");
             Assert(!isAuto());
@@ -82,12 +82,12 @@ void Do(Action &&action)
     // ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
 }
 
-
+/* DISABLED FOR V5
 // Scans both joysticks, allowing secondary operator to help with controlling non-driving functions.
 bool joystickGetDigital(unsigned char buttonGroup, unsigned char button)
 {
     bool result = ::joystickGetDigital(1, buttonGroup, button) || ::joystickGetDigital(2, buttonGroup, button);
-    
+
     // if we are running autonous code in non-aiutonomous mode, then allow user to bail out.
     // this is very useful to run autonomous skills in manual skills mode.
     if (result && g_mode != AtonMode::Regular)
@@ -100,16 +100,16 @@ bool joystickGetDigital(unsigned char buttonGroup, unsigned char button)
     }
     return result;
 }
-
+*/
 
 void autonomous()
 {
     Battery bat;
     float mp = bat.GetMainPower();
-    float ep = bat.GetExpanderPower();
+    //float ep = bat.GetExpanderPower();
     ReportStatus("Main Battery Level: %.2f\n" , mp);
-    ReportStatus("Expander Battery Level: %.2f\n", ep);
-    if (ep <= 6.0f || mp <= 6.0f)
+    //ReportStatus("Expander Battery Level: %.2f\n", ep);
+    if (mp <= 6.0f)
     {
         ReportStatus("\nERROR: LOW OR NO BATTERY\n");
         return;
@@ -117,7 +117,7 @@ void autonomous()
 
     // Safety net: run autonomous only once!
     // In case manual auto was still in place when running on competition.
-    if (g_alreadyRunAutonomous && !isAutonomous())
+    if (g_alreadyRunAutonomous && !competition_is_autonomous())
     {
         ReportStatus("\n!!! Safety: running second aton, switching to manaul mode!\n");
         g_mode = AtonMode::Regular;
@@ -159,9 +159,9 @@ void autonomous()
 
 #ifndef OFFICIAL_RUN
     // Debugging code - should not run in real autonomous
-    if (g_mode == AtonMode::ManualSkill && isAutonomous())
+    if (g_mode == AtonMode::ManualSkill && competition_is_autonomous())
         RunSuperSkills();
-    else if (g_mode == AtonMode::TestRun && !isAutonomous())
+    else if (g_mode == AtonMode::TestRun && !competition_is_autonomous())
     {
         // lcd.AtonClimbPlatform = false;
         RunAtonFirstPos();

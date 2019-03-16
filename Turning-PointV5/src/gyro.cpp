@@ -30,7 +30,7 @@ void GyroWrapper::Integrate()
 {
     unsigned long time = millis();
     // Same as analogReadCalibratedHR(). // LSLed by 4 as offset
-    int32_t reading = analogRead(m_port) << 4;
+    int32_t reading = adi_analog_read(m_port) << 4;
     reading *= m_multiplier;
     reading = int(reading) - int(m_calibValue);
 
@@ -61,7 +61,7 @@ GyroWrapper::GyroWrapper(unsigned char port, unsigned short multiplier)
 
     for (unsigned int i = 0; i < Measurements; i++)
     {
-        uint32_t value = analogRead(m_port);
+        uint32_t value = adi_analog_read(m_port);
         Assert(0 <= value && value <= 4096);
         total += value;
         task_delay(1);

@@ -3,6 +3,9 @@
 #include "cycle.h"
 #include "logger.h"
 
+using namespace pros;
+using namespace pros::c;
+
 static Main *g_main = nullptr;
 
 Main &SetupMain()
@@ -142,13 +145,13 @@ void Main::ResetState()
 //Operator Control
 void operatorControl()
 {
-	if (joystickGetDigital(JoystickIntakeGroup, JOY_UP) && joystickGetDigital(JoystickIntakeGroup, JOY_DOWN))
+	if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) && controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
 		StartSkillsinManual();
 
 	// This is required for testing purposes, but also for auto-Skills run in manual modde
 	if (isAuto())
 	{
-		Assert(!isAutonomous());
+		Assert(!competition_is_autonomous());
 		autonomous();
 	}
 
