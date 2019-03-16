@@ -1,81 +1,157 @@
-/**
- * \file main.h
- *
- * Contains common definitions and header files used throughout your PROS
- * project.
- *
- * Copyright (c) 2017-2018, Purdue University ACM SIGBots.
- * All rights reserved.
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+#pragma once
+#include "API.h"
 
-#ifndef _PROS_MAIN_H_
-#define _PROS_MAIN_H_
+// *** WARNING ***
+// Always define it for competation!!!!
+// #define OFFICIAL_RUN
 
-/**
- * If defined, some commonly used enums will have preprocessor macros which give
- * a shorter, more convenient naming pattern. If this isn't desired, simply
- * comment the following line out.
- *
- * For instance, E_CONTROLLER_MASTER has a shorter name: CONTROLLER_MASTER.
- * E_CONTROLLER_MASTER is pedantically correct within the PROS styleguide, but
- * not convienent for most student programmers.
- */
-#define PROS_USE_SIMPLE_NAMES
+// Helper function to use both oysticsk
+bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
+bool isAuto();
+bool SmartsOn();
+class Main &SetupMain();
+int AdjustAngle(int angle);
+void StartSkillsinManual();
 
-/**
- * If defined, C++ literals will be available for use. All literals are in the
- * pros::literals namespace.
- *
- * For instance, you can do `4_mtr = 50` to set motor 4's target velocity to 50
- */
-#define PROS_USE_LITERALS
+enum class IntakeShoterEvent
+{
+   LostBall,
+   Shooting,
+};
+void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown);
 
-#include "api.h"
+#define __noop(...)
 
-/**
- * You should add more #includes here
- */
-//#include "okapi/api.hpp"
-//#include "pros/api_legacy.h"
-
-/**
- * If you find doing pros::Motor() to be tedious and you'd prefer just to do
- * Motor, you can use the namespace with the following commented out line.
- *
- * IMPORTANT: Only the okapi or pros namespace may be used, not both
- * concurrently! The okapi namespace will export all symbols inside the pros
- * namespace.
- */
-// using namespace pros;
-// using namespace pros::literals;
-// using namespace okapi;
-
-/**
- * Prototypes for the competition control tasks are redefined here to ensure
- * that they can be called from user code (i.e. calling autonomous from a
- * button press in opcontrol() for testing purposes).
- */
-#ifdef __cplusplus
-extern "C" {
+#ifdef OFFICIAL_RUN
+#define Assert(f) __noop()
+#define AssertSz(f, sz) __noop()
+#else
+#define Assert(f) AssertCore(f, #f, __FILE__, __LINE__)
+#define AssertSz(f, sz) AssertCore(f, sz, __FILE__, __LINE__)
+void AssertCore(bool condition, const char *message, const char *file, int line);
 #endif
-void autonomous(void);
-void initialize(void);
-void disabled(void);
-void competition_initialize(void);
-void opcontrol(void);
-#ifdef __cplusplus
+
+#define CountOf(a) (sizeof(a) / sizeof(a[0]))
+#define UNUSED_VARIABLE(a) (void)a;
+
+#ifdef OFFICIAL_RUN
+#define ReportStatus __noop
+#else
+#define ReportStatus printf
+#endif // OFFICIAL_RUN
+
+#define joystickMax 127
+
+#define StaticAssert(a) static_assert(a, #a)
+
+inline int Sign(int value)
+{
+   if (value < 0)
+      return -1;
+   if (value > 0)
+      return 1;
+   return 0;
 }
-#endif
 
-#ifdef __cplusplus
-/**
- * You can add C++-only headers here
- */
-//#include <iostream>
-#endif
+template <typename T>
+constexpr T max(T a, T b)
+{
+   return a > b ? a : b;
+}
 
-#endif  // _PROS_MAIN_H_
+template <typename T>
+constexpr T min(T a, T b)
+{
+   return a > b ? b : a;
+}
+
+
+extern Encoder g_leftDriveEncoder;
+extern Encoder g_rightDriveEncoder;
+extern Encoder g_sideEncoder;
+
+
+/*******************************************************************************
+* 
+* MOTOR SPEEDS
+*
+*******************************************************************************/
+#define shooterMotorSpeed 100 // it otherwise burns controller / port
+#define intakeMotorSpeedUp 100 // same, being protective
+#define intakeMotorSpeedDown 100
+#define driveMotorMaxSpeed 127
+
+
+/*******************************************************************************
+* 
+* MOTOR PORTS
+*    Externder: 2-5
+
+Extender::
+A: Descorrer
+B: Back left drive
+C: Shooter 
+D: left y drive
+*
+*******************************************************************************/
+#define shooterPort 2 // 2 // "C" on extender
+#define shooter2Port 6
+#define leftDrivePort2 3 // back
+#define leftDrivePortY 4 // middle
+#define intakePort 5
+#define descorerPort 99
+#define rightDrivePortY 7
+#define anglePort 8
+#define rightDrivePort2 9
+
+
+/*******************************************************************************
+* 
+* DIGITAL SENSORS
+*
+*******************************************************************************/
+#define leftDriveEncoderBotPort 1
+#define leftDriveEncoderTopPort 2
+#define rightDriveEncoderBotPort 3
+#define rightDriveEncoderTopPort 4
+
+#define sideEncoderBotPort 7 // not implemented yet
+#define sideEncoderTopPort 8 // not implemented yet
+
+
+/*******************************************************************************
+* 
+* ANALOG SENSORS
+*
+*******************************************************************************/
+#define lineTrackerLeftPort 1
+#define lineTrackerRightPort 2
+#define ExpanderBatteryStatus 3
+#define gyroPort 4
+#define lightSensor 5
+#define shooterPreloadPoterntiometer 6
+#define ShooterSecondaryPotentiometer 7
+#define anglePotPort 8
+
+
+/*******************************************************************************
+* 
+* JOYSTICK GROUPING
+*
+*******************************************************************************/
+#define JoystickDescorerGroup 5 // Right bottom
+#define JoystickIntakeGroup 6   // Left bottom
+
+
+/*******************************************************************************
+* 
+* OTHER CONSTANTS
+*
+*******************************************************************************/
+#define lightSensorBallIn 2600
+#define lightSensorBallOut 2900
+
+#define ShooterPreloadEnd 950
+#define ShooterPreloadStart 1150
+
+#define DistanveBetweenLineSensors 390 // in clicks, rouhly 14"

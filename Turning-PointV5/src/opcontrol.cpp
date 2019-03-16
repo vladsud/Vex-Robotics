@@ -1,41 +1,163 @@
+
 #include "main.h"
-#include "okapi/api.hpp"
+#include "cycle.h"
+#include "logger.h"
 
-using namespace okapi;
-#define LEFTMOTORPORT1 1
-#define LEFTMOTORPORT2 2
+static Main *g_main = nullptr;
 
-#define RIGHTMOTORPORT1 9
-#define RIGHTMOTORPORT2 10
+Main &SetupMain()
+{
+	if (g_main == nullptr)
+		g_main = new Main();
+	return *g_main;
+}
 
+Main &GetMain()
+{
+	return *g_main;
+}
 
-auto drive = ChassisControllerFactory::create(
-	{LEFTMOTORPORT1, LEFTMOTORPORT2}, {RIGHTMOTORPORT1, RIGHTMOTORPORT2}
-);
+Logger &GetLogger() { return GetMain().logger; }
+GyroWrapper &GetGyro() { return GetMain().gyro; }
+PositionTracker &GetTracker() { return GetMain().tracker; }
+int GetGyroReading() { return GetTracker().GetGyro(); }
 
-void opcontrol() {
-	Controller controller;
+void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown)
+{
+	GetMain().intake.UpdateIntakeFromShooter(event, forceDown);
+}
 
-	while (true)
+void AssertCore(bool condition, const char *message, const char *file, int line)
+{
+	if (!condition)
 	{
-		drive.arcade(controller.getAnalog(ControllerAnalog::leftY),
-			controller.getAnalog(ControllerAnalog::rightX));
-		pros::Task::delay(10);
+		ReportStatus("\n*** ASSERT: %s:%d: %s ***\n\n", file, line, message);
+		GetMain().lcd.PrintMessage(message);
 	}
 }
 
+void Main::Update()
+{
+	if (m_LastWakeUp == 0)
+		m_LastWakeUp = millis();
 
+	do
+	{
+		// taskDelayUntil( )is better then delay() as it allows us to "catch up" if we spend too much time in one cycle,
+		// i.e. have consistent frequency of updates.
+		// That said, it assumes that we are missing the tick infrequently.
+		// If it's not the case, we can hog CPU and not allow other tasks to have their share.
+		taskDelayUntil(&m_LastWakeUp, trackerPullTime);
 
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
+		m_Ticks += trackerPullTime;
+		m_TicksToMainUpdate -= trackerPullTime;
+	} while (!UpdateWithoutWaiting());
+}
+
+void Main::UpdateAllSystems()
+{
+	lcd.Update();
+	descorer.Update();
+	intake.Update();
+	shooter.Update();
+	drive.Update();
+
+	gyro.Integrate();
+	tracker.Update();
+}
+
+bool Main::UpdateWithoutWaiting()
+{
+	bool res = false;
+
+	unsigned long time = micros();
+
+	// has to be the first one!
+	gyro.Integrate();
+	tracker.Update();
+
+	// We go through line very quickly, so we do not have enough precision if we check it
+	// every 10 ms.
+	drive.UpdateDistanes();
+	lineTrackerLeft.Update();
+	lineTrackerRight.Update();
+
+	// Trying to check intake more often, as some key pressed are not registered sometimes
+	intake.Update();
+
+	// If this assert fires, than numbers do not represent actual timing.
+	// It's likley not a big deal, but something somwhere might not work because of it.
+	StaticAssert((trackerPullTime % trackerPullTime) == 0);
+
+	switch (m_TicksToMainUpdate / trackerPullTime)
+	{
+	case 0:
+		StaticAssert(allSystemsPullTime / trackerPullTime >= 5);
+		m_TicksToMainUpdate = allSystemsPullTime;
+		// cheap sytems are grouped together
+		lcd.Update();
+		// descorer.Update();
+		break;
+	case 1:
+		shooter.Update();
+		break;
+	case 2:
+		drive.Update();
+		break;
+	case 3:
+		// Good place for external code to consume some cycles
+		res = true;
+		break;
+	}
+
+	time = micros() - time;
+	m_maxCPUTime = max(m_maxCPUTime, time);
+
+	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
+	{
+		ReportStatus("(%lu) Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
+			   m_maxCPUTime,
+			   encoderGet(g_leftDriveEncoder),
+			   encoderGet(g_rightDriveEncoder),
+			   adi_analog_read(anglePotPort),
+			   adi_analog_read(ShooterSecondaryPotentiometer),
+			   adi_analog_read(shooterPreloadPoterntiometer),
+			   GetGyroReading() * 10 / GyroWrapper::Multiplier,
+			   adi_analog_read(lightSensor));
+	}
+
+	return res;
+}
+
+void Main::ResetState()
+{
+	// reset wake-up logic
+	m_LastWakeUp = millis() - 1;
+
+	drive.ResetState();
+	intake.ResetState();
+	gyro.ResetState();
+}
+
+//Operator Control
+void operatorControl()
+{
+	if (joystickGetDigital(JoystickIntakeGroup, JOY_UP) && joystickGetDigital(JoystickIntakeGroup, JOY_DOWN))
+		StartSkillsinManual();
+
+	// This is required for testing purposes, but also for auto-Skills run in manual modde
+	if (isAuto())
+	{
+		Assert(!isAutonomous());
+		autonomous();
+	}
+
+	Main &main = SetupMain();
+	main.ResetState();
+	main.UpdateAllSystems();
+
+	while (true)
+	{
+		main.Update();
+	}
+}
