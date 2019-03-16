@@ -17,6 +17,8 @@ void operatorControl();
 void autonomous();
 void initialize();
 
+double micros(){ return pros::millis() * 1000; }
+
 enum class IntakeShoterEvent
 {
    LostBall,
