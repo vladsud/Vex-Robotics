@@ -2,30 +2,23 @@
 #include "logger.h"
 #include <cmath>
 
-Encoder g_leftDriveEncoder = nullptr;
-Encoder g_rightDriveEncoder = nullptr;
-Encoder g_sideEncoder = nullptr;
-
 PositionTracker::PositionTracker()
 {
-    g_leftDriveEncoder = encoderInit(leftDriveEncoderTopPort, leftDriveEncoderBotPort, false);
-    g_rightDriveEncoder = encoderInit(rightDriveEncoderTopPort, rightDriveEncoderBotPort, false);
-    g_sideEncoder = encoderInit(sideEncoderTopPort, sideEncoderBotPort, true);
-    encoderReset(g_leftDriveEncoder);
-    encoderReset(g_rightDriveEncoder);
-    encoderReset(g_sideEncoder);
+    motor_tare_position(leftDrivePort2);
+    motor_set_encoder_units(leftDrivePort2, E_MOTOR_ENCODER_COUNTS);
+    motor_tare_position(rightDrivePort2);
+    motor_set_encoder_units(rightDrivePort2, E_MOTOR_ENCODER_COUNTS);
+    // motor_tare_position(g_sideEncoder);
+    // motor_set_encoder_units(g_sideEncoder, E_MOTOR_ENCODER_COUNTS);
 
     m_gyro = ::GetGyro().Get();
-    auto left = encoderGet(g_leftDriveEncoder);
-    auto right = encoderGet(g_rightDriveEncoder);
-    auto side = 0; //encoderGet(g_sideEncoder);
     auto shooterAngle = adi_analog_read(shooterPreloadPoterntiometer);
 
     for (int i = 0; i < SamplesToTrack; i++)
     {
-        m_sensor.leftEncoder[i] = left;
-        m_sensor.rightEncoder[i] = right;
-        m_sensor.sideEncoder[i] = side;
+        m_sensor.leftEncoder[i] = 0;
+        m_sensor.rightEncoder[i] = 0;
+        m_sensor.sideEncoder[i] = 0;
         m_sensor.gyro[i] = m_gyro;
         m_sensor.shooterAngle[i] = shooterAngle;
 
@@ -139,8 +132,8 @@ void PositionTracker::RecalcPosition(int index, unsigned int multiplier)
 //
 void PositionTracker::Update()
 {
-    int leftEncoder = encoderGet(g_leftDriveEncoder);
-    int rightEncoder = encoderGet(g_rightDriveEncoder);
+    int leftEncoder = motor_get_position(leftDrivePort2);
+    int rightEncoder = motor_get_position(rightDrivePort2);
     int sideEncoder = 0; // encoderGet(g_sideEncoder);
     m_gyro = ::GetGyro().Get();
 
@@ -177,7 +170,7 @@ void PositionTracker::Update()
             int(m_sensor.gyro[m_currentIndex] * 10 / GyroWrapper::Multiplier) % 3600);
     if (udpateCycle == 1)
         lcdPrint(uart1, 2, "LRA: %d %d %d",
-            encoderGet(g_leftDriveEncoder), encoderGet(g_rightDriveEncoder), int(m_gyro / GyroWrapper::Multiplier) % 360);
+            motor_get_position(leftDrivePort2), motor_get_position(rightDrivePort2), int(m_gyro / GyroWrapper::Multiplier) % 360);
 #endif
 }
 

@@ -70,12 +70,6 @@ constexpr T min(T a, T b)
 }
 
 
-extern Encoder g_leftDriveEncoder;
-extern Encoder g_rightDriveEncoder;
-extern Encoder g_sideEncoder;
-
-
-
 /*******************************************************************************
 *
 * MOTOR SPEEDS
@@ -108,20 +102,6 @@ D: left y drive
 #define rightDrivePortY 7
 #define anglePort 8
 #define rightDrivePort2 9
-
-
-/*******************************************************************************
-*
-* DIGITAL SENSORS
-*
-*******************************************************************************/
-#define leftDriveEncoderBotPort 1
-#define leftDriveEncoderTopPort 2
-#define rightDriveEncoderBotPort 3
-#define rightDriveEncoderTopPort 4
-
-#define sideEncoderBotPort 7 // not implemented yet
-#define sideEncoderTopPort 8 // not implemented yet
 
 
 /*******************************************************************************

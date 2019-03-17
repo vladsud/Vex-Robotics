@@ -114,8 +114,8 @@ bool Main::UpdateWithoutWaiting()
 	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
 	{
 		ReportStatus("Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
-			   encoderGet(g_leftDriveEncoder),
-			   encoderGet(g_rightDriveEncoder),
+			   motor_get_position(leftDrivePort2),
+			   motor_get_position(rightDrivePort2),
 			   adi_analog_read(anglePotPort),
 			   adi_analog_read(ShooterSecondaryPotentiometer),
 			   adi_analog_read(shooterPreloadPoterntiometer),

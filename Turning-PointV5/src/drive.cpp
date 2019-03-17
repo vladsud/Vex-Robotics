@@ -102,16 +102,16 @@ void Drive::ResetState()
 {
     m_tracker = nullptr;
     m_distanceFromBeginning = 0;
-    encoderReset(g_leftDriveEncoder);
-    encoderReset(g_rightDriveEncoder);
-    encoderReset(g_sideEncoder);
+    motor_tare_position(leftDrivePort2);
+    motor_tare_position(rightDrivePort2);
+    // motor_tare_position(g_sideEncoder);
     ResetTrackingState();
 }
 
 void Drive::ResetTrackingState()
 {
-    m_encoderBaseLeft = encoderGet(g_leftDriveEncoder);
-    m_encoderBaseRight = encoderGet(g_rightDriveEncoder);
+    m_encoderBaseLeft = motor_get_position(leftDrivePort2);
+    m_encoderBaseRight = motor_get_position(rightDrivePort2);
     m_distance = 0;
     m_left = 0;
     m_right = 0;
@@ -140,25 +140,12 @@ void Drive::StartHoldingPosition()
 
 void Drive::HoldPosition()
 {
-    int left = encoderGet(g_leftDriveEncoder) - m_encoderBaseLeft;
-    int right = encoderGet(g_rightDriveEncoder) - m_encoderBaseRight;
-    PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
-
-    if (left * info.leftSpeed >= 0)
-        SetLeftDrive(-left * 127);
-    else
-        SetLeftDrive(-30 * Sign(left) - left - info.leftSpeed * 40);
-
-    if (right * info.rightSpeed >= 0)
-        SetLeftDrive(-right * 127);
-    else
-        SetLeftDrive(-30 * Sign(right) - right - info.rightSpeed * 40);
 }
 
 void Drive::UpdateDistanes()
 {
-    m_left = encoderGet(g_leftDriveEncoder);
-    m_right = encoderGet(g_rightDriveEncoder);
+    m_left = motor_get_position(leftDrivePort2);
+    m_right = motor_get_position(rightDrivePort2);
     m_distanceFromBeginning = abs(m_left) + abs(m_right);
 
     m_left -= m_encoderBaseLeft;
