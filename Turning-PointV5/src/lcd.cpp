@@ -24,16 +24,14 @@ void LCD::PrintMessage(const char *message)
 
 void LCD::PrintStepInstructions()
 {
-    Battery bat;
-    float mp = bat.GetMainPower();
-    float ep = bat.GetExpanderPower();
+    float mp = GetMainPower();
 
     switch (m_step)
     {
     case 0:
-        lcdSetText(uart1, 1, "Main        Exp");
+        lcdSetText(uart1, 1, "Main Battery");
 
-        lcdPrint(uart1, 2, "%.2f  Cont  %.2f", mp, ep);
+        lcdPrint(uart1, 2, "%.2f  Cont", mp);
 
         break;
     case 1:
@@ -103,10 +101,9 @@ void LCD::Update()
     if (m_step == 0 && m_count % 100 == 0)
     {
         Battery bat;
-        float mp = bat.GetMainPower();
-        float ep = bat.GetExpanderPower();
-        //lcdSetText(uart1, 1, "Main        Exp");
-        lcdPrint(uart1, 2, "%.2f  Cont  %.2f", mp, ep);
+        float mp = GetMainPower();
+        //lcdSetText(uart1, 1, "Main        ");
+        lcdPrint(uart1, 2, "%.2f  Cont", mp);
 
         if (ep > 6.0f && mp > 6.0f)
         {

@@ -102,7 +102,7 @@ bool joystickGetDigital(unsigned char buttonGroup, unsigned char button)
 {
     bool result = ::joystickGetDigital(1, buttonGroup, button) || ::joystickGetDigital(2, buttonGroup, button);
 
-    // if we are running autonous code in non-aiutonomous mode, then allow user to bail out.
+    // if we are running autonous code in non-autonomous mode, then allow user to bail out.
     // this is very useful to run autonomous skills in manual skills mode.
     if (result && g_mode != AtonMode::Regular)
     {
@@ -118,12 +118,9 @@ bool joystickGetDigital(unsigned char buttonGroup, unsigned char button)
 
 void autonomous()
 {
-    Battery bat;
-    float mp = bat.GetMainPower();
-    //float ep = bat.GetExpanderPower();
+    float mp = GetMainPower();
     ReportStatus("Main Battery Level: %.2f\n" , mp);
-    //ReportStatus("Expander Battery Level: %.2f\n", ep);
-    if (mp <= 6.0f)
+    if (mp <= 10.0f)
     {
         ReportStatus("\nERROR: LOW OR NO BATTERY\n");
         return;
