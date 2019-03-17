@@ -42,7 +42,6 @@ using Byte = unsigned short;
 
 class Logger
 {
-    const unsigned int TimeMultimplier = 25;
     const unsigned int TotalBytes = 16 * 1024;
 
     Byte *m_data = nullptr;

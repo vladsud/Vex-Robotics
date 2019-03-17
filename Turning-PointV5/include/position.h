@@ -82,7 +82,6 @@ class PositionTracker
     int m_count = 0;
     bool m_flipX = false;
 
-    uint64_t m_time[SamplesToTrack];
     SensorData m_sensor;
     PositionData m_position;
     int m_currentIndex = 0;

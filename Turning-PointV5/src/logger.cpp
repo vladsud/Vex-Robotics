@@ -46,7 +46,6 @@ static const LogArgTypes *s_Types[(int)LogEntry::Max] = {
 void Logger::Dump()
 {
     char buffer[sizeof(int) * 3 + 1];
-    unsigned long time = micros();
     Byte *data = m_data;
 
     int count = 0;
@@ -57,7 +56,7 @@ void Logger::Dump()
         fprint(s_LogEntryNames[entry], stdout);
 
         Byte time = (Byte)*data++;
-        fprint(itoa(time * TimeMultimplier, buffer, 10), stdout);
+        fprint(itoa(time, buffer, 10), stdout);
 
         const LogArgTypes *types = s_Types[entry];
         while (*types != LogArgTypes::End)
@@ -73,8 +72,7 @@ void Logger::Dump()
 
     fputs("", stdout);
 
-    time = micros() - time;
-    fprintf(stdout, "%d records, %d bytes, Time to print: %d\n", count, int(m_dataCurr - m_data), (int)time);
+    fprintf(stdout, "%d records, %d bytes\n", count, int(m_dataCurr - m_data));
 
     free(m_data);
     m_data = nullptr;
@@ -148,14 +146,14 @@ int Logger::UnPack(Byte *&buffer, LogArgTypes type)
 
 Byte Logger::GetTime()
 {
-    unsigned long time = micros();
+    unsigned long time = millis();
     if (m_data == m_dataCurr)
         m_lastTime = time;
     time -= m_lastTime;
     m_lastTime += time;
-    if (time > 255 * TimeMultimplier)
+    if (time > 255)
         return 255;
-    return time / TimeMultimplier;
+    return time;
 }
 
 signed char Logger::ToLogByte(int value)

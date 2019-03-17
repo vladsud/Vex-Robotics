@@ -201,7 +201,6 @@ void autonomous()
 
     ReportStatus("\n*** END AUTONOMOUS ***\n\n");
     printf("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
-    printf("Max Cycle Time: %d\n", (int)main.GetMaxCycleTime());
 
     GetLogger().Dump();
 

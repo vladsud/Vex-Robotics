@@ -73,8 +73,6 @@ bool Main::UpdateWithoutWaiting()
 {
 	bool res = false;
 
-	unsigned long time = micros();
-
 	// has to be the first one!
 	gyro.Integrate();
 	tracker.Update();
@@ -113,13 +111,9 @@ bool Main::UpdateWithoutWaiting()
 		break;
 	}
 
-	time = micros() - time;
-	m_maxCPUTime = max(m_maxCPUTime, time);
-
 	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
 	{
-		ReportStatus("(%lu) Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
-			   m_maxCPUTime,
+		ReportStatus("Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
 			   encoderGet(g_leftDriveEncoder),
 			   encoderGet(g_rightDriveEncoder),
 			   adi_analog_read(anglePotPort),

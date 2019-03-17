@@ -41,7 +41,6 @@ class Main
 	// Time is im milliseconds!
 	// But time resolution might be coarser, in the range of 1-10 ms
 	unsigned int GetTime() { return m_Ticks; }
-	unsigned long GetMaxCycleTime() { return m_maxCPUTime; }
 	void Update();
 	void UpdateAllSystems();
 	void ResetState();
@@ -54,7 +53,6 @@ class Main
 	unsigned long m_Ticks = 0; // in ms
 	unsigned long m_LastWakeUp = 0;
 	int m_TicksToMainUpdate = allSystemsPullTime;
-	unsigned long m_maxCPUTime = 0;
 };
 
 /*******************************************************************************

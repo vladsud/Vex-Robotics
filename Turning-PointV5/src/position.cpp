@@ -15,7 +15,6 @@ PositionTracker::PositionTracker()
     encoderReset(g_rightDriveEncoder);
     encoderReset(g_sideEncoder);
 
-    long time = micros();
     m_gyro = ::GetGyro().Get();
     auto left = encoderGet(g_leftDriveEncoder);
     auto right = encoderGet(g_rightDriveEncoder);
@@ -24,8 +23,6 @@ PositionTracker::PositionTracker()
 
     for (int i = 0; i < SamplesToTrack; i++)
     {
-        m_time[i] = time + (SamplesToTrack - i) * PositionTrackingRefreshRate;
-
         m_sensor.leftEncoder[i] = left;
         m_sensor.rightEncoder[i] = right;
         m_sensor.sideEncoder[i] = side;
@@ -40,8 +37,6 @@ PositionTracker::PositionTracker()
         m_position.gyroSpeed[i] = 0;
         m_position.shooterAngle[i] = 0;
     }
-
-    m_time[0] = time;
 }
 
 template <typename T1, typename T2>
@@ -148,7 +143,6 @@ void PositionTracker::Update()
     int rightEncoder = encoderGet(g_rightDriveEncoder);
     int sideEncoder = 0; // encoderGet(g_sideEncoder);
     m_gyro = ::GetGyro().Get();
-    unsigned long time = micros();
 
     GetLogger().Log(LogEntry::Position,
                     leftEncoder - m_sensor.leftEncoder[m_currentIndex],
@@ -157,7 +151,6 @@ void PositionTracker::Update()
 
     int i = Index(m_currentIndex + 1);
     m_currentIndex = i;
-    m_time[i] = time;
     m_sensor.leftEncoder[i] = leftEncoder;
     m_sensor.rightEncoder[i] = rightEncoder;
     m_sensor.sideEncoder[i] = sideEncoder;
