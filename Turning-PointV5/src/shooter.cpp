@@ -250,7 +250,7 @@ void Shooter::SetDistance(unsigned int distance)
 {
     if (m_distanceInches == distance)
         return;
-    ReportStatus("Shooter distance (%d)s: %d\n", millis(), distance);
+    ReportStatus("Shooter distance (%ld)s: %d\n", millis(), distance);
     m_distanceInches = distance;
     StartMoving();
 }
@@ -259,7 +259,7 @@ void Shooter::SetFlag(Flag flag)
 {
     if (m_flag == flag)
         return;
-    ReportStatus("Shooter flag (%d): %d\n", millis(), (int)flag);
+    ReportStatus("Shooter flag (%ld): %d\n", millis(), (int)flag);
     m_flag = flag;
     StartMoving();
 }

@@ -56,10 +56,6 @@ void LineTracker::Update()
     if (m_status != Status::HitBlack && value > BlackLevel)
     {
         Push(false/*white*/);
-        if (m_status == Status::HitWhite)
-        {
-            // ReportStatus("   Black line hit: port=%d, dist=%d, birghtness=%d\n", m_port, m_times[m_timesIndex-1], value);
-        }
         m_status = Status::HitBlack;
     }
 

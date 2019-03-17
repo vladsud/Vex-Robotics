@@ -3,6 +3,9 @@
 #include "cycle.h"
 #include "logger.h"
 
+unsigned int SpeedFromDistances(unsigned int distance, const unsigned int* points, const unsigned int* speeds);
+int SpeedFromDistances(int distance, const unsigned int* points, const unsigned int* speeds);
+
 void SetShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall);
 inline void IntakeUp() { GetMain().intake.SetIntakeDirection(Intake::Direction::Up); }
 inline void IntakeDown() { GetMain().intake.SetIntakeDirection(Intake::Direction::Down); }
@@ -14,7 +17,7 @@ struct Action
     Main &m_main = GetMain();
 
     Action() { m_timeStart = m_main.GetTime(); }
-    virtual bool ShouldStop() { return true; }
+    virtual bool ShouldStop() = 0; //{ return true; }
     virtual void Stop() {}
     virtual const char* Name() { return "unknown"; }
 };
@@ -30,6 +33,20 @@ struct WaitAction : public Action
     WaitAction(unsigned int wait) : m_wait(wait) {}
     bool ShouldStop() override { return m_main.GetTime() - m_timeStart >= m_wait; }
 };
+
+
+struct WaitTillStopsAction : public Action
+{
+    bool ShouldStop() override
+    {
+        PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
+        // left == riught == inches / second
+        unsigned int left = abs(int(info.leftSpeed*1000));
+        unsigned int right = abs(int(info.rightSpeed*1000));
+        return left <= 1 && right <= 1;
+    }
+};
+
 
 struct WaitShooterAngleToStopAction : public Action
 {

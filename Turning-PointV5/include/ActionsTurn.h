@@ -3,7 +3,6 @@
 #include "position.h"
 #include <cmath>
 
-#define Turn(x) TurnPrecise((x)*GyroWrapper::Multiplier)
 #define TurnToPoint(x, y) TurnToAngle(CalcAngleToPoint(x, y))
 
 int CalcAngleToPoint(double x, double y);
@@ -21,34 +20,16 @@ struct TurnPrecise : public Action
         m_initialAngle = GetGyroReading();
     }
 
-    int IdealSpeedFromDistance(int distance)
+    void Stop()
     {
-        const unsigned int point2 = 60 * GyroWrapper::Multiplier;
-        const unsigned int speed2 = 4;
-        const unsigned int point1 = 6 * GyroWrapper::Multiplier;
-        const unsigned int speed1 = 12 * GyroWrapper::Multiplier;
-        const unsigned int point0 = GyroWrapper::Multiplier;
-
-        unsigned int distanceAbs = abs(distance);
-        int idealSpeed; // gyro ticks per second
-        if (distanceAbs > point2)
-            idealSpeed = speed1 + speed2 * (point2 - point1);
-        else if (distanceAbs > point1)
-            idealSpeed = speed1 + speed2 * (distanceAbs - point1);
-        else if (distanceAbs > point0)
-            idealSpeed = speed1;
-        else
-            idealSpeed = 0;
-
-        if (distance < 0)
-            idealSpeed = -idealSpeed;
-        return idealSpeed;
+        m_main.drive.OverrideInputs(0, 0);
     }
 
     bool ShouldStop() override
     {
-        if (abs(m_turn) <= GyroWrapper::Multiplier)
-            return true;
+        // 100 points per degree of angle
+        static constexpr unsigned int points[] = {100, 101,  600,  600, UINT_MAX};
+        static constexpr unsigned int speeds[] = {  0,  12,   12,  240, 240};
 
         // positive for positive (clock-wise) turns
         int error = m_initialAngle + m_turn - GetGyroReading();
@@ -56,13 +37,12 @@ struct TurnPrecise : public Action
 
         // positive means counter-clockwise
         int actualSpeed = 1000 * GetTracker().LatestPosition(false /*clicks*/).gyroSpeed;
-        int idealSpeed = IdealSpeedFromDistance(error);
+        int idealSpeed = SpeedFromDistances(error * 100 / GyroWrapper::Multiplier,points, speeds);
 
         if ((idealSpeed == 0 && abs(actualSpeed) <= 3 * GyroWrapper::Multiplier) || (m_turn * sign < 0 && abs(error) > GyroWrapper::Multiplier / 2))
         {
             if (abs(error) >= GyroWrapper::Multiplier)
                 ReportStatus("   Turn stop! Error: error=%d turn=%d\n", error, m_turn);
-            m_main.drive.OverrideInputs(0, 0);
             return true;
         }
 

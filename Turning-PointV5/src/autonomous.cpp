@@ -62,12 +62,20 @@ void StartSkillsinManual()
 }
 
 
-void Do(Action &&action)
+void Do(Action &&action, unsigned int timeout /* = 100000 */)
 {
     // auto time = millis();
+ 
+    auto& main = GetMain();
     while (!action.ShouldStop())
     {
-        GetMain().Update();
+        if (main.GetTime() - action.m_timeStart >= timeout)
+        {
+            ReportStatus("!!! TIME-OUT: %s: %d", action.Name(), timeout);
+            break;
+        }
+
+        main.Update();
 
         // Check if we have bailed out of autonomous mode in manual skills (some key was pressed on joystick)
         if (g_mode == AtonMode::Regular && !competition_is_autonomous())
@@ -78,6 +86,12 @@ void Do(Action &&action)
             ReportStatus("\n!!! Error: Should never get back from opControl()!\n");
         }
     }
+
+    if (timeout <= 15000)
+    {
+        ReportStatus("%s's time: %d / %d", action.Name(), main.GetTime() - action.m_timeStart, timeout);
+    }
+
     action.Stop();
     // ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
 }
@@ -216,32 +230,16 @@ void SetShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
 }
 
 
-int CalcAngleToPoint(double x, double y)
-{
-    PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
-    ReportStatus("TurnToPoint: To = (%f, %f), current = (%f, %f)\n", x, y, info.X, info.Y);
-    x = info.X - x;
-    y = info.Y - y;
-    int angle = 0;
-    if (y > 0)
-        angle = atan(x / y) * 180 / 3.14159265358;
-    else if (y < 0)
-        angle = 180 + atan(x / y) * 180 / 3.14159265358;
-    ReportStatus("    vector = (%f, %f): angle = %d\n", x, y, angle);
-    return angle;
-}
-
-
-void MoveToPlatform(bool twoPlatforms)
+void MoveToPlatform(bool twoPlatforms, int angle)
 {
     // ReportStatus("First platform\n");
-    Do(MoveToPlatformAction(2700));
+    Do(MoveToPlatformAction(2700, angle));
 
     if (twoPlatforms)
     {
         // ReportStatus("Second platform\n");
-        Do(MoveToPlatformAction(2250));
-        MoveStop(-30);
+        Do(MoveToPlatformAction(2250, angle));
+        MoveStop();
     }
 }
 
@@ -250,18 +248,15 @@ void MoveExactWithAngle(int distance, int angle, bool allowTurning /*= true*/)
 {
     if (allowTurning)
         TurnToAngleIfNeeded(angle);
-    KeepAngle keeper(angle);
-    MoveExact(distance);
+    MoveExact(distance, angle);
 }
 
-
-void MoveWithAngle(int distance, int angle, int speed)
+void MoveExactFastWithAngle(int distance, int angle)
 {
     TurnToAngleIfNeeded(angle);
-    KeepAngle keeper(angle);
-    Move(distance, speed);
+    Do(MoveExactFastAction(distance, angle));
+    WaitAfterMoveReportDistance(distance);
 }
-
 
 void TurnToAngleIfNeeded(int angle)
 {
@@ -274,97 +269,57 @@ void TurnToAngleIfNeeded(int angle)
 void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle)
 {
     TurnToAngleIfNeeded(angle);
-    KeepAngle keeper(angle);
     Do(MoveExactWithLineCorrectionAction<MoveExactAction>(fullDistance, distanceAfterLine, angle));
-}
-
-
-void MoveWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle)
-{
-    TurnToAngleIfNeeded(angle);
-    KeepAngle keeper(angle);
-    Do(MoveExactWithLineCorrectionAction<MoveAction>(fullDistance, distanceAfterLine, angle));
+    WaitAfterMove();
 }
 
 
 unsigned int HitTheWall(int distanceForward, int angle)
 {
-    Assert(distanceForward != 0);
-    Drive& drive = GetMain().drive;
-
     TurnToAngleIfNeeded(angle);
+    Do(MoveHitWallAction(distanceForward, angle), 1500 + abs(distanceForward) / 1000 /*trimeout*/);
+    WaitAfterMove();
 
-    ReportStatus("Hitting wall: a=%d d1=%d\n", angle, distanceForward);
-
-    int distance = distanceForward * 80 / 100 - Sign(distanceForward) * 300;
-
-    if (distance * distanceForward <= 0)
-        distance = Sign(distanceForward) * 100;
-
-    KeepAngle keeper(angle);
-    Move(distance, 85, GetMain().lcd.AtonSkills /*StopOnColision */);
-    unsigned int distanceTravelled = drive.m_distance;
-
-    // attempt to fully stop, for more accurate back movement
-    int time = distance > 1000 ? 300 : 100;
-    MoveTimeBased(12 * Sign(distanceForward), time, true /*waitForStop*/);
-    distanceTravelled += drive.m_distance;
-
-    MoveTimeBased(25 * Sign(distanceForward), 2000, true /*waitForStop*/);
-    distanceTravelled += drive.m_distance;
-
-    // MoveTimeBased(30 * Sign(distanceForward), 100, false /*waitForStop*/);
-    Wait(300);
-    distanceTravelled += drive.m_distance;
-
-    ReportStatus("   HitTheWall: Actually travelled: %d out of %d\n", distanceTravelled, distanceForward);
-
-    return distanceTravelled;
+    unsigned int distance = GetMain().drive.m_distance;
+    ReportStatus("   HitTheWall: Actually travelled: %d out of %d\n", distance, distanceForward);
+    return distance;
 }
 
 
-void GoToCapWithBallUnderIt(int distance, int angle)
+void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle)
 {
-    KeepAngle keeper(angle);
-
-    auto& drive = GetMain().drive;
-    if (distance == 0)
-        distance = distanceToCap;
-    Move(distance - 400, 110);
-    unsigned int distanceTravelled = drive.m_distance;
     IntakeUp();
-    Move(300, 20);
-    // Wait(50);
-    distanceTravelled += drive.m_distance;
-    MoveStop(-18); // attempt to fully stop, for more accurate back movement
-
-    // we have hard time picking up the ball, so wait
-    Wait(150);
-    distanceTravelled += drive.m_distance;
-
-    ReportStatus("GoToCapWithBallUnderIt: distance=%d, expected=%d\n", distanceTravelled, distance);
+    MoveExactFastWithAngle(distance, angle);
+    distanceBack = distanceBack + GetMain().drive.m_distance - distance;
+    MoveExactWithAngle(-(int)distanceBack, angle);
 }
 
-
-void GetBallUnderCapAndReturn()
+void FlipCap(unsigned int distance, unsigned int distanceBack, int angle)
 {
-    auto &main = GetMain();
-
-    unsigned int distance = main.drive.m_distanceFromBeginning;
-
-    GoToCapWithBallUnderIt(distanceToCap);
-
-    distance = main.drive.m_distanceFromBeginning - distance + 200;
-    ReportStatus("Move back: %d\n", distance);
-    KeepAngle keeper(-90);
-    MoveExact(-distance); // 1800 ?
-    IntakeStop();
+    TurnToAngleIfNeeded(angle);
+    IntakeDown();
+    Do(MoveFlipCapAction(distance, angle));
+    WaitAfterMoveReportDistance(distance);
+    distanceBack = distanceBack + GetMain().drive.m_distance - distance;
+    MoveExact(-(int)distanceBack, angle);
 }
 
+void FlipCapWithLineCorrection(unsigned int distance, unsigned int afterLine, unsigned int distaneBack, int angle)
+{
+    IntakeDown();
+    TurnToAngleIfNeeded(angle);
+    Do(MoveExactWithLineCorrectionAction<MoveFlipCapAction>(distance, afterLine, angle));
+    WaitAfterMove();
+    // can't use this adjustment - we do not know how far we went after line...
+    // distanceBack = distanceBack + GetMain().drive.m_distance - distance;
+    MoveExactWithAngle(-(int)distaneBack, angle);
+}
 
 void ShootOneBall(bool high, int distance, bool checkBallPresence)
 {
     auto &main = GetMain();
+    IntakeStop();
+
     ReportStatus("Waiting for angle to go up: %ld\n", millis());
     WaitShooterAngleToGoUp(2000);
     if (main.shooter.BallStatus() != BallPresence::NoBall)
@@ -385,4 +340,22 @@ void ShootTwoBalls(int highFlagDistance, int midFlagDistance)
     ShootOneBall(true /*high*/, highFlagDistance, false /*checkPresenceOfBall*/);
     ShootOneBall(false /*high*/, midFlagDistance, true /*checkPresenceOfBall*/);
     IntakeUp();
+}
+
+
+// give some time for robot to completely stop
+void WaitAfterMove()
+{
+    // Not enough time in "main" atonomous
+    auto& lcd = GetMain().lcd;
+    unsigned int timeout = lcd.AtonSkills || !lcd.AtonFirstPos || !lcd.AtonClimbPlatform ? 100 : 50;
+    Do(WaitTillStopsAction(), timeout);
+}
+
+void WaitAfterMoveReportDistance(int distance)
+{
+    WaitAfterMove();
+    unsigned int error = abs((int)abs(distance) - (int)GetMain().drive.m_distance);
+    if (error >= 20)
+        ReportStatus("MoveExact (or equivalent) big Error: %d\n", error);
 }

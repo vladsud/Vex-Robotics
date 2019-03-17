@@ -68,10 +68,6 @@ public:
   Drive() { ResetState(); }
   void FlipX(bool flip) { m_flipX = flip; }
   bool IsXFlipped() const { return m_flipX; }
-  unsigned int MinWheelDistanceTravelled()
-  {
-    return min(abs(m_left), abs(m_right));
-  }
   void StartHoldingPosition();
 
   // Forward: Positive turn - turn right (clockwise)

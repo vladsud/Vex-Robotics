@@ -50,9 +50,9 @@ struct PositionData
 // This is the structure we expose to other modules
 struct PositionInfo
 {
-    double leftSpeed;
-    double rightSpeed;
-    double gyroSpeed;
+    double leftSpeed; // per ms
+    double rightSpeed;  // per ms
+    double gyroSpeed;  // per ms
     int gyro;
     double X;
     double Y;

@@ -17,23 +17,18 @@ void RunAtonSecondPos()
     if (GetMain().lcd.AtonClimbPlatform)
     {
         Wait(6000);
-        Move(700, 50);
-        Wait(1000);
+        MoveExactWithAngle(700, -30);
         TurnToAngle(-90);
-        
         Wait(200);
-        Move(400);
-        MoveToPlatform(false /*twoPlatforms*/);
+
+        MoveToPlatform(false /*twoPlatforms*/, -90);
     }
     else
     {
         TurnToAngle(-100);
         BLOCK
         {
-            KeepAngle keeper(-100);
-            GoToCapWithBallUnderIt(distanceToCap+150, -100);
-            Wait(500);
-            MoveExact(-100);
+            GoToCapWithBallUnderIt(distanceToCap+150, -200 /*distanceBack*/, -100 /*angle*/);
         }
 
         TurnToAngle(-10);
@@ -43,8 +38,7 @@ void RunAtonSecondPos()
         Wait(5000);
         ShootBall();
 
-        TurnToAngle(-70);
-        Move(500, -60);
+        MoveExactFastWithAngle(500, -70);
 
         /*
         TurnToAngle(-140);

@@ -15,7 +15,7 @@ class GyroWrapper
 
   public:
     // Devide by this nuber to convert gyro value to degrees
-    static const int Multiplier = 1 << 10;
+    static constexpr int Multiplier = 1 << 10;
     int Get() const { return m_value; }
     void SetAngle(int angle) { m_value = angle; }
     void ResetState() { m_lastTime = millis() - 1; }
