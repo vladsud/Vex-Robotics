@@ -139,7 +139,7 @@ void Main::ResetState()
 //Operator Control
 void operatorControl()
 {
-	if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) && controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
+	if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) && joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
 		StartSkillsinManual();
 
 	// This is required for testing purposes, but also for auto-Skills run in manual modde

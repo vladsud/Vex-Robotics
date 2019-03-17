@@ -107,17 +107,17 @@ unsigned int Shooter::CalcAngle()
 
 bool MoveToLoadingPosition()
 {
-    return controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_DOWN);
+    return joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_DOWN);
 }
 
 bool MoveToTopFlagPosition()
 {
-    return controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP);
+    return joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP);
 }
 
 bool MoveToMiddleFlagPosition()
 {
-    return controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_RIGHT);
+    return joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_RIGHT);
 }
 
 bool Shooter::IsShooting()
@@ -131,7 +131,7 @@ bool Shooter::IsShooting()
         Assert(!m_overrideShooting); // atonomous should always wait till angle is settled.
         return false;
     }
-    return m_overrideShooting || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT);
+    return m_overrideShooting || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT);
 }
 
 bool Shooter::IsMovingAngle()
@@ -266,13 +266,13 @@ void Shooter::SetFlag(Flag flag)
 
 void Shooter::UpdateDistanceControls()
 {
-    if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
         SetDistance(Distances[0]);
-    else if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
+    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
         SetDistance(Distances[1]);
-    else if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
+    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
         SetDistance(Distances[2]);
-    else if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
         SetDistance(Distances[3]);
 }
 

@@ -6,7 +6,7 @@
 // #define OFFICIAL_RUN
 
 // Helper function to use both oysticsk
-//bool joystickGetDigital(unsigned char buttonGroup, unsigned char button);
+bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t button);
 bool isAuto();
 bool SmartsOn();
 class Main &SetupMain();

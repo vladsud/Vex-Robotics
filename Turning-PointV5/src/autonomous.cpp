@@ -96,25 +96,23 @@ void Do(Action &&action, unsigned int timeout /* = 100000 */)
     // ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
 }
 
-/* DISABLED FOR V5
-// Scans both joysticks, allowing secondary operator to help with controlling non-driving functions.
-bool joystickGetDigital(unsigned char buttonGroup, unsigned char button)
+// Scans digital buttons on joystick
+bool joystickGetDigital(controller_id_e_t id, controller_digital_e_t button)
 {
-    bool result = ::joystickGetDigital(1, buttonGroup, button) || ::joystickGetDigital(2, buttonGroup, button);
+    bool result = controller_get_digital(id, button);
 
     // if we are running autonous code in non-autonomous mode, then allow user to bail out.
     // this is very useful to run autonomous skills in manual skills mode.
     if (result && g_mode != AtonMode::Regular)
     {
-        ReportStatus("\n!!! Cancelling autonomous mode (%d %d), running opControl()!\n", (int)buttonGroup, (int)button);
+        ReportStatus("\n!!! Cancelling autonomous mode, running opControl()!\n");
         Assert(isAuto());
-        Assert(!isAutonomous());
+        Assert(!competition_is_autonomous());
         g_mode = AtonMode::Regular;
         Assert(!isAuto());
     }
     return result;
 }
-*/
 
 void autonomous()
 {
