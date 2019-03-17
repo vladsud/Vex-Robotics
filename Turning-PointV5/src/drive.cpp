@@ -4,6 +4,8 @@
 #include "cycle.h"
 #include <math.h>
 
+using namespace pros;
+using namespace pros::c;
 
 int AdjustSpeed(int speed)
 {
@@ -47,7 +49,7 @@ float KeepAngle::GetError()
 }
 
 
-int Drive::GetMovementJoystick(controller_id_e_t joystick, controller_analog_e_t axis, int minValue)
+int Drive::GetMovementJoystick(pros::controller_id_e_t joystick, pros::controller_analog_e_t axis, int minValue)
 {
     int value = controller_get_analog(joystick, axis);
 

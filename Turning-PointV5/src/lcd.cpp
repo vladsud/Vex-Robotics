@@ -6,6 +6,8 @@
 
 #include "pros/api_legacy.h"
 
+using namespace pros::c;
+
 LCD::LCD()
 {
     m_buttons = 0;

@@ -1,6 +1,9 @@
 #include "intake.h"
 #include "logger.h"
 
+using namespace pros;
+using namespace pros::c;
+
 void Intake::ResetState()
 {
     m_power = 0;

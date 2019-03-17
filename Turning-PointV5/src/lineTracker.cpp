@@ -2,6 +2,7 @@
 #include "main.h"
 #include "cycle.h"
 
+using namespace pros::c;
 
 LineTracker::LineTracker(unsigned int port)
     : m_port(port)

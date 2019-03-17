@@ -1,9 +1,6 @@
 #pragma once
 #include "main.h"
 
-using namespace pros;
-using namespace pros::c;
-
 struct DriveTracker
 {
   DriveTracker();
@@ -56,7 +53,7 @@ class Drive
   float GetTurnAxis();
   void SetLeftDrive(int speed);
   void SetRightDrive(int speed);
-  static int GetMovementJoystick(controller_id_e_t joystick, controller_analog_e_t axis, int minValue);
+  static int GetMovementJoystick(pros::controller_id_e_t joystick, pros::controller_analog_e_t axis, int minValue);
 
 public:
   unsigned int m_distance = 0;

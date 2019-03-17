@@ -1,7 +1,6 @@
 #pragma once
 #include "Gyro.h"
 
-using namespace pros::c;
 int GetGyroReading();
 
 static const int PositionTrackingRefreshRate = 2;

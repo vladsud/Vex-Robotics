@@ -1,10 +1,6 @@
 #pragma once
 #include "main.h"
 
-using namespace pros;
-using namespace pros::c;
-
-
 enum class Flag
 {
   High,

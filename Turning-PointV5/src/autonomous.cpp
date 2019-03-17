@@ -13,6 +13,8 @@
 #include "aton.h"
 #include "battery.h"
 
+using namespace pros::c;
+
 enum class AtonMode
 {
     Regular,
@@ -97,7 +99,7 @@ void Do(Action &&action, unsigned int timeout /* = 100000 */)
 }
 
 // Scans digital buttons on joystick
-bool joystickGetDigital(controller_id_e_t id, controller_digital_e_t button)
+bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t button)
 {
     bool result = controller_get_digital(id, button);
 

@@ -1,6 +1,9 @@
 #include "shooter.h"
 #include "logger.h"
 
+using namespace pros;
+using namespace pros::c;
+
 // Distance based on front of robot
 constexpr float Distances[]{24, 30, 48, 55, 78, 108};
 //   0: flat - loading

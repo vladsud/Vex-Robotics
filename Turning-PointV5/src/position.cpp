@@ -2,14 +2,16 @@
 #include "logger.h"
 #include <cmath>
 
+using namespace pros::c;
+
 PositionTracker::PositionTracker()
 {
     motor_tare_position(leftDrivePort2);
-    motor_set_encoder_units(leftDrivePort2, E_MOTOR_ENCODER_COUNTS);
+    motor_set_encoder_units(leftDrivePort2, pros::E_MOTOR_ENCODER_COUNTS);
     motor_tare_position(rightDrivePort2);
-    motor_set_encoder_units(rightDrivePort2, E_MOTOR_ENCODER_COUNTS);
+    motor_set_encoder_units(rightDrivePort2, pros::E_MOTOR_ENCODER_COUNTS);
     // motor_tare_position(g_sideEncoder);
-    // motor_set_encoder_units(g_sideEncoder, E_MOTOR_ENCODER_COUNTS);
+    // motor_set_encoder_units(g_sideEncoder, pros::E_MOTOR_ENCODER_COUNTS);
 
     m_gyro = ::GetGyro().Get();
     auto shooterAngle = adi_analog_read(shooterPreloadPoterntiometer);
