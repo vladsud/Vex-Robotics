@@ -53,26 +53,25 @@ void Logger::Dump()
     {
         count++;
         int entry = *data++;
-        fprint(s_LogEntryNames[entry], stdout);
+        printf(s_LogEntryNames[entry]);
 
         Byte time = (Byte)*data++;
-        fprint(itoa(time, buffer, 10), stdout);
+        printf(itoa(time, buffer, 10));
 
         const LogArgTypes *types = s_Types[entry];
         while (*types != LogArgTypes::End)
         {
-            fprint(", ", stdout);
-            fprint(itoa(UnPack(data, *types), buffer, 10), stdout);
+            printf(", ");
+            printf(itoa(UnPack(data, *types), buffer, 10));
             types++;
         }
-        delay(2);
     }
 
     Assert(data == m_dataCurr);
 
-    fputs("", stdout);
+    puts("");
 
-    fprintf(stdout, "%d records, %d bytes\n", count, int(m_dataCurr - m_data));
+    printf("%d records, %d bytes\n", count, int(m_dataCurr - m_data));
 
     free(m_data);
     m_data = nullptr;
@@ -146,7 +145,7 @@ int Logger::UnPack(Byte *&buffer, LogArgTypes type)
 
 Byte Logger::GetTime()
 {
-    unsigned long time = millis();
+    unsigned long time = pros::c::millis();
     if (m_data == m_dataCurr)
         m_lastTime = time;
     time -= m_lastTime;

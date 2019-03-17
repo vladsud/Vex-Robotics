@@ -46,11 +46,11 @@ void Main::Update()
 
 	do
 	{
-		// taskDelayUntil( )is better then delay() as it allows us to "catch up" if we spend too much time in one cycle,
+		// task_delay_until( )is better then delay() as it allows us to "catch up" if we spend too much time in one cycle,
 		// i.e. have consistent frequency of updates.
 		// That said, it assumes that we are missing the tick infrequently.
 		// If it's not the case, we can hog CPU and not allow other tasks to have their share.
-		taskDelayUntil(&m_LastWakeUp, trackerPullTime);
+		task_delay_until(&m_LastWakeUp, trackerPullTime);
 
 		m_Ticks += trackerPullTime;
 		m_TicksToMainUpdate -= trackerPullTime;
