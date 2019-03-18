@@ -1,6 +1,10 @@
 #include "lineTracker.h"
 #include "main.h"
 #include "cycle.h"
+#include <cmath>
+#include <cstdio>
+
+#include "pros/adi.h"
 
 using namespace pros::c;
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "actions.h"
 #include "position.h"
-#include <cmath>
 
 #define TurnToPoint(x, y) TurnToAngle(CalcAngleToPoint(x, y))
 

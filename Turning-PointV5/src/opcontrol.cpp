@@ -2,6 +2,11 @@
 #include "main.h"
 #include "cycle.h"
 #include "logger.h"
+#include <cstdio>
+
+#include "pros/adi.h"
+#include "pros/motors.h"
+#include "pros/rtos.h"
 
 using namespace pros;
 using namespace pros::c;

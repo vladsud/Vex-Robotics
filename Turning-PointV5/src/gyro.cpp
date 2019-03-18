@@ -14,6 +14,8 @@
 #include "main.h"
 #include "gyro.h"
 #include <cmath>
+#include "pros/adi.h"
+#include "pros/rtos.h"
 
 using namespace pros;
 using namespace pros::c;
@@ -68,6 +70,11 @@ GyroWrapper::GyroWrapper(unsigned char port, unsigned short multiplier)
     }
 
     m_calibValue = ((uint64_t)total * m_multiplier) / (Measurements / 16);
+}
+
+void GyroWrapper::ResetState()
+{
+    m_lastTime = pros::c::millis() - 1;
 }
 
 int AdjustAngle(int angle)

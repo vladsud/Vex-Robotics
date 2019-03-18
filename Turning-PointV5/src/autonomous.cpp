@@ -12,6 +12,7 @@
 
 #include "aton.h"
 #include "battery.h"
+#include "pros/rtos.h"
 
 using namespace pros::c;
 

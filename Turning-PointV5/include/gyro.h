@@ -16,7 +16,7 @@ class GyroWrapper
     static constexpr int Multiplier = 1 << 10;
     int Get() const { return m_value; }
     void SetAngle(int angle) { m_value = angle; }
-    void ResetState() { m_lastTime = pros::c::millis() - 1; }
+    void ResetState();
 
     void Integrate();
     GyroWrapper(unsigned char port, unsigned short multiplier = 0);

@@ -2,7 +2,10 @@
 #include "position.h"
 #include "logger.h"
 #include "cycle.h"
-#include <math.h>
+#include <cmath>
+#include <cstdio>
+
+#include "pros/motors.h"
 
 using namespace pros;
 using namespace pros::c;

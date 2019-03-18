@@ -1,5 +1,6 @@
 #include "intake.h"
 #include "logger.h"
+#include "pros/motors.h"
 
 using namespace pros;
 using namespace pros::c;

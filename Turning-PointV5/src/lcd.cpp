@@ -1,5 +1,4 @@
 #include "lcd.h"
-#include "api.h"
 #include "main.h"
 #include "battery.h"
 #include "aton.h"

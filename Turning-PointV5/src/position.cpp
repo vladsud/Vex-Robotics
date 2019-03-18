@@ -2,6 +2,9 @@
 #include "logger.h"
 #include <cmath>
 
+#include "pros/adi.h"
+#include "pros/motors.h"
+
 using namespace pros::c;
 
 PositionTracker::PositionTracker()

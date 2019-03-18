@@ -1,5 +1,9 @@
 #pragma once
-#include "API.h"
+#include <stdint.h>
+
+// Reduce number of includes to speed up compilation!
+// Do not include API.h - it includes a ton of headers we do not need!
+#include "pros/misc.h"
 
 // *** WARNING ***
 // Always define it for competation!!!!

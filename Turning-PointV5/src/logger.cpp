@@ -1,6 +1,10 @@
 #include "logger.h"
-#include "api.h"
 #include <bits/move.h>
+#include <cstdio>
+#include <cmath>
+
+#include "pros/rtos.h"
+
 
 #ifdef OFFICIAL_RUN
 
