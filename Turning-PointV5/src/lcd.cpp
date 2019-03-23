@@ -3,24 +3,23 @@
 #include "battery.h"
 #include "aton.h"
 
-#include "pros/api_legacy.h"
-
 using namespace pros::c;
+using namespace pros;
 
 LCD::LCD()
 {
     m_buttons = 0;
     m_step = 0;
 
-    lcdInit();
-    lcdClear();
+    lcd_initialize();
+    lcd_clear();
     PrintStepInstructions();
     m_count = 0;
 }
 
 void LCD::PrintMessage(const char *message)
 {
-    lcdSetText(1, message);
+    lcd_print(1, message);
 }
 
 void LCD::PrintStepInstructions()
@@ -30,42 +29,42 @@ void LCD::PrintStepInstructions()
     switch (m_step)
     {
     case 0:
-        lcdSetText(1, "Main Battery");
+        lcd_print(1, "Main Battery");
 
-        lcdPrint(2, "%.2f  Cont", mp);
+        lcd_print(2, "%.2f  Cont", mp);
 
         break;
     case 1:
         if (AtonSkills)
         {
-            lcdSetText(1, "    SKILLS!    ");
-            lcdSetText(2, "     Cancel     ");
+            lcd_print(1, "    SKILLS!    ");
+            lcd_print(2, "     Cancel     ");
         }
         else
         {
             // Choose side
-            lcdSetText(1, "Left     Right");
-            lcdSetText(2, "Red  Skill  Blue");
+            lcd_print(1, "Left     Right");
+            lcd_print(2, "Red  Skill  Blue");
         }
         break;
     case 2:
         // Select position
-        lcdSetText(1, "First Pos?");
+        lcd_print(1, "First Pos?");
 
-        lcdSetText(2, "No    Back   Yes");
+        lcd_print(2, "No    Back   Yes");
         break;
     case 3:
         // Select platform
-        lcdSetText(1, "Climb platform?");
+        lcd_print(1, "Climb platform?");
 
-        lcdSetText(2, "No    Back   Yes");
+        lcd_print(2, "No    Back   Yes");
         break;
     case 4:
         // Print auton
-        lcdPrint(1, "%s, %s",
+        lcd_print(1, "%s, %s",
                  AtonBlueRight ? "Blue" : "Red",
                  AtonFirstPos ? "1st" : "2nd");
-        lcdPrint(2, "%-8s  Cancel",
+        lcd_print(2, "%-8s  Cancel",
                  AtonClimbPlatform ? "Climb" : "No climb");
         break;
     }
@@ -103,7 +102,7 @@ void LCD::Update()
     {
         float mp = GetMainPower();
         //lcdSetText(1, "Main        ");
-        lcdPrint(2, "%.2f  Cont", mp);
+        lcd_print(2, "%.2f  Cont", mp);
 
         if (mp > 10.0f)
         {
@@ -112,8 +111,8 @@ void LCD::Update()
         }
         else
         {
-            lcdSetText(1, "Battery");
-            lcdSetText(2, "NOT Connected");
+            lcd_print(1, "Battery");
+            lcd_print(2, "NOT Connected");
             m_disable = true;
         }
     }
@@ -123,7 +122,7 @@ void LCD::Update()
 
     // Read button
     // Returns a 3 bit integer: 100 is left, 010 is center, 001 is right
-    int buttons = lcdReadButtons();
+    int buttons = lcd_read_buttons();
 
     // If the button is the same (still pressing), ignore actions
     if (m_buttons == buttons)
