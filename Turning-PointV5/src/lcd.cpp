@@ -2,9 +2,9 @@
 #include "main.h"
 #include "battery.h"
 #include "aton.h"
+#include "pros/llemu.h"
 
 using namespace pros::c;
-using namespace pros;
 
 LCD::LCD()
 {

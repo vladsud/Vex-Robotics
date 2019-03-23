@@ -1,7 +1,8 @@
 #include "main.h"
 #include "battery.h"
 
+using namespace pros::c;
 
 float GetMainPower(){
-    return pros::c::battery_get_capacity() / 1000.0;
+    return battery_get_capacity() / 1000.0;
 }
