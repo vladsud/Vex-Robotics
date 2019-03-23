@@ -142,7 +142,7 @@ void Main::ResetState()
 }
 
 //Operator Control
-void operatorControl()
+void opcontrol()
 {
 	if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) && joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
 		StartSkillsinManual();

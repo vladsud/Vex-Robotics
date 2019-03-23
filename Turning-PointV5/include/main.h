@@ -102,7 +102,7 @@ D: left y drive
 #define leftDrivePort2 3 // back
 #define leftDrivePortY 4 // middle
 #define intakePort 5
-#define descorerPort 99
+#define descorerPort 10
 #define rightDrivePortY 7
 #define anglePort 8
 #define rightDrivePort2 9

@@ -68,7 +68,7 @@ void StartSkillsinManual()
 void Do(Action &&action, unsigned int timeout /* = 100000 */)
 {
     // auto time = millis();
- 
+
     auto& main = GetMain();
     while (!action.ShouldStop())
     {
