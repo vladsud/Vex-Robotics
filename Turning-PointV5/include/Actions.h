@@ -3,7 +3,7 @@
 #include "cycle.h"
 #include "logger.h"
 
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 
 unsigned int SpeedFromDistances(unsigned int distance, const unsigned int* points, const unsigned int* speeds);

@@ -1,7 +1,8 @@
 #include "logger.h"
 #include <bits/move.h>
-#include <cstdio>
-#include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include "pros/rtos.h"
 

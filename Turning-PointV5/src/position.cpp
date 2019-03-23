@@ -1,6 +1,6 @@
 #include "position.h"
 #include "logger.h"
-#include <cmath>
+#include <math.h>
 
 #include "pros/adi.h"
 #include "pros/motors.h"

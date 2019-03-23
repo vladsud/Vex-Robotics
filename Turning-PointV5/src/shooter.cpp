@@ -1,6 +1,6 @@
 #include "shooter.h"
 #include "logger.h"
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 
 #include "pros/adi.h"

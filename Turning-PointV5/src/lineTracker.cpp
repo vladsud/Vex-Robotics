@@ -1,7 +1,7 @@
 #include "lineTracker.h"
 #include "main.h"
 #include "cycle.h"
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 
 #include "pros/adi.h"

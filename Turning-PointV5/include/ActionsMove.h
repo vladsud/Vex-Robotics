@@ -1,5 +1,5 @@
 #pragma once
-#include <cmath>
+#include <math.h>
 #include <limits.h>
 #include "actions.h"
 #include "position.h"

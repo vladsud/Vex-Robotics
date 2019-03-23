@@ -13,7 +13,7 @@
  */
 #include "main.h"
 #include "gyro.h"
-#include <cmath>
+#include <math.h>
 #include "pros/adi.h"
 #include "pros/rtos.h"
 

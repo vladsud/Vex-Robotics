@@ -2,7 +2,7 @@
 #include "position.h"
 #include "logger.h"
 #include "cycle.h"
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 
 #include "pros/motors.h"

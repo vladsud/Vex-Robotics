@@ -17,7 +17,7 @@ class Main &SetupMain();
 int AdjustAngle(int angle);
 void StartSkillsinManual();
 
-void operatorControl();
+void opcontrol();
 void autonomous();
 void initialize();
 

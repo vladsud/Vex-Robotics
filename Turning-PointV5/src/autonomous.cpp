@@ -85,7 +85,7 @@ void Do(Action &&action, unsigned int timeout /* = 100000 */)
         {
             ReportStatus("\n!!! Switching to manual mode!\n");
             Assert(!isAuto());
-            operatorControl(); // this does not return!
+            opcontrol(); // this does not return!
             ReportStatus("\n!!! Error: Should never get back from opControl()!\n");
         }
     }
