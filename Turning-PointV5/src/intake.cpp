@@ -29,16 +29,14 @@ void Intake::SetIntakeDirection(Direction direction)
         m_power = power;
     else
         // slow down transition when change in direciton happens
-        m_power += Sign(power);
+        m_power += Sign(power) * 10;
 
     SetIntakeMotor(m_power);
-    // motorSet(intakePort2, -m_power);
 }
 
 void Intake::SetIntakeMotor(int speed)
 {
     motor_move(intakePort, speed);
-    // motorSet(intakePort2, -speed);
 }
 
 void Intake::Update()

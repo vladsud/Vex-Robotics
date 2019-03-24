@@ -15,26 +15,21 @@ constexpr float Distances[]{24, 30, 48, 55, 78, 108};
 //   0: flat - loading
 // 156: highest angle we can do (roughly 60 degrees)
 // At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]{120, 110, 80, 90, 60, 80};
-constexpr unsigned int AnglesMedium[]{90, 74, 50, 48, 40, 55};
+constexpr unsigned int AnglesHigh[]{136, 135, 134, 132, 60, 80};
+constexpr unsigned int AnglesMedium[]{60, 50, 30, 20, 10, 0};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
 constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 {
-    return 1860 - angle * 5;
+    return 1290 + angle * 20;
 }
 
 // Angle potentiometer:
-constexpr unsigned int anglerLow = 22;
-const unsigned int anglePotentiometerLow = ConvertAngleToPotentiometer(anglerLow);
-const unsigned int anglePotentiometerHigh = 1060;
+constexpr unsigned int anglerLow = 80;
 
 StaticAssert(CountOf(Distances) == CountOf(AnglesHigh));
 StaticAssert(CountOf(Distances) == CountOf(AnglesMedium));
-
-StaticAssert(ConvertAngleToPotentiometer(AnglesMedium[0]) < anglePotentiometerLow);
-StaticAssert(ConvertAngleToPotentiometer(AnglesHigh[LastDistanceCount]) >= anglePotentiometerHigh);
 
 StaticAssert(Distances[0] < Distances[1]);
 StaticAssert(Distances[1] < Distances[2]);
@@ -43,19 +38,19 @@ StaticAssert(Distances[3] < Distances[4]);
 
 StaticAssert(AnglesHigh[0] >= AnglesHigh[1]);
 StaticAssert(AnglesHigh[1] >= AnglesHigh[2]);
-//StaticAssert(AnglesHigh[2] >= AnglesHigh[3]);
-// StaticAssert(AnglesHigh[3] >= AnglesHigh[4]);
+StaticAssert(AnglesHigh[2] >= AnglesHigh[3]);
+StaticAssert(AnglesHigh[3] >= AnglesHigh[4]);
 
 StaticAssert(AnglesMedium[0] >= AnglesMedium[1]);
 StaticAssert(AnglesMedium[1] >= AnglesMedium[2]);
 StaticAssert(AnglesMedium[2] >= AnglesMedium[3]);
-// StaticAssert(AnglesMedium[3] >= AnglesMedium[4]);
+StaticAssert(AnglesMedium[3] >= AnglesMedium[4]);
 
 StaticAssert(AnglesMedium[0] < AnglesHigh[0]);
 StaticAssert(AnglesMedium[1] < AnglesHigh[1]);
 StaticAssert(AnglesMedium[2] < AnglesHigh[2]);
 StaticAssert(AnglesMedium[3] < AnglesHigh[3]);
-// StaticAssert(AnglesMedium[4] < AnglesHigh[4]);
+StaticAssert(AnglesMedium[4] < AnglesHigh[4]);
 
 constexpr unsigned int CalcAngle(Flag flag, float distanceInches)
 {
@@ -108,7 +103,9 @@ Shooter::Shooter()
       m_angleSensor(anglePotPort),
       m_ballPresenceSensor(ballPresenceSensor)
 {
+    motor_tare_position(angleMotorPort);
     m_distanceInches = Distances[2];
+    ReportStatus("Shooter angle: %d\n", m_angleSensor.get_value());
     StartMoving();
 }
 
@@ -167,14 +164,6 @@ void Shooter::KeepMoving()
     int distance = current - m_angleToMove;
     int diff = distance - m_lastAngleDistance;
 
-    // sometimes we get really wrong readings.
-    if (diff > m_diffAdjusted + 5)
-        diff = m_diffAdjusted + 5;
-    else if (diff < m_diffAdjusted - 5)
-        diff = m_diffAdjusted - 5;
-
-    distance = diff + m_lastAngleDistance;
-
     unsigned int distanceAbs = abs(distance);
 
     m_diffAdjusted = diff; // (diff + m_diffAdjusted) / 2;
@@ -182,7 +171,7 @@ void Shooter::KeepMoving()
     m_count++;
 
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 10 && abs(m_diffAdjusted) <= 3) || (distance > 0 && m_flag == Flag::Loading))
+    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4) || (distance > 0 && m_flag == Flag::Loading))
     {
         if (m_fMoving)
         {
@@ -191,34 +180,18 @@ void Shooter::KeepMoving()
                     m_count, m_angleToMove, current, current - m_angleToMove, distance, diff, m_diffAdjusted);
             StopMoving();
         }
-        // if (m_flag == Flag::Loading)
-            motor_move(anglePort, 0);
+        motor_move(angleMotorPort, 0);
         return;
     }
 
-    if (m_fMoving && m_flag == Flag::Loading)
-    {
-        if (distance > 0)
-            speed = 0;
-        else
-            speed = -26 + distance / 4 + m_diffAdjusted * 4;
-    }
-    else if (distance > 50) // going up
-        speed = 20 + distance / 4 + m_diffAdjusted * 2;
-    else if (distance > 30) // going up
-        speed = 15 + distance / 5  + m_diffAdjusted * 3;
-    else if (distance > 0) // already there
-        speed = m_fMoving ? -10 : 0;
-    else if (!m_fMoving && distance > -10)
-        speed = 0;
-    else  // going down, overshoot
-        speed = -10 + distance / 3 + m_diffAdjusted * 2;
+    // down: speed > 0
+    speed = 25 * Sign(distance) + distance / 4 + m_diffAdjusted * 1.5;
 
-
-    if (speed * distance < 0 && distanceAbs > 20)
+    // do not allow to go backwards if too far frmom final zone
+    if (speed * distance < 0 && distanceAbs > 100)
         speed = 0;
 
-    const int angleMotorSpeed = distanceAbs > 50 ? 75 : 20;
+    const int angleMotorSpeed = distanceAbs > 100 ? 75 : 25;
 
     if (speed > angleMotorSpeed)
         speed = angleMotorSpeed;
@@ -233,7 +206,7 @@ void Shooter::KeepMoving()
             ReportStatus("ANG ADJ: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
     }
 
-    motor_move(anglePort, speed);
+    motor_move(angleMotorPort, -speed);
 
     m_lastAngleDistance = distance;
 }
@@ -245,11 +218,13 @@ void Shooter::StartMoving()
     m_diffAdjusted = 0;
     m_lastAngleDistance = m_angleSensor.get_value() - m_angleToMove;
     m_count = 0;
+
+    ReportStatus("Start moving: %d -> %d\n", m_angleSensor.get_value(), m_angleToMove);
 }
 
 void Shooter::StopMoving()
 {
-    motor_move(anglePort, 0);
+    motor_move(angleMotorPort, 0);
     m_fMoving = false;
     m_count = 0;
 }
@@ -380,6 +355,12 @@ void Shooter::Update()
         needPreload = false;
     }
 
+//TODO: remove
+needPreload = false;
+m_preloadAfterShotCounter = 0;
+m_Manual = true;
+
+
     // Check if we can detect ball present.
     BallPresence ball = BallStatus();
 
@@ -468,7 +449,7 @@ void Shooter::Update()
     // Shooter motor.
     if (shooting)
     {
-        motor_move(shooterPort, shooterMotorSpeed);
+        motor_move(shooterPort, -shooterMotorSpeed);
     }
     else
     {

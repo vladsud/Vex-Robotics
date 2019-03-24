@@ -101,7 +101,7 @@ bool Main::UpdateWithoutWaiting()
 		lcd.Update();
 		// descorer.Update();
 		intake.Update();
-		// shooter.Update();
+		shooter.Update();
 		drive.Update();
 		// Good place for external code to consume some cycles
 		res = true;

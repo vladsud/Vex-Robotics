@@ -79,9 +79,9 @@ constexpr T min(T a, T b)
 * MOTOR SPEEDS
 *
 *******************************************************************************/
-#define shooterMotorSpeed 100 // it otherwise burns controller / port
-#define intakeMotorSpeedUp 100 // same, being protective
-#define intakeMotorSpeedDown 100
+#define shooterMotorSpeed 127
+#define intakeMotorSpeedUp 127
+#define intakeMotorSpeedDown 127
 #define driveMotorMaxSpeed 127
 
 
@@ -103,7 +103,7 @@ D: left y drive
 #define intakePort 3
 #define rightFrontDrivePort 20
 #define rightBackDrivePort 16
-#define anglePort 10
+#define angleMotorPort 10
 
 #define descorerPort 99
 
