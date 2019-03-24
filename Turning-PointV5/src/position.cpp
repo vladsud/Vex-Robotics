@@ -9,10 +9,10 @@ using namespace pros::c;
 
 PositionTracker::PositionTracker()
 {
-    motor_tare_position(leftDrivePort2);
-    motor_set_encoder_units(leftDrivePort2, pros::E_MOTOR_ENCODER_COUNTS);
-    motor_tare_position(rightDrivePort2);
-    motor_set_encoder_units(rightDrivePort2, pros::E_MOTOR_ENCODER_COUNTS);
+    motor_tare_position(leftBackDrivePort);
+    motor_set_encoder_units(leftBackDrivePort, pros::E_MOTOR_ENCODER_COUNTS);
+    motor_tare_position(rightBackDrivePort);
+    motor_set_encoder_units(rightBackDrivePort, pros::E_MOTOR_ENCODER_COUNTS);
     // motor_tare_position(g_sideEncoder);
     // motor_set_encoder_units(g_sideEncoder, pros::E_MOTOR_ENCODER_COUNTS);
 
@@ -134,8 +134,8 @@ void PositionTracker::RecalcPosition(int index, unsigned int multiplier)
 //
 void PositionTracker::Update()
 {
-    int leftEncoder = motor_get_position(leftDrivePort2);
-    int rightEncoder = motor_get_position(rightDrivePort2);
+    int leftEncoder = motor_get_position(leftBackDrivePort);
+    int rightEncoder = motor_get_position(rightBackDrivePort);
     int sideEncoder = 0; // encoderGet(g_sideEncoder);
     m_gyro = ::GetGyro().Get();
 
@@ -170,7 +170,7 @@ void PositionTracker::Update()
             int(m_sensor.gyro[m_currentIndex] * 10 / GyroWrapper::Multiplier) % 3600);
     if (udpateCycle == 1)
         lcdPrint(uart1, 2, "LRA: %d %d %d",
-            motor_get_position(leftDrivePort2), motor_get_position(rightDrivePort2), int(m_gyro / GyroWrapper::Multiplier) % 360);
+            motor_get_position(leftBackDrivePort), motor_get_position(rightBackDrivePort), int(m_gyro / GyroWrapper::Multiplier) % 360);
 #endif
 }
 

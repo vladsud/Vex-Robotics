@@ -98,13 +98,13 @@ D: left y drive
 *
 *******************************************************************************/
 #define shooterPort 17
-#define leftDrivePort2 18 // back
-#define leftDrivePortY 19 // middle
+#define leftBackDrivePort 18
+#define leftFrontDrivePort 19
 #define intakePort 3
-#define rightDrivePortY 20
-#define rightDrivePort2 16 // back
+#define rightFrontDrivePort 20
+#define rightBackDrivePort 16
+#define anglePort 10
 
-#define anglePort 99
 #define descorerPort 99
 
 
@@ -114,13 +114,13 @@ D: left y drive
 *
 *******************************************************************************/
 #define gyroPort 1
-
-#define lineTrackerLeftPort 2
-#define lineTrackerRightPort 3
-#define lightSensor 5
-#define shooterPreloadPoterntiometer 6
-#define ShooterSecondaryPotentiometer 7
 #define anglePotPort 8
+
+#define lineTrackerLeftPort 99
+#define lineTrackerRightPort 99
+#define ballPresenceSensor 99
+#define shooterPreloadPoterntiometer 99
+#define ShooterSecondaryPotentiometer 99
 
 
 /*******************************************************************************

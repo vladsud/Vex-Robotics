@@ -107,16 +107,16 @@ void Drive::ResetState()
 {
     m_tracker = nullptr;
     m_distanceFromBeginning = 0;
-    motor_tare_position(leftDrivePort2);
-    motor_tare_position(rightDrivePort2);
+    motor_tare_position(leftBackDrivePort);
+    motor_tare_position(rightBackDrivePort);
     // motor_tare_position(g_sideEncoder);
     ResetTrackingState();
 }
 
 void Drive::ResetTrackingState()
 {
-    m_encoderBaseLeft = motor_get_position(leftDrivePort2);
-    m_encoderBaseRight = motor_get_position(rightDrivePort2);
+    m_encoderBaseLeft = motor_get_position(leftBackDrivePort);
+    m_encoderBaseRight = motor_get_position(rightBackDrivePort);
     m_distance = 0;
     m_left = 0;
     m_right = 0;
@@ -126,15 +126,15 @@ void Drive::ResetTrackingState()
 void Drive::SetLeftDrive(int speed)
 {
     speed = AdjustSpeed(speed);
-    motor_move(leftDrivePortY, speed);
-    motor_move(leftDrivePort2, speed);
+    motor_move(leftFrontDrivePort, speed);
+    motor_move(leftBackDrivePort, speed);
 }
 
 void Drive::SetRightDrive(int speed)
 {
     speed = AdjustSpeed(speed);
-    motor_move(rightDrivePortY, -speed);
-    motor_move(rightDrivePort2, -speed);
+    motor_move(rightFrontDrivePort, -speed);
+    motor_move(rightBackDrivePort, -speed);
 }
 
 void Drive::StartHoldingPosition()
@@ -149,8 +149,8 @@ void Drive::HoldPosition()
 
 void Drive::UpdateDistanes()
 {
-    m_left = motor_get_position(leftDrivePort2);
-    m_right = motor_get_position(rightDrivePort2);
+    m_left = motor_get_position(leftBackDrivePort);
+    m_right = motor_get_position(rightBackDrivePort);
     m_distanceFromBeginning = abs(m_left) + abs(m_right);
 
     m_left -= m_encoderBaseLeft;

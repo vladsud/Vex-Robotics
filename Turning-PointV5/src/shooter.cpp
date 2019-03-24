@@ -106,7 +106,7 @@ StaticAssert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2] * 3 + Distanc
 Shooter::Shooter()
     : m_preloadSensor(shooterPreloadPoterntiometer),
       m_angleSensor(anglePotPort),
-      m_ballPresenceSensor(lightSensor)
+      m_ballPresenceSensor(ballPresenceSensor)
 {
     m_distanceInches = Distances[2];
     StartMoving();
