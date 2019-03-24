@@ -97,15 +97,15 @@ C: Shooter
 D: left y drive
 *
 *******************************************************************************/
-#define shooterPort 2 // 2 // "C" on extender
-#define shooter2Port 6
-#define leftDrivePort2 3 // back
-#define leftDrivePortY 4 // middle
-#define intakePort 5
-#define descorerPort 10
-#define rightDrivePortY 7
-#define anglePort 8
-#define rightDrivePort2 9
+#define shooterPort 17
+#define leftDrivePort2 18 // back
+#define leftDrivePortY 19 // middle
+#define intakePort 3
+#define rightDrivePortY 20
+#define rightDrivePort2 16 // back
+
+#define anglePort 99
+#define descorerPort 99
 
 
 /*******************************************************************************
@@ -113,10 +113,10 @@ D: left y drive
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define lineTrackerLeftPort 1
-#define lineTrackerRightPort 2
-#define ExpanderBatteryStatus 3
-#define gyroPort 4
+#define gyroPort 1
+
+#define lineTrackerLeftPort 2
+#define lineTrackerRightPort 3
 #define lightSensor 5
 #define shooterPreloadPoterntiometer 6
 #define ShooterSecondaryPotentiometer 7

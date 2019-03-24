@@ -1,15 +1,16 @@
 #pragma once
 #include "main.h"
+#include "pros/adi.hpp"
 
 class GyroWrapper
 {
+    pros::ADIAnalogIn m_sensor;
     int32_t m_value = 0;
     int32_t m_multiplier;
     uint32_t m_calibValue = 0;
     uint32_t m_stddev = 0;
     int32_t m_limit = 0;
     unsigned long m_lastTime = 0;
-    unsigned char m_port;
 
   public:
     // Devide by this nuber to convert gyro value to degrees

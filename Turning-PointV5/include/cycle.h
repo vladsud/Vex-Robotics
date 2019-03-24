@@ -29,7 +29,7 @@ class Main
   public:
 	Drive drive;
 	Intake intake;
-	Descorer descorer;
+	// Descorer descorer;
 	Shooter shooter;
 	GyroWrapper gyro {gyroPort};
 	PositionTracker tracker;

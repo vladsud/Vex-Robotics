@@ -4,14 +4,12 @@
 #include <math.h>
 #include <cstdio>
 
-#include "pros/adi.h"
-
 using namespace pros::c;
 
 LineTracker::LineTracker(unsigned int port)
-    : m_port(port)
+    : m_sensor(port)
 {
-    ReportStatus("Line %d init: %d\n", m_port, adi_analog_read(m_port));
+    ReportStatus("Line %d init: %d\n", port, m_sensor.get_value());
     ResetCore();
 }
 
@@ -51,11 +49,11 @@ void LineTracker::Push(bool white)
 
 void LineTracker::Update()
 {
-    int value = adi_analog_read(m_port);
+    int value = m_sensor.get_value();
     if (m_minvalue > value)
         m_minvalue = value;
 
-    // ReportStatus("L%d: %d\n", m_port, value);
+    // ReportStatus("Line %d\n", value);
     StaticAssert(WhiteLevel < BlackLevel);
 
     if (m_status != Status::HitBlack && value > BlackLevel)
@@ -70,11 +68,11 @@ void LineTracker::Update()
         if (m_times[m_timesIndex-1] == 0)
         {
             m_timesIndex--;
-            // ReportStatus("   Starting on white: port=%d, brightness=%d\n", m_port, value);
+            // ReportStatus("   Starting on white: brightness=%d\n", value);
         }
         else
         {
-            // ReportStatus("   White line hit: port=%d, dist=%d, brightness=%d\n", m_port, m_times[m_timesIndex-1], value);
+            // ReportStatus("   White line hit: dist=%d, brightness=%d\n", m_times[m_timesIndex-1], value);
         }
         m_status = Status::HitWhite;
     }

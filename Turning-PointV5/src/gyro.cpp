@@ -14,8 +14,8 @@
 #include "main.h"
 #include "gyro.h"
 #include <math.h>
-#include "pros/adi.h"
 #include "pros/rtos.h"
+#include <cstdio>
 
 using namespace pros;
 using namespace pros::c;
@@ -32,7 +32,7 @@ void GyroWrapper::Integrate()
 {
     unsigned long time = millis();
     // Same as analogReadCalibratedHR(). // LSLed by 4 as offset
-    int32_t reading = adi_analog_read(m_port) << 4;
+    int32_t reading = m_sensor.get_value() << 4;
     reading *= m_multiplier;
     reading = int(reading) - int(m_calibValue);
 
@@ -54,7 +54,7 @@ void GyroWrapper::Integrate()
 
 GyroWrapper::GyroWrapper(unsigned char port, unsigned short multiplier)
     : m_multiplier(multiplier == 0 ? GYRO_MULTIPLIER_DEFAULT : multiplier),
-      m_port(port)
+      m_sensor(port)
 {
     // Same as analogCalibrate()
     uint32_t total = 0;
@@ -63,7 +63,7 @@ GyroWrapper::GyroWrapper(unsigned char port, unsigned short multiplier)
 
     for (unsigned int i = 0; i < Measurements; i++)
     {
-        uint32_t value = adi_analog_read(m_port);
+        uint32_t value = m_sensor.get_value();
         Assert(0 <= value && value <= 4096);
         total += value;
         task_delay(1);

@@ -22,6 +22,7 @@ Main &SetupMain()
 
 Main &GetMain()
 {
+	Assert(g_main != nullptr);
 	return *g_main;
 }
 
@@ -40,7 +41,8 @@ void AssertCore(bool condition, const char *message, const char *file, int line)
 	if (!condition)
 	{
 		ReportStatus("\n*** ASSERT: %s:%d: %s ***\n\n", file, line, message);
-		GetMain().lcd.PrintMessage(message);
+		if (g_main != nullptr)
+			g_main->lcd.PrintMessage(message);
 	}
 }
 
@@ -65,7 +67,7 @@ void Main::Update()
 void Main::UpdateAllSystems()
 {
 	lcd.Update();
-	descorer.Update();
+	// descorer.Update();
 	intake.Update();
 	shooter.Update();
 	drive.Update();
@@ -88,32 +90,21 @@ bool Main::UpdateWithoutWaiting()
 	lineTrackerLeft.Update();
 	lineTrackerRight.Update();
 
-	// Trying to check intake more often, as some key pressed are not registered sometimes
-	intake.Update();
-
 	// If this assert fires, than numbers do not represent actual timing.
 	// It's likley not a big deal, but something somwhere might not work because of it.
 	StaticAssert((trackerPullTime % trackerPullTime) == 0);
 
-	switch (m_TicksToMainUpdate / trackerPullTime)
+	if (m_TicksToMainUpdate / trackerPullTime == 0)
 	{
-	case 0:
-		StaticAssert(allSystemsPullTime / trackerPullTime >= 5);
 		m_TicksToMainUpdate = allSystemsPullTime;
 		// cheap sytems are grouped together
 		lcd.Update();
 		// descorer.Update();
-		break;
-	case 1:
-		shooter.Update();
-		break;
-	case 2:
+		intake.Update();
+		// shooter.Update();
 		drive.Update();
-		break;
-	case 3:
 		// Good place for external code to consume some cycles
 		res = true;
-		break;
 	}
 
 	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)

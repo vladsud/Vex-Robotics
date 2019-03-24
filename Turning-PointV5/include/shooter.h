@@ -1,5 +1,6 @@
 #pragma once
 #include "main.h"
+#include "pros/adi.hpp"
 
 enum class Flag
 {
@@ -17,6 +18,10 @@ enum class BallPresence
 
 class Shooter
 {
+  pros::ADIAnalogIn m_preloadSensor;
+  pros::ADIAnalogIn m_angleSensor;
+  pros::ADIAnalogIn m_ballPresenceSensor;
+
   // This should be comming from autonomous, probably.
   unsigned int m_distanceInches = 48;
   Flag m_flag = Flag::Loading;

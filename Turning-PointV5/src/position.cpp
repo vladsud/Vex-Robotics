@@ -16,8 +16,7 @@ PositionTracker::PositionTracker()
     // motor_tare_position(g_sideEncoder);
     // motor_set_encoder_units(g_sideEncoder, pros::E_MOTOR_ENCODER_COUNTS);
 
-    m_gyro = ::GetGyro().Get();
-    auto shooterAngle = adi_analog_read(shooterPreloadPoterntiometer);
+    m_gyro = 0; // Can't call GetGyro() here - it's not yet initialized
 
     for (int i = 0; i < SamplesToTrack; i++)
     {
@@ -25,7 +24,6 @@ PositionTracker::PositionTracker()
         m_sensor.rightEncoder[i] = 0;
         m_sensor.sideEncoder[i] = 0;
         m_sensor.gyro[i] = m_gyro;
-        m_sensor.shooterAngle[i] = shooterAngle;
 
         m_position.leftSpeed[i] = 0;
         m_position.rightSpeed[i] = 0;
@@ -33,7 +31,6 @@ PositionTracker::PositionTracker()
         m_position.X[i] = 0;
         m_position.Y[i] = 0;
         m_position.gyroSpeed[i] = 0;
-        m_position.shooterAngle[i] = 0;
     }
 }
 
@@ -153,13 +150,11 @@ void PositionTracker::Update()
     m_sensor.rightEncoder[i] = rightEncoder;
     m_sensor.sideEncoder[i] = sideEncoder;
     m_sensor.gyro[i] = m_gyro;
-    m_sensor.shooterAngle[i] = 0;
 
     SmoothSeries(m_sensor.leftEncoder, m_position.leftSpeed, c_initialSmoothingRange, c_finalSmoothingRange);
     SmoothSeries(m_sensor.rightEncoder, m_position.rightSpeed, c_initialSmoothingRange, c_finalSmoothingRange);
     SmoothSeries(m_sensor.sideEncoder, m_position.sideSpeed, c_initialSmoothingRange, c_finalSmoothingRange);
     SmoothSeries(m_sensor.gyro, m_position.gyroSpeed, 1, 2);
-    // SmoothSeries(m_sensor.shooterAngle, m_position.shooterAngle);
 
     RecalcPosition(Index(m_currentIndex - c_initialSmoothingRange - c_finalSmoothingRange), 1);
     RecalcPosition(m_currentIndex, c_initialSmoothingRange + c_finalSmoothingRange);

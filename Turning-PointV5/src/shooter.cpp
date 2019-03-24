@@ -104,6 +104,9 @@ StaticAssert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2] * 3 + Distanc
 
 // Need to figure out initial position
 Shooter::Shooter()
+    : m_preloadSensor(shooterPreloadPoterntiometer),
+      m_angleSensor(anglePotPort),
+      m_ballPresenceSensor(lightSensor)
 {
     m_distanceInches = Distances[2];
     StartMoving();
@@ -147,7 +150,7 @@ bool Shooter::IsMovingAngle()
 {
     if (m_fMoving)
         return true;
-    unsigned int dist = abs(adi_analog_read(anglePotPort) - (int)m_angleToMove);
+    unsigned int dist = abs(m_angleSensor.get_value() - (int)m_angleToMove);
     ReportStatus("Angle dist: %d\n", dist);
     return dist > 10;
 }
@@ -160,7 +163,7 @@ void Shooter::KeepMoving()
     // distance = error
     // diff = derivative
     int speed = 0;
-    unsigned int current = adi_analog_read(anglePotPort);
+    unsigned int current = m_angleSensor.get_value();
     int distance = current - m_angleToMove;
     int diff = distance - m_lastAngleDistance;
 
@@ -240,7 +243,7 @@ void Shooter::StartMoving()
     m_fMoving = true;
     m_angleToMove = ConvertAngleToPotentiometer(CalcAngle());
     m_diffAdjusted = 0;
-    m_lastAngleDistance = adi_analog_read(anglePotPort) - m_angleToMove;
+    m_lastAngleDistance = m_angleSensor.get_value() - m_angleToMove;
     m_count = 0;
 }
 
@@ -297,7 +300,7 @@ BallPresence Shooter::BallStatus()
 {
     // Check if we can detect ball present.
     // Use two stops to make sure we do not move angle up and down if we are somewhere in gray area (on the boundary)
-    unsigned int darkness = adi_analog_read(lightSensor);
+    unsigned int darkness = m_ballPresenceSensor.get_value();
     StaticAssert(lightSensorBallIn < lightSensorBallOut);
     bool ballIn = (darkness < lightSensorBallIn);
     bool ballOut = (darkness > lightSensorBallOut);
@@ -338,7 +341,7 @@ void Shooter::Update()
     UpdateDistanceControls();
 
     bool userShooting = IsShooting();
-    int shooterPreloadPos = adi_analog_read(shooterPreloadPoterntiometer);
+    int shooterPreloadPos = m_preloadSensor.get_value();
 
     m_timeSinseShooting++;
     if (userShooting)
@@ -466,12 +469,10 @@ void Shooter::Update()
     if (shooting)
     {
         motor_move(shooterPort, shooterMotorSpeed);
-		    motor_move(shooter2Port, shooterMotorSpeed);
     }
     else
     {
         motor_move(shooterPort, 0);
-		    motor_move(shooter2Port, 0);
     }
 
     // Keep moving angle to rigth position

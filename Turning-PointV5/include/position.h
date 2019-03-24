@@ -29,8 +29,6 @@ struct SensorData
     double rightEncoder[SamplesToTrack];
     double sideEncoder[SamplesToTrack];
     double gyro[SamplesToTrack];
-
-    double shooterAngle[SamplesToTrack];
 };
 
 struct PositionData
@@ -42,8 +40,6 @@ struct PositionData
 
     double X[SamplesToTrack];
     double Y[SamplesToTrack];
-
-    int shooterAngle[SamplesToTrack];
 };
 
 // This is the structure we expose to other modules
