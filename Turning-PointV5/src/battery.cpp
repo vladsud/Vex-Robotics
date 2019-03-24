@@ -4,5 +4,5 @@
 using namespace pros::c;
 
 float GetMainPower(){
-    return battery_get_capacity() / 1000.0;
+    return battery_get_capacity();
 }
