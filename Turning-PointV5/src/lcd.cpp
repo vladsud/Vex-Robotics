@@ -11,7 +11,10 @@ LCD::LCD()
     m_buttons = 0;
     m_step = 0;
 
-    lcd_initialize();
+    //lcd_initialize();
+    //printf("Is the LCD initialized? %d\n", lcd_is_initialized());
+
+
     lcd_clear();
     PrintStepInstructions();
     m_count = 0;
