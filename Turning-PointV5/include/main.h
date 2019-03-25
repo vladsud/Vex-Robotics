@@ -97,13 +97,13 @@ C: Shooter
 D: left y drive
 *
 *******************************************************************************/
-#define shooterPort 17
+#define shooterPort 12
 #define leftBackDrivePort 18
 #define leftFrontDrivePort 19
 #define intakePort 3
 #define rightFrontDrivePort 20
 #define rightBackDrivePort 16
-#define angleMotorPort 10
+#define angleMotorPort 9
 
 #define descorerPort 99
 

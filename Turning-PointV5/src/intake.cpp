@@ -23,7 +23,7 @@ void Intake::SetIntakeDirection(Direction direction)
         return;
     }
 
-    int power = (m_direction == Direction::Up) ? intakeMotorSpeedUp : -intakeMotorSpeedDown;
+    int power = (m_direction == Direction::Up) ? -intakeMotorSpeedUp : intakeMotorSpeedDown;
 
     if (power * m_power >= 0)
         m_power = power;

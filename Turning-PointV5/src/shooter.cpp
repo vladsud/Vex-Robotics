@@ -2,7 +2,6 @@
 #include "logger.h"
 #include <math.h>
 #include <cstdio>
-
 #include "pros/adi.h"
 #include "pros/motors.h"
 #include "pros/rtos.h"
@@ -10,19 +9,18 @@
 using namespace pros;
 using namespace pros::c;
 
-// Distance based on front of robot
+// Distance based on front of the robot
 constexpr float Distances[]{24, 30, 48, 55, 78, 108};
-//   0: flat - loading
-// 156: highest angle we can do (roughly 60 degrees)
-// At value 72 (roughly 30 degree angle), +1 value results in ~1/3" shift on target, assuming 4th position (54" from target)
-constexpr unsigned int AnglesHigh[]{136, 135, 134, 132, 60, 80};
-constexpr unsigned int AnglesMedium[]{60, 50, 30, 20, 10, 0};
+
+// 135 is the max!!!
+constexpr unsigned int AnglesHigh[]   { 110, 120, 132, 133, 134, 135 };
+constexpr unsigned int AnglesMedium[] { 10,   20,  30,  40,  50,  60 };
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
 constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 {
-    return 1290 + angle * 20;
+    return 4000 - angle * 20;
 }
 
 // Angle potentiometer:
@@ -36,15 +34,15 @@ StaticAssert(Distances[1] < Distances[2]);
 StaticAssert(Distances[2] < Distances[3]);
 StaticAssert(Distances[3] < Distances[4]);
 
-StaticAssert(AnglesHigh[0] >= AnglesHigh[1]);
-StaticAssert(AnglesHigh[1] >= AnglesHigh[2]);
-StaticAssert(AnglesHigh[2] >= AnglesHigh[3]);
-StaticAssert(AnglesHigh[3] >= AnglesHigh[4]);
+StaticAssert(AnglesHigh[0] <= AnglesHigh[1]);
+StaticAssert(AnglesHigh[1] <= AnglesHigh[2]);
+StaticAssert(AnglesHigh[2] <= AnglesHigh[3]);
+StaticAssert(AnglesHigh[3] <= AnglesHigh[4]);
 
-StaticAssert(AnglesMedium[0] >= AnglesMedium[1]);
-StaticAssert(AnglesMedium[1] >= AnglesMedium[2]);
-StaticAssert(AnglesMedium[2] >= AnglesMedium[3]);
-StaticAssert(AnglesMedium[3] >= AnglesMedium[4]);
+StaticAssert(AnglesMedium[0] <= AnglesMedium[1]);
+StaticAssert(AnglesMedium[1] <= AnglesMedium[2]);
+StaticAssert(AnglesMedium[2] <= AnglesMedium[3]);
+StaticAssert(AnglesMedium[3] <= AnglesMedium[4]);
 
 StaticAssert(AnglesMedium[0] < AnglesHigh[0]);
 StaticAssert(AnglesMedium[1] < AnglesHigh[1]);
