@@ -31,9 +31,9 @@ GyroWrapper &GetGyro() { return GetMain().gyro; }
 PositionTracker &GetTracker() { return GetMain().tracker; }
 int GetGyroReading() { return GetTracker().GetGyro(); }
 
-void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown)
+void UpdateIntakeFromShooter(IntakeShoterEvent event)
 {
-	GetMain().intake.UpdateIntakeFromShooter(event, forceDown);
+	GetMain().intake.UpdateIntakeFromShooter(event);
 }
 
 void AssertCore(bool condition, const char *message, const char *file, int line)
@@ -109,14 +109,13 @@ bool Main::UpdateWithoutWaiting()
 
 	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
 	{
-		ReportStatus("Encoders: %d : %d     Angle: %d,   Shooter angle 2nd: %d    Shooter preloader: %d   Gyro: %d  Light: %d\n",
+		ReportStatus("Encoders: %d : %d     Angle: %d,   Shooter preloader: %d   Gyro: %d  Light: %d\n",
 			   motor_get_position(leftBackDrivePort),
 			   motor_get_position(rightBackDrivePort),
 			   adi_analog_read(anglePotPort),
-			   adi_analog_read(ShooterSecondaryPotentiometer),
 			   adi_analog_read(shooterPreloadPoterntiometer),
 			   GetGyroReading() * 10 / GyroWrapper::Multiplier,
-			   adi_analog_read(ballPresenceSensor));
+			   adi_analog_read(ballPresenceSensorUp));
 	}
 
 	return res;

@@ -12,7 +12,7 @@ class Intake
     };
 
     void Update();
-    void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown);
+    void UpdateIntakeFromShooter(IntakeShoterEvent event);
     void SetIntakeDirection(Direction direction);
     void ResetState();
 

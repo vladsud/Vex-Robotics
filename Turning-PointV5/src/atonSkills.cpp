@@ -69,7 +69,7 @@ void RunSuperSkills()
     main.tracker.SetCoordinates({16, 60+24, -90});
 
     // async actions
-    SetShooterAngle(true /*high*/, g_highFlagHeight-2, false /*checkPresenceOfBall*/);
+    SetShooterAngle(true /*high*/, g_highFlagHeight-2);
 
     // Pick up the first ball
     GoToCapWithBallUnderIt(distanceToCap, 2100, -90);
@@ -113,7 +113,7 @@ ReportStatus("\nShooting second pole\n");
     // pick up ball under cap
     TurnToAngle(-90);
     GoToCapWithBallUnderIt(600, 400, -90);
-    WaitShooterAngleToGoUp(500); // wait for the ball actuall to land
+    WaitForBall(500); // wait for the ball actuall to land
 
     // Flip cap #1    
     IntakeDown();

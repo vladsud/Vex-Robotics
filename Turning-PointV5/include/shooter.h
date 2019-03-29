@@ -16,15 +16,18 @@ enum class BallPresence
   HasBall
 };
 
+BallPresence BallStatus(pros::ADIAnalogIn& sensor);
+
 class Shooter
 {
   pros::ADIAnalogIn m_preloadSensor;
   pros::ADIAnalogIn m_angleSensor;
-  pros::ADIAnalogIn m_ballPresenceSensor;
+  pros::ADIAnalogIn m_ballPresenceSensorUp;
+  pros::ADIAnalogIn m_ballPresenceSensorDown;
 
   // This should be comming from autonomous, probably.
   unsigned int m_distanceInches = 48;
-  Flag m_flag = Flag::Loading;
+  Flag m_flag = Flag::High;
 
   // it is recalculated in constructor, so value does not matter that much
   unsigned int m_angleToMove = 1500;
@@ -42,6 +45,8 @@ class Shooter
   bool m_userShooting = false;
   bool m_preloading = false;
   bool m_overrideShooting = false;
+  bool m_haveBall = false;
+  bool m_haveBall2 = false;
 
 public:
   Shooter();

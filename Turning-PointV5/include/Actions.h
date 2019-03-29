@@ -9,7 +9,7 @@
 unsigned int SpeedFromDistances(unsigned int distance, const unsigned int* points, const unsigned int* speeds);
 int SpeedFromDistances(int distance, const unsigned int* points, const unsigned int* speeds);
 
-void SetShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall);
+void SetShooterAngle(bool hightFlag, int distance);
 inline void IntakeUp() { GetMain().intake.SetIntakeDirection(Intake::Direction::Up); }
 inline void IntakeDown() { GetMain().intake.SetIntakeDirection(Intake::Direction::Down); }
 inline void IntakeStop() { GetMain().intake.SetIntakeDirection(Intake::Direction::None); }
@@ -71,10 +71,10 @@ private:
     unsigned int m_maxTime;
 };
 
-struct WaitShooterAngleToGoUpAction : public Action
+struct WaitForBallAction : public Action
 {
     unsigned int m_wait;
-    WaitShooterAngleToGoUpAction(unsigned int maxWait)
+    WaitForBallAction(unsigned int maxWait)
         : m_wait(maxWait)
     {
     }
@@ -83,18 +83,18 @@ struct WaitShooterAngleToGoUpAction : public Action
     {
         if (m_main.GetTime() - m_timeStart >= m_wait)
         {
-            ReportStatus("   WaitShooterAngleToGoUp: timed out: %d\n", m_wait);
+            ReportStatus("   WaitForBallAction: timed out: %d\n", m_wait);
             return true;
         }
-        if (m_main.shooter.GetFlagPosition() != Flag::Loading)
+        if (m_main.shooter.BallStatus() == BallPresence::HasBall)
         {
-            ReportStatus("   WaitShooterAngleToGoUp: got ball: time=%d\n", m_main.GetTime() - m_timeStart);
+            ReportStatus("   WaitForBallAction: got ball: time=%d\n", m_main.GetTime() - m_timeStart);
             return true;
         }
         return false;
     }
 
-    const char* Name() override { return "WaitShooterAngleToGoUpAction"; }
+    const char* Name() override { return "WaitForBallAction"; }
 };
 
 struct ShootBallAction : public Action
@@ -102,17 +102,12 @@ struct ShootBallAction : public Action
     ShootBallAction()
     {
         Assert(!m_main.shooter.IsShooting());
-        if (m_main.shooter.GetFlagPosition() != Flag::Loading)
+        if (m_main.shooter.BallStatus() !=  BallPresence::NoBall)
         {
             m_main.shooter.OverrideSetShooterMode(true /*shooting*/);
             Assert(m_main.shooter.IsShooting());
         }
     }
     bool ShouldStop() override { return !m_main.shooter.IsShooting(); }
-    void Stop() override
-    {
-        // This should be not needed, but might be needed in the future (if we add safety in the form of time-based shooter off)
-        m_main.shooter.SetFlag(Flag::Loading);
-    }
     const char* Name() override { return "ShootBallAction"; }
 };

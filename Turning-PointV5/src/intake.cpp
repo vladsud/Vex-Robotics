@@ -81,7 +81,7 @@ void Intake::Update()
     SetIntakeDirection(direction);
 }
 
-void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown)
+void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event)
 {
     switch (event)
     {
@@ -90,10 +90,7 @@ void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown)
         SetIntakeDirection(Direction::Up);
         break;
     case IntakeShoterEvent::Shooting:
-        if (forceDown)
-            SetIntakeDirection(Direction::Down);
-        else
-            SetIntakeDirection(Direction::None);
+        SetIntakeDirection(Direction::None);
         break;
     }
 }

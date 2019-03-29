@@ -21,7 +21,7 @@ void RunAtonFirstPos()
     main.tracker.SetCoordinates({16, 60, -90});
 
     // async actions
-    SetShooterAngle(true /*high*/, g_highFlagHeight, false /*checkPresenceOfBall*/);
+    SetShooterAngle(true /*high*/, g_highFlagHeight);
 
     //
     // knock the cone
@@ -74,8 +74,8 @@ void RunAtonFirstPos()
         ShootOneBall(true/*high*/, g_midFlagHeightDiagonalShot, true /*checkPresenceOfBall*/);
 
         // IntakeUp();
-        // WaitShooterAngleToGoUp(1000);
-        // SetShooterAngle(false/*high*/, g_highFlagHeightDiagonalShot, true/*checkBall*/);
+        // WaitForBall(1000);
+        // SetShooterAngle(false/*high*/, g_highFlagHeightDiagonalShot);
 
         FlipCap(2100, -400, -48);
 

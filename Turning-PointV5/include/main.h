@@ -25,8 +25,9 @@ enum class IntakeShoterEvent
 {
    LostBall,
    Shooting,
+   TooManyBalls,
 };
-void UpdateIntakeFromShooter(IntakeShoterEvent event, bool forceDown);
+void UpdateIntakeFromShooter(IntakeShoterEvent event);
 
 #define __noop(...)
 
@@ -97,13 +98,13 @@ C: Shooter
 D: left y drive
 *
 *******************************************************************************/
-#define shooterPort 12
-#define leftBackDrivePort 18
-#define leftFrontDrivePort 19
-#define intakePort 3
-#define rightFrontDrivePort 20
-#define rightBackDrivePort 16
-#define angleMotorPort 9
+#define shooterPort 4
+#define leftBackDrivePort 2
+#define leftFrontDrivePort 18
+#define intakePort 6
+#define rightFrontDrivePort 9
+#define rightBackDrivePort 5
+#define angleMotorPort 8
 
 #define descorerPort 99
 
@@ -113,14 +114,14 @@ D: left y drive
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define gyroPort 1
-#define anglePotPort 8
+#define gyroPort 3
+#define anglePotPort 1
 
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99
-#define ballPresenceSensor 99
+#define ballPresenceSensorUp 2
+#define ballPresenceSensorDown 4
 #define shooterPreloadPoterntiometer 99
-#define ShooterSecondaryPotentiometer 99
 
 
 /*******************************************************************************

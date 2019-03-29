@@ -54,9 +54,9 @@ inline void TurnToAngle(int turn)
     WaitAfterMove();
 }
 
-inline void WaitShooterAngleToGoUp(unsigned int wait)
+inline void WaitForBall(unsigned int wait)
 {
-    Do(WaitShooterAngleToGoUpAction(wait));
+    Do(WaitForBallAction(wait));
 }
 
 inline void WaitShooterAngleToStop(unsigned int maxTime = 1000)

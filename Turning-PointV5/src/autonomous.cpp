@@ -206,24 +206,15 @@ void autonomous()
 }
 
 
-void SetShooterAngle(bool hightFlag, int distance, bool checkPresenceOfBall)
+void SetShooterAngle(bool hightFlag, int distance)
 {
     auto &main = GetMain();
     auto flag = hightFlag ? Flag::High : Flag::Middle;
     // we disable checking for ball only for first action - shooting.
     Assert(!main.shooter.IsShooting());
 
-    if (!checkPresenceOfBall || main.shooter.BallStatus() != BallPresence::NoBall)
-    {
-        main.shooter.SetFlag(flag);
-        main.shooter.SetDistance(distance);
-        Assert(main.shooter.GetFlagPosition() != Flag::Loading); // importatn for next ShootBall action to be no-op
-    }
-    else
-    {
-        Assert(!main.shooter.IsMovingAngle());                   // are we waiting for nothing?
-        Assert(main.shooter.GetFlagPosition() == Flag::Loading); // importatn for next ShootBall action to be no-op
-    }
+    main.shooter.SetFlag(flag);
+    main.shooter.SetDistance(distance);
 }
 
 
@@ -318,10 +309,10 @@ void ShootOneBall(bool high, int distance, bool checkBallPresence)
     IntakeStop();
 
     ReportStatus("Waiting for angle to go up: %ld\n", millis());
-    WaitShooterAngleToGoUp(2000);
+    WaitForBall(2000);
     if (main.shooter.BallStatus() != BallPresence::NoBall)
     {
-        SetShooterAngle(high, distance, checkBallPresence);
+        SetShooterAngle(high, distance);
         ReportStatus("Waiting for angle to stop: %ld\n", millis());
         WaitShooterAngleToStop(main.lcd.AtonSkills ? 4000: 1000);
         ReportStatus("Shooting: %ld\n", millis());

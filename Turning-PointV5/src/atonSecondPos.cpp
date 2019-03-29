@@ -9,7 +9,7 @@ void RunAtonSecondPos()
     GetMain().tracker.SetCoordinates({16.5 - 1, 33 + 48 - 1, -30});
 
    // Shoot the ball
-    SetShooterAngle(true, 108, false /*checkPresenceOfBall*/);
+    SetShooterAngle(true, 108);
     WaitShooterAngleToStop();
     Wait(1000);
     ShootBall();
@@ -32,7 +32,7 @@ void RunAtonSecondPos()
         }
 
         TurnToAngle(-10);
-        SetShooterAngle(false, 108, false /*checkPresenceOfBall*/);
+        SetShooterAngle(false, 108);
         IntakeUp();
         WaitShooterAngleToStop();
         Wait(5000);

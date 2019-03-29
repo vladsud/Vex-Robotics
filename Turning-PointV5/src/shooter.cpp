@@ -23,8 +23,6 @@ constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
     return 4000 - angle * 20;
 }
 
-// Angle potentiometer:
-constexpr unsigned int anglerLow = 80;
 
 StaticAssert(CountOf(Distances) == CountOf(AnglesHigh));
 StaticAssert(CountOf(Distances) == CountOf(AnglesMedium));
@@ -52,9 +50,6 @@ StaticAssert(AnglesMedium[4] < AnglesHigh[4]);
 
 constexpr unsigned int CalcAngle(Flag flag, float distanceInches)
 {
-    if (flag == Flag::Loading)
-        return anglerLow;
-
     const unsigned int *angles = (flag == Flag::High) ? AnglesHigh : AnglesMedium;
     unsigned int count = CountOf(Distances);
 
@@ -77,7 +72,6 @@ constexpr bool AlmostSameAngle(unsigned int angle1, unsigned int angle2)
     return angle1 == angle2;
 }
 
-StaticAssert(CalcAngle(Flag::Loading, Distances[2]) == anglerLow);
 
 StaticAssert(CalcAngle(Flag::High, Distances[0] - 5) == AnglesHigh[0]);
 StaticAssert(CalcAngle(Flag::High, Distances[0]) == AnglesHigh[0]);
@@ -99,7 +93,8 @@ StaticAssert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2] * 3 + Distanc
 Shooter::Shooter()
     : m_preloadSensor(shooterPreloadPoterntiometer),
       m_angleSensor(anglePotPort),
-      m_ballPresenceSensor(ballPresenceSensor)
+      m_ballPresenceSensorUp(ballPresenceSensorUp),
+      m_ballPresenceSensorDown(ballPresenceSensorDown)
 {
     motor_tare_position(angleMotorPort);
     m_distanceInches = Distances[2];
@@ -110,11 +105,6 @@ Shooter::Shooter()
 unsigned int Shooter::CalcAngle()
 {
     return ::CalcAngle(m_flag, m_distanceInches);
-}
-
-bool MoveToLoadingPosition()
-{
-    return joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_DOWN);
 }
 
 bool MoveToTopFlagPosition()
@@ -129,9 +119,6 @@ bool MoveToMiddleFlagPosition()
 
 bool Shooter::IsShooting()
 {
-    if (m_flag == Flag::Loading)
-        return false;
-
     // Allow "shoot" button to be pressed all the time and shoot once angle is settled
     if (m_fMoving)
     {
@@ -169,7 +156,7 @@ void Shooter::KeepMoving()
     m_count++;
 
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4) || (distance > 0 && m_flag == Flag::Loading))
+    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4))
     {
         if (m_fMoving)
         {
@@ -264,16 +251,19 @@ void Shooter::UpdateDistanceControls()
 void Shooter::OverrideSetShooterMode(bool on)
 {
     Assert(isAuto());
-    Assert(!on || m_flag != Flag::Loading);
-
     m_overrideShooting = on;
 }
 
 BallPresence Shooter::BallStatus()
 {
+    return ::BallStatus(m_ballPresenceSensorUp);
+}
+
+BallPresence BallStatus(pros::ADIAnalogIn& sensor)
+{
     // Check if we can detect ball present.
     // Use two stops to make sure we do not move angle up and down if we are somewhere in gray area (on the boundary)
-    unsigned int darkness = m_ballPresenceSensor.get_value();
+    unsigned int darkness = sensor.get_value();
     StaticAssert(lightSensorBallIn < lightSensorBallOut);
     bool ballIn = (darkness < lightSensorBallIn);
     bool ballOut = (darkness > lightSensorBallOut);
@@ -320,7 +310,7 @@ void Shooter::Update()
     if (userShooting)
     {
         m_timeSinseShooting = 0;
-        UpdateIntakeFromShooter(IntakeShoterEvent::Shooting, m_flag == Flag::Middle && m_distanceInches > Distances[1] /*forceDown*/);
+        UpdateIntakeFromShooter(IntakeShoterEvent::Shooting);
     }
 
     // Did we go from zero to 4000 on potentiometer?
@@ -361,73 +351,48 @@ m_Manual = true;
 
     // Check if we can detect ball present.
     BallPresence ball = BallStatus();
+    BallPresence ball2 = ::BallStatus(m_ballPresenceSensorDown);
 
-    // User can disable auto-reload by moving angle up / down against system.
-    // If it happens, we set m_Manual = false for this cycle (until readng starts matching user actions)
-    bool lostball = false;
     if (!m_Manual)
     {
-        if (ball == BallPresence::HasBall && m_flag == Flag::Loading)
-            SetFlag(Flag::High);
-        if (ball == BallPresence::NoBall && m_flag != Flag::Loading)
+        if (ball == BallPresence::HasBall && ball2 == BallPresence::HasBall && (!m_haveBall || !m_haveBall2))
         {
-            lostball = true;
-            SetFlag(Flag::Loading);
-            UpdateIntakeFromShooter(IntakeShoterEvent::LostBall, false /*forceDown*/);
+            UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
+        }
+        
+        if (ball == BallPresence::NoBall && m_haveBall)
+        {
+            UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
+
+            // Did shot just hapened?
+            // We can't use potentiometer here, because we are very close to dead zone, so it can jump from 0 to 4000.
+            // But having user pressing shoot button and losing the ball is a good indicator we are done.
+            // This does not handle case when ball escapes, but shooter still did not fire - we will misfire and reload -
+            // likely in time for next ball to land in shooter, so it's not a big issue.
+            if (m_timeSinseShooting <= 20)
+            {
+                m_disablePreload = false;
+                m_overrideShooting = false; // this is signal to autonomous!
+                m_preloadAfterShotCounter = 100;
+            }
         }
     }
 
-    // We tell intake to go down when shooting to clear space for the ball that we are about to shoot.
-    // But if user stopped shooting, then we want to keep second ball and not lose it, thus we need to let intake know
-    // about this event and start moving up. Similar logic exists for when we lose ball (as result of shooting),
-    // but this case is required for case when the ball was not shot
-    // Note that we do not want to do this in autonomouns / when we lost a ball, as this happens after we moved to nezt step,
-    // and thus we can overwrite autonomous command that instructed intake to go down.
-    if (!userShooting && m_userShooting && !isAuto())
-        UpdateIntakeFromShooter(IntakeShoterEvent::LostBall, false /*forceDown*/);
-
+    m_haveBall = (ball == BallPresence::HasBall);
+    m_haveBall2 = (ball2 == BallPresence::HasBall);
     m_userShooting = userShooting;
     m_preloading = needPreload;
 
-    // Did shot just hapened?
-    // We can't use potentiometer here, because we are very close to dead zone, so it can jump from 0 to 4000.
-    // But having user pressing shoot button and losing the ball is a good indicator we are done.
-    // This does not handle case when ball escapes, but shooter still did not fire - we will misfire and reload -
-    // likely in time for next ball to land in shooter, so it's not a big issue.
-    if (m_timeSinseShooting <= 20 && lostball)
-    {
-        m_disablePreload = false;
-        m_overrideShooting = false; // this is signal to autonomous!
-        m_preloadAfterShotCounter = 100;
-    }
 
     // Check angle direction based on user actions.
     bool topFlag = MoveToTopFlagPosition();
     bool middleFlag = MoveToMiddleFlagPosition();
 
-    if (MoveToLoadingPosition())
-    {
-        if (m_flag != Flag::Loading)
-        {
-            if (ball == BallPresence::HasBall)
-                m_Manual = true;
-            if (ball == BallPresence::NoBall)
-                m_Manual = false;
-        }
-        SetFlag(Flag::Loading);
-    }
-    else if (topFlag || middleFlag)
-    {
-        if (m_flag == Flag::Loading)
-        {
-            if (ball == BallPresence::NoBall)
-                m_Manual = true;
-            else if (ball == BallPresence::HasBall)
-                m_Manual = false;
-        }
-        SetFlag(topFlag ? Flag::High : Flag::Middle);
-    }
-
+    if (topFlag)
+        SetFlag(Flag::High);
+    if (middleFlag)
+        SetFlag(Flag::Middle);
+        
     bool shooting = userShooting || needPreload || m_preloadAfterShotCounter > 0;
     if (userShooting && !isAuto() && m_flag == Flag::Middle && m_distanceInches >= Distances[2])
     {
