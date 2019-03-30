@@ -11,7 +11,6 @@
  */
 
 #include "aton.h"
-#include "battery.h"
 #include "pros/rtos.h"
 
 using namespace pros::c;
@@ -119,13 +118,7 @@ bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t
 
 void autonomous()
 {
-    float mp = GetMainPower();
-    ReportStatus("Main Battery Level: %.2f\n" , mp);
-    if (mp <= 10.0f)
-    {
-        ReportStatus("\nERROR: LOW OR NO BATTERY\n");
-        return;
-    }
+    ReportStatus("Main Battery Level: %.2f\n" , battery_get_capacity());
 
     // Safety net: run autonomous only once!
     // In case manual auto was still in place when running on competition.

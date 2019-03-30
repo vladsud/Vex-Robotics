@@ -1,6 +1,5 @@
 #include "lcd.h"
 #include "main.h"
-#include "battery.h"
 #include "aton.h"
 #include "pros/llemu.h"
 
@@ -10,10 +9,6 @@ LCD::LCD()
 {
     m_buttons = 0;
     m_step = 0;
-
-    //lcd_initialize();
-    //printf("Is the LCD initialized? %d\n", lcd_is_initialized());
-
 
     lcd_clear();
     PrintStepInstructions();
@@ -27,14 +22,12 @@ void LCD::PrintMessage(const char *message)
 
 void LCD::PrintStepInstructions()
 {
-    float mp = GetMainPower();
-
     switch (m_step)
     {
     case 0:
         lcd_print(1, "Main Battery");
 
-        lcd_print(2, "%.2f  Cont", mp);
+        lcd_print(2, "%.2f  Cont", battery_get_capacity());
 
         break;
     case 1:
@@ -103,7 +96,7 @@ void LCD::Update()
     m_count++;
     if (m_step == 0 && m_count % 100 == 0)
     {
-        float mp = GetMainPower();
+        float mp = battery_get_capacity();
         //lcdSetText(1, "Main        ");
         lcd_print(2, "%.2f  Cont", mp);
 
@@ -167,4 +160,125 @@ void LCD::Update()
         m_step--;
     }
     PrintStepInstructions();
+}
+
+
+
+struct Button
+{
+    uint8_t id;
+    const char* label;
+    bool& value; 
+};
+
+
+// Starting to build alternative implementation for V5 LCD
+class NewLCD
+{
+public:
+	bool AtonBlueRight = false;
+	bool AtonFirstPos = true;
+	bool AtonClimbPlatform = true;
+	bool AtonSkills = false;
+
+public:
+    void PrintMessage(const char *message);
+    void Update();
+
+private:
+    static lv_res_t press_action(lv_obj_t * btn);
+    static lv_res_t click_action(lv_obj_t * btn);
+    lv_obj_t* CreateButton(uint8_t id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled);
+    void CreateControls();
+
+private:
+    lv_obj_t* m_textobj = nullptr;
+    lv_obj_t* m_battery = nullptr;
+    unsigned int m_count = 0;
+
+    bool lcdA;
+    const Button m_buttons[3] = {
+        {0, "Blue (right)", AtonBlueRight},
+        {1, "Climb platform", AtonClimbPlatform},
+        {2, "First pos", AtonFirstPos},
+    };
+};
+
+
+lv_res_t NewLCD::press_action(lv_obj_t * btn) 
+{
+    uint8_t id = lv_obj_get_free_num(btn);
+    printf("Press: %d\n)", id);
+    // GetMain().lcd.m_buttons[id].value = true;
+    return LV_RES_OK;
+}
+
+lv_res_t NewLCD::click_action(lv_obj_t * btn) 
+{
+    uint8_t id = lv_obj_get_free_num(btn);
+    printf("Click: %d\n)", id);
+    // GetMain().lcd.m_buttons[id].value = false;
+    return LV_RES_OK;
+}
+
+lv_obj_t* NewLCD::CreateButton(uint8_t id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled)
+{
+    lv_obj_t * btn = lv_btn_create(container, NULL);
+    lv_btn_set_toggle(btn, true);
+    
+    if (prevElement)
+        lv_obj_align(btn, prevElement, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+    else
+        lv_obj_set_pos(btn, 40, 40);
+
+    lv_cont_set_fit(btn, true, true); // enable auto-resize
+    // lv_obj_set_size(btn, 100, 50);
+    lv_btn_set_toggle(btn, true); // it's a toggle-button
+    
+    if (toggled)
+        lv_btn_set_state(btn, LV_BTN_STATE_TGL_REL);
+
+    lv_obj_set_free_num(btn, id);
+
+    lv_btn_set_action(btn, LV_BTN_ACTION_CLICK, click_action); 
+    lv_btn_set_action(btn, LV_BTN_ACTION_PR, press_action); 
+
+    /*Add text*/
+    lv_obj_t * labelEl = lv_label_create(btn, NULL);
+    lv_label_set_text(labelEl, label);    
+
+    return btn;
+}
+
+void NewLCD::CreateControls()
+{
+    m_textobj = lv_label_create(lv_scr_act(), NULL);
+    lv_obj_align(m_textobj, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, 10);
+
+    m_battery = lv_label_create(m_textobj, NULL);
+    lv_obj_align(m_battery, NULL, LV_ALIGN_OUT_TOP_MID, 0, 10);
+
+    // auto container = lv_scr_act();
+    auto container  = lv_cont_create(lv_scr_act(), NULL);
+    lv_cont_set_fit(container, true, true);
+
+    lv_obj_t* last = nullptr;
+    for (int i = 0; i < CountOf(m_buttons); i++)
+        last = CreateButton(i, m_buttons[i].label, container, last, m_buttons[i].value);
+}
+
+void NewLCD::Update()
+{
+    m_count++;
+    if ((m_count % 50) == 0)
+    {
+        char buffer[128];
+        sprintf(buffer, "Battery %.2f %%", battery_get_capacity());
+        lv_label_set_text(m_battery, buffer);
+    }
+}
+
+void NewLCD::PrintMessage(const char *message)
+{
+    lv_label_set_text(m_textobj, message);
 }
