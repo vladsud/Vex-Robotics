@@ -268,10 +268,12 @@ BallPresence BallStatus(pros::ADIAnalogIn& sensor)
     bool ballIn = (darkness < lightSensorBallIn);
     bool ballOut = (darkness > lightSensorBallOut);
 
-    if (ballOut)
+    if (ballOut){
         return BallPresence::NoBall;
-    if (ballIn)
+    }
+    if (ballIn){
         return BallPresence::HasBall;
+    }
     return BallPresence::Unknown;
 }
 
@@ -359,7 +361,7 @@ m_Manual = true;
         {
             UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
         }
-        
+
         if (ball == BallPresence::NoBall && m_haveBall)
         {
             UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
@@ -392,7 +394,7 @@ m_Manual = true;
         SetFlag(Flag::High);
     if (middleFlag)
         SetFlag(Flag::Middle);
-        
+
     bool shooting = userShooting || needPreload || m_preloadAfterShotCounter > 0;
     if (userShooting && !isAuto() && m_flag == Flag::Middle && m_distanceInches >= Distances[2])
     {

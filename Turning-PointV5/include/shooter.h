@@ -43,7 +43,7 @@ class Shooter
   bool m_Manual = false;
   bool m_disablePreload = false;
   bool m_userShooting = false;
-  bool m_preloading = false;
+  bool m_preloading = true;
   bool m_overrideShooting = false;
   bool m_haveBall = false;
   bool m_haveBall2 = false;

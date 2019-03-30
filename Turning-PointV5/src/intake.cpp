@@ -44,10 +44,14 @@ void Intake::Update()
     Direction direction = m_direction;
 
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
+    {
         m_downABit = 50;
+        ballGoDownState = false;
+    }
 
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
+        ballGoDownState = false;
         m_downABit = 0;
         if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2) || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
         {
@@ -61,6 +65,7 @@ void Intake::Update()
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
+        ballGoDownState = false;
         m_downABit = 0;
         direction = Direction::Down;
     }
@@ -78,6 +83,16 @@ void Intake::Update()
         direction = (m_downABit == 0) ? Direction::None : Direction::Down;
     }
 
+    
+    if (ballGoDownState)
+    {
+        if (motor_get_position(intakePort) > 600)
+        {
+            ballGoDownState = false;
+            SetIntakeDirection(Direction::None);
+        }
+    }
+
     SetIntakeDirection(direction);
 }
 
@@ -91,6 +106,11 @@ void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event)
         break;
     case IntakeShoterEvent::Shooting:
         SetIntakeDirection(Direction::None);
+        break;
+    case IntakeShoterEvent::TooManyBalls:
+        motor_tare_position(intakePort);
+        ballGoDownState = true;
+        SetIntakeDirection(Direction::Down);
         break;
     }
 }
@@ -129,4 +149,5 @@ void Descorer::Update()
             motor_move(descorerPort, 15);
         }
     }
+
 }

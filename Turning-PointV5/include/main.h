@@ -99,6 +99,7 @@ D: left y drive
 *
 *******************************************************************************/
 #define shooterPort 4
+
 #define leftBackDrivePort 2
 #define leftFrontDrivePort 18
 #define intakePort 6
@@ -138,8 +139,8 @@ D: left y drive
 * OTHER CONSTANTS
 *
 *******************************************************************************/
-#define lightSensorBallIn 2600
-#define lightSensorBallOut 2900
+#define lightSensorBallIn 2300
+#define lightSensorBallOut 2600
 
 #define ShooterPreloadEnd 950
 #define ShooterPreloadStart 1150
