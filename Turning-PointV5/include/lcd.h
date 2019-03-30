@@ -1,5 +1,6 @@
 #pragma once
 // #include "pros/llemu.h"
+#include <string>
 #include "display/lvgl.h"
 
 /*******************************************************************************
@@ -10,7 +11,8 @@
 struct Button
 {
     const char* label;
-    bool& value; 
+    const char* label2;
+    bool& value;
 };
 
 class LCD
@@ -38,9 +40,10 @@ private:
     unsigned int m_count = 0;
 
     bool lcdA;
+
     const Button m_buttons[3] = {
-        {"Blue (right)", AtonBlueRight},
-        {"First", AtonFirstPos},
-        {"Platform", AtonClimbPlatform},
+        {"Blue (right)", "Red (left)", AtonBlueRight},
+        {"First", "Second", AtonFirstPos},
+        {"Platform", "No Plat", AtonClimbPlatform},
     };
 };

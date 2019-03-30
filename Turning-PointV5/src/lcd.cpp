@@ -1,6 +1,7 @@
 #include "lcd.h"
 #include "main.h"
 #include "aton.h"
+#include <string.h>
 
 using namespace pros::c;
 
@@ -14,6 +15,16 @@ lv_res_t LCD::click_action(lv_obj_t * btn)
     uint8_t id = lv_obj_get_free_num(btn);
     auto& value = GetMain().lcd.m_buttons[id].value;
     value = !value;;
+
+
+    lv_obj_t * label = lv_obj_get_child(btn, NULL);
+    
+    if (value)
+        lv_label_set_text(label, GetMain().lcd.m_buttons[id].label);
+    else
+        lv_label_set_text(label, GetMain().lcd.m_buttons[id].label2);
+
+
     ReportStatus("Click: %d:  %s = %d\n)", id, GetMain().lcd.m_buttons[id].label, value);
     return LV_RES_OK;
 }
@@ -60,8 +71,11 @@ void LCD::CreateControls()
     auto container  = lv_cont_create(lv_scr_act(), NULL);
 
     lv_obj_t* last = nullptr;
-    for (int i = 0; i < CountOf(m_buttons); i++)
-        last = CreateButton(i, m_buttons[i].label, container, last, m_buttons[i].value);
+
+    for (int i = 0; i < CountOf(m_buttons); i++){
+        last = CreateButton(i, m_buttons[i].value ? m_buttons[i].label : m_buttons[i].label2, 
+            container, last, m_buttons[i].value);
+    }
 
     lv_cont_set_fit(container, true, true);
     lv_obj_align(container, NULL, LV_ALIGN_IN_TOP_MID, 0, 10);
