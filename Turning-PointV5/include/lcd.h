@@ -9,7 +9,6 @@
 *******************************************************************************/
 struct Button
 {
-    uint8_t id;
     const char* label;
     bool& value; 
 };
@@ -28,7 +27,6 @@ public:
     void Update();
 
 private:
-    static lv_res_t press_action(lv_obj_t * btn);
     static lv_res_t click_action(lv_obj_t * btn);
     lv_obj_t* CreateButton(uint8_t id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled);
     void CreateControls();
@@ -41,8 +39,8 @@ private:
 
     bool lcdA;
     const Button m_buttons[3] = {
-        {0, "Blue (right)", AtonBlueRight},
-        {1, "Platform", AtonClimbPlatform},
-        {2, "First", AtonFirstPos},
+        {"Blue (right)", AtonBlueRight},
+        {"First", AtonFirstPos},
+        {"Platform", AtonClimbPlatform},
     };
 };

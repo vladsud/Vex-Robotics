@@ -9,14 +9,6 @@ LCD::LCD()
     CreateControls();
 }
 
-lv_res_t LCD::press_action(lv_obj_t * btn) 
-{
-    uint8_t id = lv_obj_get_free_num(btn);
-    printf("Press: %d\n)", id);
-    // GetMain().lcd.m_buttons[id].value = true;
-    return LV_RES_OK;
-}
-
 lv_res_t LCD::click_action(lv_obj_t * btn) 
 {
     uint8_t id = lv_obj_get_free_num(btn);
@@ -47,7 +39,6 @@ lv_obj_t* LCD::CreateButton(uint8_t id, const char* label, lv_obj_t* container, 
     lv_obj_set_free_num(btn, id);
 
     lv_btn_set_action(btn, LV_BTN_ACTION_CLICK, click_action); 
-    // lv_btn_set_action(btn, LV_BTN_ACTION_PR, press_action); 
 
     /*Add text*/
     lv_obj_t * labelEl = lv_label_create(btn, NULL);

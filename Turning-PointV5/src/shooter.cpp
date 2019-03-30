@@ -345,11 +345,6 @@ void Shooter::Update()
         needPreload = false;
     }
 
-//TODO: remove
-needPreload = false;
-m_preloadAfterShotCounter = 0;
-
-
     // Check if we can detect ball present.
     BallPresence ball = BallStatus();
     BallPresence ball2 = ::BallStatus(m_ballPresenceSensorDown);
@@ -359,7 +354,7 @@ m_preloadAfterShotCounter = 0;
         UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
     }
 
-    if (ball == BallPresence::NoBall && m_haveBall)
+    if (ball != BallPresence::HasBall && m_haveBall)
     {
         UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
 
@@ -372,7 +367,7 @@ m_preloadAfterShotCounter = 0;
         {
             m_disablePreload = false;
             m_overrideShooting = false; // this is signal to autonomous!
-            m_preloadAfterShotCounter = 100;
+            m_preloadAfterShotCounter = 50;
         }
     }
 

@@ -122,7 +122,7 @@ D: left y drive
 #define lineTrackerRightPort 99
 #define ballPresenceSensorUp 2
 #define ballPresenceSensorDown 4
-#define shooterPreloadPoterntiometer 99
+#define shooterPreloadPoterntiometer 5
 
 
 /*******************************************************************************
@@ -142,7 +142,7 @@ D: left y drive
 #define lightSensorBallIn 2600
 #define lightSensorBallOut 2700
 
-#define ShooterPreloadEnd 950
-#define ShooterPreloadStart 1150
+#define ShooterPreloadEnd 100
+#define ShooterPreloadStart 300
 
 #define DistanveBetweenLineSensors 390 // in clicks, rouhly 14"

@@ -1,6 +1,7 @@
 #include "intake.h"
 #include "logger.h"
 #include "pros/motors.h"
+#include <stdio.h>
 
 using namespace pros;
 using namespace pros::c;
@@ -67,6 +68,8 @@ void Intake::Update()
         if (m_ballGoDownState)
         {
             int pos = motor_get_position(intakePort);
+            // There is a lot of intertia, but ball is not moving up any more
+            // DEtect when intake actually reverses, and start counting from there...
             if (pos < 0)
                 motor_tare_position(intakePort);
             if (pos > 150)
@@ -75,7 +78,7 @@ void Intake::Update()
                 direction = Direction::None;
                 m_power = 0; // remove latency!
             }
-        }     
+        }
     }
 
     if (m_doublePressed)
@@ -89,11 +92,11 @@ void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event)
     switch (event)
     {
     case IntakeShoterEvent::LostBall:
-        //if (m_direction == Direction::None && !m_doublePressed)
         SetIntakeDirection(Direction::Up);
         break;
     case IntakeShoterEvent::Shooting:
-        SetIntakeDirection(Direction::None);
+        // Do nothing here, a these events wrap around LostBall and prevent us from receiving new ball
+        // SetIntakeDirection(Direction::None);
         break;
     case IntakeShoterEvent::TooManyBalls:
         motor_tare_position(intakePort);
