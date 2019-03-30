@@ -10,6 +10,7 @@
 #include "position.h"
 #include "shooter.h"
 #include "lineTracker.h"
+#include "vision.h"
 
 /*******************************************************************************
 * 
@@ -35,6 +36,7 @@ class Main
 	PositionTracker tracker;
 	LCD lcd;
 	Logger logger;
+	Vision vision;
 	LineTracker lineTrackerLeft {lineTrackerLeftPort};
 	LineTracker lineTrackerRight {lineTrackerRightPort};
 
@@ -48,6 +50,7 @@ class Main
   protected:
 	// returns true when it's good time for external system (like autonomous) consume some CPU cycles
 	bool UpdateWithoutWaiting();
+	void UpdateFastSystems();
 
   private:
 	unsigned long m_Ticks = 0; // in ms

@@ -64,31 +64,34 @@ void Main::Update()
 	} while (!UpdateWithoutWaiting());
 }
 
-void Main::UpdateAllSystems()
-{
-	lcd.Update();
-	// descorer.Update();
-	intake.Update();
-	shooter.Update();
-	drive.Update();
 
+void Main::UpdateFastSystems()
+{
 	gyro.Integrate();
 	tracker.Update();
-}
-
-bool Main::UpdateWithoutWaiting()
-{
-	bool res = false;
-
-	// has to be the first one!
-	gyro.Integrate();
-	tracker.Update();
-
 	// We go through line very quickly, so we do not have enough precision if we check it
 	// every 10 ms.
 	drive.UpdateDistanes();
 	lineTrackerLeft.Update();
 	lineTrackerRight.Update();
+
+}
+
+void Main::UpdateAllSystems()
+{
+	UpdateFastSystems();
+
+	lcd.Update();
+	vision.Update();
+	// descorer.Update();
+	intake.Update();
+	shooter.Update();
+	drive.Update();
+}
+
+bool Main::UpdateWithoutWaiting()
+{
+	bool res = false;
 
 	// If this assert fires, than numbers do not represent actual timing.
 	// It's likley not a big deal, but something somwhere might not work because of it.
@@ -97,14 +100,15 @@ bool Main::UpdateWithoutWaiting()
 	if (m_TicksToMainUpdate / trackerPullTime == 0)
 	{
 		m_TicksToMainUpdate = allSystemsPullTime;
-		// cheap sytems are grouped together
-		lcd.Update();
-		// descorer.Update();
-		intake.Update();
-		shooter.Update();
-		drive.Update();
+		
+		UpdateAllSystems();
+
 		// Good place for external code to consume some cycles
 		res = true;
+	}
+	else
+	{
+		UpdateFastSystems();
 	}
 
 	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)

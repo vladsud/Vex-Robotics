@@ -1,11 +1,10 @@
 #include "main.h"
-#include "pros/vision.hpp"
+#include"vision.h"
 #include "pros/adi.h" // for PROS_ERR
 #include "errno.h"
 #include <stdio.h>
 
-#define VisionPort 1
-#define RGB2COLOR(R, G, B) ((R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff)) 
+ #define RGB2COLOR(R, G, B) ((R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff)) 
 
 using namespace pros::c;
 
@@ -26,16 +25,6 @@ Signature g_signatures[] = {
     {"Blue full", 30, vision_signature_from_utility(1, -3145, -2205, -2675, -1299, 14607, 6654, 2.100, 0)},
     {"Blue full", 50, vision_signature_from_utility(1, -3223, -2311, -2767, -1763, 14641, 6439, 2.000, 0)},
 //    {"Blue full", 80, vision_signature_from_utility(1, -3595, -47, -1821, -317, 12965, 6324, 1.300, 0)}, // can't detect at all
-};
-
-class Vision
-{
-    pros::Vision m_sensor;
-    unsigned int m_count = 0;
-
-public:
-    Vision();
-    void Update();
 };
 
 
@@ -70,9 +59,12 @@ void Vision::Update()
         return;
     if (count == PROS_ERR)
     {
+        // no objects found;
+        if (errno == EDOM)
+            return;
+
         // EINVAL = 22 - incorrect port or port type
         // EACCES = 13 - someone else is talking to same port
-        // EDOM (33?) - first arg is bigger then number of objects.
         ReportStatus("Vision sensor error: %d\n", errno);
         return;
     }
@@ -85,6 +77,7 @@ void Vision::Update()
         count = CountOf(objects);
     }
 
+    ReportStatus("Vision: %d objects\n", count);
     for (int i = 0; i < count; i++)
     {
         if (objects[i].signature == VISION_OBJECT_ERR_SIG)
@@ -94,7 +87,7 @@ void Vision::Update()
         else
         {
             auto& obj = g_signatures[objects[i].signature-1];
-            ReportStatus("Vision object detected: %s %d, coord=(%d, %d), size=(%d, %d)\n",                    
+            ReportStatus("   Vision object detected: %s %d, coord=(%d, %d), size=(%d, %d)\n",                    
                     obj.name,
                     obj.brightness,
                     objects[i].x_middle_coord, objects[i].y_middle_coord,
