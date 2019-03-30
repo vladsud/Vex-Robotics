@@ -348,35 +348,31 @@ void Shooter::Update()
 //TODO: remove
 needPreload = false;
 m_preloadAfterShotCounter = 0;
-m_Manual = true;
 
 
     // Check if we can detect ball present.
     BallPresence ball = BallStatus();
     BallPresence ball2 = ::BallStatus(m_ballPresenceSensorDown);
 
-    if (!m_Manual)
+    if (ball == BallPresence::HasBall && ball2 == BallPresence::HasBall && (!m_haveBall || !m_haveBall2))
     {
-        if (ball == BallPresence::HasBall && ball2 == BallPresence::HasBall && (!m_haveBall || !m_haveBall2))
-        {
-            UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
-        }
+        UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
+    }
 
-        if (ball == BallPresence::NoBall && m_haveBall)
-        {
-            UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
+    if (ball == BallPresence::NoBall && m_haveBall)
+    {
+        UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
 
-            // Did shot just hapened?
-            // We can't use potentiometer here, because we are very close to dead zone, so it can jump from 0 to 4000.
-            // But having user pressing shoot button and losing the ball is a good indicator we are done.
-            // This does not handle case when ball escapes, but shooter still did not fire - we will misfire and reload -
-            // likely in time for next ball to land in shooter, so it's not a big issue.
-            if (m_timeSinseShooting <= 20)
-            {
-                m_disablePreload = false;
-                m_overrideShooting = false; // this is signal to autonomous!
-                m_preloadAfterShotCounter = 100;
-            }
+        // Did shot just hapened?
+        // We can't use potentiometer here, because we are very close to dead zone, so it can jump from 0 to 4000.
+        // But having user pressing shoot button and losing the ball is a good indicator we are done.
+        // This does not handle case when ball escapes, but shooter still did not fire - we will misfire and reload -
+        // likely in time for next ball to land in shooter, so it's not a big issue.
+        if (m_timeSinseShooting <= 20)
+        {
+            m_disablePreload = false;
+            m_overrideShooting = false; // this is signal to autonomous!
+            m_preloadAfterShotCounter = 100;
         }
     }
 

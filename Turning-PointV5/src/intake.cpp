@@ -29,7 +29,7 @@ void Intake::SetIntakeDirection(Direction direction)
         m_power = power;
     else
         // slow down transition when change in direciton happens
-        m_power += Sign(power) * 10;
+        m_power += Sign(power) * 5;
 
     SetIntakeMotor(m_power);
 }
@@ -64,11 +64,18 @@ void Intake::Update()
     else
     {
         m_doublePressed = false;
-        if (m_ballGoDownState && motor_get_position(intakePort) > 600)
+        if (m_ballGoDownState)
         {
-            m_ballGoDownState = false;
-            direction = Direction::None;
-        }        
+            int pos = motor_get_position(intakePort);
+            if (pos < 0)
+                motor_tare_position(intakePort);
+            if (pos > 150)
+            {
+                m_ballGoDownState = false;
+                direction = Direction::None;
+                m_power = 0; // remove latency!
+            }
+        }     
     }
 
     if (m_doublePressed)

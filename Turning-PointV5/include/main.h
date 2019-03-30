@@ -139,8 +139,8 @@ D: left y drive
 * OTHER CONSTANTS
 *
 *******************************************************************************/
-#define lightSensorBallIn 2300
-#define lightSensorBallOut 2600
+#define lightSensorBallIn 2600
+#define lightSensorBallOut 2700
 
 #define ShooterPreloadEnd 950
 #define ShooterPreloadStart 1150

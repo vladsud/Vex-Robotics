@@ -25,8 +25,6 @@ class Intake
     int m_power = 0;
     
     bool m_ballGoDownState = false;
-
-
 };
 
 class Descorer

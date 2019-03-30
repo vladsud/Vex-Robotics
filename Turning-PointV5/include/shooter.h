@@ -40,7 +40,6 @@ class Shooter
   unsigned int m_shooterWait = 0;
 
   bool m_fMoving = false;
-  bool m_Manual = false;
   bool m_disablePreload = false;
   bool m_userShooting = false;
   bool m_preloading = false;
