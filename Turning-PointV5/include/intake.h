@@ -23,9 +23,8 @@ class Intake
     Direction m_direction = Direction::None;
     bool m_doublePressed = false;
     int m_power = 0;
-    unsigned int m_downABit = 0;
     
-    bool ballGoDownState = false;
+    bool m_ballGoDownState = false;
 
 
 };
