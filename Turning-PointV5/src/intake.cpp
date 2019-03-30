@@ -24,7 +24,7 @@ void Intake::SetIntakeDirection(Direction direction)
         return;
     }
 
-    int power = (m_direction == Direction::Up) ? -intakeMotorSpeedUp : intakeMotorSpeedDown;
+    int power = (m_direction == Direction::Up) ? intakeMotorSpeedUp : -intakeMotorSpeedDown;
 
     if (power * m_power >= 0)
         m_power = power;
@@ -46,7 +46,6 @@ void Intake::Update()
 
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
-        m_ballGoDownState = false;
         if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
         {
             m_doublePressed = true;
@@ -59,7 +58,6 @@ void Intake::Update()
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
-        m_ballGoDownState = false;
         direction = Direction::Down;
     }
     else
@@ -70,9 +68,9 @@ void Intake::Update()
             int pos = motor_get_position(intakePort);
             // There is a lot of intertia, but ball is not moving up any more
             // DEtect when intake actually reverses, and start counting from there...
-            if (pos < 0)
+            if (pos > 0)
                 motor_tare_position(intakePort);
-            if (pos > 150)
+            if (pos < -150)
             {
                 m_ballGoDownState = false;
                 direction = Direction::None;

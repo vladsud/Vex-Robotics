@@ -156,7 +156,7 @@ void Shooter::KeepMoving()
     m_count++;
 
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if ((m_fMoving && m_count >= 200) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4))
+    if ((m_fMoving && m_count >= 150) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4))
     {
         if (m_fMoving)
         {
@@ -357,7 +357,7 @@ void Shooter::Update()
     if (ball != BallPresence::HasBall && m_haveBall)
     {
         UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
-
+        m_justShot = true;
         // Did shot just hapened?
         // We can't use potentiometer here, because we are very close to dead zone, so it can jump from 0 to 4000.
         // But having user pressing shoot button and losing the ball is a good indicator we are done.
@@ -369,13 +369,14 @@ void Shooter::Update()
             m_overrideShooting = false; // this is signal to autonomous!
             m_preloadAfterShotCounter = 50;
         }
+
+
     }
 
     m_haveBall = (ball == BallPresence::HasBall);
     m_haveBall2 = (ball2 == BallPresence::HasBall);
     m_userShooting = userShooting;
     m_preloading = needPreload;
-
 
     // Check angle direction based on user actions.
     bool topFlag = MoveToTopFlagPosition();
@@ -385,6 +386,15 @@ void Shooter::Update()
         SetFlag(Flag::High);
     if (middleFlag)
         SetFlag(Flag::Middle);
+
+    if (m_justShot == true)
+    {
+        if (m_flag == Flag::High)
+            SetFlag(Flag::Middle);
+        else if (m_flag == Flag::Middle)
+            SetFlag(Flag::High);
+        m_justShot = false;
+    }
 
     bool shooting = userShooting || needPreload || m_preloadAfterShotCounter > 0;
     if (userShooting && !isAuto() && m_flag == Flag::Middle && m_distanceInches >= Distances[2])

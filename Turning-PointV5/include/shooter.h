@@ -46,6 +46,7 @@ class Shooter
   bool m_overrideShooting = false;
   bool m_haveBall = false;
   bool m_haveBall2 = false;
+  bool m_justShot = false;
 
 public:
   Shooter();
