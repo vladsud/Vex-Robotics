@@ -3,22 +3,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
 #include "pros/rtos.h"
-
-
-#ifdef OFFICIAL_RUN
 
 using namespace pros;
 
+// #define LOGGING
+
+
+#ifdef OFFICIAL_RUN
 bool PrintDiagnostics(Diagnostics diag)
 {
     return false;
 }
-
 #else //OFFICIAL_RUN
 
-// #define LOGGING
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-unreachable"
 
 bool PrintDiagnostics(Diagnostics diag)
 {
@@ -33,6 +34,8 @@ bool PrintDiagnostics(Diagnostics diag)
         return false;
     }
 }
+
+#pragma GCC diagnostic pop
 
 static const char *s_LogEntryNames[(int)LogEntry::Max] = {
     "\nPosition: ",
