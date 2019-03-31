@@ -13,6 +13,9 @@ using namespace pros::c;
 
 static Main *g_main = nullptr;
 
+int startTime;
+bool haveRumbled;
+
 Main &SetupMain()
 {
 	if (g_main == nullptr)
@@ -64,7 +67,6 @@ void Main::Update()
 	} while (!UpdateWithoutWaiting());
 }
 
-
 void Main::UpdateFastSystems()
 {
 	gyro.Integrate();
@@ -74,7 +76,6 @@ void Main::UpdateFastSystems()
 	drive.UpdateDistanes();
 	lineTrackerLeft.Update();
 	lineTrackerRight.Update();
-
 }
 
 void Main::UpdateAllSystems()
@@ -100,7 +101,7 @@ bool Main::UpdateWithoutWaiting()
 	if (m_TicksToMainUpdate / trackerPullTime == 0)
 	{
 		m_TicksToMainUpdate = allSystemsPullTime;
-		
+
 		UpdateAllSystems();
 
 		// Good place for external code to consume some cycles
@@ -114,12 +115,12 @@ bool Main::UpdateWithoutWaiting()
 	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
 	{
 		ReportStatus("Encoders: %d : %d     Angle: %d,   Shooter preloader: %d   Gyro: %d  Light: %d\n",
-			   motor_get_position(leftBackDrivePort),
-			   motor_get_position(rightBackDrivePort),
-			   adi_analog_read(anglePotPort),
-			   adi_analog_read(shooterPreloadPoterntiometer),
-			   GetGyroReading() * 10 / GyroWrapper::Multiplier,
-			   adi_analog_read(ballPresenceSensorUp));
+					 motor_get_position(leftBackDrivePort),
+					 motor_get_position(rightBackDrivePort),
+					 adi_analog_read(anglePotPort),
+					 adi_analog_read(shooterPreloadPoterntiometer),
+					 GetGyroReading() * 10 / GyroWrapper::Multiplier,
+					 adi_analog_read(ballPresenceSensorUp));
 	}
 
 	return res;
@@ -138,6 +139,9 @@ void Main::ResetState()
 //Operator Control
 void opcontrol()
 {
+	startTime = millis();
+	haveRumbled = false;
+
 	if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) && joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
 		StartSkillsinManual();
 
@@ -155,5 +159,15 @@ void opcontrol()
 	while (true)
 	{
 		main.Update();
+
+		if (!haveRumbled)
+		{
+			if ((millis() - startTime) > 90000)
+			{
+				haveRumbled = true;
+				controller_rumble(E_CONTROLLER_MASTER, "-");
+				controller_set_text(E_CONTROLLER_MASTER, 1, 1, "Rumble");
+			}
+		}
 	}
 }
