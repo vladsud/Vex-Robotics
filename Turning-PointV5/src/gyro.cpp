@@ -22,7 +22,7 @@ using namespace pros::c;
 
 // Default gyro multiplier
 // Calculation: 1.1 mV/dps = 1.365 quid/dps = 0.0007326007326007326 ... dpms/quid ~= 192.05>>18
-#define GYRO_MULTIPLIER_DEFAULT 193
+#define GYRO_MULTIPLIER_DEFAULT 197
 
 // Rate noise elimination threshold
 // Default value (equivalence, in Pros implementaiton) is 188, which is 7 degrees / second
