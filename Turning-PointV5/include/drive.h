@@ -62,7 +62,7 @@ public:
   unsigned int m_distanceFromBeginning = 0;
 
 public:
-  Drive() { ResetState(); }
+  Drive();
   void FlipX(bool flip) { m_flipX = flip; }
   bool IsXFlipped() const { return m_flipX; }
   void StartHoldingPosition();

@@ -52,6 +52,13 @@ float KeepAngle::GetError()
 }
 
 
+Drive::Drive()
+{
+    motor_set_reversed(rightBackDrivePort, true);
+    motor_set_reversed(rightFrontDrivePort, true);
+    ResetState();
+}
+
 int Drive::GetMovementJoystick(pros::controller_id_e_t joystick, pros::controller_analog_e_t axis, int minValue)
 {
     int value = controller_get_analog(joystick, axis);
@@ -123,18 +130,36 @@ void Drive::ResetTrackingState()
     m_ErrorIntergral = 0;
 }
 
+void setMotors(uint8_t forwardPort, uint8_t backPort, int speed)
+{
+    const int speedLimitOnReverse = 20;
+
+    speed = AdjustSpeed(speed);
+    if (speed < 0 && motor_get_direction(forwardPort) == 1)
+    {
+        motor_move(forwardPort, max(speed, -1));
+        motor_move(backPort, speed);
+    }
+    else if (speed > 0 && motor_get_direction(backPort) == -1)
+    {
+        motor_move(backPort, min(speed, 3));
+        motor_move(forwardPort, speed);
+    }
+    else
+    {
+        motor_move(backPort, speed);
+        motor_move(forwardPort, speed);
+    }
+} 
+
 void Drive::SetLeftDrive(int speed)
 {
-    speed = AdjustSpeed(speed);
-    motor_move(leftFrontDrivePort, speed);
-    motor_move(leftBackDrivePort, speed);
+    setMotors(leftFrontDrivePort, leftBackDrivePort, speed);
 }
 
 void Drive::SetRightDrive(int speed)
 {
-    speed = AdjustSpeed(speed);
-    motor_move(rightFrontDrivePort, -speed);
-    motor_move(rightBackDrivePort, -speed);
+    setMotors(rightFrontDrivePort, rightBackDrivePort, speed);
 }
 
 void Drive::StartHoldingPosition()
