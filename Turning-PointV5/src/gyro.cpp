@@ -58,18 +58,27 @@ GyroWrapper::GyroWrapper(unsigned char port, unsigned short multiplier)
 {
     // Same as analogCalibrate()
     uint32_t total = 0;
-    const unsigned int Measurements = 1024;
+    unsigned int Measurements = 1024;
+    unsigned int ActualMeasurement = 0;
     m_limit = RATE_NOISE_LIMIT_ANALOG * m_multiplier;
 
     for (unsigned int i = 0; i < Measurements; i++)
     {
         uint32_t value = m_sensor.get_value();
-        Assert(0 <= value && value <= 4096);
-        total += value;
+        if (value == 0 && i < 1024)
+        {
+            Measurements++;
+        }
+        else
+        {
+            ActualMeasurement++;
+            Assert(0 <= value && value <= 4096);
+            total += value;
+        }
         task_delay(1);
     }
 
-    m_calibValue = ((uint64_t)total * m_multiplier) / (Measurements / 16);
+    m_calibValue = total / (ActualMeasurement / 16) * m_multiplier;
 }
 
 void GyroWrapper::ResetState()

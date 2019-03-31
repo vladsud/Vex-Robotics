@@ -6,7 +6,7 @@ class GyroWrapper
 {
     pros::ADIAnalogIn m_sensor;
     int32_t m_value = 0;
-    int32_t m_multiplier;
+    int32_t m_multiplier = 0;
     uint32_t m_calibValue = 0;
     uint32_t m_stddev = 0;
     int32_t m_limit = 0;
