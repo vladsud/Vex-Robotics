@@ -89,14 +89,8 @@ constexpr T min(T a, T b)
 /*******************************************************************************
 *
 * MOTOR PORTS
-*    Externder: 2-5
-
-Extender::
-A: Descorrer
-B: Back left drive
-C: Shooter
-D: left y drive
 *
+* 
 *******************************************************************************/
 #define shooterPort 4
 

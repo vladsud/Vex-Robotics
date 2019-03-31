@@ -518,11 +518,11 @@
             "-fdiagnostics-color",
             "--std=gnu++17",
             "-o",
-            "bin/shooter.cpp.o",
-            "src\\shooter.cpp"
+            "bin/opcontrol.cpp.o",
+            "src\\opcontrol.cpp"
         ],
         "directory": "C:\\Users\\Jason Zhang\\Desktop\\Vex-Robotics\\Turning-PointV5",
-        "file": "src\\shooter.cpp"
+        "file": "src\\opcontrol.cpp"
     },
     {
         "arguments": [
@@ -588,10 +588,10 @@
             "-fdiagnostics-color",
             "--std=gnu++17",
             "-o",
-            "bin/opcontrol.cpp.o",
-            "src\\opcontrol.cpp"
+            "bin/shooter.cpp.o",
+            "src\\shooter.cpp"
         ],
         "directory": "C:\\Users\\Jason Zhang\\Desktop\\Vex-Robotics\\Turning-PointV5",
-        "file": "src\\opcontrol.cpp"
+        "file": "src\\shooter.cpp"
     }
 ]

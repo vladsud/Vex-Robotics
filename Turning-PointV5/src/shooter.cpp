@@ -156,7 +156,7 @@ void Shooter::KeepMoving()
     m_count++;
 
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if ((m_fMoving && m_count >= 150) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4))
+    if ((m_fMoving && m_count >= 75) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4))
     {
         if (m_fMoving)
         {
@@ -396,21 +396,8 @@ void Shooter::Update()
         m_justShot = false;
     }
 
-    bool shooting = userShooting || needPreload || m_preloadAfterShotCounter > 0;
-    if (userShooting && !isAuto() && m_flag == Flag::Middle && m_distanceInches >= Distances[2])
-    {
-        if (m_shooterWait == 0)
-        {
-            m_shooterWait = 10;
-        }
-        m_shooterWait++;
-        if (m_shooterWait < 25)
-            shooting = false;
-    }
-    else
-    {
-        m_shooterWait = 0;
-    }
+    bool shooting = (userShooting && m_haveBall) || needPreload || m_preloadAfterShotCounter > 0;
+
 
     // Shooter motor.
     if (shooting)
