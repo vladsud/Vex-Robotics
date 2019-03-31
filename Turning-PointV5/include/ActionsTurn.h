@@ -27,18 +27,18 @@ struct TurnPrecise : public Action
     bool ShouldStop() override
     {
         // 100 points per degree of angle
-        static constexpr unsigned int points[] = {100, 101,  600,  600, UINT_MAX};
-        static constexpr unsigned int speeds[] = {  0,  12,   12,  240, 240};
+        static constexpr unsigned int points[] = {10, 21, 200, 500, UINT_MAX};
+        static constexpr unsigned int speeds[] = { 0, 30, 100, 200, 221};
 
         // positive for positive (clock-wise) turns
         int error = m_initialAngle + m_turn - GetGyroReading();
         int sign = Sign(error);
 
         // positive means counter-clockwise
-        int actualSpeed = 1000 * GetTracker().LatestPosition(false /*clicks*/).gyroSpeed;
-        int idealSpeed = SpeedFromDistances(error * 100 / GyroWrapper::Multiplier,points, speeds);
+        int actualSpeed = 1000 * GetTracker().LatestPosition(false /*clicks*/).gyroSpeed / GyroWrapper::Multiplier; // degrees per second
+        int idealSpeed = SpeedFromDistances(error * 10 / GyroWrapper::Multiplier, points, speeds);
 
-        if ((idealSpeed == 0 && abs(actualSpeed) <= 3 * GyroWrapper::Multiplier) || (m_turn * sign < 0 && abs(error) > GyroWrapper::Multiplier / 2))
+        if ((idealSpeed == 0 && abs(actualSpeed) <= 25) || (m_turn * sign < 0 && abs(error) > GyroWrapper::Multiplier / 2))
         {
             if (abs(error) >= GyroWrapper::Multiplier)
                 ReportStatus("   Turn stop! Error: error=%d turn=%d\n", error, m_turn);
@@ -62,17 +62,9 @@ struct TurnPrecise : public Action
         if (idealSpeed == 0)
             power = -Sign(actualSpeed) * 12;
         else
-            power = sign * 26 + (idealSpeed / 40 + diff / 2) / GyroWrapper::Multiplier;
+            power = sign * 25 + idealSpeed / 8 + diff / 2;
 
-        // Sometimes we hit the wall and there is not enough power to turn
-        // Attempt to fix this condition
-        if (errorAbs > 45 * GyroWrapper::Multiplier && abs(actualSpeed) < 5 * GyroWrapper::Multiplier)
-        {
-            // ReportStatus("   Turn: turning on super charge\n");
-            power *= 3;
-        }
-
-        int maxSpeed = 100;
+        int maxSpeed = 80;
         if (errorAbs <= 3 * GyroWrapper::Multiplier)
             maxSpeed = 25;
 
@@ -81,7 +73,9 @@ struct TurnPrecise : public Action
         else if (power < -maxSpeed)
             power = -maxSpeed;
 
-        m_power = power; // + m_power) / 2;
+        m_power = (power + m_power) / 2;
+
+        ReportStatus("error = %d, power = %d, ideal speed = %d, actual = %d\n", error, power, idealSpeed, actualSpeed);
 
         // ReportStatus("Turn: %d %d %d %d\n", error, idealSpeed, actualSpeed, power);
         m_main.drive.OverrideInputs(0, -m_power);
