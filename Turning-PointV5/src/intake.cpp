@@ -1,6 +1,7 @@
 #include "intake.h"
 #include "logger.h"
 #include "pros/motors.h"
+#include "cycle.h"
 #include <stdio.h>
 
 using namespace pros;
@@ -46,6 +47,7 @@ void Intake::Update()
 
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
+        m_ballGoDownState = false;
         if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
         {
             m_doublePressed = true;
@@ -58,6 +60,7 @@ void Intake::Update()
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
+        m_ballGoDownState = false;
         direction = Direction::Down;
     }
     else
@@ -68,9 +71,9 @@ void Intake::Update()
             int pos = motor_get_position(intakePort);
             // There is a lot of intertia, but ball is not moving up any more
             // DEtect when intake actually reverses, and start counting from there...
-            if (pos > 0)
+            if (pos > 0 || GetMain().shooter.Ball2Status() == BallPresence::HasBall)
                 motor_tare_position(intakePort);
-            if (pos < -150)
+            if (pos < -60)
             {
                 m_ballGoDownState = false;
                 direction = Direction::None;

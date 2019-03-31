@@ -266,6 +266,11 @@ BallPresence Shooter::BallStatus()
     return ::BallStatus(m_ballPresenceSensorUp);
 }
 
+BallPresence Shooter::Ball2Status()
+{
+    return ::BallStatus(m_ballPresenceSensorDown);
+}
+
 BallPresence BallStatus(pros::ADIAnalogIn& sensor)
 {
     // Check if we can detect ball present.
@@ -354,7 +359,7 @@ void Shooter::Update()
 
     // Check if we can detect ball present.
     BallPresence ball = BallStatus();
-    BallPresence ball2 = ::BallStatus(m_ballPresenceSensorDown);
+    BallPresence ball2 = Ball2Status();
 
     if (ball == BallPresence::HasBall && ball2 == BallPresence::HasBall && (!m_haveBall || !m_haveBall2))
     {

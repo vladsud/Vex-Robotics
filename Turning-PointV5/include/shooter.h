@@ -61,5 +61,6 @@ public:
   bool IsMovingAngle();
   bool IsShooting();
   BallPresence BallStatus();
+  BallPresence Ball2Status();
   Flag GetFlagPosition() { return m_flag; }
 };
