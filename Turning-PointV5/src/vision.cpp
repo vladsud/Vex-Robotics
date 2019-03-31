@@ -65,7 +65,9 @@ void Vision::Update()
 
         // EINVAL = 22 - incorrect port or port type
         // EACCES = 13 - someone else is talking to same port
-        ReportStatus("Vision sensor error: %d\n", errno);
+        if (!m_reportedError)
+            ReportStatus("Vision sensor error: %d\n", errno);
+        m_reportedError = true;
         return;
     }
 

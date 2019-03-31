@@ -25,7 +25,6 @@ class Shooter
   pros::ADIAnalogIn m_ballPresenceSensorUp;
   pros::ADIAnalogIn m_ballPresenceSensorDown;
 
-  // This should be comming from autonomous, probably.
   unsigned int m_distanceInches = 48;
   Flag m_flag = Flag::High;
 
@@ -37,7 +36,6 @@ class Shooter
   int m_preLoadCount = 0;
   int m_preloadAfterShotCounter = 0;
   unsigned int m_timeSinseShooting = 0;
-  unsigned int m_shooterWait = 0;
 
   bool m_fMoving = false;
   bool m_disablePreload = false;
@@ -46,7 +44,6 @@ class Shooter
   bool m_overrideShooting = false;
   bool m_haveBall = false;
   bool m_haveBall2 = false;
-  bool m_justShot = false;
 
 public:
   Shooter();

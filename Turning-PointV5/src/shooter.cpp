@@ -125,7 +125,18 @@ bool Shooter::IsShooting()
         Assert(!m_overrideShooting); // atonomous should always wait till angle is settled.
         return false;
     }
-    return m_overrideShooting || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT);
+
+    if (!m_overrideShooting && !joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT))
+        return false;
+    
+    // if we do not hava a ball - cancel shooting
+    // check for lack of ball - that speeds up the process of shooting when ball is getting in.
+    if (BallStatus() != BallPresence::NoBall)
+        return true;
+
+    // no ball, cancel shooting.
+    m_overrideShooting = false;
+    return false;
 }
 
 bool Shooter::IsMovingAngle()
@@ -212,10 +223,6 @@ void Shooter::StopMoving()
     motor_move(angleMotorPort, 0);
     m_fMoving = false;
     m_count = 0;
-}
-
-void Shooter::Debug()
-{
 }
 
 void Shooter::SetDistance(unsigned int distance)
@@ -305,7 +312,7 @@ void Shooter::Update()
 {
     UpdateDistanceControls();
 
-    bool userShooting = IsShooting();
+    const bool userShooting = IsShooting();
     int shooterPreloadPos = m_preloadSensor.get_value();
 
     m_timeSinseShooting++;
@@ -357,7 +364,11 @@ void Shooter::Update()
     if (ball != BallPresence::HasBall && m_haveBall)
     {
         UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
-        m_justShot = true;
+        if (m_flag == Flag::High)
+            SetFlag(Flag::Middle);
+        else if (m_flag == Flag::Middle)
+            SetFlag(Flag::High);
+
         // Did shot just hapened?
         // We can't use potentiometer here, because we are very close to dead zone, so it can jump from 0 to 4000.
         // But having user pressing shoot button and losing the ball is a good indicator we are done.
@@ -369,8 +380,6 @@ void Shooter::Update()
             m_overrideShooting = false; // this is signal to autonomous!
             m_preloadAfterShotCounter = 50;
         }
-
-
     }
 
     m_haveBall = (ball == BallPresence::HasBall);
@@ -387,17 +396,7 @@ void Shooter::Update()
     if (middleFlag)
         SetFlag(Flag::Middle);
 
-    if (m_justShot == true)
-    {
-        if (m_flag == Flag::High)
-            SetFlag(Flag::Middle);
-        else if (m_flag == Flag::Middle)
-            SetFlag(Flag::High);
-        m_justShot = false;
-    }
-
-    bool shooting = (userShooting && m_haveBall) || needPreload || m_preloadAfterShotCounter > 0;
-
+    bool shooting = userShooting || needPreload || m_preloadAfterShotCounter > 0;
 
     // Shooter motor.
     if (shooting)

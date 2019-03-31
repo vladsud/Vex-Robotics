@@ -18,9 +18,6 @@ bool PrintDiagnostics(Diagnostics diag)
 #else //OFFICIAL_RUN
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wswitch-unreachable"
-
 bool PrintDiagnostics(Diagnostics diag)
 {
     switch (diag)
@@ -29,13 +26,11 @@ bool PrintDiagnostics(Diagnostics diag)
     // case Diagnostics::General:
     // case Diagnostics::Drive:
     // case Diagnostics::Angle:
-       return true;
+    //  return true;
     default:
         return false;
     }
 }
-
-#pragma GCC diagnostic pop
 
 static const char *s_LogEntryNames[(int)LogEntry::Max] = {
     "\nPosition: ",

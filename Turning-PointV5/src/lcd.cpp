@@ -16,14 +16,12 @@ lv_res_t LCD::click_action(lv_obj_t * btn)
     auto& value = GetMain().lcd.m_buttons[id].value;
     value = !value;;
 
-
     lv_obj_t * label = lv_obj_get_child(btn, NULL);
     
     if (value)
         lv_label_set_text(label, GetMain().lcd.m_buttons[id].label);
     else
         lv_label_set_text(label, GetMain().lcd.m_buttons[id].label2);
-
 
     ReportStatus("Click: %d:  %s = %d\n)", id, GetMain().lcd.m_buttons[id].label, value);
     return LV_RES_OK;
@@ -73,8 +71,12 @@ void LCD::CreateControls()
     lv_obj_t* last = nullptr;
 
     for (int i = 0; i < CountOf(m_buttons); i++){
-        last = CreateButton(i, m_buttons[i].value ? m_buttons[i].label : m_buttons[i].label2, 
-            container, last, m_buttons[i].value);
+        last = CreateButton(
+            i,
+            m_buttons[i].value ? m_buttons[i].label : m_buttons[i].label2, 
+            container,
+            last,
+            m_buttons[i].value);
     }
 
     lv_cont_set_fit(container, true, true);
