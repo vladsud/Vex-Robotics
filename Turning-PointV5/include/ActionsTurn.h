@@ -27,8 +27,8 @@ struct TurnPrecise : public Action
     bool ShouldStop() override
     {
         // 100 points per degree of angle
-        static constexpr unsigned int points[] = {10, 21, 200, 500, UINT_MAX};
-        static constexpr unsigned int speeds[] = { 0, 30, 100, 200, 221};
+        static constexpr unsigned int points[] = { 5, 6,  200, 500, UINT_MAX};
+        static constexpr unsigned int speeds[] = { 0, 30, 120, 200, 221};
 
         // positive for positive (clock-wise) turns
         int error = m_initialAngle + m_turn - GetGyroReading();
@@ -38,7 +38,7 @@ struct TurnPrecise : public Action
         int actualSpeed = 1000 * GetTracker().LatestPosition(false /*clicks*/).gyroSpeed / GyroWrapper::Multiplier; // degrees per second
         int idealSpeed = SpeedFromDistances(error * 10 / GyroWrapper::Multiplier, points, speeds);
 
-        if ((idealSpeed == 0 && abs(actualSpeed) <= 25) || (m_turn * sign < 0 && abs(error) > GyroWrapper::Multiplier / 2))
+        if ((idealSpeed == 0 && abs(actualSpeed) <= 15) || (m_turn * sign < 0 && abs(error) > GyroWrapper::Multiplier / 2))
         {
             if (abs(error) >= GyroWrapper::Multiplier)
                 ReportStatus("   Turn stop! Error: error=%d turn=%d\n", error, m_turn);
@@ -62,11 +62,11 @@ struct TurnPrecise : public Action
         if (idealSpeed == 0)
             power = -Sign(actualSpeed) * 12;
         else
-            power = sign * 25 + idealSpeed / 8 + diff / 2;
+            power = sign * 20 + idealSpeed * (4 + idealSpeed / 9) / 100 + diff * 0.36;
 
         int maxSpeed = 80;
-        if (errorAbs <= 3 * GyroWrapper::Multiplier)
-            maxSpeed = 25;
+        if (errorAbs <= 2 * GyroWrapper::Multiplier)
+            maxSpeed = 30;
 
         if (power > maxSpeed)
             power = maxSpeed;
