@@ -33,11 +33,11 @@ struct MoveAction : public Action
 
         if (m_stopOnCollision)
         {
-            PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
-            int left = int(info.leftSpeed*1000);
-            int right = int(info.rightSpeed*1000);
+            // in RPM
+            unsigned int left = abs(GetLeftVelocity());
+            unsigned int right = abs(GetRightVelocity());
 
-            if (abs(left) <= 10 || abs(right) <= 10)
+            if (left <= 5 || right <= 5)
             {
                 ReportStatus("   Collision detected! distance %d / %d, speeds: %d, %d\n",
                         distance, m_origDistanceToMove, left, right);
@@ -160,10 +160,8 @@ struct MoveExactAction : public MoveAction
         unsigned int distance = m_main.drive.m_distance;
         int error = (int)m_distanceToMove - int(distance);
 
-        PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
-        
         // 1 tick/ms on each wheel (roughly 36"/sec - unreachable speed) == 72 in actualSpeed
-        int actualSpeed = 1000 * (info.leftSpeed + info.rightSpeed);
+        int actualSpeed = 20 * GetRobotVelocity();
         int idealSpeed = SpeedFromDistance(error);
         if (!m_forward)
             actualSpeed = -actualSpeed; // make it positive

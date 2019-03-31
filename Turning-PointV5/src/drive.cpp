@@ -19,6 +19,29 @@ int AdjustSpeed(int speed)
     return speed;
 }
 
+double GetLeftVelocity()
+{
+    return (
+        motor_get_actual_velocity(leftBackDrivePort) + 
+        motor_get_actual_velocity(leftFrontDrivePort)
+    ) / 2;
+}
+
+double GetRightVelocity()
+{
+    return (
+        motor_get_actual_velocity(rightBackDrivePort) +
+        motor_get_actual_velocity(rightFrontDrivePort)
+    ) / 2;
+}
+
+double GetRobotVelocity()
+{
+    return (
+        GetLeftVelocity() +
+        GetRightVelocity()
+    ) / 2;
+}
 
 DriveTracker::DriveTracker()
     : m_main(GetMain()),

@@ -42,10 +42,8 @@ struct WaitTillStopsAction : public Action
 {
     bool ShouldStop() override
     {
-        PositionInfo info = GetTracker().LatestPosition(false /*clicks*/);
-        // left == riught == inches / second
-        unsigned int left = abs(int(info.leftSpeed*1000));
-        unsigned int right = abs(int(info.rightSpeed*1000));
+        auto left = abs(GetLeftVelocity());
+        auto right = abs(GetRightVelocity());
         return left <= 1 && right <= 1;
     }
 };
