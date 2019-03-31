@@ -15,13 +15,14 @@
 
 using namespace pros::c;
 
+// #define OFFICIAL_RUN
+
 enum class AtonMode
 {
     Regular,
     SkillsInManual,
 #ifndef OFFICIAL_RUN
     TestRun,
-    ManualSkill,
 #endif
 };
 
@@ -168,7 +169,7 @@ void autonomous()
     // Debugging code - should not run in real autonomous
     if (g_mode == AtonMode::TestRun && !competition_is_autonomous())
     {
-        HitTheWall(2000, 0);
+        TurnToAngle(45);
         // lcd.AtonClimbPlatform = false;
         // RunAtonFirstPos();
         // RunAtonSecondPos();
