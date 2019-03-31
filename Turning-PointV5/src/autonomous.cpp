@@ -73,7 +73,7 @@ void Do(Action &&action, unsigned int timeout /* = 100000 */)
     {
         if (main.GetTime() - action.m_timeStart >= timeout)
         {
-            ReportStatus("!!! TIME-OUT: %s: %d", action.Name(), timeout);
+            ReportStatus("!!! TIME-OUT: %s: %d\n", action.Name(), timeout);
             break;
         }
 
@@ -159,17 +159,18 @@ void autonomous()
     }
 
     // setup coordinates
+    if (main.lcd.AtonBlueRight)
+        ReportStatus("Flipping coordinates\n");
     main.tracker.FlipX(main.lcd.AtonBlueRight);
     main.drive.FlipX(main.lcd.AtonBlueRight);
 
 #ifndef OFFICIAL_RUN
     // Debugging code - should not run in real autonomous
-    if (g_mode == AtonMode::ManualSkill && competition_is_autonomous())
-        RunSuperSkills();
-    else if (g_mode == AtonMode::TestRun && !competition_is_autonomous())
+    if (g_mode == AtonMode::TestRun && !competition_is_autonomous())
     {
+        HitTheWall(2000, 0);
         // lcd.AtonClimbPlatform = false;
-        RunAtonFirstPos();
+        // RunAtonFirstPos();
         // RunAtonSecondPos();
         // RunSuperSkills();
     }
@@ -258,7 +259,7 @@ void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLin
 unsigned int HitTheWall(int distanceForward, int angle)
 {
     TurnToAngleIfNeeded(angle);
-    Do(MoveHitWallAction(distanceForward, angle), 1500 + abs(distanceForward) / 1000 /*trimeout*/);
+    Do(MoveHitWallAction(distanceForward, angle), 1000 + abs(distanceForward) / 2 /*trimeout*/);
     WaitAfterMove();
 
     unsigned int distance = GetMain().drive.m_distance;
@@ -329,7 +330,7 @@ void WaitAfterMove()
 {
     // Not enough time in "main" atonomous
     auto& lcd = GetMain().lcd;
-    unsigned int timeout = lcd.AtonSkills || !lcd.AtonFirstPos || !lcd.AtonClimbPlatform ? 100 : 50;
+    unsigned int timeout = lcd.AtonSkills || !lcd.AtonFirstPos || !lcd.AtonClimbPlatform ? 500 : 200;
     Do(WaitTillStopsAction(), timeout);
 }
 

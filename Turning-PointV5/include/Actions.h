@@ -44,8 +44,9 @@ struct WaitTillStopsAction : public Action
     {
         auto left = abs(GetLeftVelocity());
         auto right = abs(GetRightVelocity());
-        return left <= 1 && right <= 1;
+        return left <= 5 && right <= 5;
     }
+    const char* Name() override { return "WaitTillStopsAction"; } 
 };
 
 

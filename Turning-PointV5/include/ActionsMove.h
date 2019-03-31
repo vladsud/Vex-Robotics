@@ -27,35 +27,41 @@ struct MoveAction : public Action
         m_main.drive.OverrideInputs(power, 0/*turn*/);
     }
 
+    bool ShouldStopOnCollision()
+    {
+        if (m_stopOnCollision)
+        {
+            // in RPM
+            unsigned int fwrd = abs(GetForwardVelocity());
+            unsigned int back = abs(GetBackVelocity());
+            
+            // ReportStatus("Detect stop: %d %d\n", fwrd, back);
+
+            if (fwrd <= 10 || back <= 10)
+            {
+                ReportStatus("   Collision detected! distance %d / %d, speeds: %d, %d\n",
+                        m_main.drive.m_distance, m_origDistanceToMove, fwrd, back);
+                m_stopOnCollision = false;
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool ShouldStop() override
     {
         unsigned int distance = m_main.drive.m_distance;
 
-        if (m_stopOnCollision)
-        {
-            // in RPM
-            unsigned int left = abs(GetLeftVelocity());
-            unsigned int right = abs(GetRightVelocity());
+        if (ShouldStopOnCollision())
+            return true;
 
-            if (left <= 5 || right <= 5)
-            {
-                ReportStatus("   Collision detected! distance %d / %d, speeds: %d, %d\n",
-                        distance, m_origDistanceToMove, left, right);
-                return true;
-            }
-        }
-
-        if (m_main.drive.m_distance < m_distanceToMove)
-            return false;
-
-        if (m_stopOnCollision)
-            ReportStatus("Move did not hit wall: dist = %d\n", m_origDistanceToMove);
-
-        return true;
+        return (m_main.drive.m_distance >= m_distanceToMove);
     }
 
     void Stop() override
     {
+        if (m_stopOnCollision)
+            ReportStatus("Move did not hit wall: dist = %d\n", m_origDistanceToMove);
         m_main.drive.OverrideInputs(0, 0);
     }
 
@@ -150,13 +156,16 @@ struct MoveExactAction : public MoveAction
 
     virtual int SpeedFromDistance(int error)
     {
-        static constexpr unsigned int points[] = {30, 60, 1600, UINT_MAX};
-        static constexpr unsigned int speeds[] = {0,  60, 4000, 4000};
+        static constexpr unsigned int points[] = {30, 31, 60, 1600, UINT_MAX};
+        static constexpr unsigned int speeds[] = {0, 100, 300, 4000, 4000};
         return SpeedFromDistances(error, points, speeds);
     }
 
     bool ShouldStop() override
     {
+        if (ShouldStopOnCollision())
+            return true;
+
         unsigned int distance = m_main.drive.m_distance;
         int error = (int)m_distanceToMove - int(distance);
 
@@ -166,7 +175,7 @@ struct MoveExactAction : public MoveAction
         if (!m_forward)
             actualSpeed = -actualSpeed; // make it positive
 
-        if ((idealSpeed == 0 && abs(actualSpeed) <= 18) || error < 0)
+        if ((idealSpeed == 0 && abs(actualSpeed) <= 100) || error < -30)
             return true;
  
         // Moving counter-clockwise: Positive means we need to speed up rotation
@@ -183,9 +192,15 @@ struct MoveExactAction : public MoveAction
         // The rest is addressed by difference between nominal and desired speeds
         int power = 0;
         if (error < 0 || idealSpeed == 0)
-            power = -18 + idealSpeed / 60 + diff / 50; // Stopping!
+            power = -10 + idealSpeed / 60 + diff / 50; // Stopping!
         else if (idealSpeed != 0)
-            power = 18 + idealSpeed * (25 + idealSpeed / 500) / 2000 + diff / 70; // Moving forward
+        {
+            // Moving forward
+            if (diff > 0) // accelerating
+                power = 22 + idealSpeed / 50 + diff / 100;
+            else
+                power = 15 + idealSpeed / 80 + diff / 100;
+        }
 
         // If robot stopped, or about to stop (and far from target), then give it a boost
         // Friction is too high for formular above to start moving with right speed - it's structured
@@ -197,14 +212,14 @@ struct MoveExactAction : public MoveAction
 
         // Start slowly, for better accuracy.
         // Reach full power in 1 second, 50% powet in .3 seconds
-        int powerLimit = 30 + (m_main.GetTime() - m_timeStart) / 15;
+        int powerLimit = 45 + (m_main.GetTime() - m_timeStart) / 5;
         if (power > powerLimit)
             power = powerLimit;
 
         if (power > maxSpeed)
             power = maxSpeed;
 
-        // ReportStatus("MoveExact: %d %d %d %d %d\n", error, actualSpeed, idealSpeed, diff, power);
+        // ReportStatus("MoveExact: er=%d speed=%d ideal=%d diff=%d power=%d gyro=%d\n", error, actualSpeed, idealSpeed, diff, power, GetGyroReading());
 
         if (!m_forward)
             power = -power;
@@ -216,8 +231,8 @@ struct MoveExactAction : public MoveAction
 
   protected:
     KeepAngle m_angle;
-    static const int maxSpeed = 100;
-    int m_power = 0;
+    static const int maxSpeed = 127;
+    int m_power = 45;
 };
 
 
@@ -227,6 +242,7 @@ struct MoveExactFastAction : public MoveExactAction
         : MoveExactAction(distance, angle)
     {}
 
+/*
     int SpeedFromDistance(int error) override
     {
         // WARNING: is used by GoToCapWithBallUnderIt!
@@ -238,6 +254,7 @@ struct MoveExactFastAction : public MoveExactAction
         static constexpr unsigned int speeds[] = {0,  4000, 4000};
         return SpeedFromDistances(error, points, speeds);
     }
+    */
 };
 
 using MoveFlipCapAction = MoveExactFastAction;
@@ -253,16 +270,15 @@ struct MoveHitWallAction : public MoveExactFastAction
     int SpeedFromDistance(int error) override
     {
         // Keep going forever, untill we hit the wall...
-        const unsigned int distanceToKeep = 300;
+        const unsigned int distanceToKeep = 400;
         int timeElapsed = m_main.GetTime() - m_timeStart;
 
-        if (abs(error) <= distanceToKeep && timeElapsed >= 500)
+        if (abs(error) <= distanceToKeep)
         {
-            m_stopOnCollision = true;
             m_distanceToMove = m_main.drive.m_distance + distanceToKeep;
         }
 
-        if (timeElapsed >= 1500)
+        if (abs(GetRobotVelocity()) >= 100 || timeElapsed >= 300)
             m_stopOnCollision = true;
 
         return MoveExactAction::SpeedFromDistance(error);

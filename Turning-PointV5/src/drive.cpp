@@ -35,6 +35,22 @@ double GetRightVelocity()
     ) / 2;
 }
 
+double GetForwardVelocity()
+{
+    return (
+        motor_get_actual_velocity(rightFrontDrivePort) +
+        motor_get_actual_velocity(leftFrontDrivePort)
+    ) / 2;
+}
+
+double GetBackVelocity()
+{
+    return (
+        motor_get_actual_velocity(rightBackDrivePort) +
+        motor_get_actual_velocity(leftBackDrivePort)
+    ) / 2;
+}
+
 double GetRobotVelocity()
 {
     return (

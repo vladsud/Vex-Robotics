@@ -4,6 +4,8 @@
 // units - whatever motor_get_actual_velocity() returns (RPM)
 double GetLeftVelocity();
 double GetRightVelocity();
+double GetForwardVelocity();
+double GetBackVelocity();
 double GetRobotVelocity();
 
 struct DriveTracker
