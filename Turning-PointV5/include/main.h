@@ -5,10 +5,6 @@
 // Do not include API.h - it includes a ton of headers we do not need!
 #include "pros/misc.h"
 
-// *** WARNING ***
-// Always define it for competation!!!!
-// #define OFFICIAL_RUN
-
 // Helper function to use both oysticsk
 bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t button);
 bool isAuto();
@@ -31,23 +27,13 @@ void UpdateIntakeFromShooter(IntakeShoterEvent event);
 
 #define __noop(...)
 
-#ifdef OFFICIAL_RUN
-#define Assert(f) __noop()
-#define AssertSz(f, sz) __noop()
-#else
 #define Assert(f) AssertCore(f, #f, __FILE__, __LINE__)
 #define AssertSz(f, sz) AssertCore(f, sz, __FILE__, __LINE__)
 void AssertCore(bool condition, const char *message, const char *file, int line);
-#endif
+#define ReportStatus printf
 
 #define CountOf(a) (sizeof(a) / sizeof(a[0]))
 #define UNUSED_VARIABLE(a) (void)a;
-
-#ifdef OFFICIAL_RUN
-#define ReportStatus __noop
-#else
-#define ReportStatus printf
-#endif // OFFICIAL_RUN
 
 #define joystickMax 127
 

@@ -10,14 +10,6 @@ using namespace pros;
 // #define LOGGING
 
 
-#ifdef OFFICIAL_RUN
-bool PrintDiagnostics(Diagnostics diag)
-{
-    return false;
-}
-#else //OFFICIAL_RUN
-
-
 bool PrintDiagnostics(Diagnostics diag)
 {
     switch (diag)
@@ -191,5 +183,3 @@ void Logger::Log(LogEntry log, int arg1, int arg2, int arg3)
     Pack(*types++, arg3);
 #endif
 }
-
-#endif //OFFICIAL_RUN

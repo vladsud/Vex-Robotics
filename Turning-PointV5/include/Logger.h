@@ -19,17 +19,6 @@ enum class LogEntry : char
     Max,
 };
 
-#ifdef OFFICIAL_RUN
-
-class Logger
-{
-  public:
-    void Dump() {}
-    void Log(LogEntry, int, int, int) {}
-};
-
-#else // OFFICIAL_RUN
-
 enum class LogArgTypes
 {
     End,
@@ -61,7 +50,5 @@ class Logger
     void Dump();
     void Log(LogEntry log, int a, int b, int c);
 };
-
-#endif // OFFICIAL_RUN
 
 Logger &GetLogger();
