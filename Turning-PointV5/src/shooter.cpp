@@ -131,7 +131,7 @@ bool Shooter::IsShooting()
     
     // if we do not hava a ball - cancel shooting
     // check for lack of ball - that speeds up the process of shooting when ball is getting in.
-    if (BallStatus() != BallPresence::NoBall)
+    if (BallStatus() == BallPresence::HasBall)
         return true;
 
     // no ball, cancel shooting.
