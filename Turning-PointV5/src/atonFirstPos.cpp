@@ -1,7 +1,7 @@
 #include "aton.h"
 #include "atonFirstPos.h"
 
-const int angleToMoveToFlags = 2;
+const int angleToMoveToFlags = 3;
 
 const unsigned int distanceSecondFlag = 70;
 
@@ -43,7 +43,7 @@ void RunAtonFirstPos()
     //
     if (main.lcd.AtonClimbPlatform)
     {
-        HitLowFlagWithRecovery(6000, 11000, 13 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(6300, 11000, 13 /*angleBack*/, angleToMoveToFlags);
 
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
         auto time = main.GetTime() - timeBegin;

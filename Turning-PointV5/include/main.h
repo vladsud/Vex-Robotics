@@ -85,7 +85,7 @@ constexpr T min(T a, T b)
 #define intakePort 6
 #define rightFrontDrivePort 9
 #define rightBackDrivePort 5
-#define angleMotorPort 8
+#define angleMotorPort 17
 
 #define descorerPort 99
 

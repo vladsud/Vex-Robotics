@@ -301,7 +301,6 @@ void FlipCapWithLineCorrection(unsigned int distance, unsigned int afterLine, un
 void ShootOneBall(bool high, int distance, bool checkBallPresence)
 {
     auto &main = GetMain();
-    IntakeStop();
 
     ReportStatus("Waiting for angle to go up: %ld\n", millis());
     WaitForBall(2000);
@@ -321,15 +320,9 @@ void ShootTwoBalls(int highFlagDistance, int midFlagDistance)
 {
     ReportStatus("Shooting 2 balls\n");
     ShootOneBall(true /*high*/, highFlagDistance, false /*checkPresenceOfBall*/);
-    IntakeUp();
-    
-    ReportStatus("Intake Up\n");
-
     ShootOneBall(false /*high*/, midFlagDistance, true /*checkPresenceOfBall*/);
-
     IntakeUp();
 
-    ReportStatus("Intake Up\n");
 }
 
 
