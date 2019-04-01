@@ -216,12 +216,12 @@ void SetShooterAngle(bool hightFlag, int distance)
 void MoveToPlatform(bool twoPlatforms, int angle)
 {
     // ReportStatus("First platform\n");
-    Do(MoveToPlatformAction(2700, angle));
+    Do(MoveToPlatformAction(6000, angle));
 
     if (twoPlatforms)
     {
         // ReportStatus("Second platform\n");
-        Do(MoveToPlatformAction(2250, angle));
+        Do(MoveToPlatformAction(5300, angle));
         MoveStop();
     }
 }
@@ -321,8 +321,15 @@ void ShootTwoBalls(int highFlagDistance, int midFlagDistance)
 {
     ReportStatus("Shooting 2 balls\n");
     ShootOneBall(true /*high*/, highFlagDistance, false /*checkPresenceOfBall*/);
-    ShootOneBall(false /*high*/, midFlagDistance, true /*checkPresenceOfBall*/);
     IntakeUp();
+    
+    ReportStatus("Intake Up\n");
+
+    ShootOneBall(false /*high*/, midFlagDistance, true /*checkPresenceOfBall*/);
+
+    IntakeUp();
+
+    ReportStatus("Intake Up\n");
 }
 
 

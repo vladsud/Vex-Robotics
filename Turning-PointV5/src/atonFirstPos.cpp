@@ -26,7 +26,7 @@ void RunAtonFirstPos()
     //
     // knock the cone
     //
-    GoToCapWithBallUnderIt(distanceToCap, distanceToCap - 200, -90);
+    GoToCapWithBallUnderIt(distanceToCap, distanceToCap + 300, -90);
 
     //
     // Turn to shoot
@@ -43,7 +43,7 @@ void RunAtonFirstPos()
     //
     if (main.lcd.AtonClimbPlatform)
     {
-        HitLowFlagWithRecovery(3200, 3700, 13 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(6000, 11000, 13 /*angleBack*/, angleToMoveToFlags);
 
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
         auto time = main.GetTime() - timeBegin;
