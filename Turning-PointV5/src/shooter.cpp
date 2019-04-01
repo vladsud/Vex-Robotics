@@ -144,7 +144,6 @@ bool Shooter::IsMovingAngle()
     if (m_fMoving)
         return true;
     unsigned int dist = abs(m_angleSensor.get_value() - (int)m_angleToMove);
-    ReportStatus("Angle dist: %d\n", dist);
     return dist > 10;
 }
 
@@ -215,7 +214,7 @@ void Shooter::StartMoving()
     m_lastAngleDistance = m_angleSensor.get_value() - m_angleToMove;
     m_count = 0;
 
-    ReportStatus("Start moving: %d -> %d\n", m_angleSensor.get_value(), m_angleToMove);
+    ReportStatus("Angle start moving: %d -> %d\n", m_angleSensor.get_value(), m_angleToMove);
 }
 
 void Shooter::StopMoving()
@@ -229,7 +228,7 @@ void Shooter::SetDistance(unsigned int distance)
 {
     if (m_distanceInches == distance)
         return;
-    ReportStatus("Shooter distance (%ld)s: %d\n", millis(), distance);
+    ReportStatus("Shooter::SetDistance(%d)\n", distance);
     m_distanceInches = distance;
     StartMoving();
 }
@@ -238,7 +237,7 @@ void Shooter::SetFlag(Flag flag)
 {
     if (m_flag == flag)
         return;
-    ReportStatus("Shooter flag (%ld): %d\n", millis(), (int)flag);
+    ReportStatus("Shooter::SetFlag(%d)\n", (int)flag);
     m_flag = flag;
     StartMoving();
 }

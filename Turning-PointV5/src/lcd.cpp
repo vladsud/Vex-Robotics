@@ -14,7 +14,7 @@ lv_res_t LCD::click_action(lv_obj_t * btn)
 {
     uint8_t id = lv_obj_get_free_num(btn);
     auto& value = GetMain().lcd.m_buttons[id].value;
-    value = !value;;
+    value = !value;
 
     lv_obj_t * label = lv_obj_get_child(btn, NULL);
     

@@ -18,6 +18,7 @@ void ResetPostionAfterHittingWall(bool leftWall)
     coord.X = pos.X;
     coord.Y = pos.Y;
 
+    auto angle = coord.angle;
     if (leftWall)
     {
         coord.angle = -90;
@@ -29,6 +30,8 @@ void ResetPostionAfterHittingWall(bool leftWall)
         coord.Y = robotHalfSize;
     }
 
+    ReportStatus("Recalibrating angle from %d to %d\n", angle, coord.angle);
+
     tracker.SetCoordinates(coord);
 }
 
@@ -37,7 +40,6 @@ void HitLowFlagWithRecovery(unsigned int distanceForward, unsigned int distanceB
 {
     // should have different signs - positive & negative
     Assert(distanceForward > 0);
-    Assert(distanceBack < 0);
 
     unsigned int distance = HitTheWall(distanceForward, angleForward);
 

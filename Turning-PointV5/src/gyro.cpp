@@ -15,7 +15,6 @@
 #include "gyro.h"
 #include <math.h>
 #include "pros/rtos.h"
-#include <cstdio>
 
 using namespace pros;
 using namespace pros::c;

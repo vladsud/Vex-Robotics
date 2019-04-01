@@ -67,7 +67,7 @@ void StartSkillsinManual()
 
 void Do(Action &&action, unsigned int timeout /* = 100000 */)
 {
-    // auto time = millis();
+    auto time = millis();
 
     auto& main = GetMain();
     while (!action.ShouldStop())
@@ -90,13 +90,11 @@ void Do(Action &&action, unsigned int timeout /* = 100000 */)
         }
     }
 
-    if (timeout <= 15000)
-    {
-        ReportStatus("%s's time: %d / %d", action.Name(), main.GetTime() - action.m_timeStart, timeout);
-    }
-
     action.Stop();
-    // ReportStatus("action time (%s): %ld\n", action.Name(), millis() - time);
+    if (timeout <= 15000)
+        ReportStatus("%s took %ld ms (time-out: %d)\n", action.Name(), millis() - time, timeout);
+    else
+        ReportStatus("%s took %ld ms\n", action.Name(), millis() - time);
 }
 
 // Scans digital buttons on joystick
@@ -303,15 +301,11 @@ void ShootOneBall(bool high, int distance, bool checkBallPresence)
     auto &main = GetMain();
     GyroFreezer freezer(main.gyro);
 
-    ReportStatus("Waiting for angle to go up: %ld\n", millis());
     WaitForBall(2000);
     if (main.shooter.BallStatus() != BallPresence::NoBall)
     {
         SetShooterAngle(high, distance);
-        ReportStatus("Waiting for angle to stop: %ld\n", millis());
         WaitShooterAngleToStop(main.lcd.AtonSkills ? 4000: 1000);
-        ReportStatus("Shooting: %ld\n", millis());
-        Wait(300);
         ShootBall();
     }
     IntakeUp();
@@ -339,6 +333,6 @@ void WaitAfterMoveReportDistance(int distance)
 {
     WaitAfterMove();
     unsigned int error = abs((int)abs(distance) - (int)GetMain().drive.m_distance);
-    if (error >= 20)
+    if (error >= 40)
         ReportStatus("MoveExact (or equivalent) big Error: %d\n", error);
 }
