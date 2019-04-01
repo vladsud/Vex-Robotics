@@ -258,7 +258,7 @@ void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLin
 unsigned int HitTheWall(int distanceForward, int angle)
 {
     TurnToAngleIfNeeded(angle);
-    Do(MoveHitWallAction(distanceForward, angle), 1000 + abs(distanceForward) / 2 /*trimeout*/);
+    Do(MoveHitWallAction(distanceForward, angle), 1000 + abs(distanceForward) /*trimeout*/);
     WaitAfterMove();
 
     unsigned int distance = GetMain().drive.m_distance;

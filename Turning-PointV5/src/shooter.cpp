@@ -166,7 +166,7 @@ void Shooter::KeepMoving()
     m_count++;
 
     // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if ((m_fMoving && m_count >= 75) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4))
+    if ((m_fMoving && m_count >= 100) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4))
     {
         if (m_fMoving)
         {
