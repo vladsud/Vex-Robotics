@@ -301,6 +301,7 @@ void FlipCapWithLineCorrection(unsigned int distance, unsigned int afterLine, un
 void ShootOneBall(bool high, int distance, bool checkBallPresence)
 {
     auto &main = GetMain();
+    GyroFreezer freezer(main.gyro);
 
     ReportStatus("Waiting for angle to go up: %ld\n", millis());
     WaitForBall(2000);
@@ -322,7 +323,6 @@ void ShootTwoBalls(int highFlagDistance, int midFlagDistance)
     ShootOneBall(true /*high*/, highFlagDistance, false /*checkPresenceOfBall*/);
     ShootOneBall(false /*high*/, midFlagDistance, true /*checkPresenceOfBall*/);
     IntakeUp();
-
 }
 
 

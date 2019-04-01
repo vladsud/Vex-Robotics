@@ -28,6 +28,7 @@ using namespace pros::c;
 // Default value (equivalence, in Pros implementaiton) is 188, which is 7 degrees / second
 #define RATE_NOISE_LIMIT_ANALOG 110 //188
 
+
 void GyroWrapper::Integrate()
 {
     unsigned long time = millis();
@@ -44,6 +45,9 @@ void GyroWrapper::Integrate()
     Assert(timeDiff <= 10); // that would be pretty catastrophic
 
     if (reading >= -m_limit && reading <= m_limit)
+        return;
+
+    if (m_freeze)
         return;
 
     // Multiplier is (0.0007...<<18) dpms * DT ms * (reading<<4) quid = degrees<<22
