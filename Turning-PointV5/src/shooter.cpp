@@ -13,8 +13,8 @@ using namespace pros::c;
 constexpr float Distances[]{24, 30, 48, 55, 78, 108};
 
 // 135 is the max!!!
-constexpr unsigned int AnglesHigh[]   { 110, 120, 132, 133, 134, 135 };
-constexpr unsigned int AnglesMedium[] { 10,   20,  30,  40,  50,  60 };
+constexpr unsigned int AnglesHigh[]   { 110, 120, 175, 190, 195, 200};
+constexpr unsigned int AnglesMedium[] { 10,   20,  75, 90, 100, 110};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -181,7 +181,7 @@ void Shooter::KeepMoving()
     }
 
     // down: speed > 0
-    speed = 25 * Sign(distance) + distance / 4 + m_diffAdjusted * 1.5;
+    speed = 18 * Sign(distance) + distance / 4 + m_diffAdjusted * 1.5;
 
     // do not allow to go backwards if too far frmom final zone
     if (speed * distance < 0 && distanceAbs > 100)
