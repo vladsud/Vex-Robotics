@@ -2,6 +2,17 @@
 #include "main.h"
 #include "pros/adi.hpp"
 
+const unsigned int distanceFirstAton = 55; // main shot, 2 balls
+const unsigned int distanceFirstAtonDiagonalShot = 65; // if we are not climbing platform
+const unsigned int distanceFirstAtonFromPlatform = 70;
+
+const unsigned int distanceSecondAton = 108;
+
+const unsigned int distanceSkillsSecondShot = 53;
+const unsigned int distanceSkillsThirdShot = 33;
+
+const bool twoFlagsShootsHighFirst = false;
+
 enum class Flag
 {
   High,
@@ -31,11 +42,13 @@ class Shooter
   // it is recalculated in constructor, so value does not matter that much
   unsigned int m_angleToMove = 1500;
   unsigned int m_count = 0;
-  unsigned int m_lastAngleDistance = 0;
-  int m_diffAdjusted = 0;
   int m_preLoadCount = 0;
   int m_preloadAfterShotCounter = 0;
   unsigned int m_timeSinseShooting = 0;
+  unsigned int m_angleMovingFrom = 0;
+  int m_power = 0;
+  int m_motorPosStart = 0;
+  unsigned int m_integral = 0;
 
   bool m_fMoving = false;
   bool m_disablePreload = false;
@@ -56,6 +69,7 @@ public:
   void UpdateDistanceControls();
   void SetDistance(unsigned int distance);
   void SetFlag(Flag flag);
+  void ResetState();
 
   void OverrideSetShooterMode(bool on);
   bool IsMovingAngle();

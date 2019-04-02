@@ -6,9 +6,6 @@
 #include <math.h>
 #include <cstdio>
 
-unsigned int SpeedFromDistances(unsigned int distance, const unsigned int* points, const unsigned int* speeds);
-int SpeedFromDistances(int distance, const unsigned int* points, const unsigned int* speeds);
-
 void SetShooterAngle(bool hightFlag, int distance);
 inline void IntakeUp() { GetMain().intake.SetIntakeDirection(Intake::Direction::Up); }
 inline void IntakeDown() { GetMain().intake.SetIntakeDirection(Intake::Direction::Down); }

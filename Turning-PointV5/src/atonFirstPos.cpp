@@ -3,12 +3,6 @@
 
 const int angleToMoveToFlags = 3;
 
-const unsigned int distanceSecondFlag = 70;
-
-// used when shooting middle post when not climbing platform
-const unsigned int g_midFlagHeightDiagonalShot = 65;
-unsigned int g_highFlagHeightDiagonalShot = 50;
-
 // WARNING:
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
@@ -21,7 +15,7 @@ void RunAtonFirstPos()
     main.tracker.SetCoordinates({16, 60, -90});
 
     // async actions
-    SetShooterAngle(true /*high*/, g_highFlagHeight);
+    SetShooterAngle(twoFlagsShootsHighFirst, distanceFirstAton);
 
     //
     // knock the cone
@@ -32,11 +26,12 @@ void RunAtonFirstPos()
     // Turn to shoot
     //
     TurnToAngle(angleToShootFlags);
-    ShootTwoBalls(g_highFlagHeight, g_midFlagHeight);
+    ShootTwoBalls(distanceFirstAton);
     IntakeUp();
 
     // prepare for middle pole shooting
-    main.shooter.SetDistance(main.lcd.AtonClimbPlatform ? distanceSecondFlag : g_midFlagHeightDiagonalShot);
+    bool highFlag = false;
+    SetShooterAngle(highFlag, main.lcd.AtonClimbPlatform ? distanceFirstAtonFromPlatform : distanceFirstAtonDiagonalShot);
 
     //
     // Climb platform if neeed
@@ -52,7 +47,7 @@ void RunAtonFirstPos()
         if (shooting)
         {
             TurnToAngle(-26);
-            ShootOneBall(true/*high*/, distanceSecondFlag, false /*checkBallPresence*/);
+            ShootOneBall(highFlag, distanceFirstAtonFromPlatform, false /*checkBallPresence*/);
         }
         TurnToAngle(-91);
         MoveToPlatform(main.lcd.AtonSkills, -90);
@@ -71,14 +66,14 @@ void RunAtonFirstPos()
         HitLowFlagWithRecovery(3200, 2800, 5 /*angleBack*/, angleToMoveToFlags);
 
         TurnToAngle(-48);
-        ShootOneBall(true/*high*/, g_midFlagHeightDiagonalShot, true /*checkPresenceOfBall*/);
+        ShootOneBall(highFlag, distanceFirstAtonDiagonalShot, true /*checkPresenceOfBall*/);
 
         // IntakeUp();
         // WaitForBall(1000);
-        // SetShooterAngle(false/*high*/, g_highFlagHeightDiagonalShot);
+        // SetShooterAngle(!highFlag, distanceFirstAtonDiagonalShot);
 
         FlipCap(2100, -400, -48);
 
-        // ShootOneBall(false/*high*/, g_highFlagHeightDiagonalShot, true /*checkPresenceOfBall*/);
+        // ShootOneBall(false/*high*/, distanceFirstAtonDiagonalShot, true /*checkPresenceOfBall*/);
     }
 }

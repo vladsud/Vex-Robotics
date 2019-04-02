@@ -5,16 +5,17 @@
 #include "pros/adi.h"
 #include "pros/motors.h"
 #include "pros/rtos.h"
+#include <limits.h>
 
 using namespace pros;
 using namespace pros::c;
 
 // Distance based on front of the robot
-constexpr float Distances[]{24, 30, 48, 55, 78, 108};
+constexpr float Distances[]{48, distanceFirstAton, 78, distanceSecondAton};
 
 // 135 is the max!!!
-constexpr unsigned int AnglesHigh[]   { 110, 120, 175, 190, 195, 200};
-constexpr unsigned int AnglesMedium[] { 10,   20,  75, 90, 100, 110};
+constexpr unsigned int AnglesHigh[]   { 175, 190, 195, 200};
+constexpr unsigned int AnglesMedium[] { 75, 90, 100, 110};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -30,23 +31,19 @@ StaticAssert(CountOf(Distances) == CountOf(AnglesMedium));
 StaticAssert(Distances[0] < Distances[1]);
 StaticAssert(Distances[1] < Distances[2]);
 StaticAssert(Distances[2] < Distances[3]);
-StaticAssert(Distances[3] < Distances[4]);
 
 StaticAssert(AnglesHigh[0] <= AnglesHigh[1]);
 StaticAssert(AnglesHigh[1] <= AnglesHigh[2]);
 StaticAssert(AnglesHigh[2] <= AnglesHigh[3]);
-StaticAssert(AnglesHigh[3] <= AnglesHigh[4]);
 
 StaticAssert(AnglesMedium[0] <= AnglesMedium[1]);
 StaticAssert(AnglesMedium[1] <= AnglesMedium[2]);
 StaticAssert(AnglesMedium[2] <= AnglesMedium[3]);
-StaticAssert(AnglesMedium[3] <= AnglesMedium[4]);
 
 StaticAssert(AnglesMedium[0] < AnglesHigh[0]);
 StaticAssert(AnglesMedium[1] < AnglesHigh[1]);
 StaticAssert(AnglesMedium[2] < AnglesHigh[2]);
 StaticAssert(AnglesMedium[3] < AnglesHigh[3]);
-StaticAssert(AnglesMedium[4] < AnglesHigh[4]);
 
 constexpr unsigned int CalcAngle(Flag flag, float distanceInches)
 {
@@ -97,7 +94,14 @@ Shooter::Shooter()
       m_ballPresenceSensorDown(ballPresenceSensorDown)
 {
     motor_tare_position(angleMotorPort);
-    m_distanceInches = Distances[2];
+    m_distanceInches = Distances[0];
+    ReportStatus("Shooter angle: %d\n", m_angleSensor.get_value());
+    StartMoving();
+}
+
+void Shooter::ResetState()
+{
+    m_distanceInches = Distances[0];
     ReportStatus("Shooter angle: %d\n", m_angleSensor.get_value());
     StartMoving();
 }
@@ -147,72 +151,89 @@ bool Shooter::IsMovingAngle()
     return dist > 10;
 }
 
-// Motors:
-//   up: 100
-//   down: -100
+
+static constexpr unsigned int AnglePoints[] = { 15, 31, 150, 700, UINT_MAX};
+static constexpr unsigned int AngleSpeeds[] = { 0,  15,  25, 110, 111};
+
 void Shooter::KeepMoving()
 {
-    // distance = error
-    // diff = derivative
-    int speed = 0;
+    int power = 0;
     unsigned int current = m_angleSensor.get_value();
-    int distance = current - m_angleToMove;
-    int diff = distance - m_lastAngleDistance;
+    int currentThrughMotor = (motor_get_position(angleMotorPort) - m_motorPosStart) * 2.92 + m_angleMovingFrom;
+    current = currentThrughMotor;
 
-    unsigned int distanceAbs = abs(distance);
-
-    m_diffAdjusted = diff; // (diff + m_diffAdjusted) / 2;
+    int error = m_angleToMove - current;
+    int sign = Sign(error);
+    int actualSpeed = motor_get_actual_velocity(angleMotorPort);
+    int idealSpeed = SpeedFromDistances(error, AnglePoints, AngleSpeeds);
 
     m_count++;
 
-    // Safety net - we want to stop after some time and let other steps in autonomous to play out.
-    if ((m_fMoving && m_count >= 100) || (distanceAbs <= 20 && abs(m_diffAdjusted) <= 4))
+    if (m_fMoving)
     {
-        if (m_fMoving)
+        if (m_count >= 100 || (idealSpeed == 0 && abs(actualSpeed) <= 12) || ((m_angleToMove - m_angleMovingFrom) * sign < 0 && abs(error) > 20))
         {
-            if (PrintDiagnostics(Diagnostics::Angle))
-                ReportStatus("STOP: (%d) Dest: %d   Reading: %d, Distance: %d/%d, Diff: %d, DiffAdj: %d\n\n\n",
-                    m_count, m_angleToMove, current, current - m_angleToMove, distance, diff, m_diffAdjusted);
+            if (abs(error) >= 20)
+                ReportStatus("   Angle: error=%d\n", error);
             StopMoving();
+            return;
         }
-        motor_move(angleMotorPort, 0);
-        return;
+
+        int diff = idealSpeed - actualSpeed;
+
+        if (idealSpeed != 0)
+            power = sign * 20 + idealSpeed * (1 + sign * idealSpeed / 50) / 5 + diff * 0.75;
+        else if (m_flag == Flag::Middle)
+            power = Sign(actualSpeed) * 8; // going up - help it a bit
+        else
+            power = -Sign(actualSpeed) * 5;
     }
+    else if (abs(error) > 15)
+    {
+        unsigned int starting = (m_flag == Flag::High) ? 15 : 25;
+        power = (starting + m_integral / 2) * sign;
+        m_integral++;
+        if (m_integral > 16)
+            m_integral = 0;
+    }
+    else
+    {
+        // m_integral = 0;
+    }
+    
 
-    // down: speed > 0
-    speed = 18 * Sign(distance) + distance / 4 + m_diffAdjusted * 1.5;
+    const int angleMotorSpeed = 75;
 
-    // do not allow to go backwards if too far frmom final zone
-    if (speed * distance < 0 && distanceAbs > 100)
-        speed = 0;
+    if (power > angleMotorSpeed)
+        power = angleMotorSpeed;
+    else if (power < -angleMotorSpeed)
+        power = -angleMotorSpeed;
 
-    const int angleMotorSpeed = distanceAbs > 100 ? 75 : 25;
-
-    if (speed > angleMotorSpeed)
-        speed = angleMotorSpeed;
-    else if (speed < -angleMotorSpeed)
-        speed = -angleMotorSpeed;
-
-    if (PrintDiagnostics(Diagnostics::Angle))
+    // if (PrintDiagnostics(Diagnostics::Angle))
     {
         if (m_fMoving)
-            ReportStatus("ANG: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
-        else if (speed != 0)
-            ReportStatus("ANG ADJ: (%d) P=%d Dest=%d R=%d, Dist: %d, Diff: %d\n", m_count, speed, m_angleToMove, current, current - m_angleToMove, diff);
+            ReportStatus("ANG: (%d) P=%d Dest=%d R=%d, Dist: %d, speed=%d, ideal = %d, R2=%d\n", m_count, power, m_angleToMove, current, current - m_angleToMove,
+            actualSpeed, idealSpeed, currentThrughMotor);
+        else if (power != 0)
+            ReportStatus("ANG ADJ: (%d) P=%d Dest=%d R=%d, Dist: %d R2=%d\n", m_count, power, m_angleToMove, current, current - m_angleToMove, currentThrughMotor);
     }
 
-    motor_move(angleMotorPort, -speed);
+    if (m_count == 1)
+        m_power = power;
+    else
+        m_power = (power + m_power) / 2;
 
-    m_lastAngleDistance = distance;
+    motor_move(angleMotorPort, m_power);
 }
 
 void Shooter::StartMoving()
 {
     m_fMoving = true;
     m_angleToMove = ConvertAngleToPotentiometer(CalcAngle());
-    m_diffAdjusted = 0;
-    m_lastAngleDistance = m_angleSensor.get_value() - m_angleToMove;
+    m_angleMovingFrom = m_angleSensor.get_value();
     m_count = 0;
+    m_motorPosStart = motor_get_position(angleMotorPort);
+    m_integral = 0;
 
     ReportStatus("Angle start moving: %d -> %d\n", m_angleSensor.get_value(), m_angleToMove);
 }
@@ -220,8 +241,8 @@ void Shooter::StartMoving()
 void Shooter::StopMoving()
 {
     motor_move(angleMotorPort, 0);
-    m_fMoving = false;
     m_count = 0;
+    m_fMoving = false;
 }
 
 void Shooter::SetDistance(unsigned int distance)
@@ -244,14 +265,14 @@ void Shooter::SetFlag(Flag flag)
 
 void Shooter::UpdateDistanceControls()
 {
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
+    // if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
+    //    SetDistance(Distances[0]);
+    // if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
+    //     SetDistance(Distances[1]);
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
         SetDistance(Distances[0]);
-    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
-        SetDistance(Distances[1]);
-    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
-        SetDistance(Distances[2]);
-    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
-        SetDistance(Distances[3]);
+    // else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+    //    SetDistance(Distances[3]);
 }
 
 void Shooter::OverrideSetShooterMode(bool on)

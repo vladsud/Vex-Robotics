@@ -8,11 +8,7 @@ void RunAtonSecondPos()
 {
     GetMain().tracker.SetCoordinates({16.5 - 1, 33 + 48 - 1, -30});
 
-   // Shoot the ball
-    SetShooterAngle(true, 108);
-    WaitShooterAngleToStop();
-    Wait(1000);
-    ShootBall();
+    ShootOneBall(true /*high*/, distanceSecondAton);
 
     if (GetMain().lcd.AtonClimbPlatform)
     {
@@ -32,10 +28,11 @@ void RunAtonSecondPos()
         }
 
         TurnToAngle(-10);
-        SetShooterAngle(false, 108);
+        SetShooterAngle(false, distanceSecondAton);
         IntakeUp();
+        Wait(2000);
         WaitShooterAngleToStop();
-        Wait(5000);
+        Wait(1000);
         ShootBall();
 
         MoveExactFastWithAngle(500, -70);

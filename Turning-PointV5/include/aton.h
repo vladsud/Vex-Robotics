@@ -19,7 +19,7 @@ void MoveExactWithAngle(int distance, int angle, bool allowTurning = true);
 void MoveExactFastWithAngle(int distance, int angle);
 void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle);
 void ShootOneBall(bool high, int distance, bool checkBallPresence = true);
-void ShootTwoBalls(int highFlagDistance, int midFlagDistance);
+void ShootTwoBalls(int distance);
 void TurnToFlagsAndShootTwoBalls();
 void MoveToLowFlag();
 void TurnToAngleIfNeeded(int angle);

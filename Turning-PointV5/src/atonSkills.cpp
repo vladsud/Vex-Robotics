@@ -1,11 +1,6 @@
 #include "aton.h"
 
 const unsigned int distanceFromWall = 380;
-const unsigned int midSecondFlagDistance = 53;
-const unsigned int highSecondFlagDistance = 55;
-const unsigned int midThirdFlagDistance = 33;
-const unsigned int highThirdFlagDistance = 70;
-
 
 void ResetPostionAfterHittingWall(bool leftWall)
 {
@@ -71,7 +66,7 @@ void RunSuperSkills()
     main.tracker.SetCoordinates({16, 60+24, -90});
 
     // async actions
-    SetShooterAngle(true /*high*/, g_highFlagHeight-2);
+    SetShooterAngle(twoFlagsShootsHighFirst, distanceFirstAton);
 
     // Pick up the first ball
     GoToCapWithBallUnderIt(distanceToCap, 2100, -90);
@@ -86,11 +81,11 @@ void RunSuperSkills()
 
     // Shooting 2 balls at first row
     TurnToAngle(-2 /*angleToShootFlags+1*/);
-    ShootTwoBalls(g_highFlagHeight-2, g_midFlagHeight-5);
+    ShootTwoBalls(distanceFirstAton);
     IntakeUp();
 
     // Preset for net shooting
-    main.shooter.SetDistance(highSecondFlagDistance);
+    SetShooterAngle(twoFlagsShootsHighFirst, distanceSkillsSecondShot);
 
 ReportStatus("\nHitting 1st low flag\n");
 
@@ -107,10 +102,11 @@ ReportStatus("\nShooting second pole\n");
 
     TurnToAngle(-24);
     // Shoot middle pole
-    ShootTwoBalls(highSecondFlagDistance, midSecondFlagDistance);
+    ShootTwoBalls(distanceSkillsSecondShot);
 
     // Preset for net shooting
-    main.shooter.SetDistance(midThirdFlagDistance);
+    bool highFlag = true;
+    SetShooterAngle(highFlag, distanceSkillsThirdShot);
 
     // pick up ball under cap
     TurnToAngle(-90);
@@ -144,7 +140,7 @@ ReportStatus("\nGoing after 3rd low flag\n");
     IntakeUp();
     HitLowFlagWithRecovery(1700, 2200);
     TurnToAngle(-13);
-    ShootOneBall(true/*high*/, midThirdFlagDistance, false /*checkBallPresence*/);
+    ShootOneBall(highFlag, distanceSkillsThirdShot, false /*checkBallPresence*/);
 
 
 ReportStatus("\nGoing after platform\n");

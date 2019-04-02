@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "pros/rtos.h"
 
 // Reduce number of includes to speed up compilation!
 // Do not include API.h - it includes a ton of headers we do not need!
@@ -12,6 +13,9 @@ bool SmartsOn();
 class Main &SetupMain();
 int AdjustAngle(int angle);
 void StartSkillsinManual();
+
+unsigned int SpeedFromDistances(unsigned int distance, const unsigned int* points, const unsigned int* speeds);
+int SpeedFromDistances(int distance, const unsigned int* points, const unsigned int* speeds);
 
 void opcontrol();
 void autonomous();

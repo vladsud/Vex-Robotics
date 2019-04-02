@@ -311,11 +311,11 @@ void ShootOneBall(bool high, int distance, bool checkBallPresence)
     IntakeUp();
 }
 
-void ShootTwoBalls(int highFlagDistance, int midFlagDistance)
+void ShootTwoBalls(int distance)
 {
     ReportStatus("Shooting 2 balls\n");
-    ShootOneBall(true /*high*/, highFlagDistance, false /*checkPresenceOfBall*/);
-    ShootOneBall(false /*high*/, midFlagDistance, true /*checkPresenceOfBall*/);
+    ShootOneBall(twoFlagsShootsHighFirst, distance, false /*checkPresenceOfBall*/);
+    ShootOneBall(!twoFlagsShootsHighFirst, distance, true /*checkPresenceOfBall*/);
     IntakeUp();
 }
 

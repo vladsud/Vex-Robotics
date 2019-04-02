@@ -134,6 +134,7 @@ void Main::ResetState()
 	drive.ResetState();
 	intake.ResetState();
 	gyro.ResetState();
+	shooter.ResetState();
 }
 
 //Operator Control
