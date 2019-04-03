@@ -1,11 +1,13 @@
 #include "aton.h"
 #include "atonFirstPos.h"
 
-const int angleToMoveToFlags = 3;
-
 // WARNING:
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
+
+const unsigned int distanceTillWall = 6500;
+const int angleToMoveToFlags = 4;
+const int angleToShootFlags = -2;
 
 void RunAtonFirstPos()
 {
@@ -26,6 +28,7 @@ void RunAtonFirstPos()
     // Turn to shoot
     //
     TurnToAngle(angleToShootFlags);
+
     ShootTwoBalls(distanceFirstAton);
     IntakeUp();
 
@@ -38,7 +41,7 @@ void RunAtonFirstPos()
     //
     if (main.lcd.AtonClimbPlatform)
     {
-        HitLowFlagWithRecovery(6700, 10500, 13 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(distanceTillWall, 10500, 13 /*angleBack*/, angleToMoveToFlags);
 
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
         auto time = main.GetTime() - timeBegin;
@@ -47,9 +50,9 @@ void RunAtonFirstPos()
         if (shooting)
         {
             TurnToAngle(-26);
-            ShootOneBall(highFlag, distanceFirstAtonFromPlatform, false /*checkBallPresence*/);
+            ShootOneBall(highFlag, distanceFirstAtonFromPlatform);
         }
-        TurnToAngle(-91);
+        TurnToAngle(-90);
         MoveToPlatform(main.lcd.AtonSkills, -90);
 
         if (shooting)
@@ -63,7 +66,7 @@ void RunAtonFirstPos()
     }
     else
     {
-        HitLowFlagWithRecovery(6700, 2800, 5 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(distanceTillWall, 2800, 5 /*angleBack*/, angleToMoveToFlags);
 
         TurnToAngle(-48);
         ShootOneBall(highFlag, distanceFirstAtonDiagonalShot, true /*checkPresenceOfBall*/);

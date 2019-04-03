@@ -15,7 +15,7 @@ constexpr float Distances[]{48, distanceFirstAton, 78, distanceSecondAton};
 
 // 135 is the max!!!
 constexpr unsigned int AnglesHigh[]   { 175, 190, 195, 200};
-constexpr unsigned int AnglesMedium[] { 75, 90, 100, 110};
+constexpr unsigned int AnglesMedium[] { 75, 100, 100, 110};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -94,15 +94,14 @@ Shooter::Shooter()
       m_ballPresenceSensorDown(ballPresenceSensorDown)
 {
     motor_tare_position(angleMotorPort);
-    m_distanceInches = Distances[0];
-    ReportStatus("Shooter angle: %d\n", m_angleSensor.get_value());
+    ResetState();
     StartMoving();
 }
 
 void Shooter::ResetState()
 {
     m_distanceInches = Distances[0];
-    ReportStatus("Shooter angle: %d\n", m_angleSensor.get_value());
+    // ReportStatus("Shooter angle: %d\n", m_angleSensor.get_value());
     StartMoving();
 }
 
@@ -124,7 +123,9 @@ bool MoveToMiddleFlagPosition()
 void Shooter::StopShooting()
 {
     if (m_overrideShooting)
-        ReportStatus("Stop shooting\n");
+    {
+        // ReportStatus("Stop shooting\n");
+    }
     m_overrideShooting = false; // this is signal to autonomous!
 }
 
@@ -239,12 +240,12 @@ void Shooter::StartMoving()
     m_motorPosStart = motor_get_position(angleMotorPort);
     m_integral = 0;
 
-    ReportStatus("Angle start moving: %d -> %d\n", m_angleSensor.get_value(), m_angleToMove);
+    // ReportStatus("Angle start moving: %d -> %d\n", m_angleSensor.get_value(), m_angleToMove);
 }
 
 void Shooter::StopMoving()
 {
-    ReportStatus("Angle: stoped moving: count = %d\n", m_count);
+    // ReportStatus("Angle: stopped moving: count = %d\n", m_count);
     motor_move(angleMotorPort, 0);
     m_count = 0;
     m_fMoving = false;
@@ -254,7 +255,7 @@ void Shooter::SetDistance(unsigned int distance)
 {
     if (m_distanceInches == distance)
         return;
-    ReportStatus("Shooter::SetDistance(%d)\n", distance);
+    // ReportStatus("Shooter::SetDistance(%d)\n", distance);
     m_distanceInches = distance;
     StartMoving();
 }
@@ -263,7 +264,7 @@ void Shooter::SetFlag(Flag flag)
 {
     if (m_flag == flag)
         return;
-    ReportStatus("Shooter::SetFlag(%d)\n", (int)flag);
+    // ReportStatus("Shooter::SetFlag(%d)\n", (int)flag);
     m_flag = flag;
     StartMoving();
 }
@@ -283,7 +284,7 @@ void Shooter::UpdateDistanceControls()
 void Shooter::OverrideSetShooterMode(bool on)
 {
     Assert(isAuto());
-    ReportStatus("start shooting\n");
+    // ReportStatus("start shooting\n");
     m_overrideShooting = on;
 }
 

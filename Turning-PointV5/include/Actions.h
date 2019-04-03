@@ -32,6 +32,7 @@ struct WaitAction : public Action
     unsigned int m_wait;
     WaitAction(unsigned int wait) : m_wait(wait) {}
     bool ShouldStop() override { return m_main.GetTime() - m_timeStart >= m_wait; }
+    const char* Name() override { return "Wait"; } 
 };
 
 

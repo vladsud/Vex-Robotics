@@ -13,7 +13,7 @@ void ResetPostionAfterHittingWall(bool leftWall)
     coord.X = pos.X;
     coord.Y = pos.Y;
 
-    auto angle = coord.angle;
+    const auto angle = coord.angle;
     if (leftWall)
     {
         coord.angle = -90;
@@ -38,8 +38,11 @@ void HitLowFlagWithRecovery(unsigned int distanceForward, unsigned int distanceB
 
     unsigned int distance = HitTheWall(distanceForward, angleForward);
 
+    // let vibrtion settle in for better gyro reading
+    Wait(100);
+
     int actualAngle = GetGyro().Get();
-    if (abs(actualAngle) > 5 * GyroWrapper::Multiplier || distance + 300 <= distanceForward)
+    if (abs(actualAngle) > 12 * GyroWrapper::Multiplier || distance + 300 <= distanceForward)
     {
         unsigned int distanceAdj = 300; // min adjustment - wheels quite often spin without much movement
         if (distance + distanceAdj < distanceForward)
@@ -80,7 +83,7 @@ void RunSuperSkills()
     MoveExact(distanceFromWall, -90);
 
     // Shooting 2 balls at first row
-    TurnToAngle(-2 /*angleToShootFlags+1*/);
+    TurnToAngle(-2);
     ShootTwoBalls(distanceFirstAton);
     IntakeUp();
 
@@ -140,7 +143,7 @@ ReportStatus("\nGoing after 3rd low flag\n");
     IntakeUp();
     HitLowFlagWithRecovery(1700, 2200);
     TurnToAngle(-13);
-    ShootOneBall(highFlag, distanceSkillsThirdShot, false /*checkBallPresence*/);
+    ShootOneBall(highFlag, distanceSkillsThirdShot);
 
 
 ReportStatus("\nGoing after platform\n");

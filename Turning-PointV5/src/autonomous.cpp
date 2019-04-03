@@ -165,9 +165,8 @@ void autonomous()
     // Debugging code - should not run in real autonomous
     if (g_mode == AtonMode::TestRun && !competition_is_autonomous())
     {
-        TurnToAngle(45);
-        // lcd.AtonClimbPlatform = false;
-        // RunAtonFirstPos();
+        // MoveExactWithAngle(6000, 10, false);
+        RunAtonFirstPos();
         // RunAtonSecondPos();
         // RunSuperSkills();
     }
@@ -234,13 +233,13 @@ void MoveExactFastWithAngle(int distance, int angle, bool stopOnHit)
 {
     TurnToAngleIfNeeded(angle);
     Do(MoveExactFastAction(distance, angle, stopOnHit));
-    WaitAfterMoveReportDistance(distance);
+    WaitAfterMoveReportDistance(distance, 500);
 }
 
 void TurnToAngleIfNeeded(int angle)
 {
     int angleDiff = AdjustAngle(GetGyroReading() - angle * GyroWrapper::Multiplier);
-    if (abs(angleDiff) > 10 * GyroWrapper::Multiplier)
+    if (abs(angleDiff) > 8 * GyroWrapper::Multiplier)
         TurnToAngle(angle);
 }
 
@@ -257,7 +256,7 @@ unsigned int HitTheWall(int distanceForward, int angle)
 {
     TurnToAngleIfNeeded(angle);
     Do(MoveHitWallAction(distanceForward, angle), 1000 + abs(distanceForward) /*trimeout*/);
-    WaitAfterMove();
+    WaitAfterMove(500);
 
     unsigned int distance = GetMain().drive.m_distance;
     ReportStatus("   HitTheWall: Actually travelled: %d out of %d\n", distance, distanceForward);
@@ -270,10 +269,11 @@ void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle)
     Do(MoveExactFastAction(distance, angle, true /*stopOnHit*/));
     BLOCK
     {
-        GyroFreezer freezer(GetMain().gyro);
+        // GyroFreezer freezer(GetMain().gyro);
         IntakeUp();
-        WaitAfterMoveReportDistance(distance);
-        Wait(200);
+        Wait(200); // minimal wait
+        WaitAfterMoveReportDistance(distance, 500);
+
     }
     distanceBack = distanceBack + GetMain().drive.m_distance - distance;
     MoveExactWithAngle(-(int)distanceBack, angle);
@@ -300,16 +300,24 @@ void FlipCapWithLineCorrection(unsigned int distance, unsigned int afterLine, un
     MoveExactWithAngle(-(int)distaneBack, angle);
 }
 
-void ShootOneBall(bool high, int distance, bool checkBallPresence)
+void ShootOneBall(bool high, int distance, unsigned int extraDelay)
 {
     auto &main = GetMain();
     GyroFreezer freezer(main.gyro);
 
-    WaitForBall(2000);
+    SetShooterAngle(high, distance);
+    if (main.shooter.BallStatus() != BallPresence::HasBall)
+    {
+        IntakeUp();
+        WaitForBall(2000);
+    }
+
     if (main.shooter.BallStatus() != BallPresence::NoBall)
     {
-        SetShooterAngle(high, distance);
+        IntakeStop();
         WaitShooterAngleToStop(main.lcd.AtonSkills ? 4000: 1000);
+        if (extraDelay > 0)
+            Wait(extraDelay);
         ShootBall();
     }
     IntakeUp();
@@ -318,25 +326,25 @@ void ShootOneBall(bool high, int distance, bool checkBallPresence)
 void ShootTwoBalls(int distance)
 {
     ReportStatus("Shooting 2 balls\n");
-    ShootOneBall(twoFlagsShootsHighFirst, distance, false /*checkPresenceOfBall*/);
-    ShootOneBall(!twoFlagsShootsHighFirst, distance, true /*checkPresenceOfBall*/);
-    IntakeUp();
+    ShootOneBall(twoFlagsShootsHighFirst, distance);
+    ShootOneBall(!twoFlagsShootsHighFirst, distance, 200);
 }
 
 
 // give some time for robot to completely stop
-void WaitAfterMove()
+void WaitAfterMove(unsigned int timeout)
 {
     // Not enough time in "main" atonomous
     auto& lcd = GetMain().lcd;
-    unsigned int timeout = lcd.AtonSkills || !lcd.AtonFirstPos || !lcd.AtonClimbPlatform ? 500 : 200;
+    if (timeout == 0)
+        timeout = lcd.AtonSkills || !lcd.AtonFirstPos || !lcd.AtonClimbPlatform ? 500 : 200;
     Do(WaitTillStopsAction(), timeout);
 }
 
-void WaitAfterMoveReportDistance(int distance)
+void WaitAfterMoveReportDistance(int distance, unsigned int timeout)
 {
-    WaitAfterMove();
+    WaitAfterMove(timeout);
     unsigned int error = abs((int)abs(distance) - (int)GetMain().drive.m_distance);
-    if (error >= 40)
-        ReportStatus("MoveExact (or equivalent) big Error: %d\n", error);
+    if (error >= 50)
+        ReportStatus("MoveExact (or equivalent) big Error: %d, distance travelled: %d, expected: %d\n", error, GetMain().drive.m_distance, distance);
 }

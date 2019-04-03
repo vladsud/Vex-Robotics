@@ -97,7 +97,7 @@ struct MoveToPlatformAction : public MoveAction
     const char* Name() override { return "MoveToPlatformAction"; }
 
     MoveToPlatformAction(int distance, int angle)
-        : MoveAction(distance, 85),
+        : MoveAction(distance, 100),
           m_angle(angle)
     {}
 
@@ -148,9 +148,10 @@ struct MoveExactAction : public MoveAction
 {
     const char* Name() override { return "MoveExactAction"; }
 
-    MoveExactAction(int distance, int angle)
+    MoveExactAction(int distance, int angle, bool stopOnCollision = false)
         : MoveAction(distance, 0 /*power*/),
-          m_angle(angle)
+          m_angle(angle),
+          m_sengageSopOnCollision(stopOnCollision)
     {
     }
 
@@ -163,6 +164,14 @@ struct MoveExactAction : public MoveAction
 
     bool ShouldStop() override
     {
+        int velocity = GetRobotVelocity();
+        if (m_sengageSopOnCollision)
+        {
+            int timeElapsed = m_main.GetTime() - m_timeStart;
+            if (abs(velocity) >= 100 || timeElapsed >= 300)
+                m_stopOnCollision = true;
+        }
+
         if (ShouldStopOnCollision())
             return true;
 
@@ -170,7 +179,7 @@ struct MoveExactAction : public MoveAction
         int error = (int)m_distanceToMove - int(distance);
 
         // 1 tick/ms on each wheel (roughly 36"/sec - unreachable speed) == 72 in actualSpeed
-        int actualSpeed = 20 * GetRobotVelocity();
+        int actualSpeed = 20 * velocity;
         int idealSpeed = SpeedFromDistance(error);
         if (!m_forward)
             actualSpeed = -actualSpeed; // make it positive
@@ -233,34 +242,28 @@ struct MoveExactAction : public MoveAction
     KeepAngle m_angle;
     static const int maxSpeed = 127;
     int m_power = 45;
+    bool m_sengageSopOnCollision = false;
 };
 
 
 struct MoveExactFastAction : public MoveExactAction
 {
-    MoveExactFastAction(int distance, int angle, bool stopOnHit = false)
-        : MoveExactAction(distance, angle),
-        m_stopOnHit(stopOnHit)
+    // Keep going forever, untill we hit the wall...
+    static const int distancetoStopMotors = 60;
+    static const int distanceToAdd = 20;
+
+    MoveExactFastAction(int distance, int angle, bool stopOnCollision = false)
+        : MoveExactAction(distance + Sign(distance) * distanceToAdd, angle, stopOnCollision)
     {}
 
-/*
-    int SpeedFromDistance(int error) override
-    {
-        // WARNING: is used by GoToCapWithBallUnderIt!
-        // Be careful when changing values in here!
-        // WARNING: Also used by
-        //   - MoveHitWallAction (define minimal speed)
-        //   - MoveFlipCapAction
-        static constexpr unsigned int points[] = {30, 30, 100, 1600, UINT_MAX};
-        static constexpr unsigned int speeds[] = {0, 300, 300, 4000, 4000};
-        return SpeedFromDistances(error, points, speeds);
-    }
-*/
     bool ShouldStop() override
     {
-        int timeElapsed = m_main.GetTime() - m_timeStart;
-        if (abs(GetRobotVelocity()) >= 100 || timeElapsed >= 300)
-            m_stopOnCollision = true;
+        unsigned int distance = m_main.drive.m_distance;
+        int error = (int)m_distanceToMove - int(distance);
+        // ReportStatus("A: %d %d %d\n ", distance, m_distanceToMove, error);
+        if (error < distancetoStopMotors)
+            return true;
+
         return MoveExactAction::ShouldStop();
     }
 private:
@@ -270,13 +273,13 @@ private:
 using MoveFlipCapAction = MoveExactFastAction;
 
 
-struct MoveHitWallAction : public MoveExactFastAction
+struct MoveHitWallAction : public MoveExactAction
 {
     // Keep going forever, untill we hit the wall...
-    const unsigned int distanceToKeep = 400;
+    static const int distanceToKeep = 400;
 
     MoveHitWallAction(int distance, int angle)
-        : MoveExactFastAction(distance + distanceToKeep, angle, true /*stopOnHit*/)
+        : MoveExactAction(distance + Sign(distance) * distanceToKeep, angle, true /*stopOnCollision*/)
     {
     }
 

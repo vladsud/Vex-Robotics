@@ -27,8 +27,8 @@ struct TurnPrecise : public Action
     bool ShouldStop() override
     {
         // 100 points per degree of angle
-        static constexpr unsigned int points[] = { 5, 6,  200, 500, UINT_MAX};
-        static constexpr unsigned int speeds[] = { 0, 30, 120, 200, 221};
+        static constexpr unsigned int points[] = { 6,  8,  200, 500, UINT_MAX};
+        static constexpr unsigned int speeds[] = { 0, 20, 100, 200, 221};
 
         // positive for positive (clock-wise) turns
         int error = m_initialAngle + m_turn - GetGyroReading();

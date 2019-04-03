@@ -18,7 +18,7 @@ void RunSuperSkills();
 void MoveExactWithAngle(int distance, int angle, bool allowTurning = true);
 void MoveExactFastWithAngle(int distance, int angle, bool stopOnHit = false);
 void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle);
-void ShootOneBall(bool high, int distance, bool checkBallPresence = true);
+void ShootOneBall(bool high, int distance, unsigned int extraDelay = 0);
 void ShootTwoBalls(int distance);
 void TurnToFlagsAndShootTwoBalls();
 void MoveToLowFlag();
@@ -28,8 +28,8 @@ void HitLowFlagWithRecovery(unsigned int distanceForward, unsigned int distanceB
 unsigned int HitTheWall(int distanceForward, int angle);
 void FlipCap(unsigned int distance, unsigned int distaneBack, int angle);
 void FlipCapWithLineCorrection(unsigned int distance, unsigned int afterLine, unsigned int distaneBack, int angle);
-void WaitAfterMove();
-void WaitAfterMoveReportDistance(int distance);
+void WaitAfterMove(unsigned int timeout = 0);
+void WaitAfterMoveReportDistance(int distance, unsigned int timeout = 0);
 
 
 inline void Wait(unsigned int duration)
@@ -50,8 +50,12 @@ inline void ShootBall()
 
 inline void TurnToAngle(int turn)
 {
-    Do(TurnPrecise(turn * GyroWrapper::Multiplier - GetGyroReading()));
+    const auto mult = GyroWrapper::Multiplier;
+    auto angle = turn * mult - GetGyroReading();
+    Do(TurnPrecise(angle));
     WaitAfterMove();
+    if (abs(turn * mult - GetGyroReading()) >= mult/2)
+        ReportStatus("!!! Turn Error: (x10) curr angle = %d, desired angle = %d\n", GetGyroReading() * 10 / mult, 10 * turn);
 }
 
 inline void WaitForBall(unsigned int wait)
