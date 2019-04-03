@@ -86,7 +86,7 @@ void Do(Action &&action, unsigned int timeout /* = 100000 */)
     }
 
     action.Stop();
-    if (!timedout)
+    if (!timedout && false)
     {
         if (timeout <= 15000)
             ReportStatus("%s took %ld ms (time-out: %d)\n", action.Name(), millis() - time, timeout);
@@ -166,8 +166,10 @@ void autonomous()
     if (g_mode == AtonMode::TestRun && !competition_is_autonomous())
     {
         // MoveExactWithAngle(6000, 10, false);
-        RunAtonFirstPos();
-        // RunAtonSecondPos();
+        // lcd.AtonClimbPlatform = false;
+        lcd.AtonFirstPos = false;
+        // RunAtonFirstPos();
+        RunAtonSecondPos();
         // RunSuperSkills();
     }
     else
@@ -256,24 +258,21 @@ unsigned int HitTheWall(int distanceForward, int angle)
 {
     TurnToAngleIfNeeded(angle);
     Do(MoveHitWallAction(distanceForward, angle), 1000 + abs(distanceForward) /*trimeout*/);
-    WaitAfterMove(500);
+    WaitAfterMove();
 
     unsigned int distance = GetMain().drive.m_distance;
-    ReportStatus("   HitTheWall: Actually travelled: %d out of %d\n", distance, distanceForward);
     return distance;
 }
 
 
 void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle)
 {
+    IntakeUp();
     Do(MoveExactFastAction(distance, angle, true /*stopOnHit*/));
     BLOCK
     {
         // GyroFreezer freezer(GetMain().gyro);
-        IntakeUp();
-        Wait(200); // minimal wait
-        WaitAfterMoveReportDistance(distance, 500);
-
+        // WaitAfterMoveReportDistance(distance, 200);
     }
     distanceBack = distanceBack + GetMain().drive.m_distance - distance;
     MoveExactWithAngle(-(int)distanceBack, angle);
@@ -286,7 +285,8 @@ void FlipCap(unsigned int distance, unsigned int distanceBack, int angle)
     Do(MoveFlipCapAction(distance, angle));
     WaitAfterMoveReportDistance(distance);
     distanceBack = distanceBack + GetMain().drive.m_distance - distance;
-    MoveExact(-(int)distanceBack, angle);
+    ReportStatus("Driving back: %d\n", distanceBack);
+    MoveExactFastWithAngle(-(int)distanceBack, angle);
 }
 
 void FlipCapWithLineCorrection(unsigned int distance, unsigned int afterLine, unsigned int distaneBack, int angle)
@@ -308,8 +308,9 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay)
     SetShooterAngle(high, distance);
     if (main.shooter.BallStatus() != BallPresence::HasBall)
     {
+        ReportStatus("No ball, waiting\n");
         IntakeUp();
-        WaitForBall(2000);
+        WaitForBall(3000);
     }
 
     if (main.shooter.BallStatus() != BallPresence::NoBall)
@@ -320,6 +321,11 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay)
             Wait(extraDelay);
         ShootBall();
     }
+    else
+    {
+        ReportStatus("No ball, akip ahooting\n");
+    }
+    
     IntakeUp();
 }
 
@@ -327,7 +333,7 @@ void ShootTwoBalls(int distance)
 {
     ReportStatus("Shooting 2 balls\n");
     ShootOneBall(twoFlagsShootsHighFirst, distance);
-    ShootOneBall(!twoFlagsShootsHighFirst, distance, 200);
+    ShootOneBall(!twoFlagsShootsHighFirst, distance, 50);
 }
 
 

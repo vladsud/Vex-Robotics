@@ -5,7 +5,7 @@
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
 
-const unsigned int distanceTillWall = 6500;
+const unsigned int distanceTillWall = 6700;
 const int angleToMoveToFlags = 4;
 const int angleToShootFlags = -2;
 
@@ -22,7 +22,7 @@ void RunAtonFirstPos()
     //
     // knock the cone
     //
-    GoToCapWithBallUnderIt(distanceToCap, distanceToCap + 300, -90);
+    GoToCapWithBallUnderIt(distanceToCap-100, distanceToCap+100, -90);
 
     //
     // Turn to shoot
@@ -41,7 +41,7 @@ void RunAtonFirstPos()
     //
     if (main.lcd.AtonClimbPlatform)
     {
-        HitLowFlagWithRecovery(distanceTillWall, 10500, 13 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(distanceTillWall, 10500, 12 /*angleBack*/, angleToMoveToFlags);
 
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
         auto time = main.GetTime() - timeBegin;
@@ -49,7 +49,11 @@ void RunAtonFirstPos()
         bool shooting = hasBall && (time < 11000);
         if (shooting)
         {
-            TurnToAngle(-26);
+            // Sometimes ball lands on top and interfeers with another ball
+            UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
+
+            TurnToAngle(-27);
+            Wait(100);
             ShootOneBall(highFlag, distanceFirstAtonFromPlatform);
         }
         TurnToAngle(-90);
@@ -66,16 +70,16 @@ void RunAtonFirstPos()
     }
     else
     {
-        HitLowFlagWithRecovery(distanceTillWall, 2800, 5 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(distanceTillWall, 6200, 5 /*angleBack*/, angleToMoveToFlags);
 
-        TurnToAngle(-48);
+        TurnToAngle(-46);
         ShootOneBall(highFlag, distanceFirstAtonDiagonalShot, true /*checkPresenceOfBall*/);
 
         // IntakeUp();
         // WaitForBall(1000);
         // SetShooterAngle(!highFlag, distanceFirstAtonDiagonalShot);
 
-        FlipCap(2100, -400, -48);
+        FlipCap(4400, 2000, -48);
 
         // ShootOneBall(false/*high*/, distanceFirstAtonDiagonalShot, true /*checkPresenceOfBall*/);
     }

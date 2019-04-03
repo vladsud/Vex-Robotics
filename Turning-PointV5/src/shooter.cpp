@@ -10,12 +10,15 @@
 using namespace pros;
 using namespace pros::c;
 
-// Distance based on front of the robot
-constexpr float Distances[]{48, distanceFirstAton, 78, distanceSecondAton};
+const unsigned int distanceFirstAton = 55; // main shot, 2 balls
+const unsigned int distanceFirstAtonDiagonalShot = 68; // medium flag
+const unsigned int distanceFirstAtonFromPlatform = 80; // medium flag
+const unsigned int distanceSecondAton = 108;        // high, then medium
 
-// 135 is the max!!!
-constexpr unsigned int AnglesHigh[]   { 175, 190, 195, 200};
-constexpr unsigned int AnglesMedium[] { 75, 100, 100, 110};
+// Distance based on front of the robot
+constexpr float Distances[]             {48,  55,  80, 100};
+constexpr unsigned int AnglesHigh[]   { 175, 190, 191, 192};
+constexpr unsigned int AnglesMedium[] {  75, 100, 110, 70};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -34,11 +37,9 @@ StaticAssert(Distances[2] < Distances[3]);
 
 StaticAssert(AnglesHigh[0] <= AnglesHigh[1]);
 StaticAssert(AnglesHigh[1] <= AnglesHigh[2]);
-StaticAssert(AnglesHigh[2] <= AnglesHigh[3]);
 
 StaticAssert(AnglesMedium[0] <= AnglesMedium[1]);
 StaticAssert(AnglesMedium[1] <= AnglesMedium[2]);
-StaticAssert(AnglesMedium[2] <= AnglesMedium[3]);
 
 StaticAssert(AnglesMedium[0] < AnglesHigh[0]);
 StaticAssert(AnglesMedium[1] < AnglesHigh[1]);
@@ -91,7 +92,8 @@ Shooter::Shooter()
     : m_preloadSensor(shooterPreloadPoterntiometer),
       m_angleSensor(anglePotPort),
       m_ballPresenceSensorUp(ballPresenceSensorUp),
-      m_ballPresenceSensorDown(ballPresenceSensorDown)
+      m_ballPresenceSensorDown(ballPresenceSensorDown),
+      m_ballPresenceSensorDown2(ballPresenceSensorDown2)
 {
     motor_tare_position(angleMotorPort);
     ResetState();
@@ -153,8 +155,7 @@ bool Shooter::IsShooting()
 
 bool Shooter::IsMovingAngle()
 {
-    if (m_fMoving)
-        return true;
+    return m_fMoving;
 }
 
 
@@ -295,7 +296,9 @@ BallPresence Shooter::BallStatus()
 
 BallPresence Shooter::Ball2Status()
 {
-    return ::BallStatus(m_ballPresenceSensorDown);
+    auto status1 = ::BallStatus(m_ballPresenceSensorDown);
+    auto status2 = ::BallStatus(m_ballPresenceSensorDown2);
+    return BallPresence(max(int(status1), int(status2)));
 }
 
 BallPresence BallStatus(pros::ADIAnalogIn& sensor)

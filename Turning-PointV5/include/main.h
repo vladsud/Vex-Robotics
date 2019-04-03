@@ -109,6 +109,7 @@ constexpr T min(T a, T b)
 #define lineTrackerRightPort 99
 #define ballPresenceSensorUp 2
 #define ballPresenceSensorDown 4
+#define ballPresenceSensorDown2 6
 #define shooterPreloadPoterntiometer 5
 
 

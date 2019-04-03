@@ -120,12 +120,12 @@ struct MoveToPlatformAction : public MoveAction
             m_fIsLow = true;
             if (m_slowCount == 0)
             {
-                m_main.drive.OverrideInputs(100, 0);
+                m_main.drive.OverrideInputs(127, 0);
                 m_distanceFirstHit = distance;
             }
         }
 
-        if (m_fIsLow && distance >= m_distanceFirstHit + 2300)
+        if (m_fIsLow && distance >= m_distanceFirstHit + 2500)
             return true;
 
         m_lastDistance = distance;
@@ -168,7 +168,7 @@ struct MoveExactAction : public MoveAction
         if (m_sengageSopOnCollision)
         {
             int timeElapsed = m_main.GetTime() - m_timeStart;
-            if (abs(velocity) >= 100 || timeElapsed >= 300)
+            if (abs(velocity) >= 100 || timeElapsed >= 600)
                 m_stopOnCollision = true;
         }
 

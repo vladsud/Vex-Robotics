@@ -2,16 +2,15 @@
 #include "main.h"
 #include "pros/adi.hpp"
 
-const unsigned int distanceFirstAton = 55; // main shot, 2 balls
-const unsigned int distanceFirstAtonDiagonalShot = 65; // if we are not climbing platform
-const unsigned int distanceFirstAtonFromPlatform = 70;
-
-const unsigned int distanceSecondAton = 108;
+extern const unsigned int distanceFirstAton; // main shot, 2 balls
+extern const unsigned int distanceFirstAtonDiagonalShot;// if we are not climbing platform
+extern const unsigned int distanceFirstAtonFromPlatform;
+extern const unsigned int distanceSecondAton;
 
 const unsigned int distanceSkillsSecondShot = 53;
 const unsigned int distanceSkillsThirdShot = 33;
 
-const bool twoFlagsShootsHighFirst = false;
+const bool twoFlagsShootsHighFirst = true;
 
 enum class Flag
 {
@@ -35,6 +34,7 @@ class Shooter
   pros::ADIAnalogIn m_angleSensor;
   pros::ADIAnalogIn m_ballPresenceSensorUp;
   pros::ADIAnalogIn m_ballPresenceSensorDown;
+  pros::ADIAnalogIn m_ballPresenceSensorDown2;
 
   unsigned int m_distanceInches = 48;
   Flag m_flag = Flag::High;

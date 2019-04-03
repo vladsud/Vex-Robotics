@@ -8,14 +8,17 @@ void RunAtonSecondPos()
 {
     GetMain().tracker.SetCoordinates({16.5 - 1, 33 + 48 - 1, -30});
 
-    ShootOneBall(true /*high*/, distanceSecondAton);
+    SetShooterAngle(false, distanceSecondAton);
+    Wait(1000);
+    ShootOneBall(false /*high*/, distanceSecondAton);
 
     if (GetMain().lcd.AtonClimbPlatform)
     {
+        IntakeStop();
         Wait(6000);
-        MoveExactWithAngle(700, -30);
+        IntakeUp();
+        MoveExactWithAngle(3600, -30);
         TurnToAngle(-90);
-        Wait(200);
 
         MoveToPlatform(false /*twoPlatforms*/, -90);
     }
@@ -24,7 +27,7 @@ void RunAtonSecondPos()
         TurnToAngle(-100);
         BLOCK
         {
-            GoToCapWithBallUnderIt(distanceToCap+150, -200 /*distanceBack*/, -100 /*angle*/);
+            GoToCapWithBallUnderIt(distanceToCap+200, 600 /*distanceBack*/, -100 /*angle*/);
         }
 
         TurnToAngle(-10);
@@ -35,7 +38,7 @@ void RunAtonSecondPos()
         Wait(1000);
         ShootBall();
 
-        MoveExactFastWithAngle(500, -70);
+        MoveExactFastWithAngle(1500, -70);
 
         /*
         TurnToAngle(-140);
