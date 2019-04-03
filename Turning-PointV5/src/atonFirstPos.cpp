@@ -38,7 +38,7 @@ void RunAtonFirstPos()
     //
     if (main.lcd.AtonClimbPlatform)
     {
-        HitLowFlagWithRecovery(6300, 11000, 13 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(6700, 10500, 13 /*angleBack*/, angleToMoveToFlags);
 
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
         auto time = main.GetTime() - timeBegin;
@@ -63,7 +63,7 @@ void RunAtonFirstPos()
     }
     else
     {
-        HitLowFlagWithRecovery(3200, 2800, 5 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(6700, 2800, 5 /*angleBack*/, angleToMoveToFlags);
 
         TurnToAngle(-48);
         ShootOneBall(highFlag, distanceFirstAtonDiagonalShot, true /*checkPresenceOfBall*/);

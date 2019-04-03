@@ -143,9 +143,6 @@ void opcontrol()
 	startTime = millis();
 	haveRumbled = false;
 
-	if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) && joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
-		StartSkillsinManual();
-
 	// This is required for testing purposes, but also for auto-Skills run in manual modde
 	if (isAuto())
 	{

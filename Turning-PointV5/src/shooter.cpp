@@ -121,6 +121,13 @@ bool MoveToMiddleFlagPosition()
     return joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_RIGHT);
 }
 
+void Shooter::StopShooting()
+{
+    if (m_overrideShooting)
+        ReportStatus("Stop shooting\n");
+    m_overrideShooting = false; // this is signal to autonomous!
+}
+
 bool Shooter::IsShooting()
 {
     // Allow "shoot" button to be pressed all the time and shoot once angle is settled
@@ -139,7 +146,7 @@ bool Shooter::IsShooting()
         return true;
 
     // no ball, cancel shooting.
-    m_overrideShooting = false;
+    StopShooting();
     return false;
 }
 
@@ -147,8 +154,6 @@ bool Shooter::IsMovingAngle()
 {
     if (m_fMoving)
         return true;
-    unsigned int dist = abs(m_angleSensor.get_value() - (int)m_angleToMove);
-    return dist > 10;
 }
 
 
@@ -182,7 +187,7 @@ void Shooter::KeepMoving()
         int diff = idealSpeed - actualSpeed;
 
         if (idealSpeed != 0)
-            power = sign * 20 + idealSpeed * (1 + sign * idealSpeed / 50) / 5 + diff * 0.75;
+            power = sign * 20 + idealSpeed * (1 + abs(idealSpeed) / 50) / 5 + diff * 0.75;
         else if (m_flag == Flag::Middle)
             power = Sign(actualSpeed) * 8; // going up - help it a bit
         else
@@ -201,7 +206,6 @@ void Shooter::KeepMoving()
         // m_integral = 0;
     }
     
-
     const int angleMotorSpeed = 75;
 
     if (power > angleMotorSpeed)
@@ -209,7 +213,7 @@ void Shooter::KeepMoving()
     else if (power < -angleMotorSpeed)
         power = -angleMotorSpeed;
 
-    // if (PrintDiagnostics(Diagnostics::Angle))
+    if (PrintDiagnostics(Diagnostics::Angle))
     {
         if (m_fMoving)
             ReportStatus("ANG: (%d) P=%d Dest=%d R=%d, Dist: %d, speed=%d, ideal = %d, R2=%d\n", m_count, power, m_angleToMove, current, current - m_angleToMove,
@@ -240,6 +244,7 @@ void Shooter::StartMoving()
 
 void Shooter::StopMoving()
 {
+    ReportStatus("Angle: stoped moving: count = %d\n", m_count);
     motor_move(angleMotorPort, 0);
     m_count = 0;
     m_fMoving = false;
@@ -278,6 +283,7 @@ void Shooter::UpdateDistanceControls()
 void Shooter::OverrideSetShooterMode(bool on)
 {
     Assert(isAuto());
+    ReportStatus("start shooting\n");
     m_overrideShooting = on;
 }
 
@@ -402,7 +408,7 @@ void Shooter::Update()
         if (m_timeSinseShooting <= 20)
         {
             m_disablePreload = false;
-            m_overrideShooting = false; // this is signal to autonomous!
+            StopShooting();
             m_preloadAfterShotCounter = 50;
         }
     }

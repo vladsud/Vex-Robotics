@@ -12,7 +12,6 @@ bool isAuto();
 bool SmartsOn();
 class Main &SetupMain();
 int AdjustAngle(int angle);
-void StartSkillsinManual();
 
 unsigned int SpeedFromDistances(unsigned int distance, const unsigned int* points, const unsigned int* speeds);
 int SpeedFromDistances(int distance, const unsigned int* points, const unsigned int* speeds);

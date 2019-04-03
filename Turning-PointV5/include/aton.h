@@ -16,7 +16,7 @@ void MoveToPlatform(bool twhoPlatforms, int angle);
 void Do(Action &&action, unsigned int timeout = 100000);
 void RunSuperSkills();
 void MoveExactWithAngle(int distance, int angle, bool allowTurning = true);
-void MoveExactFastWithAngle(int distance, int angle);
+void MoveExactFastWithAngle(int distance, int angle, bool stopOnHit = false);
 void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle);
 void ShootOneBall(bool high, int distance, bool checkBallPresence = true);
 void ShootTwoBalls(int distance);
@@ -45,7 +45,7 @@ inline void MoveExact(int distance, int angle)
 
 inline void ShootBall()
 {
-    Do(ShootBallAction());
+    Do(ShootBallAction(), 600);
 }
 
 inline void TurnToAngle(int turn)
@@ -56,12 +56,12 @@ inline void TurnToAngle(int turn)
 
 inline void WaitForBall(unsigned int wait)
 {
-    Do(WaitForBallAction(wait));
+    Do(WaitForBallAction(), wait);
 }
 
 inline void WaitShooterAngleToStop(unsigned int maxTime = 1000)
 {
-    Do(WaitShooterAngleToStopAction(maxTime));
+    Do(WaitShooterAngleToStopAction(), maxTime);
 }
 
 inline void MoveStop()

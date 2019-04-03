@@ -103,7 +103,7 @@ struct MoveToPlatformAction : public MoveAction
 
     bool ShouldStop() override
     {
-        int distance = m_main.drive.m_distance * 10;
+        int distance = m_main.drive.m_distance;
         m_diff = (m_diff + (distance - (int)m_lastDistance)) / 2;
 
         if (m_diffMax < m_diff)
@@ -113,7 +113,7 @@ struct MoveToPlatformAction : public MoveAction
 
         // ReportStatus("MoveToPlatform: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
 
-        if (!m_fIsLow && m_diff <= m_diffMax - 90)
+        if (!m_fIsLow && m_diff <= m_diffMax - 18)
         {
             // ReportStatus("MoveToPlatform: Slow down: diff = %d/%d, max  = %d, min = %d\n", m_diff, distance - (int)m_lastDistance, m_diffMax, m_diffMin);
             m_diffMin = m_diff;
@@ -125,7 +125,7 @@ struct MoveToPlatformAction : public MoveAction
             }
         }
 
-        if (m_fIsLow && distance >= m_distanceFirstHit + 1200 * 10)
+        if (m_fIsLow && distance >= m_distanceFirstHit + 2300)
             return true;
 
         m_lastDistance = distance;
@@ -238,8 +238,9 @@ struct MoveExactAction : public MoveAction
 
 struct MoveExactFastAction : public MoveExactAction
 {
-    MoveExactFastAction(int distance, int angle)
-        : MoveExactAction(distance, angle)
+    MoveExactFastAction(int distance, int angle, bool stopOnHit = false)
+        : MoveExactAction(distance, angle),
+        m_stopOnHit(stopOnHit)
     {}
 
 /*
@@ -250,11 +251,20 @@ struct MoveExactFastAction : public MoveExactAction
         // WARNING: Also used by
         //   - MoveHitWallAction (define minimal speed)
         //   - MoveFlipCapAction
-        static constexpr unsigned int points[] = {50, 2000, UINT_MAX};
-        static constexpr unsigned int speeds[] = {0,  4000, 4000};
+        static constexpr unsigned int points[] = {30, 30, 100, 1600, UINT_MAX};
+        static constexpr unsigned int speeds[] = {0, 300, 300, 4000, 4000};
         return SpeedFromDistances(error, points, speeds);
     }
-    */
+*/
+    bool ShouldStop() override
+    {
+        int timeElapsed = m_main.GetTime() - m_timeStart;
+        if (abs(GetRobotVelocity()) >= 100 || timeElapsed >= 300)
+            m_stopOnCollision = true;
+        return MoveExactAction::ShouldStop();
+    }
+private:
+    bool m_stopOnHit;
 };
 
 using MoveFlipCapAction = MoveExactFastAction;
@@ -262,25 +272,20 @@ using MoveFlipCapAction = MoveExactFastAction;
 
 struct MoveHitWallAction : public MoveExactFastAction
 {
+    // Keep going forever, untill we hit the wall...
+    const unsigned int distanceToKeep = 400;
+
     MoveHitWallAction(int distance, int angle)
-        : MoveExactFastAction(distance, angle)
+        : MoveExactFastAction(distance + distanceToKeep, angle, true /*stopOnHit*/)
     {
     }
 
     int SpeedFromDistance(int error) override
     {
-        // Keep going forever, untill we hit the wall...
-        const unsigned int distanceToKeep = 400;
-        int timeElapsed = m_main.GetTime() - m_timeStart;
-
         if (abs(error) <= distanceToKeep)
         {
             m_distanceToMove = m_main.drive.m_distance + distanceToKeep;
         }
-
-        if (abs(GetRobotVelocity()) >= 100 || timeElapsed >= 300)
-            m_stopOnCollision = true;
-
         return MoveExactAction::SpeedFromDistance(error);
     }
 };

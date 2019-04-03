@@ -58,22 +58,17 @@ bool SmartsOn()
     return g_autonomousSmartsOn && isAuto();
 }
 
-void StartSkillsinManual()
-{
-    g_mode = AtonMode::SkillsInManual;
-    Assert(isAuto());
-}
-
-
 void Do(Action &&action, unsigned int timeout /* = 100000 */)
 {
     auto time = millis();
+    bool timedout = false;
 
     auto& main = GetMain();
     while (!action.ShouldStop())
     {
         if (main.GetTime() - action.m_timeStart >= timeout)
         {
+            timedout = true;
             ReportStatus("!!! TIME-OUT: %s: %d\n", action.Name(), timeout);
             break;
         }
@@ -91,10 +86,13 @@ void Do(Action &&action, unsigned int timeout /* = 100000 */)
     }
 
     action.Stop();
-    if (timeout <= 15000)
-        ReportStatus("%s took %ld ms (time-out: %d)\n", action.Name(), millis() - time, timeout);
-    else
-        ReportStatus("%s took %ld ms\n", action.Name(), millis() - time);
+    if (!timedout)
+    {
+        if (timeout <= 15000)
+            ReportStatus("%s took %ld ms (time-out: %d)\n", action.Name(), millis() - time, timeout);
+        else
+            ReportStatus("%s took %ld ms\n", action.Name(), millis() - time);
+    }
 }
 
 // Scans digital buttons on joystick
@@ -214,12 +212,12 @@ void SetShooterAngle(bool hightFlag, int distance)
 void MoveToPlatform(bool twoPlatforms, int angle)
 {
     // ReportStatus("First platform\n");
-    Do(MoveToPlatformAction(6000, angle));
+    Do(MoveToPlatformAction(5200, angle));
 
     if (twoPlatforms)
     {
         // ReportStatus("Second platform\n");
-        Do(MoveToPlatformAction(5300, angle));
+        Do(MoveToPlatformAction(5200, angle));
         MoveStop();
     }
 }
@@ -232,10 +230,10 @@ void MoveExactWithAngle(int distance, int angle, bool allowTurning /*= true*/)
     MoveExact(distance, angle);
 }
 
-void MoveExactFastWithAngle(int distance, int angle)
+void MoveExactFastWithAngle(int distance, int angle, bool stopOnHit)
 {
     TurnToAngleIfNeeded(angle);
-    Do(MoveExactFastAction(distance, angle));
+    Do(MoveExactFastAction(distance, angle, stopOnHit));
     WaitAfterMoveReportDistance(distance);
 }
 
@@ -269,8 +267,14 @@ unsigned int HitTheWall(int distanceForward, int angle)
 
 void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle)
 {
-    IntakeUp();
-    MoveExactFastWithAngle(distance, angle);
+    Do(MoveExactFastAction(distance, angle, true /*stopOnHit*/));
+    BLOCK
+    {
+        GyroFreezer freezer(GetMain().gyro);
+        IntakeUp();
+        WaitAfterMoveReportDistance(distance);
+        Wait(200);
+    }
     distanceBack = distanceBack + GetMain().drive.m_distance - distance;
     MoveExactWithAngle(-(int)distanceBack, angle);
 }

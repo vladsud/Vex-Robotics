@@ -77,4 +77,5 @@ public:
   BallPresence BallStatus();
   BallPresence Ball2Status();
   Flag GetFlagPosition() { return m_flag; }
+  void StopShooting();
 };

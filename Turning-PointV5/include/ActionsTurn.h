@@ -62,7 +62,7 @@ struct TurnPrecise : public Action
         if (idealSpeed == 0)
             power = -Sign(actualSpeed) * 12;
         else
-            power = sign * 20 + idealSpeed * (4 + idealSpeed / 9) / 100 + diff * 0.36;
+            power = sign * 20 + idealSpeed * (4 + abs(idealSpeed) / 9) / 100 + diff * 0.36;
 
         int maxSpeed = 80;
         if (errorAbs <= 2 * GyroWrapper::Multiplier)
