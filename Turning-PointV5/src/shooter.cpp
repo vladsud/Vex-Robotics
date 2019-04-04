@@ -13,9 +13,15 @@ using namespace pros::c;
 const unsigned int distanceFirstAton = 55; // main shot, 2 balls
 const unsigned int distanceFirstAtonDiagonalShot = 68; // medium flag
 const unsigned int distanceFirstAtonFromPlatform = 80; // medium flag
-const unsigned int distanceSecondAton = 108;        // high, then medium
+const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
+
+/*
+1X
+2Y
+3B
+*/
 constexpr float Distances[]             {48,  55,  80, 100};
 constexpr unsigned int AnglesHigh[]   { 175, 190, 191, 192};
 constexpr unsigned int AnglesMedium[] {  75, 100, 110, 70};
@@ -24,7 +30,7 @@ constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
 constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 {
-    return 4000 - angle * 20;
+    return 5000 - angle * 20;
 }
 
 
@@ -197,7 +203,7 @@ void Shooter::KeepMoving()
     }
     else if (abs(error) > 15)
     {
-        unsigned int starting = (m_flag == Flag::High) ? 15 : 25;
+        unsigned int starting = (m_flag == Flag::High) ? 15 : 20;
         power = (starting + m_integral / 2) * sign;
         m_integral++;
         if (m_integral > 16)
@@ -272,14 +278,14 @@ void Shooter::SetFlag(Flag flag)
 
 void Shooter::UpdateDistanceControls()
 {
-    // if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
-    //    SetDistance(Distances[0]);
-    // if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
-    //     SetDistance(Distances[1]);
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
         SetDistance(Distances[0]);
-    // else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
-    //    SetDistance(Distances[3]);
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))    
+        SetDistance(Distances[1]);
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
+        SetDistance(Distances[2]);
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+        SetDistance(Distances[3]);
 }
 
 void Shooter::OverrideSetShooterMode(bool on)
