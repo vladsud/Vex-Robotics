@@ -92,7 +92,7 @@ constexpr T min(T a, T b)
 #define rightBackDrivePort 5
 #define angleMotorPort 16
 
-#define descorerPort 99
+#define descorerPort 12
 
 #define VisionPort 7
 

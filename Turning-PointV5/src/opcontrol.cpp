@@ -84,7 +84,7 @@ void Main::UpdateAllSystems()
 
 	lcd.Update();
 	vision.Update();
-	// descorer.Update();
+	descorer.Update();
 	intake.Update();
 	shooter.Update();
 	drive.Update();

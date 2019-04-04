@@ -115,31 +115,19 @@ void Descorer::Update()
         {
             m_count = 0;
             m_direction = Direction::Up;
-            motor_move(descorerPort, 85);
+            motor_move(descorerPort, 95);
         }
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
     {
         m_direction = Direction::Down;
         m_count = 0;
-        motor_move(descorerPort, -85);
+        motor_move(descorerPort, -95);
     }
     else
     {
-        m_count++;
-        if (m_count > 20)
-        {
-            motor_move(descorerPort, 0);
-            m_direction = Direction::None;
-        }
-        else if (m_direction == Direction::Up)
-        {
-            motor_move(descorerPort, -15);
-        }
-        else
-        {
-            motor_move(descorerPort, 15);
-        }
+        motor_move(descorerPort, 0);
+        m_direction = Direction::None;
     }
 
 }
