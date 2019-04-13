@@ -33,7 +33,7 @@ void Intake::SetIntakeDirection(Direction direction)
         // slow down transition when change in direciton happens
         m_power += Sign(power) * 5;
 
-    SetIntakeMotor(m_power);
+    SetIntakeMotor(-m_power);
 }
 
 void Intake::SetIntakeMotor(int speed)
