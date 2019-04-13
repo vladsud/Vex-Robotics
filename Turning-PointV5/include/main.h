@@ -83,14 +83,14 @@ constexpr T min(T a, T b)
 *
 * 
 *******************************************************************************/
-#define shooterPort 4
+#define shooterPort 7
 
-#define leftBackDrivePort 2
-#define leftFrontDrivePort 18
-#define intakePort 6
-#define rightFrontDrivePort 9
-#define rightBackDrivePort 5
-#define angleMotorPort 16
+#define leftBackDrivePort 9
+#define leftFrontDrivePort 2
+#define intakePort 5
+#define rightFrontDrivePort 4
+#define rightBackDrivePort 8
+#define angleMotorPort 99999 /*15 actual port/
 
 #define descorerPort 12
 
@@ -104,13 +104,14 @@ constexpr T min(T a, T b)
 *******************************************************************************/
 #define gyroPort 3
 #define anglePotPort 1
-
+/*
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99
 #define ballPresenceSensorUp 2
 #define ballPresenceSensorDown 4
 #define ballPresenceSensorDown2 6
-#define shooterPreloadPoterntiometer 5
+*/
+#define shooterPreloadPoterntiometer 2
 
 
 /*******************************************************************************
