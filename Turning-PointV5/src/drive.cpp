@@ -177,7 +177,7 @@ void setMotors(uint8_t forwardPort, uint8_t backPort, int speed)
     if (speed < 0 && motor_get_actual_velocity(forwardPort) > 70)
     {
         motor_move(forwardPort, max(speed, -1));
-        motor_move(backPort, max(speed, -3));
+        motor_move(backPort, speed);
     }
     else if (speed > 0 && motor_get_actual_velocity(backPort) < -20)
     {
