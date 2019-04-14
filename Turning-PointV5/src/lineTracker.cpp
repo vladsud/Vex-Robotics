@@ -9,7 +9,7 @@ using namespace pros::c;
 LineTracker::LineTracker(unsigned int port)
     : m_sensor(port)
 {
-    ReportStatus("Line %d init: %d\n", port, m_sensor.get_value());
+    // ReportStatus("Line %d init: %d\n", port, m_sensor.get_value());
     ResetCore();
 }
 

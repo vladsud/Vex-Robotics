@@ -16,21 +16,15 @@ const unsigned int distanceFirstAtonFromPlatform = 80; // medium flag
 const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
-
-/*
-1X
-2Y
-3B
-*/
 constexpr float Distances[]             {48,  55,  80, 100};
-constexpr unsigned int AnglesHigh[]   { 175, 190, 191, 192};
-constexpr unsigned int AnglesMedium[] {  75, 100, 110, 70};
+constexpr unsigned int AnglesHigh[]   { 220, 390, 391, 392};
+constexpr unsigned int AnglesMedium[] {   30, 101, 110, 70};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
 constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 {
-    return 5000 - angle * 20;
+    return angle * 2;
 }
 
 
@@ -101,16 +95,20 @@ Shooter::Shooter()
       m_ballPresenceSensorDown(ballPresenceSensorDown),
       m_ballPresenceSensorDown2(ballPresenceSensorDown2)
 {
-    motor_tare_position(angleMotorPort);
+    motor_set_brake_mode(angleMotorPort, motor_brake_mode_e::E_MOTOR_BRAKE_HOLD);
+    motor_set_encoder_units(angleMotorPort, motor_encoder_units_e::E_MOTOR_ENCODER_COUNTS);    
     ResetState();
-    StartMoving();
+
+    m_initialAdjustment = true;
+    motor_tare_position(angleMotorPort);
+    motor_move(angleMotorPort, -40);
+    m_lastPos = 0;
 }
 
 void Shooter::ResetState()
 {
     m_distanceInches = Distances[0];
     // ReportStatus("Shooter angle: %d\n", m_angleSensor.get_value());
-    StartMoving();
 }
 
 unsigned int Shooter::CalcAngle()
@@ -164,18 +162,33 @@ bool Shooter::IsMovingAngle()
     return m_fMoving;
 }
 
+void Shooter::InitialAdjustment()
+{
+    m_count++;
+    int curr = motor_get_position(angleMotorPort);
+    ReportStatus("initial adjustment: %d %d %d\n", curr, m_lastPos, m_count);
+    if (m_lastPos == curr && m_count < 100)
+        m_count = 100;
+    m_lastPos = curr;
+
+    if (m_count == 110) 
+    {
+        m_initialAdjustment = false;
+        motor_tare_position(angleMotorPort);
+        m_lastPos = 0;
+        StartMoving();
+    }
+}
 
 static constexpr unsigned int AnglePoints[] = { 15, 31, 150, 700, UINT_MAX};
-static constexpr unsigned int AngleSpeeds[] = { 0,  15,  25, 110, 111};
+static constexpr unsigned int AngleSpeeds[] = { 0,  40,  50, 250, 301};
 
 void Shooter::KeepMoving()
 {
     int power = 0;
-    unsigned int current = m_angleSensor.get_value();
-    int currentThrughMotor = (motor_get_position(angleMotorPort) - m_motorPosStart) * 2.92 + m_angleMovingFrom;
-    current = currentThrughMotor;
+    int current = motor_get_position(angleMotorPort);
 
-    int error = m_angleToMove - current;
+    int error = (int) m_angleToMove - current;
     int sign = Sign(error);
     int actualSpeed = motor_get_actual_velocity(angleMotorPort);
     int idealSpeed = SpeedFromDistances(error, AnglePoints, AngleSpeeds);
@@ -184,7 +197,9 @@ void Shooter::KeepMoving()
 
     if (m_fMoving)
     {
-        if (m_count >= 100 || (idealSpeed == 0 && abs(actualSpeed) <= 12) || ((m_angleToMove - m_angleMovingFrom) * sign < 0 && abs(error) > 20))
+        // For some reason motor reports rather high speed for many ticks even though reading does not change
+        bool slow = abs(actualSpeed) <= 12 || m_lastPos == current;
+        if (m_count >= 100 || (idealSpeed == 0 && slow) || ((m_angleToMove - m_angleMovingFrom) * sign < 0 && abs(error) > 20))
         {
             if (abs(error) >= 20)
                 ReportStatus("   Angle: error=%d\n", error);
@@ -195,19 +210,20 @@ void Shooter::KeepMoving()
         int diff = idealSpeed - actualSpeed;
 
         if (idealSpeed != 0)
-            power = sign * 20 + idealSpeed * (1 + abs(idealSpeed) / 50) / 5 + diff * 0.75;
-        else if (m_flag == Flag::Middle)
-            power = Sign(actualSpeed) * 8; // going up - help it a bit
+            power = sign * 30 + idealSpeed * (1 + abs(idealSpeed) / 60) / 5 + diff / 5;
         else
-            power = -Sign(actualSpeed) * 5;
+            power = Sign(actualSpeed) * 5;
     }
-    else if (abs(error) > 15)
+    else if (abs(error) > 15 || m_adjusting)
     {
-        unsigned int starting = (m_flag == Flag::High) ? 15 : 20;
-        power = (starting + m_integral / 2) * sign;
-        m_integral++;
-        if (m_integral > 16)
-            m_integral = 0;
+        m_adjusting = abs(error) > 5;
+        if (m_adjusting)
+        {
+            power = (20 + m_integral / 2) * sign;
+            m_integral++;
+            if (m_integral > 15)
+                m_integral = 0;
+        }
     }
     else
     {
@@ -224,17 +240,18 @@ void Shooter::KeepMoving()
     if (PrintDiagnostics(Diagnostics::Angle))
     {
         if (m_fMoving)
-            ReportStatus("ANG: (%d) P=%d Dest=%d R=%d, Dist: %d, speed=%d, ideal = %d, R2=%d\n", m_count, power, m_angleToMove, current, current - m_angleToMove,
-            actualSpeed, idealSpeed, currentThrughMotor);
+            ReportStatus("ANG: (%d) P=%d Dest=%d R=%d, Dist: %d, speed=%d, ideal = %d\n", m_count, power, m_angleToMove, current, current - m_angleToMove,
+            actualSpeed, idealSpeed);
         else if (power != 0)
-            ReportStatus("ANG ADJ: (%d) P=%d Dest=%d R=%d, Dist: %d R2=%d\n", m_count, power, m_angleToMove, current, current - m_angleToMove, currentThrughMotor);
+            ReportStatus("ANG ADJ: (%d) P=%d Dest=%d R=%d, Dist: %d\n", m_count, power, m_angleToMove, current, current - m_angleToMove);
     }
 
-    if (m_count == 1)
+    if (m_fMoving && m_count == 1)
         m_power = power;
     else
         m_power = (power + m_power) / 2;
 
+    m_lastPos = current;
     motor_move(angleMotorPort, m_power);
 }
 
@@ -242,19 +259,21 @@ void Shooter::StartMoving()
 {
     m_fMoving = true;
     m_angleToMove = ConvertAngleToPotentiometer(CalcAngle());
-    m_angleMovingFrom = m_angleSensor.get_value();
+    m_angleMovingFrom = motor_get_position(angleMotorPort);
+    m_lastPos = m_angleMovingFrom;
     m_count = 0;
-    m_motorPosStart = motor_get_position(angleMotorPort);
     m_integral = 0;
+    m_adjusting = false;
 
     // ReportStatus("Angle start moving: %d -> %d\n", m_angleSensor.get_value(), m_angleToMove);
 }
 
 void Shooter::StopMoving()
 {
-    // ReportStatus("Angle: stopped moving: count = %d\n", m_count);
+    ReportStatus("Angle: stopped moving: count = %d\n", m_count);
     motor_move(angleMotorPort, 0);
     m_count = 0;
+    // m_power = 0;
     m_fMoving = false;
 }
 
@@ -450,5 +469,8 @@ void Shooter::Update()
     }
 
     // Keep moving angle to rigth position
-    KeepMoving();
+    if (m_initialAdjustment)
+        InitialAdjustment();
+    else
+        KeepMoving();
 }

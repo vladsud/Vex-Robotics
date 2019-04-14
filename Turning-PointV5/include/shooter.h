@@ -47,10 +47,12 @@ class Shooter
   unsigned int m_timeSinseShooting = 0;
   unsigned int m_angleMovingFrom = 0;
   int m_power = 0;
-  int m_motorPosStart = 0;
   unsigned int m_integral = 0;
+  int m_lastPos;
 
   bool m_fMoving = false;
+  bool m_adjusting = false;
+  bool m_initialAdjustment = true;
   bool m_disablePreload = false;
   bool m_userShooting = false;
   bool m_preloading = false;
@@ -78,4 +80,6 @@ public:
   BallPresence Ball2Status();
   Flag GetFlagPosition() { return m_flag; }
   void StopShooting();
+private:
+  void InitialAdjustment();
 };

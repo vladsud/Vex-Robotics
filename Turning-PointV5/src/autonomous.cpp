@@ -98,7 +98,7 @@ void Do(Action &&action, unsigned int timeout /* = 100000 */)
 // Scans digital buttons on joystick
 bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t button)
 {
-    bool result = controller_get_digital(id, button);
+    bool result = (controller_get_digital(id, button) == 1);
 
     // if we are running autonous code in non-autonomous mode, then allow user to bail out.
     // this is very useful to run autonomous skills in manual skills mode.

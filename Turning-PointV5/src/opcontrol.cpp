@@ -13,9 +13,6 @@ using namespace pros::c;
 
 static Main *g_main = nullptr;
 
-int startTime;
-bool haveRumbled;
-
 Main &SetupMain()
 {
 	if (g_main == nullptr)
@@ -140,9 +137,6 @@ void Main::ResetState()
 //Operator Control
 void opcontrol()
 {
-	startTime = millis();
-	haveRumbled = false;
-
 	// This is required for testing purposes, but also for auto-Skills run in manual modde
 	if (isAuto())
 	{
@@ -153,19 +147,19 @@ void opcontrol()
 	Main &main = SetupMain();
 	main.ResetState();
 	main.UpdateAllSystems();
+	bool haveRumbled = false;
+
+	ReportStatus("Starting op control\n");
 
 	while (true)
 	{
 		main.Update();
 
-		if (!haveRumbled)
+		if (!haveRumbled && (main.GetTime() > 90000))
 		{
-			if ((millis() - startTime) > 90000)
-			{
-				haveRumbled = true;
-				controller_rumble(E_CONTROLLER_MASTER, "-");
-				controller_set_text(E_CONTROLLER_MASTER, 1, 1, "Rumble");
-			}
+			haveRumbled = true;
+			controller_rumble(E_CONTROLLER_MASTER, "-");
+			controller_set_text(E_CONTROLLER_MASTER, 1, 1, "Rumble");
 		}
 	}
 }

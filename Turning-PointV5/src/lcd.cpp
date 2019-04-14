@@ -29,7 +29,7 @@ lv_res_t LCD::click_action(lv_obj_t * btn)
 
 lv_obj_t* LCD::CreateButton(uint8_t id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled)
 {
-    ReportStatus("lcd: %d %d %s\n, id, toggled, label");
+    // ReportStatus("lcd: %d %d %s\n, id, toggled, label");
     lv_obj_t * btn = lv_btn_create(container, NULL);
     lv_btn_set_toggle(btn, true);
     

@@ -12,6 +12,7 @@ void Intake::ResetState()
     m_power = 0;
     m_direction = Direction::None;
     m_doublePressed = false;
+    motor_set_reversed(intakePort, true);
 }
 
 void Intake::SetIntakeDirection(Direction direction)
@@ -25,7 +26,13 @@ void Intake::SetIntakeDirection(Direction direction)
         return;
     }
 
-    int power = (m_direction == Direction::Up) ? intakeMotorSpeedUp : -intakeMotorSpeedDown / 2;
+    int power;
+    if (m_ballGoDownState)
+        power = -intakeMotorSpeedDown / 3;
+    else if (m_direction == Direction::Up)
+        power = intakeMotorSpeedUp * 0.85;
+    else
+        power = -intakeMotorSpeedDown / 2;
 
     if (power * m_power >= 0)
         m_power = power;
@@ -33,7 +40,7 @@ void Intake::SetIntakeDirection(Direction direction)
         // slow down transition when change in direciton happens
         m_power += Sign(power) * 5;
 
-    SetIntakeMotor(-m_power);
+    SetIntakeMotor(m_power);
 }
 
 void Intake::SetIntakeMotor(int speed)
