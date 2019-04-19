@@ -160,6 +160,7 @@ void autonomous()
         ReportStatus("Flipping coordinates\n");
     main.tracker.FlipX(main.lcd.AtonBlueRight);
     main.drive.FlipX(main.lcd.AtonBlueRight);
+    main.vision.SetFlipX(main.lcd.AtonBlueRight);
 
 #ifndef OFFICIAL_RUN
     // Debugging code - should not run in real autonomous
