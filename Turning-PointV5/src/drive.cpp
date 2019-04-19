@@ -288,10 +288,7 @@ void Drive::Update()
 
     if (!smartsOn)
     {
-        // if we are not moving forward, then we want to put all power to motors to turn
-        // But if we are moving forward 100%, we do not want to completely stop one motor if
-        // turning 100% to the right - we still want to make forward progress!
-        int turn = m_turn * (0.6 + 0.4 * forwardAbs / driveMotorMaxSpeed);
+        int turn = m_turn;
 
         SetLeftDrive(m_forward + turn);
         SetRightDrive(m_forward - turn);
