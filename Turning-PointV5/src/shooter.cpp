@@ -166,7 +166,7 @@ void Shooter::InitialAdjustment()
 {
     m_count++;
     int curr = motor_get_position(angleMotorPort);
-    ReportStatus("initial adjustment: %d %d %d\n", curr, m_lastPos, m_count);
+    // ReportStatus("initial adjustment: %d %d %d\n", curr, m_lastPos, m_count);
     if (m_lastPos == curr && m_count < 100)
         m_count = 100;
     m_lastPos = curr;
