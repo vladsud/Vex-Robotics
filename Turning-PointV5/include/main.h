@@ -83,18 +83,18 @@ constexpr T min(T a, T b)
 *
 * 
 *******************************************************************************/
-#define shooterPort 7
-
 #define leftBackDrivePort 9
 #define leftFrontDrivePort 2
-#define intakePort 5
 #define rightFrontDrivePort 4
 #define rightBackDrivePort 8
-#define angleMotorPort 12 /*15actual*/
 
-#define descorerPort 12
+#define intakePort 5
+#define angleMotorPort 12
+#define shooterPort 7
 
-#define VisionPort 20
+#define descorerPort 99
+
+#define VisionPort 13
 
 
 /*******************************************************************************

@@ -80,7 +80,7 @@ void Main::UpdateAllSystems()
 	UpdateFastSystems();
 
 	lcd.Update();
-	vision.Update();
+	vision.Update(); // before drive, for it to update where to drive
 	descorer.Update();
 	intake.Update();
 	shooter.Update();

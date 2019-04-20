@@ -6,6 +6,7 @@
 #include "pros/motors.h"
 #include "pros/rtos.h"
 #include <limits.h>
+#include "cycle.h"
 
 using namespace pros;
 using namespace pros::c;
@@ -17,14 +18,14 @@ const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
 constexpr float Distances[]             {48,  55,  80, 100};
-constexpr unsigned int AnglesHigh[]   { 220, 390, 391, 392};
-constexpr unsigned int AnglesMedium[] {   30, 101, 110, 70};
+constexpr unsigned int AnglesHigh[]   { 540, 500, 400, 300};
+constexpr unsigned int AnglesMedium[] { 160, 150, 140, 130};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
 constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 {
-    return angle * 2;
+    return 600-angle;
 }
 
 
@@ -35,11 +36,11 @@ StaticAssert(Distances[0] < Distances[1]);
 StaticAssert(Distances[1] < Distances[2]);
 StaticAssert(Distances[2] < Distances[3]);
 
-StaticAssert(AnglesHigh[0] <= AnglesHigh[1]);
-StaticAssert(AnglesHigh[1] <= AnglesHigh[2]);
+StaticAssert(AnglesHigh[0] >= AnglesHigh[1]);
+StaticAssert(AnglesHigh[1] >= AnglesHigh[2]);
 
-StaticAssert(AnglesMedium[0] <= AnglesMedium[1]);
-StaticAssert(AnglesMedium[1] <= AnglesMedium[2]);
+StaticAssert(AnglesMedium[0] >= AnglesMedium[1]);
+StaticAssert(AnglesMedium[1] >= AnglesMedium[2]);
 
 StaticAssert(AnglesMedium[0] < AnglesHigh[0]);
 StaticAssert(AnglesMedium[1] < AnglesHigh[1]);
@@ -137,15 +138,18 @@ void Shooter::StopShooting()
 
 bool Shooter::IsShooting()
 {
-    // Allow "shoot" button to be pressed all the time and shoot once angle is settled
-    if (m_fMoving)
+    if (!GetMain().vision.OnTarget())
     {
-        Assert(!m_overrideShooting); // atonomous should always wait till angle is settled.
-        return false;
-    }
+        // Allow "shoot" button to be pressed all the time and shoot once angle is settled
+        if (m_fMoving)
+        {
+            Assert(!m_overrideShooting); // atonomous should always wait till angle is settled.
+            return false;
+        }
 
-    if (!m_overrideShooting && !joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT))
-        return false;
+        if (!m_overrideShooting && !joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT))
+            return false;
+    }
     
     // if we do not hava a ball - cancel shooting
     // check for lack of ball - that speeds up the process of shooting when ball is getting in.
@@ -270,7 +274,7 @@ void Shooter::StartMoving()
 
 void Shooter::StopMoving()
 {
-    ReportStatus("Angle: stopped moving: count = %d\n", m_count);
+    // ReportStatus("Angle: stopped moving: count = %d\n", m_count);
     motor_move(angleMotorPort, 0);
     m_count = 0;
     // m_power = 0;
@@ -293,6 +297,23 @@ void Shooter::SetFlag(Flag flag)
     // ReportStatus("Shooter::SetFlag(%d)\n", (int)flag);
     m_flag = flag;
     StartMoving();
+}
+
+// positive is up
+void Shooter::MoveAngleRelative(int pos)
+{
+    if (m_preloadAfterShotCounter > 0)
+        return;
+    StartMoving();
+    m_angleToMove = motor_get_position(angleMotorPort) + pos;
+}
+
+int Shooter::MovingRelativeTo()
+{
+    int diff = m_angleToMove - motor_get_position(angleMotorPort);
+    if (!m_fMoving && abs(diff) <= 15)
+        return 0;
+    return diff;
 }
 
 void Shooter::UpdateDistanceControls()
@@ -423,6 +444,7 @@ void Shooter::Update()
 
     if (ball != BallPresence::HasBall && m_haveBall)
     {
+        ReportStatus("Lost ball\n");
         UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
         if (m_flag == Flag::High)
             SetFlag(Flag::Middle);

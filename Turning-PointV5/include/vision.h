@@ -1,3 +1,4 @@
+#pragma once
 #include "pros/vision.hpp"
 
 enum SigType
@@ -18,15 +19,23 @@ class Vision
     pros::Vision m_sensor;
     SigType m_type = SigType::Red;
     unsigned int m_count = 0;
-    unsigned int m_detections = 0;
+    unsigned int m_detectionsHigh = 0;
+    unsigned int m_detectionsLow = 0;
+    unsigned int m_countNotFound = 0;
+    unsigned int m_countShooterMoving = 0;
+    unsigned int m_anglePos = 0;
     unsigned m_brightness = 30;
     bool m_reportedError = false;
     bool m_blue = false;
+    bool m_fOnTarget = false;
+    bool m_aimingNShooting = false;
 
 public:
     Vision();
     void Update();
     void SetFlipX(bool blue); 
+    bool OnTarget();
+    bool IsShooting();
 
 protected:
     bool ReadObjects();

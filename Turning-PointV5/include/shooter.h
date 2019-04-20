@@ -80,6 +80,9 @@ public:
   BallPresence Ball2Status();
   Flag GetFlagPosition() { return m_flag; }
   void StopShooting();
+  void MoveAngleRelative(int pos);
+  int MovingRelativeTo();
+
 private:
   void InitialAdjustment();
 };

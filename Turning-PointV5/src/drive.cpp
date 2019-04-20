@@ -121,7 +121,7 @@ int Drive::GetMovementJoystick(pros::controller_id_e_t joystick, pros::controlle
 int Drive::GetForwardAxis()
 {
     // motors can't move robot at slow speed, so add some boost
-    if (isAuto())
+    if (isAuto() || GetMain().vision.IsShooting())
         return m_overrideForward;
     return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_LEFT_Y, 18);
 }
@@ -129,7 +129,7 @@ int Drive::GetForwardAxis()
 float Drive::GetTurnAxis()
 {
     // We adjust speed to put more power to motors initially to move robot from still position.
-    if (isAuto())
+    if (isAuto() || GetMain().vision.IsShooting())
         return m_overrideTurn;
     // convert joystick metric to drive metric
     return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_RIGHT_X, 37) * driveMotorMaxSpeed / joystickMax;
@@ -137,7 +137,7 @@ float Drive::GetTurnAxis()
 
 void Drive::OverrideInputs(int forward, float turn)
 {
-    Assert(isAuto());
+    Assert(isAuto() || GetMain().vision.IsShooting());
 
     if (m_flipX)
         turn = -turn;
