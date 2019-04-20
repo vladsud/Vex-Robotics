@@ -126,10 +126,10 @@ constexpr T min(T a, T b)
 * OTHER CONSTANTS
 *
 *******************************************************************************/
-#define lightSensorBallIn 2600
-#define lightSensorBallOut 2700
+#define lightSensorBallIn 2200
+#define lightSensorBallOut 2600
 
-#define ShooterPreloadEnd 100
-#define ShooterPreloadStart 300
+#define ShooterPreloadEnd 300
+#define ShooterPreloadStart 500
 
 #define DistanveBetweenLineSensors 390 // in clicks, rouhly 14"
