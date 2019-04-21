@@ -33,7 +33,7 @@ void UpdateIntakeFromShooter(IntakeShoterEvent event);
 #define Assert(f) AssertCore(f, #f, __FILE__, __LINE__)
 #define AssertSz(f, sz) AssertCore(f, sz, __FILE__, __LINE__)
 void AssertCore(bool condition, const char *message, const char *file, int line);
-#define ReportStatus printf
+#define ReportStatus(format, ...) printf("%ld: " format, pros::c::millis(), ##__VA_ARGS__)
 
 #define CountOf(a) (sizeof(a) / sizeof(a[0]))
 #define UNUSED_VARIABLE(a) (void)a;
@@ -94,7 +94,7 @@ constexpr T min(T a, T b)
 
 #define descorerPort 99
 
-#define VisionPort 13
+#define VisionPort 14
 
 
 /*******************************************************************************

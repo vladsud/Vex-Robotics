@@ -25,10 +25,12 @@ class Vision
     unsigned int m_countShooterMoving = 0;
     unsigned int m_anglePos = 0;
     unsigned m_brightness = 30;
+    unsigned m_trackingX = 30;
+    unsigned m_trackingY = 30;
     bool m_reportedError = false;
     bool m_blue = false;
     bool m_fOnTarget = false;
-    bool m_aimingNShooting = false;
+    bool m_isShooting = false;
 
 public:
     Vision();

@@ -446,7 +446,13 @@ void Shooter::Update()
     {
         ReportStatus("Lost ball\n");
         UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
-        if (m_flag == Flag::High)
+
+        // Start moving to another flag.
+        // Use fuzzy logic here, as auto-aiming might have focused on a different
+        auto midFlag =  ConvertAngleToPotentiometer(::CalcAngle(Flag::Middle, m_distanceInches));
+        auto highFlag =  ConvertAngleToPotentiometer(::CalcAngle(Flag::High, m_distanceInches));
+        int curr = motor_get_position(angleMotorPort);
+        if (abs(midFlag - curr) > abs(highFlag - curr))
             SetFlag(Flag::Middle);
         else if (m_flag == Flag::Middle)
             SetFlag(Flag::High);

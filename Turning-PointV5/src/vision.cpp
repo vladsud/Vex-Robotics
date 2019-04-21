@@ -23,10 +23,10 @@ struct Signature
 };
 
 Signature g_signatures[] = {
-    {SigType::Green, "Green 2", 30, vision_signature_from_utility(1, -2891, -2245, -2568, -4615, -3847, -4231, 5.500, 0)},
-    {SigType::Green, "Green", 50, vision_signature_from_utility(1, -2965, -2365, -2665, -4899, -4239, -4569, 4.500, 0)},
-    {SigType::Blue,  "Blue 2", 30, vision_signature_from_utility(1, -3329, -2467, -2898, 12655, 14947, 13801, 4.000, 0)},
-    {SigType::Blue,  "Blue", 50, vision_signature_from_utility(1, -3339, -1973, -2656, 11547, 15541, 13544, 3.000, 0)},
+    {SigType::Green, "Green 2", 30, vision_signature_from_utility(1, -2891, -2245, -2568, -4615, -3847, -4231, 6.500, 0)},
+    {SigType::Green, "Green", 50, vision_signature_from_utility(1, -2965, -2365, -2665, -4899, -4239, -4569, 5.500, 0)},
+    {SigType::Blue,  "Blue 2", 30, vision_signature_from_utility(1, -3329, -2467, -2898, 12655, 14947, 13801, 5.000, 0)},
+    {SigType::Blue,  "Blue", 50, vision_signature_from_utility(1, -3339, -1973, -2656, 11547, 15541, 13544, 4.000, 0)},
 //    {SigType::BlueFull, "Blue full", 30, vision_signature_from_utility(1, -3145, -2205, -2675, -1299, 14607, 6654, 1.500, 0)},
 };
 
@@ -112,13 +112,12 @@ void Vision::SetFlipX(bool blue)
 
 bool Vision::IsShooting()
 {
-    return joystickGetDigital(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_DIGITAL_DOWN);
+    return m_isShooting;
 }
 
 bool Vision::OnTarget()
 {
-    return m_aimingNShooting;
-//     return m_fOnTarget && IsShooting();
+    return m_fOnTarget && m_isShooting;
 }
 
 bool Vision::ReadObjects()
@@ -128,6 +127,7 @@ bool Vision::ReadObjects()
         return false;
     if (m_objCount == PROS_ERR || m_objCount < 0)
     {
+        m_objCount = 0;
         // no objects found
         if (errno != EDOM)
         {
@@ -179,7 +179,14 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
         auto& currentMainColor = tracker[tracking];
         currentMainColor.mainColor = &objectMainColor;
         currentMainColor.green = nullptr;
-        currentMainColor.confidence = 1;
+        currentMainColor.confidence = 0;
+        // m,ain color part is almost square
+        if (objectMainColor.width < objectMainColor.height * 3 / 2 && objectMainColor.height < objectMainColor.width * 3 / 2)
+            currentMainColor.confidence += 4;
+        if (objectMainColor.width >= 10)
+            currentMainColor.confidence += 2;
+        if (objectMainColor.width >= 20)
+            currentMainColor.confidence += 2;
         currentMainColor.distance = objectMainColor.x_middle_coord * objectMainColor.x_middle_coord + objectMainColor.y_middle_coord * objectMainColor.y_middle_coord;
         if (currentMainColor.distance < minDistanece)
             minDistanece = currentMainColor.distance;
@@ -239,7 +246,14 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
         return false;
 
     int x = obj.mainColor->x_middle_coord;
-    int y = - obj.mainColor->y_middle_coord; // pos coordinate is down
+    int y = obj.mainColor->y_middle_coord; // pos coordinate is down
+
+    if (m_isShooting)
+    {
+        m_trackingX = x;
+        m_trackingY = y;
+    }
+
     m_fOnTarget = abs(x) <= 5 && abs(y) <= 10;
     /*
     if ((m_m_objCount % 10) == 0)
@@ -251,17 +265,18 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
             obj.mainColor->width,
             obj.mainColor->height);
     */
+
     if (moveToIt)
     {
-        int y_angle = y;
+        int y_angle = - y;
         if (abs(y) > 50)
             y_angle = y_angle * 3.5;
         else
             y_angle = y_angle * 3;
 
         auto& main = GetMain();
-        ReportStatus("Tracking: confidence = %d, width = %d, coord = %d %d, angle diff = %d, %d, angle: %d\n",
-            obj.confidence, obj.mainColor->width, x, y, y_angle, main.shooter.MovingRelativeTo(), (int)motor_get_position(angleMotorPort));
+        ReportStatus("Tracking: confidence = %d, dimentions = (%d, %d) coord = (%d %d), angle diff = (%d, %d), angle: %d\n",
+            obj.confidence, obj.mainColor->width, obj.mainColor->height, x, y, y_angle, main.shooter.MovingRelativeTo(), (int)motor_get_position(angleMotorPort));
 
         if (abs(x) > 5)
         {
@@ -280,11 +295,8 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
         int y_expected = main.shooter.MovingRelativeTo();
         if (abs(y) > 8 || abs(y_expected) > 20)
         {
-            m_countShooterMoving++;
-            // y_angle += Sign(y_angle) * 20;
             if (y_expected == 0 || m_countShooterMoving >= 10) // it is moving
             {
-//                y_angle = (y_angle + 15 * y_expected) / 16;
                 main.shooter.MoveAngleRelative(y_angle);
                 m_countShooterMoving = 0;
             }            
@@ -295,6 +307,7 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
             m_countShooterMoving = 0;
         }
     }
+    
     return true;
 }
 
@@ -304,11 +317,11 @@ void Vision::Update()
     auto& main = GetMain();
 
     // Calibration code
-    if (false)
+    if (true)
     {
         if ((m_count % 100) == 0)
         {
-            ReportStatus("(%3d) detections: %3d / %3d\n", m_brightness, m_detectionsHigh, m_detectionsHigh + m_detectionsLow);
+            ReportStatus("Brightness = %3d, detections (high confidence / total): %3d / %3d\n", m_brightness, m_detectionsHigh, m_detectionsHigh + m_detectionsLow);
             m_detectionsHigh = 0;
             m_detectionsLow = 0;
             m_brightness += 5;
@@ -316,49 +329,56 @@ void Vision::Update()
                 m_brightness = 0;
             m_sensor.set_exposure(m_brightness); // 0..150
         }
-        if (FindObject(30, 30, 17, false))
+        if (FindObject(200, 200, 17, false))
             m_detectionsHigh++;
-        else if (FindObject(30, 30, 11, false))
+        else if (FindObject(200, 200, 0, false))
             m_detectionsLow++;
         return;
     }
 
     bool found = false;
-    bool move = IsShooting();
+    bool shooting = joystickGetDigital(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_DIGITAL_DOWN);
+
+    if (shooting)
+        m_countShooterMoving++;
+
     if (ReadObjects())
     {
+        // Camera does not look precisely streight, and the ball does not fly on streight line
+        // So need to adjust for that by "moving" all objects
         for (int i = 0; i < m_objCount; i++)
-        {
-            auto& obj = m_objects[i];
-            obj.y_middle_coord += 45;
+            m_objects[i].y_middle_coord += 45;
+
+        // resolution: 640 x 400
+        // field-of-view: 75 degrees horizontal, 47 degrees vertical
+        // so roughly 8 x 8 pixels is 1 degree in each dimention.
+        found =
+            FindObject(abs(m_trackingX) + 20, abs(m_trackingX) + 20, 15, shooting) ||
+            FindObject(200, 200, 11, shooting);
         }
 
-        found =
-            FindObject(30, 30, 17, move) ||
-            FindObject(100, 100, 17, move) ||
-            FindObject(30, 30, 11, move) ||
-            FindObject(30, 30, 4, move);
-        if (!found)
-            m_countNotFound++;
-        if (m_countNotFound >= 5)
+    if (!found)
+    {
+        m_countNotFound++;
+        if (m_countNotFound >= 3)
         {
             m_fOnTarget = false;
             m_countNotFound = 0;
         }
-        
-        if (!move)
-            m_fOnTarget = false;
     }
+    else
+        m_countNotFound = 0;
 
-    bool newValue = m_fOnTarget && move;
-    if (!newValue && m_aimingNShooting)
+    if (!shooting && m_isShooting)
     {
         main.drive.OverrideInputs(0, 0);
         main.shooter.MoveAngleRelative(0);
         m_countShooterMoving = 0;
+        m_trackingX = 30;
+        m_trackingY = 30;
     }
-    m_aimingNShooting = newValue;
+    m_isShooting = shooting;
 
-    if (move && !found)
-        ReportStatus("not found\n");
+    if (shooting && !found)
+        ReportStatus("not found (objects inspected: %d)\n", m_objCount);
 }
