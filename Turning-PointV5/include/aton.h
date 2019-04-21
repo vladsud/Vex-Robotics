@@ -13,13 +13,13 @@
 void RunAtonFirstPos();
 void RunAtonSecondPos();
 void MoveToPlatform(bool twhoPlatforms, int angle);
-void Do(Action &&action, unsigned int timeout = 100000);
+bool Do(Action &&action, unsigned int timeout = 100000);
 void RunSuperSkills();
 void MoveExactWithAngle(int distance, int angle, bool allowTurning = true);
 void MoveExactFastWithAngle(int distance, int angle, bool stopOnHit = false);
 void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle);
-void ShootOneBall(bool high, int distance, unsigned int extraDelay = 0);
-void ShootTwoBalls(int distance);
+void ShootOneBall(bool high, int distance, unsigned int extraDelay = 0, bool visionMove = false, bool visionAngle = false);
+void ShootTwoBalls(int distance, bool visionMove = false, bool visionAngle = false);
 void TurnToFlagsAndShootTwoBalls();
 void MoveToLowFlag();
 void TurnToAngleIfNeeded(int angle);

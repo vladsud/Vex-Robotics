@@ -29,7 +29,7 @@ void RunAtonFirstPos()
     //
     TurnToAngle(angleToShootFlags);
 
-    ShootTwoBalls(distanceFirstAton);
+    ShootTwoBalls(distanceFirstAton, true, false);
     IntakeUp();
 
     // prepare for middle pole shooting

@@ -42,9 +42,11 @@ public:
     bool OnTarget();
     bool IsShooting();
     void LostBall();
+    void ShootingInAutonomous(bool visionMove, bool visionAngle);
 
 protected:
     bool ReadObjects();
+    void ChangeState(bool moveBase, bool moveAngle);
     bool FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsigned int minConfidence, bool moveBase, bool moveAngle);
 };
 

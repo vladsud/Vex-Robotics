@@ -84,3 +84,10 @@ struct ShootBallAction : public Action
     void Stop() override { m_main.shooter.StopShooting(); } // in case we timed-out
     const char* Name() override { return "ShootBallAction"; }
 };
+
+struct ShootWithVisionAction : public Action
+{
+    ShootWithVisionAction(bool visionMove, bool visionAngle) { GetMain().vision.ShootingInAutonomous(visionMove, visionAngle); }
+    bool ShouldStop() { return !GetMain().vision.IsShooting(); }
+    void Stop() override { GetMain().vision.ShootingInAutonomous(false, false); }
+};

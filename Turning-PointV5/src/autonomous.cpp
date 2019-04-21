@@ -26,7 +26,7 @@ enum class AtonMode
 #endif
 };
 
-AtonMode g_mode = AtonMode::TestRun;
+AtonMode g_mode = AtonMode::Regular;
 
 const  bool g_leverageLineTrackers = true;
 
@@ -58,7 +58,7 @@ bool SmartsOn()
     return g_autonomousSmartsOn && isAuto();
 }
 
-void Do(Action &&action, unsigned int timeout /* = 100000 */)
+bool Do(Action &&action, unsigned int timeout /* = 100000 */)
 {
     auto time = millis();
     bool timedout = false;
@@ -93,6 +93,8 @@ void Do(Action &&action, unsigned int timeout /* = 100000 */)
         else
             ReportStatus("%s took %ld ms\n", action.Name(), millis() - time);
     }
+
+    return !timedout;
 }
 
 // Scans digital buttons on joystick
@@ -301,7 +303,7 @@ void FlipCapWithLineCorrection(unsigned int distance, unsigned int afterLine, un
     MoveExactWithAngle(-(int)distaneBack, angle);
 }
 
-void ShootOneBall(bool high, int distance, unsigned int extraDelay)
+void ShootOneBall(bool high, int distance, unsigned int extraDelay, bool visionMove, bool visionAngle)
 {
     auto &main = GetMain();
     GyroFreezer freezer(main.gyro);
@@ -320,7 +322,15 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay)
         WaitShooterAngleToStop(main.lcd.AtonSkills ? 4000: 1000);
         if (extraDelay > 0)
             Wait(extraDelay);
-        ShootBall();
+        
+        bool shoot = true;
+        if (visionMove || visionAngle)
+        {
+            shoot = !Do(ShootWithVisionAction(visionMove, visionAngle), 300);
+            ReportStatus("Shooting with vision: %d\n", shoot);
+        }
+        if (shoot)
+            ShootBall();
     }
     else
     {
@@ -330,11 +340,11 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay)
     IntakeUp();
 }
 
-void ShootTwoBalls(int distance)
+void ShootTwoBalls(int distance, bool visionMove, bool visionAngle)
 {
     ReportStatus("Shooting 2 balls\n");
-    ShootOneBall(twoFlagsShootsHighFirst, distance);
-    ShootOneBall(!twoFlagsShootsHighFirst, distance, 50);
+    ShootOneBall(twoFlagsShootsHighFirst, distance, 0, visionMove, visionAngle);
+    ShootOneBall(!twoFlagsShootsHighFirst, distance, 50, visionMove, visionAngle);
 }
 
 

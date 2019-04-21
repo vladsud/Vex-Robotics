@@ -262,7 +262,12 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
         m_trackingY = y;
     }
 
-    m_fOnTarget = abs(x) <= 5 && abs(y) <= 10;
+    m_fOnTarget = true;
+    if (moveBase && abs(x) >= 5)
+        m_fOnTarget = false;
+    if (moveAngle && abs(y) > 7)
+        m_fOnTarget = false;
+
     /*
     if ((m_m_objCount % 10) == 0)
         ReportStatus("(%3d) Vision best match: confidence=%2d coord=(%3d, %3d), size=(%3d, %3d)\n",
@@ -306,7 +311,7 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
         if (moveAngle)
         {
             int y_expected = main.shooter.MovingRelativeTo();
-            if (abs(y) > 8 || abs(y_expected) > 20)
+            if (abs(y) > 6 || abs(y_expected) > 20)
             {
                 if (y_expected == 0 || m_countShooterMoving >= 10) // it is moving
                 {
@@ -337,6 +342,9 @@ void Vision::LostBall()
     m_countShooterMoving = 0;
     m_trackingX = 200;
     m_trackingY = 200;
+
+    if (isAuto())
+        ShootingInAutonomous(false, false);
 }
 
 void Vision::Update()
@@ -377,6 +385,12 @@ void Vision::Update()
     bool shooting = joystickGetDigital(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_DIGITAL_DOWN);
     bool moveBase = shooting;
     bool moveAngle = shooting;
+    // In auton, just leverage
+    if (isAuto())
+    {
+        moveBase = m_isShootingMoveBase;
+        moveAngle = m_isShootingMoveAngle;
+    }
 
     // Ignore everything after the shot - let the shooter move to other ball and us start to capture it.
     if (m_lostBallCount > 0)
@@ -426,17 +440,31 @@ void Vision::Update()
             ReportStatus("not found (objects inspected: %d)\n", m_objCount);
     }
 
-    if (!shooting && (m_isShootingMoveBase || m_isShootingMoveAngle))
+    ChangeState(moveBase, moveAngle);
+}
+
+void Vision::ChangeState(bool moveBase, bool moveAngle)
+{
+    auto& main = GetMain();
+    if (!moveBase && m_isShootingMoveBase)
+        main.drive.OverrideInputs(0, 0);
+    if (!moveAngle && m_isShootingMoveAngle)
     {
-        if (moveBase)
-            main.drive.OverrideInputs(0, 0);
-        if (moveAngle)
-            main.shooter.MoveAngleRelative(0);
+        main.shooter.MoveAngleRelative(0);
         m_countShooterMoving = 0;
-        m_trackingX = 30;
-        m_trackingY = 30;
+    }
+    if (!moveBase && !moveAngle)
+    {
+        m_trackingX = 200;
+        m_trackingY = 200;
     }
 
     m_isShootingMoveBase = moveBase;
     m_isShootingMoveAngle = moveAngle;
+}
+
+void Vision::ShootingInAutonomous(bool visionMove, bool visionAngle)
+{
+    Assert(isAuto());
+    ChangeState(visionMove, visionAngle);
 }

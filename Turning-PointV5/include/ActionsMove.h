@@ -97,7 +97,7 @@ struct MoveToPlatformAction : public MoveAction
     const char* Name() override { return "MoveToPlatformAction"; }
 
     MoveToPlatformAction(int distance, int angle)
-        : MoveAction(distance, 100),
+        : MoveAction(distance, 80),
           m_angle(angle)
     {}
 
