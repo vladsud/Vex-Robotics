@@ -18,7 +18,7 @@ const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
 constexpr float Distances[]             {48,  55,  80, 100};
-constexpr unsigned int AnglesHigh[]   { 540, 500, 400, 300};
+constexpr unsigned int AnglesHigh[]   { 400, 350, 340, 330};
 constexpr unsigned int AnglesMedium[] { 160, 150, 140, 130};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
@@ -283,8 +283,6 @@ void Shooter::StopMoving()
 
 void Shooter::SetDistance(unsigned int distance)
 {
-    if (m_distanceInches == distance)
-        return;
     // ReportStatus("Shooter::SetDistance(%d)\n", distance);
     m_distanceInches = distance;
     StartMoving();
@@ -292,9 +290,7 @@ void Shooter::SetDistance(unsigned int distance)
 
 void Shooter::SetFlag(Flag flag)
 {
-    if (m_flag == flag)
-        return;
-    // ReportStatus("Shooter::SetFlag(%d)\n", (int)flag);
+    ReportStatus("Shooter::SetFlag(%d)\n", (int)flag);
     m_flag = flag;
     StartMoving();
 }
@@ -302,8 +298,6 @@ void Shooter::SetFlag(Flag flag)
 // positive is up
 void Shooter::MoveAngleRelative(int pos)
 {
-    if (m_preloadAfterShotCounter > 0)
-        return;
     StartMoving();
     m_angleToMove = motor_get_position(angleMotorPort) + pos;
 }
@@ -449,12 +443,13 @@ void Shooter::Update()
 
         // Start moving to another flag.
         // Use fuzzy logic here, as auto-aiming might have focused on a different
-        auto midFlag =  ConvertAngleToPotentiometer(::CalcAngle(Flag::Middle, m_distanceInches));
-        auto highFlag =  ConvertAngleToPotentiometer(::CalcAngle(Flag::High, m_distanceInches));
+        int midFlag =  ConvertAngleToPotentiometer(::CalcAngle(Flag::Middle, m_distanceInches));
+        int highFlag =  ConvertAngleToPotentiometer(::CalcAngle(Flag::High, m_distanceInches));
         int curr = motor_get_position(angleMotorPort);
+        ReportStatus("Lost ball: curr=%d high=%d low =%d\n", curr, highFlag, midFlag);
         if (abs(midFlag - curr) > abs(highFlag - curr))
             SetFlag(Flag::Middle);
-        else if (m_flag == Flag::Middle)
+        else
             SetFlag(Flag::High);
 
         // Did shot just hapened?

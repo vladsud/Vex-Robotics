@@ -33,7 +33,10 @@ int GetGyroReading() { return GetTracker().GetGyro(); }
 
 void UpdateIntakeFromShooter(IntakeShoterEvent event)
 {
-	GetMain().intake.UpdateIntakeFromShooter(event);
+	auto& main = GetMain();
+	main.intake.UpdateIntakeFromShooter(event);
+	if (event == IntakeShoterEvent::LostBall)
+		main.vision.LostBall();;
 }
 
 void AssertCore(bool condition, const char *message, const char *file, int line)

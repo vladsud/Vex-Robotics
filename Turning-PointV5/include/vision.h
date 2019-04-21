@@ -20,10 +20,12 @@ class Vision
     SigType m_type = SigType::Red;
     unsigned int m_count = 0;
     unsigned int m_detectionsHigh = 0;
+    unsigned int m_detectionsMedium = 0;
     unsigned int m_detectionsLow = 0;
     unsigned int m_countNotFound = 0;
     unsigned int m_countShooterMoving = 0;
     unsigned int m_anglePos = 0;
+    unsigned int m_lostBallCount = 0;
     unsigned m_brightness = 30;
     unsigned m_trackingX = 30;
     unsigned m_trackingY = 30;
@@ -38,6 +40,7 @@ public:
     void SetFlipX(bool blue); 
     bool OnTarget();
     bool IsShooting();
+    void LostBall();
 
 protected:
     bool ReadObjects();
