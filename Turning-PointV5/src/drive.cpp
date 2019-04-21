@@ -81,13 +81,13 @@ KeepAngle::KeepAngle(int angle)
         angle = -angle;
     angle *= GyroWrapper::Multiplier;
 
-    AssertSz(abs(angle - GetGyro().Get()) <= 20 * GyroWrapper::Multiplier, "Angle is too far from current one!");
+    AssertSz(abs(angle - GetGyroReading()) <= 20 * GyroWrapper::Multiplier, "Angle is too far from current one!");
     m_angle = angle;
 }
 
 float KeepAngle::GetError()
 {
-    return (m_angle - GetGyro().Get()) * 2.0 / GyroWrapper::Multiplier;
+    return (m_angle - GetGyroReading()) * 2.0 / GyroWrapper::Multiplier;
 }
 
 
@@ -224,6 +224,7 @@ void Drive::UpdateDistanes()
 
 int Drive::GetAngle()
 {
+    // return motor_get_position(rightBackDrivePort) - motor_get_position(leftBackDrivePort);
     return m_right + m_encoderBaseRight - m_left - m_encoderBaseLeft;
 }
 
@@ -350,7 +351,7 @@ void Drive::Update()
     {
         ReportStatus("Drive: gyro: %d, erorr: (%d, %d), Speeds (%d, %d)\n",
                // left, right,
-               GetGyro().Get() * 10 / GyroWrapper::Multiplier,
+               GetGyroReading() * 10 / GyroWrapper::Multiplier,
                int(error), errorMultiplier,
                // int(m_ErrorIntergral),
                // m_distance, int(m_turn * m_distance / m_forward),

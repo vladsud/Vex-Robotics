@@ -38,7 +38,7 @@ void HitLowFlagWithRecovery(unsigned int distanceForward, unsigned int distanceB
 
     unsigned int distance = HitTheWall(distanceForward, angleForward);
 
-    int actualAngle = GetGyro().Get();
+    int actualAngle = GetGyroReading();
     if (abs(actualAngle) > 15 * GyroWrapper::Multiplier || distance + 300 <= distanceForward)
     {
         unsigned int distanceAdj = 250; // min adjustment - wheels quite often spin without much movement

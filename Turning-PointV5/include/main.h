@@ -102,7 +102,7 @@ constexpr T min(T a, T b)
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define gyroPort 99
+#define gyroPort 5
 #define anglePotPort 99
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99

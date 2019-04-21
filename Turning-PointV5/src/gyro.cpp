@@ -98,27 +98,23 @@ int GyroWheels::Get() const
 
 void GyroWheels::Integrate()
 {
+    /*
     if ((GetMain().GetTime() % 2000) == 0)
         ReportStatus("Gyro: %d\n", Get() / Multiplier);
+    */
 }
 
 void GyroWheels::SetAngle(int angle)
 {
     m_offset = 0;
-    m_offset = angle * Multiplier - Get();
+    auto curr = Get();
+    m_offset = angle - curr;
 }
 
 void GyroWheels::ResetState()
 {
     m_offset = 0;
 }
-
-void GyroWheels::Flip()
-{
-    m_offset = -m_offset;
-    m_multiplier = -m_multiplier;
-}
-
 
 
 int AdjustAngle(int angle)

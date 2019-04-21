@@ -83,7 +83,7 @@ Vision::Vision()
     : m_sensor(VisionPort, pros::E_VISION_ZERO_CENTER)
 {
     // testing
-    SetFlipX(true);
+    SetFlipX(false);
 
     m_sensor.set_wifi_mode(0);
     m_sensor.set_led(0x00ffffff);
@@ -94,6 +94,9 @@ Vision::Vision()
 
 void Vision::SetFlipX(bool blue) 
 {
+    // If we are playing blue, we need to find red flags!
+    blue = !blue;
+
     m_brightness = 60;
     m_sensor.set_exposure(m_brightness); // 0..150
 
@@ -176,7 +179,7 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
             continue;
 
         auto& currentMainColor = tracker[tracking];
-        currentMainColor.mainColor = &objectMainColor;
+        currentMainColor.mainColor = &m_objects[i];
         currentMainColor.green = nullptr;
         currentMainColor.confidence = 0;
         // m,ain color part is almost square
@@ -199,8 +202,8 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
                 continue;
 
             auto& current = tracker[tracking];
-            current.mainColor = &objectMainColor;
-            current.green = &object;
+            current.mainColor = &m_objects[i];
+            current.green = &m_objects[j];
             current.distance = currentMainColor.distance;
             current.confidence = currentMainColor.confidence;
             if (currentMainColor.distance < minDistanecePair)

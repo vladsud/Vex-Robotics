@@ -26,11 +26,6 @@ class GyroReal
 
     void Freeze() { m_freeze = true; }
     void Unfreeze() { m_freeze = false; }
-    void Flip()
-    {
-        m_value = -m_value;
-        m_multiplier = -m_multiplier;
-    }
 };
 
 
@@ -51,7 +46,6 @@ class GyroWheels
     int Get() const;
     void SetAngle(int angle);
     void ResetState();
-    void Flip();
 };
 
 
