@@ -51,7 +51,7 @@ class Shooter
   int m_lastPos;
 
   bool m_fMoving = false;
-  bool m_adjusting = false;
+  int m_adjusting = 0;
   bool m_initialAdjustment = true;
   bool m_disablePreload = false;
   bool m_userShooting = false;

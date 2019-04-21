@@ -18,14 +18,14 @@ const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
 constexpr float Distances[]             {48,  55,  80, 100};
-constexpr unsigned int AnglesHigh[]   { 400, 350, 340, 330};
-constexpr unsigned int AnglesMedium[] { 160, 150, 140, 130};
+constexpr unsigned int AnglesHigh[]   { 430, 350, 340, 330};
+constexpr unsigned int AnglesMedium[] { 100, 10, 5, 1};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
 constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 {
-    return 600-angle;
+    return 700-angle;
 }
 
 
@@ -98,11 +98,11 @@ Shooter::Shooter()
 {
     motor_set_brake_mode(angleMotorPort, motor_brake_mode_e::E_MOTOR_BRAKE_HOLD);
     motor_set_encoder_units(angleMotorPort, motor_encoder_units_e::E_MOTOR_ENCODER_COUNTS);    
+    motor_set_reversed(angleMotorPort, true);
     ResetState();
 
     m_initialAdjustment = true;
     motor_tare_position(angleMotorPort);
-    motor_move(angleMotorPort, -40);
     m_lastPos = 0;
 }
 
@@ -169,13 +169,16 @@ bool Shooter::IsMovingAngle()
 void Shooter::InitialAdjustment()
 {
     m_count++;
+    motor_move(angleMotorPort, -40);
+    if (m_count <= 30)
+        return;
     int curr = motor_get_position(angleMotorPort);
     // ReportStatus("initial adjustment: %d %d %d\n", curr, m_lastPos, m_count);
-    if (m_lastPos == curr && m_count < 100)
-        m_count = 100;
+    if (m_lastPos == curr && m_count < 200)
+        m_count = 200;
     m_lastPos = curr;
 
-    if (m_count == 110) 
+    if (m_count == 210) 
     {
         m_initialAdjustment = false;
         motor_tare_position(angleMotorPort);
@@ -218,20 +221,25 @@ void Shooter::KeepMoving()
         else
             power = Sign(actualSpeed) * 5;
     }
-    else if (abs(error) > 15 || m_adjusting)
+    else if (abs(error) > 20 || m_adjusting != 0)
     {
-        m_adjusting = abs(error) > 5;
-        if (m_adjusting)
+        if (m_adjusting == 0)
+            m_adjusting = error;
+        if (error * m_adjusting > 0)
         {
-            power = (20 + m_integral / 2) * sign;
+            power = (22 + m_integral / 2) * sign;
             m_integral++;
-            if (m_integral > 15)
+            if (m_integral > 30)
                 m_integral = 0;
+        }
+        else
+        {
+            m_adjusting = 0;
         }
     }
     else
     {
-        // m_integral = 0;
+        m_integral = 0;
     }
     
     const int angleMotorSpeed = 75;
@@ -267,7 +275,7 @@ void Shooter::StartMoving()
     m_lastPos = m_angleMovingFrom;
     m_count = 0;
     m_integral = 0;
-    m_adjusting = false;
+    m_adjusting = 0;
 
     // ReportStatus("Angle start moving: %d -> %d\n", m_angleSensor.get_value(), m_angleToMove);
 }
@@ -290,7 +298,7 @@ void Shooter::SetDistance(unsigned int distance)
 
 void Shooter::SetFlag(Flag flag)
 {
-    ReportStatus("Shooter::SetFlag(%d)\n", (int)flag);
+    // ReportStatus("Shooter::SetFlag(%d)\n", (int)flag);
     m_flag = flag;
     StartMoving();
 }
@@ -404,6 +412,8 @@ void Shooter::Update()
 
     if (m_preloadAfterShotCounter > 0)
         m_preloadAfterShotCounter--;
+
+    // ReportStatus("%d %d %d %d\n", m_preloadAfterShotCounter, shooterPreloadPos, (m_preloading), userShooting);
 
     // remove jiggering by having two stops
     // Start moving if we are below first stop (ShooterPreloadStart)
