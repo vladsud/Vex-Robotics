@@ -3,7 +3,7 @@
 #include "pros/adi.hpp"
 
 
-class GyroWrapper
+class GyroReal
 {
     pros::ADIAnalogIn m_sensor;
     int32_t m_value = 0;
@@ -22,7 +22,7 @@ class GyroWrapper
     void ResetState();
 
     void Integrate();
-    GyroWrapper(unsigned char port, unsigned short multiplier = 0);
+    GyroReal(unsigned char port, unsigned short multiplier = 0);
 
     void Freeze() { m_freeze = true; }
     void Unfreeze() { m_freeze = false; }
@@ -32,6 +32,30 @@ class GyroWrapper
         m_multiplier = -m_multiplier;
     }
 };
+
+
+class GyroWheels
+{
+    int32_t m_offset = 0;
+    int32_t m_multiplier = 100;
+
+  public:
+    // Devide by this nuber to convert gyro value to degrees
+    static constexpr int Multiplier = 1 << 10;
+
+    GyroWheels(unsigned char port) {}
+    void Integrate() {}
+    void Freeze() { }
+    void Unfreeze() { }
+
+    int Get() const;
+    void SetAngle(int angle);
+    void ResetState();
+    void Flip();
+};
+
+
+using GyroWrapper = GyroReal;
 
 class GyroFreezer
 {

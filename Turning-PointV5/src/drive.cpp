@@ -222,6 +222,11 @@ void Drive::UpdateDistanes()
     m_distance = abs(m_left) + abs(m_right);
 }
 
+int Drive::GetAngle()
+{
+    return m_right + m_encoderBaseRight - m_left - m_encoderBaseLeft;
+}
+
 void Drive::Update()
 {
     //Drive

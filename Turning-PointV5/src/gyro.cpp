@@ -15,6 +15,7 @@
 #include "gyro.h"
 #include <math.h>
 #include "pros/rtos.h"
+#include "cycle.h"
 
 using namespace pros;
 using namespace pros::c;
@@ -28,7 +29,7 @@ using namespace pros::c;
 #define RATE_NOISE_LIMIT_ANALOG 110 //188
 
 
-void GyroWrapper::Integrate()
+void GyroReal::Integrate()
 {
     unsigned long time = millis();
     // Same as analogReadCalibratedHR(). // LSLed by 4 as offset
@@ -55,7 +56,7 @@ void GyroWrapper::Integrate()
     m_value += d;
 }
 
-GyroWrapper::GyroWrapper(unsigned char port, unsigned short multiplier)
+GyroReal::GyroReal(unsigned char port, unsigned short multiplier)
     : m_multiplier(multiplier == 0 ? GYRO_MULTIPLIER_DEFAULT : multiplier),
       m_sensor(port)
 {
@@ -84,10 +85,32 @@ GyroWrapper::GyroWrapper(unsigned char port, unsigned short multiplier)
     m_calibValue = total / (ActualMeasurement / 16) * m_multiplier;
 }
 
-void GyroWrapper::ResetState()
+void GyroReal::ResetState()
 {
     m_lastTime = pros::c::millis() - 1;
 }
+
+int GyroWheels::Get() const
+{
+    return m_offset + GetMain().drive.GetAngle() * m_multiplier;
+}
+void GyroWheels::SetAngle(int angle)
+{
+    m_offset = 0;
+    m_offset = angle * Multiplier - Get();
+}
+void GyroWheels::ResetState()
+{
+    m_offset = 0;
+}
+
+void GyroWheels::Flip()
+{
+    m_offset = -m_offset;
+    m_multiplier = -m_multiplier;
+}
+
+
 
 int AdjustAngle(int angle)
 {

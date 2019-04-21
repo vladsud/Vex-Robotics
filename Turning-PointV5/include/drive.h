@@ -73,6 +73,7 @@ public:
   void FlipX(bool flip) { m_flipX = flip; }
   bool IsXFlipped() const { return m_flipX; }
   void StartHoldingPosition();
+  int GetAngle();
 
   // Forward: Positive turn - turn right (clockwise)
   // Backwards: Positive turn - turn left (clockwise)
