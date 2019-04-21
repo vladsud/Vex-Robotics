@@ -32,7 +32,8 @@ class Vision
     bool m_reportedError = false;
     bool m_blue = false;
     bool m_fOnTarget = false;
-    bool m_isShooting = false;
+    bool m_isShootingMoveBase = false;
+    bool m_isShootingMoveAngle = false;
 
 public:
     Vision();
@@ -44,6 +45,6 @@ public:
 
 protected:
     bool ReadObjects();
-    bool FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsigned int minConfidence, bool moveToIt);
+    bool FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsigned int minConfidence, bool moveBase, bool moveAngle);
 };
 

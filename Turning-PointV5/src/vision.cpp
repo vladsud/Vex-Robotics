@@ -111,12 +111,12 @@ void Vision::SetFlipX(bool blue)
 
 bool Vision::IsShooting()
 {
-    return m_isShooting;
+    return m_isShootingMoveBase || m_isShootingMoveAngle;
 }
 
 bool Vision::OnTarget()
 {
-    return m_fOnTarget && m_isShooting;
+    return m_fOnTarget && (m_isShootingMoveBase || m_isShootingMoveAngle);
 }
 
 bool Vision::ReadObjects()
@@ -145,7 +145,7 @@ bool Vision::ReadObjects()
     return true;
 }
 
-bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsigned int minConfidence, bool moveToIt)
+bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsigned int minConfidence, bool moveBase, bool moveAngle)
 {
     ObjTracker tracker[30];
     unsigned int tracking = 0;
@@ -157,7 +157,7 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
         auto& objectMainColor = m_objects[i];
 
         /*
-        if (moveToIt)
+        if (moveBase || moveAngle)
             ReportStatus("   obj: id=%d, x=%d, y=%d, w=%d, h=%d, a=%d\n",
                 objectMainColor.signature,
                 objectMainColor.x_middle_coord,
@@ -248,13 +248,18 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
     int x = obj.mainColor->x_middle_coord;
     int y = obj.mainColor->y_middle_coord; // pos coordinate is down
 
-    if (m_isShooting)
+    if (m_blue)
+        x -= obj.mainColor->width / 4;
+    else
+        x += obj.mainColor->width / 4;
+
+    if (moveBase || moveAngle)
     {
         m_trackingX = x;
         m_trackingY = y;
     }
 
-    m_fOnTarget = abs(x) <= 8 && abs(y) <= 10;
+    m_fOnTarget = abs(x) <= 5 && abs(y) <= 10;
     /*
     if ((m_m_objCount % 10) == 0)
         ReportStatus("(%3d) Vision best match: confidence=%2d coord=(%3d, %3d), size=(%3d, %3d)\n",
@@ -266,7 +271,7 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
             obj.mainColor->height);
     */
 
-    if (moveToIt)
+    if (moveBase || moveAngle)
     {
         int y_angle = - y;
         if (abs(y) > 50)
@@ -278,33 +283,39 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
         ReportStatus("Tracking: confidence = %d, dimentions = (%d, %d) coord = (%d %d), angle diff = (%d, %d), angle: %d\n",
             obj.confidence, obj.mainColor->width, obj.mainColor->height, x, y, y_angle, main.shooter.MovingRelativeTo(), (int)motor_get_position(angleMotorPort));
 
-        if (abs(x) > 8)
+        if (moveBase)
         {
-            if (x > 8)
-                x = 8;
-            else if (x < -8)
-                x = -8;
-            x = x * 2 + Sign(x)*10;
-            main.drive.OverrideInputs(0, x); // positive ia turn right (clockwise)
-        }
-        else
-        {
-            main.drive.OverrideInputs(0, 0);
+            if (abs(x) > 4)
+            {
+                if (x > 8)
+                    x = 8;
+                else if (x < -8)
+                    x = -8;
+                x = x * 2 + Sign(x)*10;
+                main.drive.OverrideInputs(0, x); // positive ia turn right (clockwise)
+            }
+            else
+            {
+                main.drive.OverrideInputs(0, 0);
+            }
         }
         
-        int y_expected = main.shooter.MovingRelativeTo();
-        if (abs(y) > 8 || abs(y_expected) > 20)
+        if (moveAngle)
         {
-            if (y_expected == 0 || m_countShooterMoving >= 10) // it is moving
+            int y_expected = main.shooter.MovingRelativeTo();
+            if (abs(y) > 8 || abs(y_expected) > 20)
             {
-                main.shooter.MoveAngleRelative(y_angle);
+                if (y_expected == 0 || m_countShooterMoving >= 10) // it is moving
+                {
+                    main.shooter.MoveAngleRelative(y_angle);
+                    m_countShooterMoving = 0;
+                }            
+            }
+            else
+            {
+                main.shooter.MoveAngleRelative(0);
                 m_countShooterMoving = 0;
-            }            
-        }
-        else
-        {
-            main.shooter.MoveAngleRelative(0);
-            m_countShooterMoving = 0;
+            }
         }
     }
     
@@ -313,9 +324,12 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
 
 void Vision::LostBall()
 {
+    // Not look at flags for a while...
+    // First, the flag takes a while to flip and for camera to notice it
+    // By waiting, we allow shooter default behaviour to start moving to another flag and actually start noticing it
     m_lostBallCount = 20;
     m_fOnTarget = false;
-    if (m_isShooting)
+    if (m_isShootingMoveBase)
         GetMain().drive.OverrideInputs(0, 0);
     m_countShooterMoving = 0;
     m_trackingX = 200;
@@ -346,11 +360,11 @@ void Vision::Update()
         }
         if (ReadObjects())
         {
-            if (FindObject(200, 200, 32, false))
+            if (FindObject(200, 200, 32, false, false))
                 m_detectionsHigh++;
-            else if (FindObject(200, 200, 28, false))
+            else if (FindObject(200, 200, 28, false, false))
                 m_detectionsMedium++;
-            else if (FindObject(200, 200, 20, false))
+            else if (FindObject(200, 200, 20, false, false))
                 m_detectionsLow++;
         }
         return;
@@ -358,60 +372,68 @@ void Vision::Update()
 
     bool found = false;
     bool shooting = joystickGetDigital(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_DIGITAL_DOWN);
+    bool moveBase = shooting;
+    bool moveAngle = shooting;
 
     // Ignore everything after the shot - let the shooter move to other ball and us start to capture it.
     if (m_lostBallCount > 0)
     {
         m_lostBallCount--;
-        m_isShooting = shooting;
-        return;
-    }
-
-    if (shooting)
-    {
-        m_countShooterMoving++;
-        m_isShooting = true;
-    }
-
-    if (ReadObjects())
-    {
-        // Camera does not look precisely streight, and the ball does not fly on streight line
-        // So need to adjust for that by "moving" all objects
-        for (int i = 0; i < m_objCount; i++)
-            m_objects[i].y_middle_coord += 55;
-
-        // resolution: 640 x 400
-        // field-of-view: 75 degrees horizontal, 47 degrees vertical
-        // so roughly 8 x 8 pixels is 1 degree in each dimention.
-        // 26 - max
-        // 22 - next best thing
-        found =
-            FindObject(abs(m_trackingX) + 20, abs(m_trackingX) + 20, 11, shooting) ||
-            FindObject(200, 200, 11, shooting);
-        }
-
-    if (!found)
-    {
-        m_countNotFound++;
-        if (m_countNotFound >= 3)
-        {
-            m_fOnTarget = false;
-            m_countNotFound = 0;
-        }
     }
     else
-        m_countNotFound = 0;
-
-    if (!shooting && m_isShooting)
     {
-        main.drive.OverrideInputs(0, 0);
-        main.shooter.MoveAngleRelative(0);
+        if (moveAngle)
+        {
+            m_countShooterMoving++;
+            m_isShootingMoveAngle = moveAngle;
+        }
+        if (moveBase)
+            m_isShootingMoveBase = moveBase;
+
+        if (ReadObjects())
+        {
+            // Camera does not look precisely streight, and the ball does not fly on streight line
+            // So need to adjust for that by "moving" all objects
+            for (int i = 0; i < m_objCount; i++)
+                m_objects[i].y_middle_coord += 55;
+
+            // resolution: 640 x 400
+            // field-of-view: 75 degrees horizontal, 47 degrees vertical
+            // so roughly 8 x 8 pixels is 1 degree in each dimention.
+            // 26 - max
+            // 22 - next best thing
+            found =
+                FindObject(abs(m_trackingX) + 20, abs(m_trackingX) + 20, 11, moveBase, moveAngle) ||
+                FindObject(200, 200, 11, moveBase, moveAngle);
+            }
+
+        if (!found)
+        {
+            m_countNotFound++;
+            if (m_countNotFound >= 3)
+            {
+                m_fOnTarget = false;
+                m_countNotFound = 0;
+            }
+        }
+        else
+            m_countNotFound = 0;
+
+        if (shooting && !found)
+            ReportStatus("not found (objects inspected: %d)\n", m_objCount);
+    }
+
+    if (!shooting && (m_isShootingMoveBase || m_isShootingMoveAngle))
+    {
+        if (moveBase)
+            main.drive.OverrideInputs(0, 0);
+        if (moveAngle)
+            main.shooter.MoveAngleRelative(0);
         m_countShooterMoving = 0;
         m_trackingX = 30;
         m_trackingY = 30;
     }
-    m_isShooting = shooting;
 
-    if (shooting && !found)
-        ReportStatus("not found (objects inspected: %d)\n", m_objCount);
+    m_isShootingMoveBase = moveBase;
+    m_isShootingMoveAngle = moveAngle;
 }
