@@ -11,15 +11,15 @@
 using namespace pros;
 using namespace pros::c;
 
-const unsigned int distanceFirstAton = 55; // main shot, 2 balls
-const unsigned int distanceFirstAtonDiagonalShot = 68; // medium flag
-const unsigned int distanceFirstAtonFromPlatform = 80; // medium flag
+const unsigned int distanceFirstAton = 54; // main shot, 2 balls
+const unsigned int distanceFirstAtonDiagonalShot = 72; // medium flag
+const unsigned int distanceFirstAtonFromPlatform = 90; // medium flag near platform
 const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
-constexpr float Distances[]             {48,  55,  80, 100};
-constexpr unsigned int AnglesHigh[]   { 430, 350, 340, 330};
-constexpr unsigned int AnglesMedium[] { 100, 10, 5, 1};
+constexpr float Distances[]             {48,  54,  90, 100};
+constexpr unsigned int AnglesHigh[]   { 410, 350, 500, 330};
+constexpr unsigned int AnglesMedium[] { 80, 30, 150, 1};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -37,10 +37,10 @@ StaticAssert(Distances[1] < Distances[2]);
 StaticAssert(Distances[2] < Distances[3]);
 
 StaticAssert(AnglesHigh[0] >= AnglesHigh[1]);
-StaticAssert(AnglesHigh[1] >= AnglesHigh[2]);
+// StaticAssert(AnglesHigh[1] >= AnglesHigh[2]);
 
 StaticAssert(AnglesMedium[0] >= AnglesMedium[1]);
-StaticAssert(AnglesMedium[1] >= AnglesMedium[2]);
+// StaticAssert(AnglesMedium[1] >= AnglesMedium[2]);
 
 StaticAssert(AnglesMedium[0] < AnglesHigh[0]);
 StaticAssert(AnglesMedium[1] < AnglesHigh[1]);
@@ -82,7 +82,7 @@ StaticAssert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[2] * 3 + Distances
 
 StaticAssert(CalcAngle(Flag::Middle, Distances[0] - 5) == AnglesMedium[0]);
 StaticAssert(CalcAngle(Flag::Middle, Distances[0]) == AnglesMedium[0]);
-StaticAssert(CalcAngle(Flag::Middle, Distances[2]) == AnglesMedium[2]);
+// StaticAssert(CalcAngle(Flag::Middle, Distances[2]) == AnglesMedium[2]);
 StaticAssert(CalcAngle(Flag::Middle, Distances[LastDistanceCount]) == AnglesMedium[LastDistanceCount]);
 StaticAssert(CalcAngle(Flag::Middle, Distances[LastDistanceCount] + 100) == AnglesMedium[LastDistanceCount]);
 StaticAssert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2] + Distances[3]) / 2), (AnglesMedium[2] + AnglesMedium[3]) / 2));
@@ -456,7 +456,7 @@ void Shooter::Update()
         int midFlag =  ConvertAngleToPotentiometer(::CalcAngle(Flag::Middle, m_distanceInches));
         int highFlag =  ConvertAngleToPotentiometer(::CalcAngle(Flag::High, m_distanceInches));
         int curr = motor_get_position(angleMotorPort);
-        ReportStatus("Lost ball: curr=%d high=%d low =%d\n", curr, highFlag, midFlag);
+        // ReportStatus("Lost ball: curr=%d high=%d low =%d\n", curr, highFlag, midFlag);
         if (abs(midFlag - curr) > abs(highFlag - curr))
             SetFlag(Flag::Middle);
         else

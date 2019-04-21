@@ -26,7 +26,7 @@ enum class AtonMode
 #endif
 };
 
-AtonMode g_mode = AtonMode::Regular;
+AtonMode g_mode = AtonMode::TestRun;
 
 const  bool g_leverageLineTrackers = true;
 
@@ -168,9 +168,9 @@ void autonomous()
     {
         // MoveExactWithAngle(6000, 10, false);
         // lcd.AtonClimbPlatform = false;
-        lcd.AtonFirstPos = false;
-        // RunAtonFirstPos();
-        RunAtonSecondPos();
+        // lcd.AtonFirstPos = false;
+        RunAtonFirstPos();
+        // RunAtonSecondPos();
         // RunSuperSkills();
     }
     else
@@ -345,7 +345,7 @@ void WaitAfterMove(unsigned int timeout)
     auto& lcd = GetMain().lcd;
     if (timeout == 0)
         timeout = lcd.AtonSkills || !lcd.AtonFirstPos || !lcd.AtonClimbPlatform ? 500 : 200;
-    Do(WaitTillStopsAction(), timeout);
+    // Do(WaitTillStopsAction(), timeout);
 }
 
 void WaitAfterMoveReportDistance(int distance, unsigned int timeout)

@@ -120,12 +120,12 @@ struct MoveToPlatformAction : public MoveAction
             m_fIsLow = true;
             if (m_slowCount == 0)
             {
-                m_main.drive.OverrideInputs(127, 0);
+                m_main.drive.OverrideInputs(90, 0);
                 m_distanceFirstHit = distance;
             }
         }
 
-        if (m_fIsLow && distance >= m_distanceFirstHit + 2500)
+        if (m_fIsLow && distance >= m_distanceFirstHit + 2000)
             return true;
 
         m_lastDistance = distance;

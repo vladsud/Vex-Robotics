@@ -5,9 +5,9 @@
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
 
-const unsigned int distanceTillWall = 6700;
-const int angleToMoveToFlags = 4;
-const int angleToShootFlags = -2;
+const unsigned int distanceTillWall = 6900;
+const int angleToMoveToFlags = 6;
+const int angleToShootFlags = 0;
 
 void RunAtonFirstPos()
 {
@@ -41,7 +41,7 @@ void RunAtonFirstPos()
     //
     if (main.lcd.AtonClimbPlatform)
     {
-        HitLowFlagWithRecovery(distanceTillWall, 10500, 12 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(distanceTillWall, 10600, 9 /*angleBack*/, angleToMoveToFlags);
 
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
         auto time = main.GetTime() - timeBegin;
@@ -52,9 +52,12 @@ void RunAtonFirstPos()
             // Sometimes ball lands on top and interfeers with another ball
             UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
 
-            TurnToAngle(-27);
+            TurnToAngle(-33);
             Wait(100);
             ShootOneBall(highFlag, distanceFirstAtonFromPlatform);
+            ReportStatus("\n   Time after diagonal shot: %d,\n", main.GetTime() - timeBegin);
+            if (main.GetTime() - timeBegin < 12000)
+                ShootOneBall(!highFlag, distanceFirstAtonFromPlatform);
         }
         TurnToAngle(-90);
         MoveToPlatform(main.lcd.AtonSkills, -90);
