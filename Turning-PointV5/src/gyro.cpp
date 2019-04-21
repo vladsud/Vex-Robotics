@@ -90,15 +90,24 @@ void GyroReal::ResetState()
     m_lastTime = pros::c::millis() - 1;
 }
 
+
 int GyroWheels::Get() const
 {
     return m_offset + GetMain().drive.GetAngle() * m_multiplier;
 }
+
+void GyroWheels::Integrate()
+{
+    if ((GetMain().GetTime() % 2000) == 0)
+        ReportStatus("Gyro: %d\n", Get() / Multiplier);
+}
+
 void GyroWheels::SetAngle(int angle)
 {
     m_offset = 0;
     m_offset = angle * Multiplier - Get();
 }
+
 void GyroWheels::ResetState()
 {
     m_offset = 0;

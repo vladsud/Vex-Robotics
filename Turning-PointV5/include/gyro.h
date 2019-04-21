@@ -37,14 +37,14 @@ class GyroReal
 class GyroWheels
 {
     int32_t m_offset = 0;
-    int32_t m_multiplier = 100;
+    float m_multiplier = 68.5;
 
   public:
     // Devide by this nuber to convert gyro value to degrees
     static constexpr int Multiplier = 1 << 10;
 
     GyroWheels(unsigned char port) {}
-    void Integrate() {}
+    void Integrate(); // {}
     void Freeze() { }
     void Unfreeze() { }
 
@@ -55,7 +55,7 @@ class GyroWheels
 };
 
 
-using GyroWrapper = GyroReal;
+using GyroWrapper = GyroWheels;
 
 class GyroFreezer
 {
