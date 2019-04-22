@@ -312,7 +312,7 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay, bool visionM
     if (main.shooter.BallStatus() != BallPresence::HasBall)
     {
         ReportStatus("No ball, waiting\n");
-        if (GetMain().ballCount > 0)
+        if (GetMain().shooter.ballCount > 0)
             IntakeUp();
     }
 
