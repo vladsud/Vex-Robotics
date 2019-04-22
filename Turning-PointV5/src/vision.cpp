@@ -293,13 +293,13 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
 
         if (moveBase)
         {
-            if (abs(x) > 5)
+            if (abs(x) > 7)
             {
                 if (x > 8)
                     x = 8;
                 else if (x < -8)
                     x = -8;
-                x = x * 2 + Sign(x) * 5;
+                x = x * 2.3 + Sign(x) * 8;
                 main.drive.OverrideInputs(0, x); // positive ia turn right (clockwise)
             }
             else

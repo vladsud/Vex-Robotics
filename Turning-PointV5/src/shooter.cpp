@@ -19,7 +19,7 @@ const unsigned int distanceSecondAton = 100;        // high, then medium
 // Distance based on front of the robot
 constexpr float Distances[]             {48,  54,  90, 100};
 constexpr unsigned int AnglesHigh[]   { 410, 350, 500, 330};
-constexpr unsigned int AnglesMedium[] { 80, 30, 150, 1};
+constexpr unsigned int AnglesMedium[] { 80, 30, 250, 1};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -353,12 +353,17 @@ BallPresence Shooter::Ball2Status()
     */
     unsigned int darkness1 = m_ballPresenceSensorDown.get_value();
     unsigned int darkness2 = m_ballPresenceSensorDown2.get_value();
-    if ((darkness1 + darkness2) > 3900){
+    
+    if ((darkness1 + darkness2) == 0)
+        return BallPresence::NoBall;
+
+    if ((darkness1 + darkness2) > 4100){
         return BallPresence::NoBall;
     }
-    if ((darkness1 + darkness2) < 4100){
+    if ((darkness1 + darkness2) < 3900){
         return BallPresence::HasBall;
     }
+
     return BallPresence::Unknown;
 }
 
@@ -420,7 +425,7 @@ void Shooter::Update()
 
     // Did we go from zero to 4000 on potentiometer?
     // That means shot was done, and we are starting "normal" preload.
-    if ((ShooterPreloadStart < shooterPreloadPos && shooterPreloadPos < 3400) || shooterPreloadPos < ShooterPreloadEnd)
+    if ((ShooterPreloadStart < shooterPreloadPos && shooterPreloadPos < 3400))
         m_preloadAfterShotCounter = 0;
 
     if (m_preloadAfterShotCounter > 0)
