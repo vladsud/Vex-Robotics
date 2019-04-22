@@ -9,6 +9,7 @@ class Intake
         None,
         Up,
         Down,
+        DownWithTooManyBalls,
     };
 
     void Update();
@@ -23,8 +24,6 @@ class Intake
     Direction m_direction = Direction::None;
     bool m_doublePressed = false;
     int m_power = 0;
-    
-    bool m_ballGoDownState = false;
 };
 
 class Descorer

@@ -19,18 +19,13 @@ void Intake::SetIntakeDirection(Direction direction)
 {
     m_direction = direction;
 
-    if (direction == Direction::None)
-    {
-        m_power = 0;
-        SetIntakeMotor(0);
-        return;
-    }
-
     int power;
-    if (m_ballGoDownState)
-        power = -intakeMotorSpeedDown / 3;
+    if (direction == Direction::None)
+        power = 0;
     else if (m_direction == Direction::Up)
         power = intakeMotorSpeedUp * 0.85;
+    else if (m_direction == Direction::DownWithTooManyBalls)
+        power = -intakeMotorSpeedDown / 3;
     else
         power = -intakeMotorSpeedDown / 2;
 
@@ -54,7 +49,6 @@ void Intake::Update()
 
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
-        m_ballGoDownState = false;
         if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
         {
             m_doublePressed = true;
@@ -67,13 +61,12 @@ void Intake::Update()
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
-        m_ballGoDownState = false;
         direction = Direction::Down;
     }
     else
     {
         m_doublePressed = false;
-        if (m_ballGoDownState)
+        if (direction == Direction::DownWithTooManyBalls)
         {
             int pos = motor_get_position(intakePort);
             // There is a lot of intertia, but ball is not moving up any more
@@ -82,7 +75,6 @@ void Intake::Update()
                 motor_tare_position(intakePort);
             if (pos < -100)
             {
-                m_ballGoDownState = false;
                 direction = Direction::None;
                 m_power = 0; // remove latency!
             }
@@ -108,8 +100,7 @@ void Intake::UpdateIntakeFromShooter(IntakeShoterEvent event)
         break;
     case IntakeShoterEvent::TooManyBalls:
         motor_tare_position(intakePort);
-        m_ballGoDownState = true;
-        SetIntakeDirection(Direction::Down);
+        SetIntakeDirection(Direction::DownWithTooManyBalls);
         break;
     }
 }
