@@ -475,7 +475,9 @@ void Shooter::Update()
         ReportStatus("Lost ball\n");
         UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
         
-        ballCount--;
+        Assert(ballCount >= 0);
+        if (ballCount > 0)
+            ballCount--;
 
         // Start moving to another flag.
         // Use fuzzy logic here, as auto-aiming might have focused on a different
