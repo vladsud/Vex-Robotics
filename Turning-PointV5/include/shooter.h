@@ -82,6 +82,7 @@ public:
   void StopShooting();
   void MoveAngleRelative(int pos);
   int MovingRelativeTo();
+  int ballCount = 0;
 
 private:
   void InitialAdjustment();

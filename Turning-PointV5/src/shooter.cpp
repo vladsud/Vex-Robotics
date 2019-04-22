@@ -18,8 +18,8 @@ const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
 constexpr float Distances[]             {48,  54,  90, 100};
-constexpr unsigned int AnglesHigh[]   { 410, 350, 500, 330};
-constexpr unsigned int AnglesMedium[] { 80, 30, 250, 1};
+constexpr unsigned int AnglesHigh[]   { 410, 350, 410, 330};
+constexpr unsigned int AnglesMedium[] { 80, 30, 240, 1};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -353,7 +353,7 @@ BallPresence Shooter::Ball2Status()
     */
     unsigned int darkness1 = m_ballPresenceSensorDown.get_value();
     unsigned int darkness2 = m_ballPresenceSensorDown2.get_value();
-    
+
     if ((darkness1 + darkness2) == 0)
         return BallPresence::NoBall;
 
@@ -458,16 +458,24 @@ void Shooter::Update()
     // Check if we can detect ball present.
     BallPresence ball = BallStatus();
     BallPresence ball2 = Ball2Status();
+    
+    if (ball == BallPresence::HasBall && ballCount == 0)
+    {
+        ballCount = 1;
+    }
 
     if (ball == BallPresence::HasBall && ball2 == BallPresence::HasBall && (!m_haveBall || !m_haveBall2))
     {
         UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
+        ballCount = 2;
     }
 
     if (ball != BallPresence::HasBall && m_haveBall)
     {
         ReportStatus("Lost ball\n");
         UpdateIntakeFromShooter(IntakeShoterEvent::LostBall);
+        
+        ballCount--;
 
         // Start moving to another flag.
         // Use fuzzy logic here, as auto-aiming might have focused on a different

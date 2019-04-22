@@ -54,7 +54,7 @@ void RunAtonFirstPos()
 
             TurnToAngle(-33);
             Wait(100);
-            ShootOneBall(highFlag, distanceFirstAtonFromPlatform);
+            ShootOneBall(highFlag, distanceFirstAtonFromPlatform, 0, true);
             ReportStatus("\n   Time after diagonal shot: %d,\n", main.GetTime() - timeBegin);
             if (main.GetTime() - timeBegin < 12000)
                 ShootOneBall(!highFlag, distanceFirstAtonFromPlatform);
@@ -76,7 +76,7 @@ void RunAtonFirstPos()
         HitLowFlagWithRecovery(distanceTillWall, 6200, 5 /*angleBack*/, angleToMoveToFlags);
 
         TurnToAngle(-46);
-        ShootOneBall(highFlag, distanceFirstAtonDiagonalShot, true /*checkPresenceOfBall*/);
+        ShootTwoBalls(distanceFirstAtonDiagonalShot, 0, true /*vision calibraion*/);
 
         // IntakeUp();
         // WaitForBall(1000);

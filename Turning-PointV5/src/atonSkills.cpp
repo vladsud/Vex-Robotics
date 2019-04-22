@@ -52,7 +52,7 @@ void HitLowFlagWithRecovery(unsigned int distanceForward, unsigned int distanceB
     else
     {
         // ReportStatus("    Normal hit: a = %d, d = %d, expected d = %d\n", actualAngle / GyroWrapper::Multiplier, distance, distanceForward);
-        ResetPostionAfterHittingWall(false /*leftWall*/);
+        //ResetPostionAfterHittingWall(false /*leftWall*/);
     }
 
     // not using MoveExactWithAngle() here as we should avoid turning - we may get stuck
