@@ -147,7 +147,7 @@ bool Shooter::IsShooting()
             return false;
         }
 
-        if (!m_overrideShooting && !joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT))
+        if (!m_overrideShooting && !joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
             return false;
     }
     
@@ -322,12 +322,14 @@ void Shooter::UpdateDistanceControls()
 {
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
         SetDistance(Distances[0]);
+    /*
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))    
         SetDistance(Distances[1]);
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
         SetDistance(Distances[2]);
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
         SetDistance(Distances[3]);
+    */
 }
 
 void Shooter::OverrideSetShooterMode(bool on)
@@ -344,9 +346,20 @@ BallPresence Shooter::BallStatus()
 
 BallPresence Shooter::Ball2Status()
 {
+    /*
     auto status1 = ::BallStatus(m_ballPresenceSensorDown);
     auto status2 = ::BallStatus(m_ballPresenceSensorDown2);
     return BallPresence(max(int(status1), int(status2)));
+    */
+    unsigned int darkness1 = m_ballPresenceSensorDown.get_value();
+    unsigned int darkness2 = m_ballPresenceSensorDown2.get_value();
+    if ((darkness1 + darkness2) > 3900){
+        return BallPresence::NoBall;
+    }
+    if ((darkness1 + darkness2) < 4100){
+        return BallPresence::HasBall;
+    }
+    return BallPresence::Unknown;
 }
 
 BallPresence BallStatus(pros::ADIAnalogIn& sensor)
@@ -407,7 +420,7 @@ void Shooter::Update()
 
     // Did we go from zero to 4000 on potentiometer?
     // That means shot was done, and we are starting "normal" preload.
-    if (ShooterPreloadStart < shooterPreloadPos && shooterPreloadPos < 3500)
+    if ((ShooterPreloadStart < shooterPreloadPos && shooterPreloadPos < 3400) || shooterPreloadPos < ShooterPreloadEnd)
         m_preloadAfterShotCounter = 0;
 
     if (m_preloadAfterShotCounter > 0)

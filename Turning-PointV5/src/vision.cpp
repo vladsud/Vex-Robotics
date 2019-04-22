@@ -293,13 +293,13 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
 
         if (moveBase)
         {
-            if (abs(x) > 4)
+            if (abs(x) > 5)
             {
                 if (x > 8)
                     x = 8;
                 else if (x < -8)
                     x = -8;
-                x = x * 2 + Sign(x)*10;
+                x = x * 2 + Sign(x) * 5;
                 main.drive.OverrideInputs(0, x); // positive ia turn right (clockwise)
             }
             else
@@ -382,7 +382,7 @@ void Vision::Update()
     }
 
     bool found = false;
-    bool shooting = joystickGetDigital(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_DIGITAL_DOWN);
+    bool shooting = joystickGetDigital(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_DIGITAL_R1);
     bool moveBase = shooting;
     bool moveAngle = shooting;
     // In auton, just leverage
@@ -412,7 +412,7 @@ void Vision::Update()
             // Camera does not look precisely streight, and the ball does not fly on streight line
             // So need to adjust for that by "moving" all objects
             for (int i = 0; i < m_objCount; i++)
-                m_objects[i].y_middle_coord += 55;
+                m_objects[i].y_middle_coord += 70;
 
             // resolution: 640 x 400
             // field-of-view: 75 degrees horizontal, 47 degrees vertical
@@ -420,7 +420,7 @@ void Vision::Update()
             // 26 - max
             // 22 - next best thing
             found =
-                FindObject(abs(m_trackingX) + 20, abs(m_trackingX) + 20, 11, moveBase, moveAngle) ||
+                FindObject(abs(int(m_trackingX)) + 20, abs(int(m_trackingX)) + 20, 11, moveBase, moveAngle) ||
                 FindObject(200, 200, 11, moveBase, moveAngle);
             }
 

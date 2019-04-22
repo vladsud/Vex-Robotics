@@ -80,7 +80,7 @@ void Intake::Update()
             // DEtect when intake actually reverses, and start counting from there...
             if (pos > 0 || GetMain().shooter.Ball2Status() == BallPresence::HasBall)
                 motor_tare_position(intakePort);
-            if (pos < -60)
+            if (pos < -100)
             {
                 m_ballGoDownState = false;
                 direction = Direction::None;
