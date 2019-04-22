@@ -1,6 +1,7 @@
 #pragma once
 #include "actions.h"
 #include "position.h"
+#include "limits.h"
 
 #define TurnToPoint(x, y) TurnToAngle(CalcAngleToPoint(x, y))
 
@@ -24,6 +25,17 @@ struct TurnPrecise : public Action
         m_main.drive.OverrideInputs(0, 0);
     }
 
+    // Relative to current position
+    void ChangeTurn(int turn)
+    {
+        m_turn += turn - GetError();
+    }
+
+    int GetError()
+    {
+        return m_initialAngle + m_turn - GetGyroReading();
+    }
+
     bool ShouldStop() override
     {
         // 100 points per degree of angle
@@ -31,7 +43,7 @@ struct TurnPrecise : public Action
         static constexpr unsigned int speeds[] = { 0, 18,  80, 200, 221};
 
         // positive for positive (clock-wise) turns
-        int error = m_initialAngle + m_turn - GetGyroReading();
+        int error = GetError();
         int sign = Sign(error);
 
         // positive means counter-clockwise

@@ -12,14 +12,14 @@ using namespace pros;
 using namespace pros::c;
 
 const unsigned int distanceFirstAton = 54; // main shot, 2 balls
-const unsigned int distanceFirstAtonDiagonalShot = 72; // medium flag
+const unsigned int distanceFirstAtonDiagonalShot = 60; // medium flag
 const unsigned int distanceFirstAtonFromPlatform = 90; // medium flag near platform
 const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
-constexpr float Distances[]             {48,  54,  90, 100};
-constexpr unsigned int AnglesHigh[]   { 410, 350, 410, 330};
-constexpr unsigned int AnglesMedium[] { 80, 30, 240, 1};
+constexpr float Distances[]            { 48,  54,  90, 100};
+constexpr unsigned int AnglesHigh[]   { 410, 350,  410, 330};
+constexpr unsigned int AnglesMedium[] {  80 , 30,  240, 1};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
@@ -140,12 +140,13 @@ bool Shooter::IsShooting()
 {
     if (!GetMain().vision.OnTarget())
     {
+        // atonomous should always wait till angle is settled.
+        // But we can have angle moving due to vision, so let it through.
+        AssertSz(!m_fMoving || !m_overrideShooting, "Shooting while moving angle!");
+
         // Allow "shoot" button to be pressed all the time and shoot once angle is settled
-        if (m_fMoving)
-        {
-            Assert(!m_overrideShooting); // atonomous should always wait till angle is settled.
+        if (m_fMoving && !m_overrideShooting)
             return false;
-        }
 
         if (!m_overrideShooting && !joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
             return false;
@@ -306,6 +307,8 @@ void Shooter::SetFlag(Flag flag)
 // positive is up
 void Shooter::MoveAngleRelative(int pos)
 {
+    if (!m_fMoving && pos == 0)
+        return;
     StartMoving();
     m_angleToMove = motor_get_position(angleMotorPort) + pos;
 }

@@ -311,9 +311,9 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay, bool visionM
     SetShooterAngle(high, distance);
     if (main.shooter.BallStatus() != BallPresence::HasBall)
     {
-        ReportStatus("No ball, waiting\n");
         if (GetMain().shooter.ballCount > 0)
         {
+            ReportStatus("No ball, waiting\n");
             IntakeUp();
             WaitForBall(1000);
         }
@@ -329,8 +329,9 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay, bool visionM
         bool shoot = true;
         if (visionMove || visionAngle)
         {
+            auto angle = GetGyroReading();
             shoot = !Do(ShootWithVisionAction(visionMove, visionAngle), 300);
-            ReportStatus("Shooting with vision: %d\n", shoot);
+            ReportStatus("Shooting with vision: shot: %d, angle shift: %d  -> %d\n", !shoot, angle / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
         }
         if (shoot)
             ShootBall();

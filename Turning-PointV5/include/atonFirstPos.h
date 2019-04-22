@@ -1,7 +1,7 @@
 #pragma once
 #include "main.h"
 
-const int distanceToCap = 5300;
+extern const int distanceToCap;
 
 
 

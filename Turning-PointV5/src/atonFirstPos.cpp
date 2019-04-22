@@ -7,7 +7,8 @@
 
 const unsigned int distanceTillWall = 6900;
 const int angleToMoveToFlags = 6;
-const int angleToShootFlags = 0;
+const int angleToShootFlags = -2;
+const int distanceToCap = 5100;
 
 void RunAtonFirstPos()
 {
@@ -32,15 +33,15 @@ void RunAtonFirstPos()
     ShootTwoBalls(distanceFirstAton, true, false);
     IntakeUp();
 
-    // prepare for middle pole shooting
-    bool highFlag = false;
-    SetShooterAngle(highFlag, main.lcd.AtonClimbPlatform ? distanceFirstAtonFromPlatform : distanceFirstAtonDiagonalShot);
-
     //
     // Climb platform if neeed
     //
     if (main.lcd.AtonClimbPlatform)
     {
+        // prepare for middle pole shooting
+        bool highFlag = false;
+        SetShooterAngle(highFlag, distanceFirstAtonFromPlatform);
+
         HitLowFlagWithRecovery(distanceTillWall, 10600, 9 /*angleBack*/, angleToMoveToFlags);
 
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
@@ -53,10 +54,9 @@ void RunAtonFirstPos()
             UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
 
             TurnToAngle(-33);
-            Wait(100);
             ShootOneBall(highFlag, distanceFirstAtonFromPlatform, 0, true);
             ReportStatus("\n   Time after diagonal shot: %d,\n", main.GetTime() - timeBegin);
-            if (main.GetTime() - timeBegin < 12000)
+            if (main.GetTime() - timeBegin < 12500)
                 ShootOneBall(!highFlag, distanceFirstAtonFromPlatform);
         }
         TurnToAngle(-90);
@@ -73,17 +73,18 @@ void RunAtonFirstPos()
     }
     else
     {
-        HitLowFlagWithRecovery(distanceTillWall, 6200, 5 /*angleBack*/, angleToMoveToFlags);
+        // prepare for middle pole shooting
+        SetShooterAngle(twoFlagsShootsHighFirst, distanceFirstAtonDiagonalShot);
 
-        TurnToAngle(-46);
+        HitLowFlagWithRecovery(distanceTillWall, 6100, 5 /*angleBack*/, angleToMoveToFlags);
+
+        int angle = -53;
+        TurnToAngle(angle);
+        MoveExactFastWithAngle(1500, angle);
         ShootTwoBalls(distanceFirstAtonDiagonalShot, 0, true /*vision calibraion*/);
 
-        // IntakeUp();
-        // WaitForBall(1000);
-        // SetShooterAngle(!highFlag, distanceFirstAtonDiagonalShot);
-
-        FlipCap(4400, 2000, -48);
-
-        // ShootOneBall(false/*high*/, distanceFirstAtonDiagonalShot, true /*checkPresenceOfBall*/);
+        IntakeDown();
+        Wait(500);
+        FlipCap(2900, 2000, -48);
     }
 }

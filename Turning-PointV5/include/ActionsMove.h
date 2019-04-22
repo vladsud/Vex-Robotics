@@ -125,7 +125,7 @@ struct MoveToPlatformAction : public MoveAction
             }
         }
 
-        if (m_fIsLow && distance >= m_distanceFirstHit + 2000)
+        if (m_fIsLow && distance >= m_distanceFirstHit + 2300)
             return true;
 
         m_lastDistance = distance;
