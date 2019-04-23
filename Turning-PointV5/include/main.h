@@ -127,8 +127,8 @@ constexpr T min(T a, T b)
 * OTHER CONSTANTS
 *
 *******************************************************************************/
-#define lightSensorBallIn 2000
-#define lightSensorBallOut 2300
+#define lightSensorBallIn 1500
+#define lightSensorBallOut 2500
 
 #define ShooterPreloadEnd 700
 #define ShooterPreloadStart 900

@@ -360,10 +360,10 @@ BallPresence Shooter::Ball2Status()
     if ((darkness1 + darkness2) == 0)
         return BallPresence::NoBall;
 
-    if ((darkness1 + darkness2) > 4100){
+    if ((darkness1 + darkness2) > 4500){
         return BallPresence::NoBall;
     }
-    if ((darkness1 + darkness2) < 3900){
+    if ((darkness1 + darkness2) < 4000){
         return BallPresence::HasBall;
     }
 
