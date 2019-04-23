@@ -94,7 +94,7 @@ constexpr T min(T a, T b)
 
 #define descorerPort 99
 
-#define VisionPort 20
+#define VisionPort 13
 
 
 /*******************************************************************************
@@ -103,6 +103,7 @@ constexpr T min(T a, T b)
 *
 *******************************************************************************/
 #define gyroPort 5
+#define gyroPort2 6
 #define anglePotPort 99
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99
