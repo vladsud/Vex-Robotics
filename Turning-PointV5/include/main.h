@@ -129,7 +129,7 @@ constexpr T min(T a, T b)
 #define lightSensorBallIn 2000
 #define lightSensorBallOut 2300
 
-#define ShooterPreloadEnd 300
-#define ShooterPreloadStart 500
+#define ShooterPreloadEnd 700
+#define ShooterPreloadStart 900
 
 #define DistanveBetweenLineSensors 390 // in clicks, rouhly 14"

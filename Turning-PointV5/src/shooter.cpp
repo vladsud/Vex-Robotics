@@ -18,8 +18,8 @@ const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
 constexpr float Distances[]            { 48,  54,  90, 100};
-constexpr unsigned int AnglesHigh[]   { 410, 350,  410, 330};
-constexpr unsigned int AnglesMedium[] {  80 , 30,  240, 1};
+constexpr unsigned int AnglesHigh[]   { 470, 350,  410, 330};
+constexpr unsigned int AnglesMedium[] { 130, 30,  240, 1};
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 

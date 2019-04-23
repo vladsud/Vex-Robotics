@@ -132,7 +132,7 @@ float Drive::GetTurnAxis()
     if (isAuto() || GetMain().vision.IsShooting())
         return m_overrideTurn;
     // convert joystick metric to drive metric
-    return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_RIGHT_X, 37) * driveMotorMaxSpeed / joystickMax;
+    return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_RIGHT_X, 25) * driveMotorMaxSpeed / joystickMax;
 }
 
 void Drive::OverrideInputs(int forward, float turn)
