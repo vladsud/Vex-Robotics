@@ -81,13 +81,13 @@ KeepAngle::KeepAngle(int angle)
         angle = -angle;
     angle *= GyroWrapper::Multiplier;
 
-    AssertSz(abs(angle - GetGyroReading()) <= 20 * GyroWrapper::Multiplier, "Angle is too far from current one!");
+    AssertSz(abs(angle - GetGyro().Get()) <= 20 * GyroWrapper::Multiplier, "Angle is too far from current one!");
     m_angle = angle;
 }
 
 float KeepAngle::GetError()
 {
-    return (m_angle - GetGyroReading()) * 2.0 / GyroWrapper::Multiplier;
+    return (m_angle - GetGyro().Get()) * 2.0 / GyroWrapper::Multiplier;
 }
 
 

@@ -1,9 +1,10 @@
 #include "position.h"
 #include "logger.h"
 #include <math.h>
-
 #include "pros/adi.h"
 #include "pros/motors.h"
+#include <cstdio>
+
 
 using namespace pros::c;
 
