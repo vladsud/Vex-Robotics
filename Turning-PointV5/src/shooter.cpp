@@ -13,13 +13,14 @@ using namespace pros::c;
 
 const unsigned int distanceFirstAton = 48; // main shot, 2 balls
 const unsigned int distanceFirstAtonDiagonalShot = 50; // medium flag
+const unsigned int distanceSecondAtonFromPlatform = 80;
 const unsigned int distanceFirstAtonFromPlatform = 90; // medium flag near platform
 const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
-constexpr float Distances[]           {  48,  50,  90,  100};
-constexpr unsigned int AnglesHigh[]   { 570,  500, 570, 400}; // 700 seems to be the highest point
-constexpr unsigned int AnglesMedium[] { 230,  220, 340,  30}; // 30 is lowest point!
+constexpr float Distances[]           {  48,  50,  80,  90,  100};
+constexpr unsigned int AnglesHigh[]   { 570,  500, 500, 570, 400}; // 700 seems to be the highest point
+constexpr unsigned int AnglesMedium[] { 230,  220, 100, 340,  30}; // 30 is lowest point!
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 

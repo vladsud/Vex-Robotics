@@ -6,6 +6,7 @@ extern const unsigned int distanceFirstAton; // main shot, 2 balls
 extern const unsigned int distanceFirstAtonDiagonalShot;// if we are not climbing platform
 extern const unsigned int distanceFirstAtonFromPlatform;
 extern const unsigned int distanceSecondAton;
+extern const unsigned int distanceSecondAtonFromPlatform;
 
 const unsigned int distanceSkillsSecondShot = 53;
 const unsigned int distanceSkillsThirdShot = 33;
