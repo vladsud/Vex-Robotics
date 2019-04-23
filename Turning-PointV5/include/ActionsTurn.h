@@ -38,7 +38,7 @@ struct TurnPrecise : public Action
 
     bool ShouldStop() override
     {
-        // 100 points per degree of angle
+        // 10 points per degree of angle
         static constexpr unsigned int points[] = { 8,  9, 200, 500, UINT_MAX};
         static constexpr unsigned int speeds[] = { 0, 18,  80, 200, 221};
 
@@ -85,11 +85,12 @@ struct TurnPrecise : public Action
         else if (power < -maxSpeed)
             power = -maxSpeed;
 
-        m_power = (power + m_power) / 2;
+        if (actualSpeed == 0 && abs(power) < 40)
+            m_power = sign * 40;
+        else
+            m_power = (power + m_power) / 2;
 
-        // ReportStatus("error = %d, power = %d, ideal speed = %d, actual = %d\n", error, power, idealSpeed, actualSpeed);
-
-        // ReportStatus("Turn: %d %d %d %d\n", error, idealSpeed, actualSpeed, power);
+        // ReportStatus("Turn error = %d, power = %d, ideal speed = %d, actual = %d\n", error, power, idealSpeed, actualSpeed);
         m_main.drive.OverrideInputs(0, -m_power);
         return false;
     }

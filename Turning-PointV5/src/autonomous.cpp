@@ -330,7 +330,7 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay, bool visionM
         if (visionMove || visionAngle)
         {
             auto angle = GetGyroReading();
-            shoot = !Do(ShootWithVisionAction(visionMove, visionAngle), 300);
+            shoot = !Do(ShootWithVisionAction(visionMove, visionAngle), 500);
             ReportStatus("Shooting with vision: shot: %d, angle shift: %d  -> %d\n", !shoot, angle / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
         }
         if (shoot)

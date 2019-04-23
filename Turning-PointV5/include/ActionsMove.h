@@ -167,8 +167,7 @@ struct MoveExactAction : public MoveAction
         int velocity = GetRobotVelocity();
         if (m_sengageSopOnCollision)
         {
-            int timeElapsed = m_main.GetTime() - m_timeStart;
-            if (abs(velocity) >= 100 || timeElapsed >= 600)
+            if (abs(velocity) >= 100 || GetElapsedTime() >= 600)
                 m_stopOnCollision = true;
         }
 
@@ -221,7 +220,7 @@ struct MoveExactAction : public MoveAction
 
         // Start slowly, for better accuracy.
         // Reach full power in 1 second, 50% powet in .3 seconds
-        int powerLimit = 45 + (m_main.GetTime() - m_timeStart) / 5;
+        int powerLimit = 45 + (GetElapsedTime()) / 5;
         if (power > powerLimit)
             power = powerLimit;
 

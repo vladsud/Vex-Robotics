@@ -34,6 +34,8 @@ class Vision
     bool m_fOnTarget = false;
     bool m_isShootingMoveBase = false;
     bool m_isShootingMoveAngle = false;
+    class TurnPrecise* m_turnAction = nullptr;
+    unsigned int m_foundCount = 0;
 
 public:
     Vision();
@@ -44,8 +46,11 @@ public:
     void LostBall();
     void ShootingInAutonomous(bool visionMove, bool visionAngle);
 
+    unsigned int GetAndResetFoundCount();
+
 protected:
     bool ReadObjects();
+    void StopTurning();
     void ChangeState(bool moveBase, bool moveAngle);
     bool FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsigned int minConfidence, bool moveBase, bool moveAngle);
 };

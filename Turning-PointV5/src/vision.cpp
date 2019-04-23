@@ -1,20 +1,3 @@
-//red 60
-//vision::signature SIG_1 (1, 5795, 9547, 7670, -1181, 255, -464, 3.000, 0);
-//red 30
-//vision::signature SIG_2 (2, 6275, 9623, 7949, -1159, 269, -445, 3.500, 0);
-//green 30
-//vision::signature SIG_3 (3, -3515, -2543, -3029, -5301, -4029, -4665, 4.100, 0);
-//green 60
-//vision::signature SIG_4 (4, -3515, -2543, -3029, -5301, -4029, -4665, 6.000, 0);
-
-//blue 60
-//vision::signature SIG_1 (1, -4229, -2233, -3232, 9557, 15711, 12634, 3.000, 0);
-
-//blue 30
-//vision::signature SIG_2 (2, -4255, -2021, -3138, 8995, 15745, 12370, 2.700, 0);
-
-
-
 #include "main.h"
 #include"vision.h"
 #include "pros/adi.h" // for PROS_ERR
@@ -26,6 +9,7 @@
 #include "pros/rtos.h"
 #include "cycle.h"
 #include "pros/motors.h"
+#include "ActionsTurn.h"
 
  #define RGB2COLOR(R, G, B) ((R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff)) 
 
@@ -40,11 +24,21 @@ struct Signature
 };
 
 Signature g_signatures[] = {
+    // Laps in bonus roon
+    {SigType::Green, "Green 1", 30, vision_signature_from_utility(3, -3515, -2543, -3029, -5301, -4029, -4665, 4.100, 0)},
+    {SigType::Green, "Green 2", 60, vision_signature_from_utility(4, -3515, -2543, -3029, -5301, -4029, -4665, 6.000, 0)},
+    {SigType::Red, "Red 1", 60, vision_signature_from_utility(1, 5795, 9547, 7670, -1181, 255, -464, 3.000, 0)},
+    {SigType::Red, "Red 2", 30, vision_signature_from_utility(2, 6275, 9623, 7949, -1159, 269, -445, 3.500, 0)},
+    {SigType::Blue, "Blue 1", 60, vision_signature_from_utility(1, -4229, -2233, -3232, 9557, 15711, 12634, 3.000, 0)},
+    {SigType::Blue, "Blue 2", 30, vision_signature_from_utility(2, -4255, -2021, -3138, 8995, 15745, 12370, 2.700, 0)}
+
+    // Natural light
+    /*
     {SigType::Green, "Green 2", 30, vision_signature_from_utility(1, -2891, -2245, -2568, -4615, -3847, -4231, 7.500, 0)},
     {SigType::Green, "Green", 50, vision_signature_from_utility(1, -2965, -2365, -2665, -4899, -4239, -4569, 6.500, 0)},
     {SigType::Blue,  "Blue 2", 30, vision_signature_from_utility(1, -3329, -2467, -2898, 12655, 14947, 13801, 6.000, 0)},
     {SigType::Blue,  "Blue", 50, vision_signature_from_utility(1, -3339, -1973, -2656, 11547, 15541, 13544, 5.000, 0)},
-//    {SigType::BlueFull, "Blue full", 30, vision_signature_from_utility(1, -3145, -2205, -2675, -1299, 14607, 6654, 1.500, 0)},
+    */
 };
 
 struct ObjTracker
@@ -99,7 +93,7 @@ bool IsValidObject(pros::vision_object_s_t& obj, SigType type, bool report)
 Vision::Vision()
     : m_sensor(VisionPort, pros::E_VISION_ZERO_CENTER)
 {
-    // testing
+    // by default, starting as red
     SetFlipX(false);
 
     m_sensor.set_wifi_mode(0);
@@ -279,7 +273,9 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
         m_trackingY = y;
     }
 
-    m_fOnTarget = true;
+    m_fOnTarget = false;
+    if (moveBase || moveAngle)
+        m_fOnTarget = true;
     if (moveBase && abs(x) >= 5)
         m_fOnTarget = false;
     if (moveAngle && abs(y) > 7)
@@ -305,24 +301,17 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
             y_angle = y_angle * 3;
 
         auto& main = GetMain();
-        ReportStatus("Tracking: confidence = %d, dimentions = (%d, %d) coord = (%d %d), angle diff = (%d, %d), angle: %d\n",
-            obj.confidence, obj.mainColor->width, obj.mainColor->height, x, y, y_angle, main.shooter.MovingRelativeTo(), (int)motor_get_position(angleMotorPort));
+        ReportStatus("Tracking: confidence = %d, dimentions = (%d, %d) coord = (%d %d), angle diff = (%d, %d), angle: %d, angle diff: %d\n",
+            obj.confidence, obj.mainColor->width, obj.mainColor->height, x, y, y_angle, main.shooter.MovingRelativeTo(), (int)motor_get_position(angleMotorPort),
+            m_turnAction ? m_turnAction->GetError() : 0);
 
         if (moveBase)
         {
-            if (abs(x) > 7)
-            {
-                if (x > 8)
-                    x = 8;
-                else if (x < -8)
-                    x = -8;
-                x = x * 2.3 + Sign(x) * 8;
-                main.drive.OverrideInputs(0, x); // positive ia turn right (clockwise)
-            }
-            else
-            {
-                main.drive.OverrideInputs(0, 0);
-            }
+            int angle = -x * GyroWrapper::Multiplier / 4;
+            if (!m_turnAction)
+                m_turnAction = new TurnPrecise(angle);
+            m_turnAction->ChangeTurn(angle);
+            (void)m_turnAction->ShouldStop();
         }
         
         if (moveAngle)
@@ -355,10 +344,10 @@ void Vision::LostBall()
     m_lostBallCount = 20;
     m_fOnTarget = false;
     if (m_isShootingMoveBase)
-        GetMain().drive.OverrideInputs(0, 0);
+        StopTurning();
     m_countShooterMoving = 0;
-    m_trackingX = 200;
-    m_trackingY = 200;
+    m_trackingX = 400;
+    m_trackingY = 300;
 
     if (isAuto())
         ShootingInAutonomous(false, false);
@@ -388,20 +377,20 @@ void Vision::Update()
         }
         if (ReadObjects())
         {
-            if (FindObject(200, 200, 32, false, false))
+            if (FindObject(400, 300, 32, false, false))
                 m_detectionsHigh++;
-            else if (FindObject(200, 200, 28, false, false))
+            else if (FindObject(400, 300, 28, false, false))
                 m_detectionsMedium++;
-            else if (FindObject(200, 200, 20, false, false))
+            else if (FindObject(400, 300, 20, false, false))
                 m_detectionsLow++;
         }
         return;
     }
 
     bool found = false;
-    bool shooting = joystickGetDigital(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_DIGITAL_R1);
-    bool moveBase = shooting;
-    bool moveAngle = shooting;
+    bool moveBase = joystickGetDigital(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_DIGITAL_R1);
+    bool moveAngle = moveBase;
+
     // In auton, just leverage
     if (isAuto())
     {
@@ -438,23 +427,29 @@ void Vision::Update()
             // 22 - next best thing
             found =
                 FindObject(abs(int(m_trackingX)) + 20, abs(int(m_trackingX)) + 20, 11, moveBase, moveAngle) ||
-                FindObject(200, 200, 11, moveBase, moveAngle);
+                FindObject(400, 300, 11, moveBase, moveAngle);
             }
 
         if (!found)
         {
             m_countNotFound++;
-            if (m_countNotFound >= 3)
+            if (m_countNotFound >= 20)
             {
                 m_fOnTarget = false;
                 m_countNotFound = 0;
+                StopTurning();
             }
         }
         else
             m_countNotFound = 0;
 
-        if (shooting && !found)
-            ReportStatus("not found (objects inspected: %d)\n", m_objCount);
+        if (moveBase || moveAngle)
+        {
+            if (found)
+                m_foundCount++;
+            if (!found)
+                ReportStatus("not found (objects inspected: %d)\n", m_objCount);
+        }
     }
 
     ChangeState(moveBase, moveAngle);
@@ -464,7 +459,7 @@ void Vision::ChangeState(bool moveBase, bool moveAngle)
 {
     auto& main = GetMain();
     if (!moveBase && m_isShootingMoveBase)
-        main.drive.OverrideInputs(0, 0);
+        StopTurning();
     if (!moveAngle && m_isShootingMoveAngle)
     {
         main.shooter.MoveAngleRelative(0);
@@ -472,16 +467,36 @@ void Vision::ChangeState(bool moveBase, bool moveAngle)
     }
     if (!moveBase && !moveAngle)
     {
-        m_trackingX = 200;
-        m_trackingY = 200;
+        m_trackingX = 400;
+        m_trackingY = 300;
+        m_foundCount = 0;
+        m_countNotFound = 0;
     }
 
     m_isShootingMoveBase = moveBase;
     m_isShootingMoveAngle = moveAngle;
 }
 
+void Vision::StopTurning()
+{
+    if (m_turnAction)
+    {
+        m_turnAction->Stop();
+        delete m_turnAction;
+        m_turnAction = nullptr;
+    }
+    GetMain().drive.OverrideInputs(0, 0);
+}
+
 void Vision::ShootingInAutonomous(bool visionMove, bool visionAngle)
 {
     Assert(isAuto());
     ChangeState(visionMove, visionAngle);
+}
+
+unsigned int Vision::GetAndResetFoundCount()
+{
+    unsigned int result = m_foundCount;
+    m_foundCount = 0;
+    return result;
 }

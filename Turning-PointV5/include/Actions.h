@@ -13,13 +13,15 @@ inline void IntakeStop() { GetMain().intake.SetIntakeDirection(Intake::Direction
 
 struct Action
 {
-    unsigned int m_timeStart;
     Main &m_main = GetMain();
 
     Action() { m_timeStart = m_main.GetTime(); }
+    unsigned int GetElapsedTime() const { return m_main.GetTime() - m_timeStart; }
     virtual bool ShouldStop() = 0; //{ return true; }
     virtual void Stop() {}
     virtual const char* Name() { return "unknown"; }
+private:
+    unsigned int m_timeStart;
 };
 
 struct EndOfAction : public Action
@@ -31,7 +33,7 @@ struct WaitAction : public Action
 {
     unsigned int m_wait;
     WaitAction(unsigned int wait) : m_wait(wait) {}
-    bool ShouldStop() override { return m_main.GetTime() - m_timeStart >= m_wait; }
+    bool ShouldStop() override { return GetElapsedTime() >= m_wait; }
     const char* Name() override { return "Wait"; } 
 };
 
@@ -87,8 +89,20 @@ struct ShootBallAction : public Action
 
 struct ShootWithVisionAction : public Action
 {
-    ShootWithVisionAction(bool visionMove, bool visionAngle) { GetMain().vision.ShootingInAutonomous(visionMove, visionAngle); }
-    bool ShouldStop() { return !GetMain().vision.IsShooting(); }
-    void Stop() override { GetMain().vision.ShootingInAutonomous(false, false); }
+    ShootWithVisionAction(bool visionMove, bool visionAngle)
+    {
+        GetMain().vision.ShootingInAutonomous(visionMove, visionAngle);
+        (void) GetMain().vision.GetAndResetFoundCount();
+    }
+    bool ShouldStop()
+    {
+        if ((GetElapsedTime() % 10) == 0 && GetMain().vision.GetAndResetFoundCount() < 3)
+            return true;
+        return !GetMain().vision.IsShooting();
+    }
+    void Stop() override
+    {
+        GetMain().vision.ShootingInAutonomous(false, false);
+    }
     const char* Name() override { return "ShootWithVisionAction"; } 
 };

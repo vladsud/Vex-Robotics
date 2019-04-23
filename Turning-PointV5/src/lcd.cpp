@@ -24,6 +24,8 @@ lv_res_t LCD::click_action(lv_obj_t * btn)
         lv_label_set_text(label, GetMain().lcd.m_buttons[id].label2);
 
     ReportStatus("Click: %d:  %s = %d\n)", id, GetMain().lcd.m_buttons[id].label, value);
+
+    GetMain().vision.SetFlipX(GetMain().lcd.AtonBlueRight);
     return LV_RES_OK;
 }
 
