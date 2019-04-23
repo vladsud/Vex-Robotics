@@ -69,7 +69,7 @@ void RunSuperSkills()
     SetShooterAngle(twoFlagsShootsHighFirst, distanceFirstAton);
 
     // Pick up the first ball
-    GoToCapWithBallUnderIt(distanceToCap, 2100, -90);
+    GoToCapWithBallUnderIt(distanceToCap, 2100, -90, -90);
 
     // Move in front of first flags
     MoveExactWithLineCorrection(2550, 700, 0);
@@ -110,7 +110,7 @@ ReportStatus("\nShooting second pole\n");
 
     // pick up ball under cap
     TurnToAngle(-90);
-    GoToCapWithBallUnderIt(600, 400, -90);
+    GoToCapWithBallUnderIt(600, 400, -90, -90);
     WaitForBall(500); // wait for the ball actuall to land
 
     // Flip cap #1    

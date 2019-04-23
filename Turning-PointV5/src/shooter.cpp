@@ -11,21 +11,21 @@
 using namespace pros;
 using namespace pros::c;
 
-const unsigned int distanceFirstAton = 54; // main shot, 2 balls
+const unsigned int distanceFirstAton = 48; // main shot, 2 balls
 const unsigned int distanceFirstAtonDiagonalShot = 60; // medium flag
 const unsigned int distanceFirstAtonFromPlatform = 90; // medium flag near platform
 const unsigned int distanceSecondAton = 100;        // high, then medium
 
 // Distance based on front of the robot
-constexpr float Distances[]            { 48,  54,  90, 100};
-constexpr unsigned int AnglesHigh[]   { 470, 350,  410, 330};
-constexpr unsigned int AnglesMedium[] { 130, 30,  240, 1};
+constexpr float Distances[]           {  48,  90,  100};
+constexpr unsigned int AnglesHigh[]   { 570,  600, 400}; // 700 seems to be the highest point
+constexpr unsigned int AnglesMedium[] { 230,  340,  30}; // 30 is lowest point!
 
 constexpr unsigned int LastDistanceCount = CountOf(Distances) - 1;
 
 constexpr unsigned int ConvertAngleToPotentiometer(unsigned int angle)
 {
-    return 700-angle;
+    return 800-angle;
 }
 
 
@@ -34,18 +34,16 @@ StaticAssert(CountOf(Distances) == CountOf(AnglesMedium));
 
 StaticAssert(Distances[0] < Distances[1]);
 StaticAssert(Distances[1] < Distances[2]);
-StaticAssert(Distances[2] < Distances[3]);
 
-StaticAssert(AnglesHigh[0] >= AnglesHigh[1]);
+// StaticAssert(AnglesHigh[0] >= AnglesHigh[1]);
 // StaticAssert(AnglesHigh[1] >= AnglesHigh[2]);
 
-StaticAssert(AnglesMedium[0] >= AnglesMedium[1]);
+// StaticAssert(AnglesMedium[0] >= AnglesMedium[1]);
 // StaticAssert(AnglesMedium[1] >= AnglesMedium[2]);
 
 StaticAssert(AnglesMedium[0] < AnglesHigh[0]);
 StaticAssert(AnglesMedium[1] < AnglesHigh[1]);
 StaticAssert(AnglesMedium[2] < AnglesHigh[2]);
-StaticAssert(AnglesMedium[3] < AnglesHigh[3]);
 
 constexpr unsigned int CalcAngle(Flag flag, float distanceInches)
 {
@@ -77,16 +75,16 @@ StaticAssert(CalcAngle(Flag::High, Distances[0]) == AnglesHigh[0]);
 StaticAssert(CalcAngle(Flag::High, Distances[2]) == AnglesHigh[2]);
 StaticAssert(CalcAngle(Flag::High, Distances[LastDistanceCount]) == AnglesHigh[LastDistanceCount]);
 StaticAssert(CalcAngle(Flag::High, Distances[LastDistanceCount] + 100) == AnglesHigh[LastDistanceCount]);
-StaticAssert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[2] + Distances[3]) / 2), (AnglesHigh[2] + AnglesHigh[3]) / 2));
-StaticAssert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[2] * 3 + Distances[3]) / 4), (AnglesHigh[2] * 3 + AnglesHigh[3]) / 4));
+StaticAssert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[0] + Distances[1]) / 2), (AnglesHigh[0] + AnglesHigh[1]) / 2));
+StaticAssert(AlmostSameAngle(CalcAngle(Flag::High, (Distances[1] * 3 + Distances[2]) / 4), (AnglesHigh[1] * 3 + AnglesHigh[2]) / 4));
 
 StaticAssert(CalcAngle(Flag::Middle, Distances[0] - 5) == AnglesMedium[0]);
 StaticAssert(CalcAngle(Flag::Middle, Distances[0]) == AnglesMedium[0]);
 // StaticAssert(CalcAngle(Flag::Middle, Distances[2]) == AnglesMedium[2]);
 StaticAssert(CalcAngle(Flag::Middle, Distances[LastDistanceCount]) == AnglesMedium[LastDistanceCount]);
 StaticAssert(CalcAngle(Flag::Middle, Distances[LastDistanceCount] + 100) == AnglesMedium[LastDistanceCount]);
-StaticAssert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2] + Distances[3]) / 2), (AnglesMedium[2] + AnglesMedium[3]) / 2));
-StaticAssert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[2] * 3 + Distances[3]) / 4), (AnglesMedium[2] * 3 + AnglesMedium[3]) / 4));
+StaticAssert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[0] + Distances[1]) / 2), (AnglesMedium[0] + AnglesMedium[1]) / 2));
+StaticAssert(AlmostSameAngle(CalcAngle(Flag::Middle, (Distances[1] * 3 + Distances[2]) / 4), (AnglesMedium[1] * 3 + AnglesMedium[2]) / 4));
 
 // Need to figure out initial position
 Shooter::Shooter()

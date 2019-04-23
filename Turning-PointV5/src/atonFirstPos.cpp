@@ -23,7 +23,7 @@ void RunAtonFirstPos()
     //
     // knock the cone
     //
-    GoToCapWithBallUnderIt(distanceToCap-100, distanceToCap+100, -90);
+    GoToCapWithBallUnderIt(distanceToCap, distanceToCap+200, -90, -96);
 
     //
     // Turn to shoot
@@ -42,7 +42,7 @@ void RunAtonFirstPos()
         bool highFlag = false;
         SetShooterAngle(highFlag, distanceFirstAtonFromPlatform);
 
-        HitLowFlagWithRecovery(distanceTillWall, 10600, 9 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(distanceTillWall, 10600, 10 /*angleBack*/, angleToMoveToFlags);
 
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
         auto time = main.GetTime() - timeBegin;
@@ -53,7 +53,7 @@ void RunAtonFirstPos()
             // Sometimes ball lands on top and interfeers with another ball
             UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
 
-            TurnToAngle(-33);
+            TurnToAngle(-31);
             ShootOneBall(highFlag, distanceFirstAtonFromPlatform, 0, true);
             ReportStatus("\n   Time after diagonal shot: %d,\n", main.GetTime() - timeBegin);
             if (main.GetTime() - timeBegin < 12500)

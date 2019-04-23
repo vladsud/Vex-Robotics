@@ -93,13 +93,17 @@ struct MoveToPlatformAction : public MoveAction
     int m_slowCount = 0;
     bool m_fIsLow = false;
     int m_distanceFirstHit = 0;
+    unsigned int m_distance;
 
     const char* Name() override { return "MoveToPlatformAction"; }
 
     MoveToPlatformAction(int distance, int angle)
         : MoveAction(distance, 80),
           m_angle(angle)
-    {}
+    {
+        // we drive from side in second aton
+        m_distance = GetMain().lcd.AtonFirstPos ? 2300 : 2100;
+    }
 
     bool ShouldStop() override
     {
@@ -125,7 +129,7 @@ struct MoveToPlatformAction : public MoveAction
             }
         }
 
-        if (m_fIsLow && distance >= m_distanceFirstHit + 2300)
+        if (m_fIsLow && distance >= m_distanceFirstHit + m_distance)
             return true;
 
         m_lastDistance = distance;
@@ -151,7 +155,7 @@ struct MoveExactAction : public MoveAction
     MoveExactAction(int distance, int angle, bool stopOnCollision = false)
         : MoveAction(distance, 0 /*power*/),
           m_angle(angle),
-          m_sengageSopOnCollision(stopOnCollision)
+          m_engageStopOnCollision(stopOnCollision)
     {
     }
 
@@ -165,7 +169,7 @@ struct MoveExactAction : public MoveAction
     bool ShouldStop() override
     {
         int velocity = GetRobotVelocity();
-        if (m_sengageSopOnCollision)
+        if (m_engageStopOnCollision)
         {
             if (abs(velocity) >= 100 || GetElapsedTime() >= 600)
                 m_stopOnCollision = true;
@@ -241,7 +245,7 @@ struct MoveExactAction : public MoveAction
     KeepAngle m_angle;
     static const int maxSpeed = 127;
     int m_power = 45;
-    bool m_sengageSopOnCollision = false;
+    bool m_engageStopOnCollision = false;
 };
 
 

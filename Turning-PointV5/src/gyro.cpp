@@ -147,8 +147,8 @@ void GyroBoth::Unfreeze()
 
 int GyroBoth::Get() const
 {
-    if ((GetMain().GetTime() % 1000) == 0)
-        ReportStatus("Gyro readings: %d %d %d\n", m_gyro.Get() / Multiplier, m_gyro2.Get() / Multiplier, m_wheels.Get() / Multiplier);
+    // if ((GetMain().GetTime() % 1000) == 0)
+    //     ReportStatus("Gyro readings: %d %d %d\n", m_gyro.Get() / Multiplier, m_gyro2.Get() / Multiplier, m_wheels.Get() / Multiplier);
     return (m_gyro.Get() +  m_gyro2.Get() + m_wheels.Get()) / 3;
 }
 

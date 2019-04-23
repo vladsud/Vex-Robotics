@@ -6,6 +6,32 @@
 
 void RunAtonSecondPos()
 {
+    GetMain().tracker.SetCoordinates({16.5 - 1, 33 + 48 - 1, -90});
+    GoToCapWithBallUnderIt(distanceToCap, 400 /*distanceBack*/, -90 /*angle*/, -90);
+
+    if (GetMain().lcd.AtonClimbPlatform)
+    {
+        TurnToAngle(0);
+        MoveToPlatform(false /*twoPlatforms*/, 0);  
+        MoveStop();
+        TurnToAngle(-14);
+        Wait(8000);
+        ShootTwoBalls(distanceFirstAton, true, false);
+    }
+    else
+    {
+        TurnToAngle(-8);
+        Wait(7000);
+        ShootTwoBalls(distanceSecondAton, true, false);
+        // Prep for the game!
+        TurnToAngle(95);
+        MoveExactWithAngle(distanceToCap, 95);
+        TurnToAngle(0);
+    }
+    
+
+    // OLD CODE
+#if 0
     GetMain().tracker.SetCoordinates({16.5 - 1, 33 + 48 - 1, -30});
 
     SetShooterAngle(false, distanceSecondAton);
@@ -25,10 +51,7 @@ void RunAtonSecondPos()
     else
     {
         TurnToAngle(-100);
-        BLOCK
-        {
-            GoToCapWithBallUnderIt(distanceToCap+200, 600 /*distanceBack*/, -100 /*angle*/);
-        }
+        GoToCapWithBallUnderIt(distanceToCap+200, 600 /*distanceBack*/, -100 /*angle*/, -100);
 
         TurnToAngle(-10);
         SetShooterAngle(false, distanceSecondAton);
@@ -47,5 +70,5 @@ void RunAtonSecondPos()
         MoveExact(-500);
         */
     }
-    
+#endif
 }

@@ -58,7 +58,8 @@ bool SmartsOn()
     return g_autonomousSmartsOn && isAuto();
 }
 
-bool Do(Action &&action, unsigned int timeout /* = 100000 */)
+template <typename T>
+bool DoCore(T &&action, unsigned int timeout /* = 100000 */)
 {
     auto time = millis();
     bool timedout = false;
@@ -66,7 +67,7 @@ bool Do(Action &&action, unsigned int timeout /* = 100000 */)
     auto& main = GetMain();
     while (!action.ShouldStop())
     {
-        if (main.GetTime() - action.m_timeStart >= timeout)
+        if (action.GetElapsedTime() >= timeout)
         {
             timedout = true;
             ReportStatus("!!! TIME-OUT: %s: %d\n", action.Name(), timeout);
@@ -95,6 +96,16 @@ bool Do(Action &&action, unsigned int timeout /* = 100000 */)
     }
 
     return !timedout;
+}
+
+bool Do(Action &&action, unsigned int timeout /* = 100000 */)
+{
+    return DoCore(std::move(action), timeout);
+}
+
+bool Do(Action &action, unsigned int timeout /* = 100000 */)
+{
+    return DoCore(action, timeout);
 }
 
 // Scans digital buttons on joystick
@@ -268,7 +279,7 @@ unsigned int HitTheWall(int distanceForward, int angle)
 }
 
 
-void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle)
+void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle, int angleBack)
 {
     IntakeUp();
     Do(MoveExactFastAction(distance, angle, true /*stopOnHit*/));
@@ -278,7 +289,7 @@ void GoToCapWithBallUnderIt(int distance, unsigned int distanceBack, int angle)
         // WaitAfterMoveReportDistance(distance, 200);
     }
     distanceBack = distanceBack + GetMain().drive.m_distance - distance;
-    MoveExactWithAngle(-(int)distanceBack, angle);
+    MoveExactWithAngle(-(int)distanceBack, angleBack);
 }
 
 void FlipCap(unsigned int distance, unsigned int distanceBack, int angle)
@@ -330,7 +341,9 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay, bool visionM
         if (visionMove || visionAngle)
         {
             auto angle = GetGyroReading();
-            shoot = !Do(ShootWithVisionAction(visionMove, visionAngle), 500);
+            ShootWithVisionAction action(visionMove, visionAngle);
+            Do(action, 500);
+            bool shot = !action.Shot();
             ReportStatus("Shooting with vision: shot: %d, angle shift: %d  -> %d\n", !shoot, angle / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
         }
         if (shoot)

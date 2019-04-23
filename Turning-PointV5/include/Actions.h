@@ -96,13 +96,25 @@ struct ShootWithVisionAction : public Action
     }
     bool ShouldStop()
     {
-        if ((GetElapsedTime() % 10) == 0 && GetMain().vision.GetAndResetFoundCount() < 3)
-            return true;
-        return !GetMain().vision.IsShooting();
+        if ((GetElapsedTime() % 100) == 0)
+        {
+            auto ratio = GetMain().vision.GetAndResetFoundCount();
+            ReportStatus("Vision aiming: %d / 10\n", ratio);
+            if (ratio < 3)
+                return true;
+        }
+
+        m_shot = !GetMain().vision.IsShooting();
+        return m_shot;
     }
     void Stop() override
     {
         GetMain().vision.ShootingInAutonomous(false, false);
     }
+
+    bool Shot() { return m_shot; }
     const char* Name() override { return "ShootWithVisionAction"; } 
+
+private:
+    bool m_shot = false;
 };

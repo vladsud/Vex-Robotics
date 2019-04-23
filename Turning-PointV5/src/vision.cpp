@@ -341,7 +341,7 @@ void Vision::LostBall()
     // Not look at flags for a while...
     // First, the flag takes a while to flip and for camera to notice it
     // By waiting, we allow shooter default behaviour to start moving to another flag and actually start noticing it
-    m_lostBallCount = 20;
+    m_lostBallCount = 40;
     m_fOnTarget = false;
     if (m_isShootingMoveBase)
         StopTurning();
