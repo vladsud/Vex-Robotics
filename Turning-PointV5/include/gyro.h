@@ -38,7 +38,7 @@ class GyroWheels
     // Devide by this nuber to convert gyro value to degrees
     static constexpr int Multiplier = 1 << 10;
 
-    GyroWheels(unsigned char port) {}
+    GyroWheels() {}
     void Integrate(); // {}
     void Freeze() { }
     void Unfreeze() { }
@@ -49,7 +49,28 @@ class GyroWheels
 };
 
 
-using GyroWrapper = GyroWheels;
+class GyroBoth
+{
+    GyroReal m_gyro;
+    GyroReal m_gyro2;
+    GyroWheels m_wheels;
+
+  public:
+    // Devide by this nuber to convert gyro value to degrees
+    static constexpr int Multiplier = 1 << 10;
+
+    GyroBoth();
+    void Integrate();
+    void Freeze();
+    void Unfreeze();
+
+    int Get() const;
+    void SetAngle(int angle);
+    void ResetState();
+};
+
+
+using GyroWrapper = GyroBoth;
 
 class GyroFreezer
 {

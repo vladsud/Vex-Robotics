@@ -117,6 +117,56 @@ void GyroWheels::ResetState()
 }
 
 
+GyroBoth::GyroBoth()
+    : m_gyro(gyroPort),
+    m_gyro2(gyroPort2),
+    m_wheels()
+{
+}
+
+void GyroBoth::Integrate()
+{
+    m_gyro.Integrate();
+    m_gyro2.Integrate();
+    m_wheels.Integrate();
+}
+
+void GyroBoth::Freeze()
+{
+    m_gyro.Freeze();
+    m_gyro2.Freeze();
+    m_wheels.Freeze();
+}
+
+void GyroBoth::Unfreeze()
+{
+    m_gyro.Unfreeze();
+    m_gyro2.Unfreeze();
+    m_wheels.Unfreeze();
+}
+
+int GyroBoth::Get() const
+{
+    if ((GetMain().GetTime() % 1000) == 0)
+        ReportStatus("Gyro readings: %d %d %d\n", m_gyro.Get() / Multiplier, m_gyro2.Get() / Multiplier, m_wheels.Get() / Multiplier);
+    return (m_gyro.Get() +  m_gyro2.Get() + m_wheels.Get()) / 3;
+}
+
+void GyroBoth::SetAngle(int angle)
+{
+    m_gyro.SetAngle(angle);
+    m_gyro2.SetAngle(angle);
+    m_wheels.SetAngle(angle);
+}
+
+void GyroBoth::ResetState()
+{
+    m_gyro.ResetState();
+    m_gyro2.ResetState();
+    m_wheels.ResetState();
+}
+
+
 int AdjustAngle(int angle)
 {
     while (angle > 180 * GyroWrapper::Multiplier)

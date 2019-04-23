@@ -32,7 +32,7 @@ class Main
 	Intake intake;
 	Descorer descorer;
 	Shooter shooter;
-	GyroWrapper gyro {gyroPort};
+	GyroWrapper gyro;
 	PositionTracker tracker;
 	LCD lcd;
 	Logger logger;
