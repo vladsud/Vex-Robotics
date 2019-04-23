@@ -182,6 +182,7 @@ void autonomous()
         // MoveExactWithAngle(6000, 10, false);
         // lcd.AtonClimbPlatform = false;
         // lcd.AtonFirstPos = false;
+
         RunAtonFirstPos();
         // RunAtonSecondPos();
         // RunSuperSkills();
@@ -326,7 +327,7 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay, bool visionM
         {
             ReportStatus("No ball, waiting\n");
             IntakeUp();
-            WaitForBall(1000);
+            WaitForBall(1500);
         }
     }
 

@@ -145,10 +145,15 @@ void GyroBoth::Unfreeze()
     m_wheels.Unfreeze();
 }
 
+void GyroBoth::PrintValues()
+{
+    ReportStatus("Gyro readings: %d %d %d\n", m_gyro.Get() / Multiplier, m_gyro2.Get() / Multiplier, m_wheels.Get() / Multiplier);
+
+}
 int GyroBoth::Get() const
 {
     // if ((GetMain().GetTime() % 1000) == 0)
-    //     ReportStatus("Gyro readings: %d %d %d\n", m_gyro.Get() / Multiplier, m_gyro2.Get() / Multiplier, m_wheels.Get() / Multiplier);
+    //     PrintValues();
     return (m_gyro.Get() +  m_gyro2.Get() + m_wheels.Get()) / 3;
 }
 

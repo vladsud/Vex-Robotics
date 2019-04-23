@@ -32,7 +32,7 @@ class GyroReal
 class GyroWheels
 {
     int32_t m_offset = 0;
-    float m_multiplier = 68.5;
+    const float m_multiplier = 68.5;
 
   public:
     // Devide by this nuber to convert gyro value to degrees
@@ -67,6 +67,7 @@ class GyroBoth
     int Get() const;
     void SetAngle(int angle);
     void ResetState();
+    void PrintValues();
 };
 
 

@@ -51,6 +51,7 @@ void HitLowFlagWithRecovery(unsigned int distanceForward, unsigned int distanceB
     }
     else
     {
+        GetMain().gyro.PrintValues();        
         // ReportStatus("    Normal hit: a = %d, d = %d, expected d = %d\n", actualAngle / GyroWrapper::Multiplier, distance, distanceForward);
         //ResetPostionAfterHittingWall(false /*leftWall*/);
     }

@@ -44,6 +44,8 @@ void RunAtonFirstPos()
 
         HitLowFlagWithRecovery(distanceTillWall, 10600, 10 /*angleBack*/, angleToMoveToFlags);
 
+        main.gyro.PrintValues();
+
         bool hasBall = main.shooter.BallStatus() == BallPresence::HasBall;
         auto time = main.GetTime() - timeBegin;
         ReportStatus("\n   Time before diagonal shot: %d, Ball: %d\n\n", time, (int)hasBall);
@@ -78,7 +80,7 @@ void RunAtonFirstPos()
 
         HitLowFlagWithRecovery(distanceTillWall, 6100, 5 /*angleBack*/, angleToMoveToFlags);
 
-        int angle = -53;
+        int angle = -50;
         TurnToAngle(angle);
         MoveExactFastWithAngle(1500, angle);
         ShootTwoBalls(distanceFirstAtonDiagonalShot, 0, true /*vision calibraion*/);
