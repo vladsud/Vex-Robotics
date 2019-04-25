@@ -15,7 +15,7 @@
 
 const unsigned int maxX = 200; // we do not want it to turn too far!
 const unsigned int maxY = 300;
-
+const bool calibration = false;
 
 using namespace pros::c;
 
@@ -29,14 +29,18 @@ struct Signature
 
 Signature g_signatures[] = {
     // Laps in bonus roon
-    {SigType::Green, "Green 1", 20, vision_signature_from_utility(2, -3447, -1273, -2360, -6387, -409, -3398, 1.100, 0)},
-    {SigType::Green, "Green 2", 20, vision_signature_from_utility(2, -4355, -3665, -4010, -5927, -4803, -5365, 1.700, 0)},
+    //{SigType::Green, "Green 1", 30, vision_signature_from_utility(2, -3447, -1273, -2360, -6387, -409, -3398, 1.100, 0)},
+    //{SigType::Green, "Green 2", 30, vision_signature_from_utility(2, -4355, -3665, -4010, -5927, -4803, -5365, 1.700, 0)},
+    {SigType::Green, "Green 3", 30, vision_signature_from_utility(3, -4129, -3477, -3803, -7063, -5957, -6510, 3.000, 0)},
 
-    {SigType::Red, "Red 1", 20, vision_signature_from_utility(1, 2871, 7681, 5276, 171, 1013, 592, 1.500, 0)},
-    // {SigType::Red, "Red 2", 20, vision_signature_from_utility(2, 6275, 9623, 7949, -1159, 269, -445, 3.500, 0)},
+    //{SigType::Red, "Red 1", 30, vision_signature_from_utility(1, 2871, 7681, 5276, 171, 1013, 592, 2.500, 0)},
+    //{SigType::Red, "Red 2", 30, vision_signature_from_utility(1, 4205, 8609, 6407, -1249, -675, -962, 2.400, 0)},
+    {SigType::Red, "Red 3", 30, vision_signature_from_utility(2, 3333, 10533, 6933, -1445, -455, -950, 1.000, 0)},
+    
 
-    {SigType::Blue, "Blue 1", 20, vision_signature_from_utility(1, -2377, -953, -1665, 9243, 13343, 11293, 2.500, 0)},
-    // {SigType::Blue, "Blue 2", 20, vision_signature_from_utility(2, -4255, -2021, -3138, 8995, 15745, 12370, 2.700, 0)}
+    //{SigType::Blue, "Blue 1", 30, vision_signature_from_utility(1, -2377, -953, -1665, 9243, 13343, 11293, 2.500, 0)},
+    //{SigType::Blue, "Blue 2", 30, vision_signature_from_utility(2, -2941, -2035, -2488, 5423, 8029, 6726, 2.900, 0)}
+    {SigType::Blue, "Blue 3", 30, vision_signature_from_utility(1, -3225, -2201, -2713, 5661, 8989, 7325, 2.900, 0)}
 
     // Natural light
     /*
@@ -114,7 +118,7 @@ void Vision::SetFlipX(bool blue)
     // If we are playing blue, we need to find red flags!
     blue = !blue;
 
-    m_brightness = 20;
+    m_brightness = 30;
     m_sensor.set_exposure(m_brightness); // 0..150
 
     m_blue = blue;
@@ -365,7 +369,7 @@ void Vision::Update()
     auto& main = GetMain();
 
     // Calibration code
-    if (false)
+    if (calibration)
     {
         if ((m_count % 100) == 0)
         {
@@ -377,7 +381,7 @@ void Vision::Update()
             m_detectionsMedium = 0;
             m_detectionsLow = 0;
             m_brightness += 5;
-            if (m_brightness == 150)
+            if (m_brightness == 60)
                 m_brightness = 0;
             m_sensor.set_exposure(m_brightness); // 0..150
         }

@@ -14,7 +14,7 @@ void RunAtonSecondPos()
         TurnToAngle(0);
         MoveToPlatform(false /*twoPlatforms*/, 0);  
         MoveStop();
-        TurnToAngle(-14);
+        TurnToAngle(-18);
         Wait(8000);
         ShootTwoBalls(distanceSecondAtonFromPlatform, true, false);
     }

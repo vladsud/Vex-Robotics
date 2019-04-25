@@ -339,6 +339,7 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay, bool visionM
             Wait(extraDelay);
         
         bool shoot = true;
+        /*
         if (visionMove || visionAngle)
         {
             auto angle = GetGyroReading();
@@ -347,6 +348,7 @@ void ShootOneBall(bool high, int distance, unsigned int extraDelay, bool visionM
             bool shot = !action.Shot();
             ReportStatus("Shooting with vision: shot: %d, angle shift: %d  -> %d\n", !shoot, angle / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
         }
+        */
         if (shoot)
             ShootBall();
     }
