@@ -30,11 +30,13 @@ struct Signature
 Signature g_signatures[] = {
     // Laps in bonus roon
     {SigType::Green, "Green 1", 20, vision_signature_from_utility(2, -3447, -1273, -2360, -6387, -409, -3398, 1.100, 0)},
-    // {SigType::Green, "Green 2", 60, vision_signature_from_utility(4, -3515, -2543, -3029, -5301, -4029, -4665, 6.000, 0)},
-    // {SigType::Red, "Red 1", 60, vision_signature_from_utility(1, 5795, 9547, 7670, -1181, 255, -464, 3.000, 0)},
-    // {SigType::Red, "Red 2", 30, vision_signature_from_utility(2, 6275, 9623, 7949, -1159, 269, -445, 3.500, 0)},
+    {SigType::Green, "Green 2", 20, vision_signature_from_utility(2, -4355, -3665, -4010, -5927, -4803, -5365, 1.700, 0)},
+
+    {SigType::Red, "Red 1", 20, vision_signature_from_utility(1, 2871, 7681, 5276, 171, 1013, 592, 1.500, 0)},
+    // {SigType::Red, "Red 2", 20, vision_signature_from_utility(2, 6275, 9623, 7949, -1159, 269, -445, 3.500, 0)},
+
     {SigType::Blue, "Blue 1", 20, vision_signature_from_utility(1, -2377, -953, -1665, 9243, 13343, 11293, 2.500, 0)},
-    // {SigType::Blue, "Blue 2", 30, vision_signature_from_utility(2, -4255, -2021, -3138, 8995, 15745, 12370, 2.700, 0)}
+    // {SigType::Blue, "Blue 2", 20, vision_signature_from_utility(2, -4255, -2021, -3138, 8995, 15745, 12370, 2.700, 0)}
 
     // Natural light
     /*
@@ -112,7 +114,7 @@ void Vision::SetFlipX(bool blue)
     // If we are playing blue, we need to find red flags!
     blue = !blue;
 
-    m_brightness = 60;
+    m_brightness = 20;
     m_sensor.set_exposure(m_brightness); // 0..150
 
     m_blue = blue;
