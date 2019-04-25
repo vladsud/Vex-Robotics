@@ -25,6 +25,10 @@
 
  #define RGB2COLOR(R, G, B) ((R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff)) 
 
+const unsigned int maxX = 200; // we do not want it to turn too far!
+const unsigned int maxY = 300;
+
+
 using namespace pros::c;
 
 struct Signature
@@ -358,8 +362,8 @@ void Vision::LostBall()
     if (m_isShootingMoveBase)
         StopTurning();
     m_countShooterMoving = 0;
-    m_trackingX = 400;
-    m_trackingY = 300;
+    m_trackingX = maxX;
+    m_trackingY = maxY;
 
     if (isAuto())
         ShootingInAutonomous(false, false);
@@ -389,11 +393,11 @@ void Vision::Update()
         }
         if (ReadObjects())
         {
-            if (FindObject(400, 300, 32, false, false))
+            if (FindObject(maxX, maxY, 32, false, false))
                 m_detectionsHigh++;
-            else if (FindObject(400, 300, 28, false, false))
+            else if (FindObject(maxX, maxY, 28, false, false))
                 m_detectionsMedium++;
-            else if (FindObject(400, 300, 20, false, false))
+            else if (FindObject(maxX, maxY, 20, false, false))
                 m_detectionsLow++;
         }
         return;
@@ -439,14 +443,15 @@ void Vision::Update()
             // 22 - next best thing
             found =
                 FindObject(abs(int(m_trackingX)) + 20, abs(int(m_trackingX)) + 20, 11, moveBase, moveAngle) ||
-                FindObject(400, 300, 11, moveBase, moveAngle);
+                FindObject(maxX, maxY, 11, moveBase, moveAngle);
             }
 
         if (!found)
         {
             m_countNotFound++;
-            if (m_countNotFound >= 20)
+            if (m_countNotFound >= 10)
             {
+                ReportStatus("Stopping vision motion\n");
                 m_fOnTarget = false;
                 m_countNotFound = 0;
                 StopTurning();
