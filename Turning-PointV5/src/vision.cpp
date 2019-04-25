@@ -1,15 +1,3 @@
-//vision::signature SIG_1 (1, -2377, -953, -1665, 9243, 13343, 11293, 2.500, 0);
-//blue flag
-//vision::signature SIG_2 (2, -3447, -1273, -2360, -6387, -409, -3398, 1.100, 0);
-//green spot
-//vision::signature SIG_3 (3, 0, 0, 0, 0, 0, 0, 3.000, 0);
-//vision::signature SIG_4 (4, 0, 0, 0, 0, 0, 0, 3.000, 0);
-//vision::signature SIG_5 (5, 0, 0, 0, 0, 0, 0, 3.000, 0);
-//vision::signature SIG_6 (6, 0, 0, 0, 0, 0, 0, 3.000, 0);
-//vision::signature SIG_7 (7, 0, 0, 0, 0, 0, 0, 3.000, 0);
-//vex::vision vision1 ( vex::PORT1, 20, SIG_1, SIG_2, SIG_3, SIG_4, SIG_5, SIG_6, SIG_7 );
-
-
 #include "main.h"
 #include"vision.h"
 #include "pros/adi.h" // for PROS_ERR
@@ -41,12 +29,12 @@ struct Signature
 
 Signature g_signatures[] = {
     // Laps in bonus roon
-    {SigType::Green, "Green 1", 30, vision_signature_from_utility(3, -3515, -2543, -3029, -5301, -4029, -4665, 4.100, 0)},
-    {SigType::Green, "Green 2", 60, vision_signature_from_utility(4, -3515, -2543, -3029, -5301, -4029, -4665, 6.000, 0)},
-    {SigType::Red, "Red 1", 60, vision_signature_from_utility(1, 5795, 9547, 7670, -1181, 255, -464, 3.000, 0)},
-    {SigType::Red, "Red 2", 30, vision_signature_from_utility(2, 6275, 9623, 7949, -1159, 269, -445, 3.500, 0)},
-    {SigType::Blue, "Blue 1", 60, vision_signature_from_utility(1, -4229, -2233, -3232, 9557, 15711, 12634, 3.000, 0)},
-    {SigType::Blue, "Blue 2", 30, vision_signature_from_utility(2, -4255, -2021, -3138, 8995, 15745, 12370, 2.700, 0)}
+    {SigType::Green, "Green 1", 20, vision_signature_from_utility(2, -3447, -1273, -2360, -6387, -409, -3398, 1.100, 0)},
+    // {SigType::Green, "Green 2", 60, vision_signature_from_utility(4, -3515, -2543, -3029, -5301, -4029, -4665, 6.000, 0)},
+    // {SigType::Red, "Red 1", 60, vision_signature_from_utility(1, 5795, 9547, 7670, -1181, 255, -464, 3.000, 0)},
+    // {SigType::Red, "Red 2", 30, vision_signature_from_utility(2, 6275, 9623, 7949, -1159, 269, -445, 3.500, 0)},
+    {SigType::Blue, "Blue 1", 20, vision_signature_from_utility(1, -2377, -953, -1665, 9243, 13343, 11293, 2.500, 0)},
+    // {SigType::Blue, "Blue 2", 30, vision_signature_from_utility(2, -4255, -2021, -3138, 8995, 15745, 12370, 2.700, 0)}
 
     // Natural light
     /*
