@@ -7,8 +7,8 @@
 
 const unsigned int distanceTillWall = 6900;
 const int angleToMoveToFlags = 6;
-const int angleToShootFlags = -2;
-const int distanceToCap = 5100;
+const int angleToShootFlags = 0;
+const int distanceToCap = 5350;
 
 void RunAtonFirstPos()
 {
@@ -30,7 +30,7 @@ void RunAtonFirstPos()
     //
     TurnToAngle(angleToShootFlags);
 
-    ShootTwoBalls(distanceFirstAton, true, false);
+    ShootTwoBalls(distanceFirstAton, false, false);
     IntakeUp();
 
     //
@@ -42,7 +42,7 @@ void RunAtonFirstPos()
         bool highFlag = false;
         SetShooterAngle(highFlag, distanceFirstAtonFromPlatform);
 
-        HitLowFlagWithRecovery(distanceTillWall, 10600, 10 /*angleBack*/, angleToMoveToFlags);
+        HitLowFlagWithRecovery(distanceTillWall, 10700, 10 /*angleBack*/, angleToMoveToFlags);
 
         main.gyro.PrintValues();
 
@@ -56,7 +56,7 @@ void RunAtonFirstPos()
             UpdateIntakeFromShooter(IntakeShoterEvent::TooManyBalls);
 
             TurnToAngle(-31);
-            ShootOneBall(highFlag, distanceFirstAtonFromPlatform, 0, true);
+            ShootOneBall(highFlag, distanceFirstAtonFromPlatform, 0, false);
             ReportStatus("\n   Time after diagonal shot: %d,\n", main.GetTime() - timeBegin);
             if (main.GetTime() - timeBegin < 12500)
                 ShootOneBall(!highFlag, distanceFirstAtonFromPlatform);
@@ -83,10 +83,12 @@ void RunAtonFirstPos()
         int angle = -50;
         TurnToAngle(angle);
         MoveExactFastWithAngle(1500, angle);
-        ShootTwoBalls(distanceFirstAtonDiagonalShot, 0, true /*vision calibraion*/);
+        ShootTwoBalls(distanceFirstAtonDiagonalShot, false, false /*vision calibraion*/);
 
         IntakeDown();
         Wait(500);
+        TurnToAngle(angle - 9);
+        
         FlipCap(2900, 2000, -48);
     }
 }

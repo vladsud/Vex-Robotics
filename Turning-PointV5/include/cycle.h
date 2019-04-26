@@ -47,6 +47,8 @@ class Main
 	void UpdateAllSystems();
 	void ResetState();
 
+	int initialTime;
+
   protected:
 	// returns true when it's good time for external system (like autonomous) consume some CPU cycles
 	bool UpdateWithoutWaiting();
@@ -56,6 +58,7 @@ class Main
 	unsigned long m_Ticks = 0; // in ms
 	unsigned long m_LastWakeUp = 0;
 	int m_TicksToMainUpdate = allSystemsPullTime;
+
 };
 
 /*******************************************************************************

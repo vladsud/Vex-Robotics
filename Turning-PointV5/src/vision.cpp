@@ -31,11 +31,11 @@ Signature g_signatures[] = {
     // Laps in bonus roon
     //{SigType::Green, "Green 1", 30, vision_signature_from_utility(2, -3447, -1273, -2360, -6387, -409, -3398, 1.100, 0)},
     //{SigType::Green, "Green 2", 30, vision_signature_from_utility(2, -4355, -3665, -4010, -5927, -4803, -5365, 1.700, 0)},
-    {SigType::Green, "Green 3", 30, vision_signature_from_utility(3, -4129, -3477, -3803, -7063, -5957, -6510, 3.000, 0)},
+    {SigType::Green, "Green 3", 30, vision_signature_from_utility(3, -4129, -3477, -3803, -7063, -5957, -6510, 7.000, 0)},
 
     //{SigType::Red, "Red 1", 30, vision_signature_from_utility(1, 2871, 7681, 5276, 171, 1013, 592, 2.500, 0)},
     //{SigType::Red, "Red 2", 30, vision_signature_from_utility(1, 4205, 8609, 6407, -1249, -675, -962, 2.400, 0)},
-    {SigType::Red, "Red 3", 30, vision_signature_from_utility(2, 3333, 10533, 6933, -1445, -455, -950, 1.000, 0)},
+    {SigType::Red, "Red 3", 30, vision_signature_from_utility(2, 3333, 10533, 6933, -1445, -455, -950, 1.250, 0)},
     
 
     //{SigType::Blue, "Blue 1", 30, vision_signature_from_utility(1, -2377, -953, -1665, 9243, 13343, 11293, 2.500, 0)},
@@ -118,7 +118,7 @@ void Vision::SetFlipX(bool blue)
     // If we are playing blue, we need to find red flags!
     blue = !blue;
 
-    m_brightness = 30;
+    m_brightness = 23;
     m_sensor.set_exposure(m_brightness); // 0..150
 
     m_blue = blue;
@@ -428,7 +428,7 @@ void Vision::Update()
             // Camera does not look precisely streight, and the ball does not fly on streight line
             // So need to adjust for that by "moving" all objects
             for (int i = 0; i < m_objCount; i++)
-                m_objects[i].y_middle_coord += 70;
+                m_objects[i].y_middle_coord += 65;
 
             // resolution: 640 x 400
             // field-of-view: 75 degrees horizontal, 47 degrees vertical

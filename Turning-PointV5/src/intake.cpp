@@ -25,7 +25,7 @@ void Intake::SetIntakeDirection(Direction direction)
     else if (m_direction == Direction::Up)
         power = intakeMotorSpeedUp * 0.85;
     else if (m_direction == Direction::DownWithTooManyBalls)
-        power = -intakeMotorSpeedDown / 3;
+        power = -intakeMotorSpeedDown / 2;
     else
         power = -intakeMotorSpeedDown / 2;
 
