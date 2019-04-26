@@ -40,7 +40,7 @@ Signature g_signatures[] = {
 
     //{SigType::Blue, "Blue 1", 30, vision_signature_from_utility(1, -2377, -953, -1665, 9243, 13343, 11293, 2.500, 0)},
     //{SigType::Blue, "Blue 2", 30, vision_signature_from_utility(2, -2941, -2035, -2488, 5423, 8029, 6726, 2.900, 0)}
-    {SigType::Blue, "Blue 3", 30, vision_signature_from_utility(1, -3225, -2201, -2713, 5661, 8989, 7325, 2.900, 0)}
+    {SigType::Blue, "Blue 3", 30, vision_signature_from_utility(1, -3875, -2107, -2990, 6455, 11041, 8608, 3.000, 0)}
 
     // Natural light
     /*
@@ -381,7 +381,7 @@ void Vision::Update()
             m_detectionsMedium = 0;
             m_detectionsLow = 0;
             m_brightness += 5;
-            if (m_brightness == 60)
+            if (m_brightness >= 60)
                 m_brightness = 0;
             m_sensor.set_exposure(m_brightness); // 0..150
         }
