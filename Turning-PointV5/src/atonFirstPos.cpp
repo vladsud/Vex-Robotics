@@ -79,16 +79,20 @@ void RunAtonFirstPos()
         SetShooterAngle(twoFlagsShootsHighFirst, distanceFirstAtonDiagonalShot);
 
         HitLowFlagWithRecovery(distanceTillWall, 6100, 5 /*angleBack*/, angleToMoveToFlags);
-
+        
         int angle = -50;
-        TurnToAngle(angle);
-        MoveExactFastWithAngle(1500, angle);
-        ShootTwoBalls(distanceFirstAtonDiagonalShot, false, false /*vision calibraion*/);
 
         IntakeDown();
         Wait(500);
         TurnToAngle(angle - 9);
         
         FlipCap(2900, 2000, -48);
+
+        TurnToAngle(angle);
+        MoveExactFastWithAngle(1500, angle);
+        ShootOneBall(false, distanceFirstAtonDiagonalShot, 0, false, false /*vision calibraion*/);
+        ShootOneBall(true, distanceFirstAtonDiagonalShot, 0, false, false /*vision calibraion*/);
+
+
     }
 }
