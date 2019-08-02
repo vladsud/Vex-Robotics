@@ -138,30 +138,4 @@ void opcontrol()
 	Main &main = SetupMain();
 	main.ResetState();
 	main.UpdateAllSystems();
-
-	bool haveRumbled = false;
-	bool haveRumbled2 = false;
-
-	main.initialTime = main.GetTime();
-
-	ReportStatus("Starting op control\n");
-
-	while (true)
-	{
-		main.Update();
-
-		if (!haveRumbled && (main.GetTime() - main.initialTime > 90000))
-		{
-			haveRumbled = true;
-			controller_rumble(E_CONTROLLER_MASTER, "-.-");
-			controller_set_text(E_CONTROLLER_MASTER, 1, 1, "Rumble");
-		}
-
-		if (!haveRumbled2 && (main.GetTime() - main.initialTime > 95000))
-		{
-			haveRumbled2 = true;
-			controller_rumble(E_CONTROLLER_MASTER, "..-");
-			controller_set_text(E_CONTROLLER_MASTER, 1, 1, "Rumble");
-		}
-	}
 }

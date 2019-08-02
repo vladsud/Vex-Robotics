@@ -31,7 +31,7 @@ EXCLUDE_SRC_FROM_LIB+=$(foreach file, $(SRCDIR)/opcontrol $(SRCDIR)/initialize $
 # files that get distributed to every user (beyond your source archive) - add
 # whatever files you want here. This line is configured to add all header files
 # that are in the the include directory get exported
-TEMPLATE_FILES=$(INCDIR)/**/*.h $(INCDIR)/**/*.hpp
+TEMPLATE_FILES=$(INCDIR)/**/*.h $(INCDIR)/**/*.hpp $(INCDIR)/*.h
 
 .DEFAULT_GOAL=quick
 
