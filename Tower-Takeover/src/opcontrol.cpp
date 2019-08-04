@@ -138,4 +138,9 @@ void opcontrol()
 	Main &main = SetupMain();
 	main.ResetState();
 	main.UpdateAllSystems();
+
+	while (true)
+	{
+		main.Update();
+	}
 }

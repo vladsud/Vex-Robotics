@@ -118,12 +118,20 @@ int Drive::GetMovementJoystick(pros::controller_id_e_t joystick, pros::controlle
     return neg ? value : -value;
 }
 
-int Drive::GetForwardAxis()
+int Drive::GetForwardLeftAxis()
 {
     // motors can't move robot at slow speed, so add some boost
     if (isAuto())
         return m_overrideForward;
     return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_LEFT_Y, 18);
+}
+
+
+int Drive::GetForwardRightAxis()
+{
+    // motors can't move robot at slow speed, so add some boost
+    if (!isAuto())
+        return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_RIGHT_Y, 18);
 }
 
 float Drive::GetTurnAxis()
@@ -231,8 +239,19 @@ int Drive::GetAngle()
 void Drive::Update()
 {
     //Drive
-    int forward = GetForwardAxis();
-    int turn = GetTurnAxis();
+    int forward;
+    int turn;
+    if (m_isTankDrive)
+    {
+        forward = (GetForwardLeftAxis() + GetForwardRightAxis())/2;
+        turn = (GetForwardLeftAxis() - GetForwardRightAxis())/2;
+    }   
+    else
+    {
+        forward = GetForwardLeftAxis();
+        turn = GetTurnAxis();
+    }
+    
 
     if (m_holdingPosition)
     {

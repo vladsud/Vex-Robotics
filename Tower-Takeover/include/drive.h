@@ -43,6 +43,7 @@ class Drive
   float m_ErrorIntergral = 0;
   bool m_flipX = false;
   bool m_holdingPosition = false;
+  bool m_isTankDrive = true;
 
   DriveTracker* m_tracker = nullptr;
 
@@ -56,7 +57,8 @@ class Drive
   }
 
   void HoldPosition();
-  int GetForwardAxis();
+  int GetForwardLeftAxis();
+  int GetForwardRightAxis();
   float GetTurnAxis();
   void SetLeftDrive(int speed);
   void SetRightDrive(int speed);
