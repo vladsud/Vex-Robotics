@@ -236,12 +236,13 @@ int Drive::GetAngle()
     return m_right + m_encoderBaseRight - m_left - m_encoderBaseLeft;
 }
 
+
 void Drive::Update()
 {
     //Drive
     int forward;
     int turn;
-    if (m_isTankDrive)
+    if (GetMain().lcd.IsTankDrive)
     {
         forward = (GetForwardLeftAxis() + GetForwardRightAxis())/2;
         turn = (GetForwardLeftAxis() - GetForwardRightAxis())/2;

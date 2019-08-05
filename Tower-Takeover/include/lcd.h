@@ -22,6 +22,7 @@ public:
 	bool AtonFirstPos = true;
 	bool AtonClimbPlatform = true;
 	bool AtonSkills = false;
+    bool IsTankDrive = true;
 
 public:
 	LCD();
@@ -45,5 +46,6 @@ private:
         {"Blue (right)", "Red (left)", AtonBlueRight},
         {"First", "Second", AtonFirstPos},
         {"Platform", "No Plat", AtonClimbPlatform},
+        {"Tank Drive", "Arcade Drive", IsTankDrive},
     };
 };
