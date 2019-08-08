@@ -89,10 +89,7 @@ constexpr T min(T a, T b)
 #define rightBackDrivePort 9
 
 #define intakePort 5
-#define angleMotorPort 12
-#define shooterPort 7
-
-#define descorerPort 99
+#define cubtrayPort 99
 
 #define VisionPort 11
 
@@ -118,7 +115,7 @@ constexpr T min(T a, T b)
 * JOYSTICK GROUPING
 *
 *******************************************************************************/
-#define JoystickDescorerGroup 5 // Right bottom
+#define JoystickCubtrayGroup 5 // Right bottom
 #define JoystickIntakeGroup 6   // Left bottom
 
 
@@ -127,10 +124,4 @@ constexpr T min(T a, T b)
 * OTHER CONSTANTS
 *
 *******************************************************************************/
-#define lightSensorBallIn 1500
-#define lightSensorBallOut 2500
-
-#define ShooterPreloadEnd 700
-#define ShooterPreloadStart 900
-
 #define DistanveBetweenLineSensors 390 // in clicks, rouhly 14"

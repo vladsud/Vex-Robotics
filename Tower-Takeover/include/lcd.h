@@ -42,7 +42,7 @@ private:
 
     bool lcdA;
 
-    const Button m_buttons[3] = {
+    const Button m_buttons[4] = {
         {"Blue (right)", "Red (left)", AtonBlueRight},
         {"First", "Second", AtonFirstPos},
         {"Platform", "No Plat", AtonClimbPlatform},

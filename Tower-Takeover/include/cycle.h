@@ -9,6 +9,9 @@
 #include "position.h"
 #include "lineTracker.h"
 #include "vision.h"
+#include "intake.h"
+#include "cubetray.h"
+
 
 /*******************************************************************************
 * 
@@ -31,6 +34,8 @@ class Main
 	PositionTracker tracker;
 	LCD lcd;
 	Logger logger;
+	Intake intake;
+	Cubtray cubtray;
 	//Vision vision;
 	LineTracker lineTrackerLeft {lineTrackerLeftPort};
 	LineTracker lineTrackerRight {lineTrackerRightPort};
