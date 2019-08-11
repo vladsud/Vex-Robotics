@@ -30,7 +30,8 @@ void Intake::UpdateIntake(Direction direction)
 
 void Intake::SetIntakeMotor(int speed)
 {
-    motor_move(intakePort, speed);
+    motor_move(intakeLeftPort, speed);
+    motor_move(intakeRightPort, speed);
 }
 
 void Intake::Update()
