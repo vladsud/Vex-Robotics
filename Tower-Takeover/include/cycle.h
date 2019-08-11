@@ -35,7 +35,7 @@ class Main
 	LCD lcd;
 	Logger logger;
 	Intake intake;
-	Cubtray cubtray;
+	Cubetray cubetray;
 	//Vision vision;
 	LineTracker lineTrackerLeft {lineTrackerLeftPort};
 	LineTracker lineTrackerRight {lineTrackerRightPort};

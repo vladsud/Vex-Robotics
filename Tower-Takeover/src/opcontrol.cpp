@@ -76,7 +76,7 @@ void Main::UpdateAllSystems()
 
 	lcd.Update();
 	intake.Update();
-	cubtray.Update();
+	cubetray.Update();
 	//vision.Update(); // before drive, for it to update where to drive
 	drive.Update();
 }

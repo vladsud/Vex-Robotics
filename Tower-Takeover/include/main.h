@@ -20,13 +20,12 @@ void opcontrol();
 void autonomous();
 void initialize();
 
-enum class IntakeShoterEvent
+enum class Direction
 {
-   LostBall,
-   Shooting,
-   TooManyBalls,
+   None,
+   Up,
+   Down,
 };
-void UpdateIntakeFromShooter(IntakeShoterEvent event);
 
 #define __noop(...)
 
@@ -89,7 +88,7 @@ constexpr T min(T a, T b)
 #define rightBackDrivePort 9
 
 #define intakePort 5
-#define cubtrayPort 99
+#define cubetrayPort 99
 
 #define VisionPort 11
 
@@ -115,7 +114,7 @@ constexpr T min(T a, T b)
 * JOYSTICK GROUPING
 *
 *******************************************************************************/
-#define JoystickCubtrayGroup 5 // Right bottom
+#define JoystickCubetrayGroup 5 // Right bottom
 #define JoystickIntakeGroup 6   // Left bottom
 
 

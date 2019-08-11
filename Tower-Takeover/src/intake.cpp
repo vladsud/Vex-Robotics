@@ -7,7 +7,7 @@
 using namespace pros;
 using namespace pros::c;
 
-void Intake::SetIntakeDirection(Direction direction)
+void Intake::UpdateIntake(Direction direction)
 {
     m_direction = direction;
 
@@ -45,14 +45,9 @@ void Intake::Update()
     {
         direction = Direction::Down;
     }
-    else
-    {
-        direction = Direction::None;
-    }
-
-    if (m_doublePressed)
+    else if (m_doublePressed)
         direction = m_direction;
     
-    SetIntakeDirection(direction);
+    UpdateIntake(direction);
 }
 

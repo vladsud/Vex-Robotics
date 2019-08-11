@@ -4,15 +4,8 @@
 class Intake
 {
   public:
-    enum class Direction
-    {
-        None,
-        Up,
-        Down,
-    };
-
     void Update();
-    void SetIntakeDirection(Direction direction);
+    void UpdateIntake(Direction direction);
 
   private:
     void SetIntakeMotor(int speed);
