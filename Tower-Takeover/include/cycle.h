@@ -11,6 +11,7 @@
 #include "vision.h"
 #include "intake.h"
 #include "cubetray.h"
+#include "lift.h"
 
 
 /*******************************************************************************
@@ -36,6 +37,7 @@ class Main
 	Logger logger;
 	Intake intake;
 	Cubetray cubetray;
+	Lift lift;
 	//Vision vision;
 	LineTracker lineTrackerLeft {lineTrackerLeftPort};
 	LineTracker lineTrackerRight {lineTrackerRightPort};

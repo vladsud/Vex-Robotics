@@ -1,4 +1,4 @@
-#include "intake.h"
+#include "cubetray.h"
 #include "logger.h"
 #include "pros/motors.h"
 #include "cycle.h"
@@ -36,30 +36,40 @@ void Cubetray::Unload()
     // If not alreadying unloading --> unload
     if (!m_unload)
     {
+        // Remember to keep unloading
         m_unload = true;
-        motor_move_absolute(cubetrayPort, 100, 30);
+        
+    }
+    else
+    {
+        // keep moving until fully unloaded
+        motor_move_absolute(cubetrayPort, m_initializationDistance, 30);
         GetMain().intake.UpdateIntake (Direction::Down);
 
         // If the motor gets there --> stop unloading and initialize
-        if (motor_get_position(cubetrayPort) >= 100)
+        if (motor_get_position(cubetrayPort) >= (m_initializationDistance - 10))
         {
             m_unload = false;
             GetMain().intake.UpdateIntake (Direction::None);
         }
+
+        // override inputs
+        return;
     }
+    
 }
 
 void Cubetray::Update()
 {
-    // If not initalized --> initialize to reset and find starting position
-    if (!m_initialize)
+    // If not initialized and lift is already initialized --> initialize to reset and find starting position
+    if (!m_initialize && GetMain().lift.IsInitialized())
     {
         Initialize();
     }
 
     m_count = 0;
-    // Unload
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP))
+    // Unload 
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP) || m_unload)
     {
         Unload();
     }

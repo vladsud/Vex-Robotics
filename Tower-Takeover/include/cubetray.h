@@ -10,6 +10,7 @@ class Cubetray
     unsigned int m_count = 0;
     int m_lastPos;
     
+    int m_initializationDistance = 100;
 
     void Initialize();
     void Unload();

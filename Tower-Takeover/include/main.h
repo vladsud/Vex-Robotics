@@ -90,6 +90,7 @@ constexpr T min(T a, T b)
 #define intakeLeftPort 5
 #define intakeRightPort 6
 #define cubetrayPort 99
+#define liftMotorPort 7
 
 #define VisionPort 11
 
