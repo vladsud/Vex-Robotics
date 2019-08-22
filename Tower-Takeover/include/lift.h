@@ -5,8 +5,9 @@ class Lift
 {
   public:
     void Update();
-    void SetLiftMotor(int speed)
+    void SetLiftMotor(int speed);
     bool IsInitialized();
+    void Initialize();
 
 private:
     bool m_initialize = false;

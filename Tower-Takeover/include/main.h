@@ -82,17 +82,17 @@ constexpr T min(T a, T b)
 *
 * 
 *******************************************************************************/
-#define leftBackDrivePort 20
-#define leftFrontDrivePort 2
-#define rightFrontDrivePort 4
-#define rightBackDrivePort 9
+#define leftBackDrivePort 99
+#define leftFrontDrivePort 99
+#define rightFrontDrivePort 99
+#define rightBackDrivePort 99
 
-#define intakeLeftPort 5
-#define intakeRightPort 6
+#define intakeLeftPort 9
+#define intakeRightPort 13
 #define cubetrayPort 99
-#define liftMotorPort 7
+#define liftMotorPort 99
 
-#define VisionPort 11
+#define VisionPort 99
 
 
 /*******************************************************************************

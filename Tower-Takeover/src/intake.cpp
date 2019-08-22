@@ -31,24 +31,29 @@ void Intake::UpdateIntake(Direction direction)
 void Intake::SetIntakeMotor(int speed)
 {
     motor_move(intakeLeftPort, speed);
-    motor_move(intakeRightPort, speed);
+    motor_move(intakeRightPort, -speed);
 }
 
 void Intake::Update()
 {
     Direction direction = m_direction;
 
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
+     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
-        direction = Direction::Up;
+        if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
+        {
+            m_doublePressed = true;
+            m_direction = Direction::None;
+        }
+        else
+        {
+            direction = Direction::Up;
+        }
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
         direction = Direction::Down;
     }
-    else if (m_doublePressed)
-        direction = m_direction;
-    
     UpdateIntake(direction);
 }
 
