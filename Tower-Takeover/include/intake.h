@@ -12,6 +12,5 @@ class Intake
 
   private:
     Direction m_direction = Direction::None;
-    bool m_doublePressed = false;
     int m_power = 0;
 };

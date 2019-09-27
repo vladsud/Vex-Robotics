@@ -9,13 +9,11 @@ using namespace pros::c;
 
 void Intake::UpdateIntake(Direction direction)
 {
-    m_direction = direction;
-
     int power;
     if (direction == Direction::None)
         power = 0;
-    else if (m_direction == Direction::Up)
-        power = intakeMotorSpeedUp * 0.85;
+    else if (direction == Direction::Up)
+        power = intakeMotorSpeedUp;
     else
         power = -intakeMotorSpeedDown / 2;
 
@@ -30,30 +28,27 @@ void Intake::UpdateIntake(Direction direction)
 
 void Intake::SetIntakeMotor(int speed)
 {
-    motor_move(intakeLeftPort, speed);
-    motor_move(intakeRightPort, -speed);
+    motor_move(intakeLeftPort, -speed);
+    motor_move(intakeRightPort, speed);
 }
 
 void Intake::Update()
 {
-    Direction direction = m_direction;
-
-     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
         if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
         {
-            m_doublePressed = true;
             m_direction = Direction::None;
         }
         else
         {
-            direction = Direction::Up;
+            m_direction = Direction::Up;
         }
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
-        direction = Direction::Down;
+        m_direction = Direction::Down;
     }
-    UpdateIntake(direction);
+    UpdateIntake(m_direction);
 }
 

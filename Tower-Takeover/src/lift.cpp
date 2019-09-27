@@ -32,7 +32,9 @@ void Lift::Update()
 {
     // If not initialized --> initialize
     if (!m_initialize)
-        Initialize();
+    {
+        //Initialize();
+    }
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
     {
         SetLiftMotor(90);

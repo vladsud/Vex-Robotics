@@ -64,7 +64,7 @@ void Cubetray::Update()
     // If not initialized and lift is already initialized --> initialize to reset and find starting position
     if (!m_initialize && GetMain().lift.IsInitialized())
     {
-        Initialize();
+        //Initialize();
     }
 
     m_count = 0;
