@@ -10,6 +10,6 @@ class Lift
     void Initialize();
 
 private:
-    bool m_initialize = false;
+    bool m_initialize = true;
     int m_initializationDistance = 100;
 };

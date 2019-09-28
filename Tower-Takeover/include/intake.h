@@ -6,8 +6,6 @@ class Intake
   public:
     void Update();
     void UpdateIntake(Direction direction);
-
-  private:
     void SetIntakeMotor(int speed);
 
   private:

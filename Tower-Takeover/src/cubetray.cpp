@@ -9,6 +9,7 @@ using namespace pros::c;
 
 void Cubetray::Initialize()
 {
+    /*
     m_count++;
     motor_move(cubetrayPort, -50);
     int curr = motor_get_position(cubetrayPort);
@@ -29,6 +30,10 @@ void Cubetray::Initialize()
         motor_tare_position(cubetrayPort);
         m_initialize = true;
     }
+    */
+    motor_tare_position(cubetrayPort);
+    m_initialize = true;
+
 }
 
 void Cubetray::Unload()
@@ -43,16 +48,16 @@ void Cubetray::Unload()
     else
     {
         // keep moving until fully unloaded
-        motor_move_absolute(cubetrayPort, m_initializationDistance, 30);
-        GetMain().intake.UpdateIntake (Direction::Down);
+        motor_move_absolute(cubetrayPort, m_initializationDistance + 100, 30);
+        GetMain().intake.SetIntakeMotorSpeed(-20);
 
         // If the motor gets there --> stop unloading and initialize
-        if (motor_get_position(cubetrayPort) >= (m_initializationDistance - 10))
+        if (motor_get_position(cubetrayPort) >= (m_initializationDistance + 100))
         {
             m_unload = false;
             GetMain().intake.UpdateIntake (Direction::None);
         }
-
+        
         // override inputs
         return;
     }
@@ -62,9 +67,9 @@ void Cubetray::Unload()
 void Cubetray::Update()
 {
     // If not initialized and lift is already initialized --> initialize to reset and find starting position
-    if (!m_initialize && GetMain().lift.IsInitialized())
+    if (!m_initialize/* && GetMain().lift.IsInitialized()*/)
     {
-        //Initialize();
+        Initialize();
     }
 
     m_count = 0;
@@ -77,7 +82,7 @@ void Cubetray::Update()
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
     {
         m_direction = Direction::Up;
-        motor_move(cubetrayPort, 95);
+        motor_move(cubetrayPort, 35);
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
     {

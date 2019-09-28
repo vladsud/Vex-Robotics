@@ -21,7 +21,7 @@ bool Lift::IsInitialized()
 void Lift::Initialize()
 {   
     // Move m_initializationDistance
-    motor_move_relative(liftMotorPort, m_initializationDistance, 100);
+    motor_move_relative(liftMotorPort, m_initializationDistance + 200, 100);
     // If there stop initializing
     if (motor_get_position(cubetrayPort) >= (m_initializationDistance - 10))
         m_initialize = true;
@@ -35,13 +35,15 @@ void Lift::Update()
     {
         //Initialize();
     }
+    // Up
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
     {
-        SetLiftMotor(90);
+        SetLiftMotor(-90);
     }
+    // Down
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
     {
-        SetLiftMotor(-90);
+        SetLiftMotor(90);
     }
     else
     {

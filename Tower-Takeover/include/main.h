@@ -82,15 +82,15 @@ constexpr T min(T a, T b)
 *
 * 
 *******************************************************************************/
-#define leftBackDrivePort 99
-#define leftFrontDrivePort 99
-#define rightFrontDrivePort 99
-#define rightBackDrivePort 99
+#define leftBackDrivePort 9
+#define leftFrontDrivePort 7
+#define rightFrontDrivePort 18
+#define rightBackDrivePort 17
 
 #define intakeLeftPort 19
 #define intakeRightPort 5
-#define cubetrayPort 99
-#define liftMotorPort 99
+#define cubetrayPort 10
+#define liftMotorPort 6
 
 #define VisionPort 99
 
@@ -100,8 +100,8 @@ constexpr T min(T a, T b)
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define gyroPort 5
-#define gyroPort2 6
+#define gyroPort 99
+#define gyroPort2 99
 #define anglePotPort 99
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99
