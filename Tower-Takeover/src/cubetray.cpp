@@ -32,32 +32,34 @@ void Cubetray::Initialize()
     }
     */
     motor_tare_position(cubetrayPort);
+    motor_set_encoder_units(cubetrayPort, pros::E_MOTOR_ENCODER_COUNTS);
     m_initialize = true;
 
 }
 
 void Cubetray::Unload()
 {
+    
     // If not alreadying unloading --> unload
     if (!m_unload)
     {
         // Remember to keep unloading
         m_unload = true;
-        
     }
     else
     {
         // keep moving until fully unloaded
-        motor_move_absolute(cubetrayPort, m_initializationDistance + 100, 30);
-        GetMain().intake.SetIntakeMotorSpeed(-20);
+        motor_move(cubetrayPort, 50);
+        GetMain().intake.SetIntakeMotor(-15);
 
         // If the motor gets there --> stop unloading and initialize
-        if (motor_get_position(cubetrayPort) >= (m_initializationDistance + 100))
+        if (motor_get_position(cubetrayPort) >= (m_initializationDistance - 10))
         {
-            m_unload = false;
-            GetMain().intake.UpdateIntake (Direction::None);
+            //m_unload = false;
+            //GetMain().intake.UpdateIntake (Direction::None);
+            printf("%s", "There!");
         }
-        
+
         // override inputs
         return;
     }
@@ -66,6 +68,7 @@ void Cubetray::Unload()
 
 void Cubetray::Update()
 {
+    printf("%f\n", motor_get_position(cubetrayPort));
     // If not initialized and lift is already initialized --> initialize to reset and find starting position
     if (!m_initialize/* && GetMain().lift.IsInitialized()*/)
     {
@@ -74,15 +77,11 @@ void Cubetray::Update()
 
     m_count = 0;
     // Unload 
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP) || m_unload)
-    {
-        Unload();
-    }
 
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
     {
         m_direction = Direction::Up;
-        motor_move(cubetrayPort, 35);
+        motor_move(cubetrayPort, 50);
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
     {
@@ -94,5 +93,11 @@ void Cubetray::Update()
         motor_move(cubetrayPort, 0);
         m_direction = Direction::None;
     }
+
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP) || m_unload)
+    {
+        Unload();
+    }
+
 }
 
