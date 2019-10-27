@@ -105,11 +105,6 @@ constexpr T min(T a, T b)
 #define anglePotPort 99
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99
-#define ballPresenceSensorUp 3
-#define ballPresenceSensorDown 4
-#define ballPresenceSensorDown2 1
-#define shooterPreloadPoterntiometer 2
-
 
 /*******************************************************************************
 *
