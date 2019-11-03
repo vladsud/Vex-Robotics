@@ -106,13 +106,7 @@ bool Main::UpdateWithoutWaiting()
 
 	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
 	{
-		ReportStatus("Encoders: %d : %d     Angle: %d,   Shooter preloader: %d   Gyro: %d  Light: %d\n",
-					 motor_get_position(leftBackDrivePort),
-					 motor_get_position(rightBackDrivePort),
-					 adi_analog_read(anglePotPort),
-					 adi_analog_read(shooterPreloadPoterntiometer),
-					 GetGyroReading() * 10 / GyroWrapper::Multiplier,
-					 adi_analog_read(ballPresenceSensorUp));
+		// Not Implemented
 	}
 
 	return res;
