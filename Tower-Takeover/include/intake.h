@@ -1,14 +1,12 @@
 #pragma once
 #include "main.h"
+#include <string>
 
-class Intake
-{
-  public:
+class Intake{
+public:
     void Update();
-    void UpdateIntake(Direction direction);
-    void SetIntakeMotor(int speed);
-
-  private:
-    Direction m_direction = Direction::None;
-    int m_power = 0;
+    bool is_intake = 0; 
+    std::string intake_state = ""; 
+    int intake_normal_speed = 127; 
+    int intake_slow_speed = 40; 
 };

@@ -7,77 +7,8 @@
 using namespace pros;
 using namespace pros::c;
 
-void Cubetray::Initialize()
-{
-    /*
-    m_count++;
-    motor_move(cubetrayPort, -50);
-    int curr = motor_get_position(cubetrayPort);
-
-    // Before 40 count do not move cubetray
-    if (m_count < 40)
-        return;
-
-    // After if the position is still skip to last 10 count
-    if (m_lastPos == curr && m_count < 180)
-        m_count = 180;
-
-    m_lastPos = curr;
-
-    // if count is 200 --> cubetray is there --> stop initializing
-    if (m_count == 200) 
-    {
-        motor_tare_position(cubetrayPort);
-        m_initialize = true;
-    }
-    */
-    motor_tare_position(cubetrayPort);
-    motor_set_encoder_units(cubetrayPort, pros::E_MOTOR_ENCODER_COUNTS);
-    m_initialize = true;
-
-}
-
-void Cubetray::Unload()
-{
-    
-    // If not alreadying unloading --> unload
-    if (!m_unload)
-    {
-        // Remember to keep unloading
-        m_unload = true;
-    }
-    else
-    {
-        // keep moving until fully unloaded
-        motor_move(cubetrayPort, 50);
-        GetMain().intake.SetIntakeMotor(-15);
-
-        // If the motor gets there --> stop unloading and initialize
-        if (motor_get_position(cubetrayPort) >= (m_initializationDistance - 10))
-        {
-            //m_unload = false;
-            //GetMain().intake.UpdateIntake (Direction::None);
-            printf("%s", "There!");
-        }
-
-        // override inputs
-        return;
-    }
-    
-}
-
 void Cubetray::Update()
 {
-    printf("%f\n", motor_get_position(cubetrayPort));
-    // If not initialized and lift is already initialized --> initialize to reset and find starting position
-    if (!m_initialize/* && GetMain().lift.IsInitialized()*/)
-    {
-        Initialize();
-    }
-
-    m_count = 0;
-    // Unload 
-
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
     {
         m_direction = Direction::Up;
@@ -93,11 +24,5 @@ void Cubetray::Update()
         motor_move(cubetrayPort, 0);
         m_direction = Direction::None;
     }
-
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP) || m_unload)
-    {
-        Unload();
-    }
-
 }
 
