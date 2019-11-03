@@ -5,6 +5,7 @@ using namespace pros::c;
 #include "pros/motors.h"
  
  void Intake::Update(){
+    printf("is_intake: %d\n", is_intake);
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) ||
             controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2) ||
             controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1) ||
@@ -18,8 +19,8 @@ using namespace pros::c;
         }
     }
     if (is_intake){
-        motor_move(intakeLeftPort, 0);
-        motor_move(intakeRightPort, 0);
+        motor_move(intakeLeftPort, 20);
+        motor_move(intakeRightPort, -20);
         printf("stop motor\n");
         return;
     }

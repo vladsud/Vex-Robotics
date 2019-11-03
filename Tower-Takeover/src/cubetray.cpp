@@ -12,12 +12,12 @@ void Cubetray::Update()
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
     {
         m_direction = Direction::Up;
-        motor_move(cubetrayPort, 50);
+        motor_move(cubetrayPort, 95);
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
     {
         m_direction = Direction::Down;
-        motor_move(cubetrayPort, -95);
+        motor_move(cubetrayPort, -50);
     }
     else
     {
