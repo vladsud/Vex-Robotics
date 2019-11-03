@@ -3,25 +3,29 @@
 using namespace pros;
 using namespace pros::c;
 #include "pros/motors.h"
+#include <cstdlib>
  
  void Intake::Update(){
-    printf("is_intake: %d\n", is_intake);
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) ||
             controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2) ||
             controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1) ||
             controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2)) {
         
         if (!is_intake)
-            is_intake = !is_intake;
+            is_intake = 1;
         else
         {
             is_intake = 0;
         }
     }
-    if (is_intake){
-        motor_move(intakeLeftPort, 20);
-        motor_move(intakeRightPort, -20);
-        printf("stop motor\n");
+
+    if (!is_intake){
+        int value = 0;
+        printf("Actual velocity Left: %lf\n", motor_get_actual_velocity(intakeLeftPort));
+        if (motor_get_actual_velocity(intakeLeftPort) < 0)
+            value = 40;
+        motor_move(intakeLeftPort, value);
+        motor_move(intakeRightPort, -value);
         return;
     }
 
