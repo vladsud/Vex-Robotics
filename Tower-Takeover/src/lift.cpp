@@ -7,7 +7,6 @@
 using namespace pros;
 using namespace pros::c;
 
-
 void Lift::SetLiftMotor(int speed)
 {
     motor_move(liftMotorPort, speed);
@@ -15,15 +14,34 @@ void Lift::SetLiftMotor(int speed)
 
 void Lift::Update()
 {
+    int avg = (motor_get_actual_velocity(intakeLeftPort) + motor_get_actual_velocity(intakeRightPort))/2;
     // Up
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
     {
-        SetLiftMotor(90);
+        if (avg < targetSpeed - 20)
+        {
+            SetLiftMotor(targetSpeed - 20);
+        }
+        else
+        {
+            int diff = targetSpeed - motor_get_actual_velocity(intakeLeftPort);
+            int setSpeed = currentSpeed + diff * K;
+            SetLiftMotor(setSpeed);
+        }
     }
     // Down
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
     {
-        SetLiftMotor(-90);
+        if (avg > -targetSpeed + 20)
+        {
+            SetLiftMotor(-targetSpeed + 20);
+        }
+        else
+        {
+            int diff = -targetSpeed - motor_get_actual_velocity(intakeLeftPort);
+            int setSpeed = currentSpeed + diff * K;
+            SetLiftMotor(-setSpeed);
+        }
     }
     else
     {
