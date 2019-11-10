@@ -102,9 +102,12 @@ constexpr T min(T a, T b)
 *******************************************************************************/
 #define gyroPort 99
 #define gyroPort2 99
-#define anglePotPort 99
+
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99
+
+#define liftPotPort 99
+#define cubetrayPotPort 2
 
 /*******************************************************************************
 *

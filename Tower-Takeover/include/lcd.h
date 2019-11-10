@@ -22,7 +22,7 @@ public:
 	bool AtonFirstPos = true;
 	bool AtonClimbPlatform = true;
 	bool AtonSkills = false;
-    bool IsTankDrive = true;
+    bool IsTankDrive = false;
 
 public:
 	LCD();

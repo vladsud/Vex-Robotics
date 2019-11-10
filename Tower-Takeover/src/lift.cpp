@@ -4,9 +4,14 @@
 #include "cycle.h"
 #include <stdio.h>
 
+
 using namespace pros;
 using namespace pros::c;
 
+Lift::Lift() : m_anglePot(liftPotPort)
+{
+    
+}
 
 void Lift::SetLiftMotor(int speed)
 {
@@ -15,6 +20,7 @@ void Lift::SetLiftMotor(int speed)
 
 void Lift::Update()
 {
+    
     // Up
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
     {
