@@ -1,47 +1,35 @@
- 
 #include "intake.h"
 using namespace pros;
 using namespace pros::c;
 #include "pros/motors.h"
 #include <cstdlib>
- 
- void Intake::Update(){
+  
+void Intake::Update()
+{
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) ||
-            controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2) ||
-            controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1) ||
-            controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2)) {
-        
+            controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2)){
         if (!is_intake)
-        {
             is_intake = 1;
-        }
-        else 
+        else
         {
             is_intake = 0;
-            intakeFirstTime = true;
         }
     }
 
     if (!is_intake){
-        if (intakeFirstTime)
-        {
-            motor_tare_position(intakeLeftPort);
-            motor_tare_position(intakeRightPort);
-            intakeFirstTime = false;
-        }
-        
-        int currentError = (motor_get_position(intakeLeftPort) + motor_get_position(intakeRightPort))/2;
-        totalError += currentError;
-
-        int currentSpeed = currentError + totalError / kI;
-;
-        motor_move(intakeLeftPort, currentSpeed);
-        motor_move(intakeRightPort, -currentSpeed);
-
-        printf("current: %.2f  Error: %d  Speed: %d\n", (motor_get_position(intakeLeftPort) + motor_get_position(intakeRightPort))/2, currentError, currentSpeed);
-
+        /*
+        int value = 0;
+        //printf("Actual velocity Left: %lf\n", motor_get_actual_velocity(intakeLeftPort));
+        if (motor_get_actual_velocity(intakeLeftPort) < 0)
+            value = 40;
+        motor_move(intakeLeftPort, value);
+        motor_move(intakeRightPort, -value);
+        */
+        motor_move(intakeLeftPort, 0);
+        motor_move(intakeRightPort, 0);
         return;
     }
+
     
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1)) //fast intake
     {
@@ -54,4 +42,5 @@ using namespace pros::c;
         motor_move(intakeLeftPort, -intake_slow_speed);
         motor_move(intakeRightPort, intake_slow_speed);
     }
+    
 }

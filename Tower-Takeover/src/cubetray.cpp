@@ -16,11 +16,11 @@ Cubetray::Cubetray()
 
 void Cubetray::Update()
 {
-    int kP = 10;
-    int kI = 200;
+    int kP = 25;
+    int kI = 8000;
 
     // Target value
-    int upValue = 1329;
+    int upValue = 1350;
     int currentRotation = m_anglePot.get_value();
 
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
@@ -31,18 +31,20 @@ void Cubetray::Update()
 
         int currSpeed = currError / kP + totalError / kI;
         motor_move(cubetrayPort, -currSpeed);
-        //printf("Pot: %d  Error: %d  Speed: %d\n", currentRotation, currError, currSpeed);
+        //printf("Pot: %d  Error: %d  Total Error: %d Speed: %d\n", currentRotation, currError, totalError, currSpeed);
         m_direction = Direction::Up;
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
     {
         motor_move(cubetrayPort, 127);
         m_direction = Direction::Down;
+        totalError = 0;
     }
     else
     {
         motor_move(cubetrayPort, 0);
         m_direction = Direction::None;
+        totalError = 0;
     }
 }
 
