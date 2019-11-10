@@ -13,7 +13,7 @@ using namespace pros::c;
         
         if (!is_intake)
             is_intake = 1;
-        else
+        else 
         {
             is_intake = 0;
         }
