@@ -10,3 +10,7 @@ Turning-PointV5/.vscode/*
 Tower-Takeover/\.vscode/cquery_cached_index/@c@@users@jason zhang@desktop@vex-robotics@turning-pointv5/
 
 Tower-Takeover/\.vscode/
+
+Tower-Takeover/bin/
+
+Tower-Takeover/compile_commands.json
