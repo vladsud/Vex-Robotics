@@ -20,7 +20,6 @@ void Lift::SetLiftMotor(int speed)
 
 void Lift::Update()
 {
-    
     // Up
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
     {

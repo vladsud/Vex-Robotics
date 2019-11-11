@@ -4,6 +4,25 @@ using namespace pros::c;
 #include "pros/motors.h"
 #include <cstdlib>
   
+
+Intake::Intake()
+    : leftIntakeLineTracker(leftIntakeLineTrackerPort), rightIntakeLineTracker(rightIntakeLineTrackerPort)
+{
+
+}
+
+bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
+{
+    // Check if we can detect ball present.
+    // Use two stops to make sure we do not move angle up and down if we are somewhere in gray area (on the boundary)
+    unsigned int sensorValue = sensor.get_value();
+
+    int avg = (cubeIn + cubeOut)/2;
+
+    return sensorValue > avg ? false : true;
+}
+
+
 void Intake::Update()
 {
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) ||
@@ -17,16 +36,17 @@ void Intake::Update()
     }
 
     if (!is_intake){
-        /*
-        int value = 0;
-        //printf("Actual velocity Left: %lf\n", motor_get_actual_velocity(intakeLeftPort));
-        if (motor_get_actual_velocity(intakeLeftPort) < 0)
-            value = 40;
-        motor_move(intakeLeftPort, value);
-        motor_move(intakeRightPort, -value);
-        */
-        motor_move(intakeLeftPort, 0);
-        motor_move(intakeRightPort, 0);
+        printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
+        if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
+        {
+            motor_move(intakeLeftPort, -25);
+            motor_move(intakeRightPort, 25);
+        }
+        else
+        {
+            motor_move(intakeLeftPort, 0);
+            motor_move(intakeRightPort, 0);
+        }
         return;
     }
 

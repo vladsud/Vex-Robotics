@@ -100,14 +100,11 @@ constexpr T min(T a, T b)
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define gyroPort 99
-#define gyroPort2 99
-
-#define lineTrackerLeftPort 99
-#define lineTrackerRightPort 99
-
 #define liftPotPort 99
 #define cubetrayPotPort 2
+
+#define leftIntakeLineTrackerPort 6
+#define rightIntakeLineTrackerPort 7
 
 /*******************************************************************************
 *
@@ -124,3 +121,14 @@ constexpr T min(T a, T b)
 *
 *******************************************************************************/
 #define DistanveBetweenLineSensors 390 // in clicks, rouhly 14"
+
+/*******************************************************************************
+*
+* OLD VALUES
+*
+*******************************************************************************/
+#define gyroPort 99
+#define gyroPort2 99
+
+#define lineTrackerLeftPort 99
+#define lineTrackerRightPort 99
