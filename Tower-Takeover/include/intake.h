@@ -10,6 +10,8 @@ private:
 
     int cubeIn = 2550;
     int cubeOut = 2850;
+
+    bool tower = false;
 public:
     Intake();
     void Update();

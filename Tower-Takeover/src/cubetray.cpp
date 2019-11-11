@@ -36,7 +36,12 @@ void Cubetray::Update()
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
     {
-        motor_move(cubetrayPort, 127);
+        if (currentRotation < 2850) {
+            motor_move(cubetrayPort, 127);
+        } else {
+            motor_move(cubetrayPort, 0);
+        }
+        printf("Rotation: %d", currentRotation);
         m_direction = Direction::Down;
         totalError = 0;
     }

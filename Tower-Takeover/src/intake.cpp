@@ -25,8 +25,17 @@ bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
 
 void Intake::Update()
 {
+    // Start tower stacking
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP)) //slow outake 
+    {
+        tower = true;
+        
+    }
+
+    // Get new controller press
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) ||
             controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2)){
+        tower = false;
         if (!is_intake)
             is_intake = 1;
         else
@@ -35,8 +44,9 @@ void Intake::Update()
         }
     }
 
+    // If not intaking
     if (!is_intake){
-        printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
+        //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
         if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
         {
             motor_move(intakeLeftPort, -25);
@@ -44,23 +54,43 @@ void Intake::Update()
         }
         else
         {
-            motor_move(intakeLeftPort, 0);
-            motor_move(intakeRightPort, 0);
+            motor_move(intakeLeftPort, 40);
+            motor_move(intakeRightPort, -40);
         }
         return;
     }
 
-    
+    // Intaking up
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1)) //fast intake
     {
         motor_move(intakeLeftPort, intake_normal_speed);
         motor_move(intakeRightPort, -intake_normal_speed);
     }
-        
+
+
+    //Intaking down    
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2)) //slow outake 
     {
         motor_move(intakeLeftPort, -intake_slow_speed);
         motor_move(intakeRightPort, intake_slow_speed);
     }
     
+
+    // If tower stacking action
+    if (tower)
+    {
+        // If cube is not in slowing intake
+        if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
+        {
+            motor_move(intakeLeftPort, 40);
+            motor_move(intakeRightPort, -40);
+        }
+        // When in, stop intaking and cancel action
+        else
+        {
+            tower = false;
+            motor_move(intakeLeftPort, 0); 
+            motor_move(intakeRightPort, 0);
+        }
+    }
 }
