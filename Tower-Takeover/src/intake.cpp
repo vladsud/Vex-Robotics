@@ -79,6 +79,7 @@ void Intake::Update()
     // If tower stacking action
     if (tower)
     {
+        is_intake = 1;
         // If cube is not in slowing intake
         if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
         {
