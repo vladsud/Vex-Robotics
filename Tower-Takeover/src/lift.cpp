@@ -35,6 +35,17 @@ void Lift::Update()
     // Up
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
     {
+        goUP = true;
+        goDOWN = false;
+    }   
+    // Down
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+    {
+        goDOWN = true;   
+        goUP = false;
+    }
+
+    if (goUP) {
         int currTrayError = currentTray - trayValue;
         int currArmError = currentArm - armValue;
         totalTrayError += currTrayError;
@@ -46,24 +57,31 @@ void Lift::Update()
         int currArmSpeed = currArmError / kPArm + totalArmError / kI;
         SetLiftMotor(currArmSpeed);
 
+        printf("Arm:%d\n", currArmSpeed);
+
+        //printf("Tray Error: %d", currTrayError);
+
+        if (currTrayError < 5) {
+            goUP = false;
+        }
+
         //printf("Arm: %d\n", currentArm);
         //printf("TrayError: %d\n", currTrayError);
-
     }
-    // Down
-    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
-    {
-        SetLiftMotor(-90);
-
+    if (goDOWN) {
+        SetLiftMotor(-120);
         if (currentTray < 2850) {
-            motor_move(cubetrayPort, 75);
+            if (currentArm > 1650)
+            {
+                motor_move(cubetrayPort, 55);
+            }
         } else {
             motor_move(cubetrayPort, 0);
+            goDOWN = false;
         }
+
     }
-    else
-    {
-        SetLiftMotor(0);
-    }
+
+    printf("UP: %d DOWN: %d\n", goUP, goDOWN);
 }
 
