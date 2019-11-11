@@ -44,6 +44,26 @@ void Intake::Update()
         }
     }
 
+    // If tower stacking action
+    if (tower)
+    {
+        is_intake = 1;
+        // If cube is not in slowing intake
+        if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
+        {
+            motor_move(intakeLeftPort, 40);
+            motor_move(intakeRightPort, -40);
+        }
+        // When in, stop intaking and cancel action
+        else
+        {
+            tower = false;
+            motor_move(intakeLeftPort, 0); 
+            motor_move(intakeRightPort, 0);
+        }
+        return;
+    }
+
     // If not intaking
     if (!is_intake){
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
@@ -54,8 +74,8 @@ void Intake::Update()
         }
         else
         {
-            motor_move(intakeLeftPort, 40);
-            motor_move(intakeRightPort, -40);
+            motor_move(intakeLeftPort, 0);
+            motor_move(intakeRightPort, 0);
         }
         return;
     }
@@ -74,24 +94,5 @@ void Intake::Update()
         motor_move(intakeLeftPort, -intake_slow_speed);
         motor_move(intakeRightPort, intake_slow_speed);
     }
-    
 
-    // If tower stacking action
-    if (tower)
-    {
-        is_intake = 1;
-        // If cube is not in slowing intake
-        if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
-        {
-            motor_move(intakeLeftPort, 40);
-            motor_move(intakeRightPort, -40);
-        }
-        // When in, stop intaking and cancel action
-        else
-        {
-            tower = false;
-            motor_move(intakeLeftPort, 0); 
-            motor_move(intakeRightPort, 0);
-        }
-    }
 }

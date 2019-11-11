@@ -90,7 +90,7 @@ constexpr T min(T a, T b)
 #define intakeLeftPort 20
 #define intakeRightPort 16
 #define cubetrayPort 11
-#define liftMotorPort 10
+#define liftMotorPort 9
 
 #define VisionPort 99
 
@@ -100,7 +100,7 @@ constexpr T min(T a, T b)
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define liftPotPort 99
+#define liftPotPort 3
 #define cubetrayPotPort 2
 
 #define leftIntakeLineTrackerPort 6
