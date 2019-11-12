@@ -10,7 +10,7 @@ using namespace pros::c;
 
 Lift::Lift() : m_anglePot(liftPotPort)
 {
-    
+    motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_HOLD);
 }
 
 void Lift::SetLiftMotor(int speed)
@@ -27,7 +27,7 @@ void Lift::Update()
 
     // Target value
     int armValue = 1300;
-    int trayValue = 2250;
+    int trayValue = 2150;
 
     int currentArm = m_anglePot.get_value();
     int currentTray = GetMain().cubetray.m_anglePot.get_value();
@@ -37,33 +37,44 @@ void Lift::Update()
     {
         goUP = true;
         goDOWN = false;
+        totalTrayError = 0;
+        totalArmError = 0;
     }   
     // Down
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
     {
         goDOWN = true;   
         goUP = false;
+        totalTrayError = 0;
+        totalArmError = 0;
     }
 
     if (goUP) {
-        int currTrayError = currentTray - trayValue;
+        
         int currArmError = currentArm - armValue;
-        totalTrayError += currTrayError;
         totalArmError += currArmError;
 
-        int currTraySpeed = currTrayError / kPTray + totalTrayError / kI;
-        motor_move(cubetrayPort, -currTraySpeed);
-        
         int currArmSpeed = currArmError / kPArm + totalArmError / kI;
         SetLiftMotor(currArmSpeed);
+        
+        printf("Error:%d\n", currArmError);
 
-        printf("Arm:%d\n", currArmSpeed);
+        if (currentArm < 2150)
+        {    
+            int currTrayError = currentTray - trayValue;
+            totalTrayError += currTrayError;
+
+            int currTraySpeed = currTrayError / kPTray + totalTrayError / kI;
+            motor_move(cubetrayPort, -currTraySpeed);
+
+            if (currTrayError < 5) 
+            {
+            goUP = false;
+            }
+        }
+
 
         //printf("Tray Error: %d", currTrayError);
-
-        if (currTrayError < 5) {
-            goUP = false;
-        }
 
         //printf("Arm: %d\n", currentArm);
         //printf("TrayError: %d\n", currTrayError);
@@ -78,6 +89,7 @@ void Lift::Update()
         } else {
             motor_move(cubetrayPort, 0);
             goDOWN = false;
+            SetLiftMotor(0);
         }
 
     }

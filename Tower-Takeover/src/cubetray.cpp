@@ -10,7 +10,7 @@ using namespace pros::c;
 Cubetray::Cubetray() 
     : m_anglePot(cubetrayPotPort)
 {
-    
+    motor_set_brake_mode(cubetrayPort, E_MOTOR_BRAKE_HOLD);
 }
 
 

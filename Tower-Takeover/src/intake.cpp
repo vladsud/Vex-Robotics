@@ -8,7 +8,8 @@ using namespace pros::c;
 Intake::Intake()
     : leftIntakeLineTracker(leftIntakeLineTrackerPort), rightIntakeLineTracker(rightIntakeLineTrackerPort)
 {
-
+    motor_set_brake_mode(intakeLeftPort, E_MOTOR_BRAKE_HOLD);
+    motor_set_brake_mode(intakeRightPort, E_MOTOR_BRAKE_HOLD);
 }
 
 bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
@@ -58,8 +59,9 @@ void Intake::Update()
         else
         {
             tower = false;
-            motor_move(intakeLeftPort, 0); 
+            motor_move(intakeLeftPort, 0);
             motor_move(intakeRightPort, 0);
+
         }
         return;
     }
