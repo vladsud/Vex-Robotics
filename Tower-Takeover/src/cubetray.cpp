@@ -31,11 +31,13 @@ void Cubetray::Update()
 
         int currSpeed = currError / kP + totalError / kI;
         motor_move(cubetrayPort, -currSpeed);
+        motor_move(liftMotorPort, -60);
         //printf("Pot: %d  Error: %d  Total Error: %d Speed: %d\n", currentRotation, currError, totalError, currSpeed);
         m_direction = Direction::Up;
     }
     else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
     {
+        motor_move(liftMotorPort, 0);
         if (currentRotation < 2850) {
             motor_move(cubetrayPort, 127);
         } else {
@@ -47,6 +49,7 @@ void Cubetray::Update()
     }
     else
     {
+        motor_move(liftMotorPort, 0);
         motor_move(cubetrayPort, 0);
         m_direction = Direction::None;
         totalError = 0;

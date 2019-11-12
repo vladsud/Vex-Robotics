@@ -27,7 +27,7 @@ void Lift::Update()
 
     // Target value
     int armValue = 1300;
-    int trayValue = 2150;
+    int trayValue = 2250;
 
     int currentArm = m_anglePot.get_value();
     int currentTray = GetMain().cubetray.m_anglePot.get_value();
@@ -72,8 +72,6 @@ void Lift::Update()
             goUP = false;
             }
         }
-
-
         //printf("Tray Error: %d", currTrayError);
 
         //printf("Arm: %d\n", currentArm);
