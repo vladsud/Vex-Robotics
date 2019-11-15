@@ -8,6 +8,7 @@ class StateMachine
     public:
         StateMachine();
         void UpdateState(State state);
+        State GetState();
         void Update();
 
         int armValue;

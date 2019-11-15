@@ -17,6 +17,13 @@ void StateMachine::Update()
 {
     trayValue = GetMain().cubetray.m_anglePot.get_value();
     armValue = GetMain().lift.m_anglePot.get_value();
+
+    currentState = calculateState(currentState);
+}
+
+State StateMachine::GetState()
+{
+    return currentState;
 }
 
 State calculateState(State state)
