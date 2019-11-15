@@ -31,7 +31,6 @@ void Cubetray::Update()
     // If the state is the tray out state
     if (sm.GetState() == State::TrayOut)
     {
-
         int currError = currentRotation - upValue;
         totalError += currError;
 

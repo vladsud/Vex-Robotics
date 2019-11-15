@@ -21,35 +21,29 @@ void Lift::SetLiftMotor(int speed)
 void Lift::Update()
 {
 
-    int kPTray = 2;
+    // Get a reference of the state machine
+    StateMachine& sm = GetMain().sm;
+    
+    // Update current Arm and Tray value
+    int currentArm = sm.armValue;
+    int currentTray = sm.trayValue;
+
+    //int kPTray = 2;
     int kPArm = 5;
     int kI = 4000;
 
     // Target value
     int armValue = 1100;
-    int trayValue = 2250;
+    //int trayValue = 2250;
 
-    int currentArm = m_anglePot.get_value();
-    int currentTray = GetMain().cubetray.m_anglePot.get_value();
-
-    // Up
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
+    // If button is pressed reset errors
+    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X) || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
     {
-        goUP = true;
-        goDOWN = false;
         totalTrayError = 0;
         totalArmError = 0;
     }   
-    // Down
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
-    {
-        goDOWN = true;   
-        goUP = false;
-        totalTrayError = 0;
-        totalArmError = 0;
-    }
 
-    if (goUP) {
+    if (sm.GetState() == State::ArmsUpMid) {
         
         int currArmError = currentArm - armValue;
         totalArmError += currArmError;
@@ -59,6 +53,7 @@ void Lift::Update()
         
         //printf("Error:%d\n", currArmError);
 
+        /*
         if (currentArm < 2150)
         {    
             int currTrayError = currentTray - trayValue;
@@ -72,12 +67,15 @@ void Lift::Update()
             goUP = false;
             }
         }
+        */
+
+
         //printf("Tray Error: %d", currTrayError);
 
         //printf("Arm: %d\n", currentArm);
         //printf("TrayError: %d\n", currTrayError);
     }
-    if (goDOWN) {
+    if (sm.GetState() == State::Rest) {
         if (currentTray < 2850) {
             if (currentArm > 1300)
             {
@@ -85,7 +83,6 @@ void Lift::Update()
             }
         } else {
             motor_move(cubetrayPort, 0);
-            goDOWN = false;
         }
 
         if (currentArm > 2200)

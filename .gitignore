@@ -14,3 +14,9 @@ Tower-Takeover/\.vscode/
 Tower-Takeover/bin/
 
 Tower-Takeover/compile_commands.json
+
+*.json
+
+*.elf
+
+*.bin
