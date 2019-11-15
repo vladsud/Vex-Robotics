@@ -4,7 +4,7 @@ using namespace pros::c;
 #include "pros/motors.h"
 #include "cycle.h"
 #include <cstdlib>
-  
+ 
 
 Intake::Intake()
     : leftIntakeLineTracker(leftIntakeLineTrackerPort), rightIntakeLineTracker(rightIntakeLineTrackerPort)

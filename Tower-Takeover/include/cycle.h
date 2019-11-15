@@ -13,6 +13,7 @@
 #include "cubetray.h"
 #include "lift.h"
 
+#include "StateMachine.h"
 
 /*******************************************************************************
 * 
@@ -30,6 +31,8 @@ class Main
 	static const int allSystemsPullTime = 10;
 
   public:
+	StateMachine sm;
+
 	Drive drive;
 	GyroWrapper gyro;
 	PositionTracker tracker;

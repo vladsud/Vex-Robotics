@@ -63,6 +63,8 @@ void Main::UpdateFastSystems()
 {
 	gyro.Integrate();
 	tracker.Update();
+
+	
 	// We go through line very quickly, so we do not have enough precision if we check it
 	// every 10 ms.
 	drive.UpdateDistanes();
@@ -75,6 +77,9 @@ void Main::UpdateAllSystems()
 	UpdateFastSystems();
 
 	lcd.Update();
+
+	sm.Update();
+
 	intake.Update();
 	cubetray.Update();
 	lift.Update();
