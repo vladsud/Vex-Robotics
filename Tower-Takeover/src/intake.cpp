@@ -2,6 +2,7 @@
 using namespace pros;
 using namespace pros::c;
 #include "pros/motors.h"
+#include "cycle.h"
 #include <cstdlib>
   
 
@@ -26,11 +27,21 @@ bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
 
 void Intake::Update()
 {
+    int trayLevel = GetMain().cubetray.m_anglePot.get_value();
+    int armLevel = GetMain().lift.m_anglePot.get_value();
+
+    printf("tray: %d    arm: %d\n", trayLevel, armLevel);
+
+    if (trayLevel < 2850 && armLevel > 2300)
+    {
+        motor_move(intakeLeftPort, 0);
+        motor_move(intakeRightPort, 0);
+        return;
+    }
     // Start tower stacking
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP)) //slow outake 
     {
         tower = true;
-        
     }
 
     // Get new controller press
@@ -52,8 +63,8 @@ void Intake::Update()
         // If cube is not in slowing intake
         if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
         {
-            motor_move(intakeLeftPort, 40);
-            motor_move(intakeRightPort, -40);
+            motor_move(intakeLeftPort, 60);
+            motor_move(intakeRightPort, -60);
         }
         // When in, stop intaking and cancel action
         else
@@ -61,7 +72,6 @@ void Intake::Update()
             tower = false;
             motor_move(intakeLeftPort, 0);
             motor_move(intakeRightPort, 0);
-
         }
         return;
     }
@@ -71,8 +81,8 @@ void Intake::Update()
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
         if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
         {
-            motor_move(intakeLeftPort, -25);
-            motor_move(intakeRightPort, 25);
+            motor_move(intakeLeftPort, -40);
+            motor_move(intakeRightPort, 40);
         }
         else
         {

@@ -10,7 +10,7 @@ using namespace pros::c;
 
 Lift::Lift() : m_anglePot(liftPotPort)
 {
-    motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_HOLD);
+    motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_BRAKE);
 }
 
 void Lift::SetLiftMotor(int speed)
@@ -22,11 +22,11 @@ void Lift::Update()
 {
 
     int kPTray = 2;
-    int kPArm = 15;
+    int kPArm = 5;
     int kI = 4000;
 
     // Target value
-    int armValue = 1300;
+    int armValue = 1100;
     int trayValue = 2250;
 
     int currentArm = m_anglePot.get_value();
@@ -57,7 +57,7 @@ void Lift::Update()
         int currArmSpeed = currArmError / kPArm + totalArmError / kI;
         SetLiftMotor(currArmSpeed);
         
-        printf("Error:%d\n", currArmError);
+        //printf("Error:%d\n", currArmError);
 
         if (currentArm < 2150)
         {    
@@ -78,20 +78,27 @@ void Lift::Update()
         //printf("TrayError: %d\n", currTrayError);
     }
     if (goDOWN) {
-        SetLiftMotor(-120);
         if (currentTray < 2850) {
-            if (currentArm > 1650)
+            if (currentArm > 1300)
             {
-                motor_move(cubetrayPort, 55);
+                motor_move(cubetrayPort, 80);
             }
         } else {
             motor_move(cubetrayPort, 0);
             goDOWN = false;
+        }
+
+        if (currentArm > 2200)
+        {
             SetLiftMotor(0);
+        }
+        else
+        {
+            SetLiftMotor(-120);
         }
 
     }
 
-    printf("UP: %d DOWN: %d\n", goUP, goDOWN);
+    //printf("UP: %d DOWN: %d\n", goUP, goDOWN);
 }
 

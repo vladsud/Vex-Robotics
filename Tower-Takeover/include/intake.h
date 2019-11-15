@@ -8,8 +8,8 @@ private:
     pros::ADIAnalogIn leftIntakeLineTracker;
     pros::ADIAnalogIn rightIntakeLineTracker;
 
-    int cubeIn = 2550;
-    int cubeOut = 2850;
+    int cubeIn = 300;
+    int cubeOut = 2800;
 
     bool tower = false;
 public:
@@ -17,6 +17,6 @@ public:
     void Update();
     bool IsCubeIn(pros::ADIAnalogIn& sensor);
     int is_intake = 0; 
-    int intake_normal_speed = 127; 
-    int intake_slow_speed = 40; 
+    int intake_normal_speed = 100; 
+    int intake_slow_speed = 60; 
 };
