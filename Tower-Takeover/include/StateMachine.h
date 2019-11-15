@@ -1,18 +1,18 @@
 #pragma once
 #include "main.h"
 
+enum State
+{   
+    Rest, TrayOut, ArmsUpLow, ArmsUpMid, 
+};
+
 class StateMachine
 {
-    enum State
-    {   
-        Rest, TrayOut, ArmsUpLow, ArmsUpMid, 
-    };
-
     public:
         StateMachine();
-        void UpdateState(State state);
         State GetState();
         void Update();
+        State calculateState(State state);
 
         int armValue;
         int trayValue;
@@ -23,4 +23,3 @@ class StateMachine
         State currentState;
 
 };
-

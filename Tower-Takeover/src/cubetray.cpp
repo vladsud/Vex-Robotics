@@ -21,9 +21,15 @@ void Cubetray::Update()
 
     // Target value
     int upValue = 1350;
-    int currentRotation = m_anglePot.get_value();
 
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+    // Get a reference of the state machine
+    StateMachine& sm = GetMain().sm;
+
+    // Get the current tray rotation from state machine
+    int currentRotation = sm.trayValue;
+
+    // If the state is the tray out state
+    if (sm.GetState() == State::TrayOut)
     {
 
         int currError = currentRotation - upValue;

@@ -12,6 +12,7 @@
 #include "intake.h"
 #include "cubetray.h"
 #include "lift.h"
+#include "StateMachine.h"
 
 #include "StateMachine.h"
 
