@@ -154,7 +154,9 @@ int GyroBoth::Get() const
 {
     // if ((GetMain().GetTime() % 1000) == 0)
     //     PrintValues();
-    return (m_gyro.Get() +  m_gyro2.Get() + m_wheels.Get()) / 3;
+    
+    //return (m_gyro.Get() +  m_gyro2.Get() + m_wheels.Get()) / 3;
+    return m_wheels.Get();
 }
 
 void GyroBoth::SetAngle(int angle)

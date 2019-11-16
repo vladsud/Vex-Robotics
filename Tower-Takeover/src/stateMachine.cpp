@@ -36,7 +36,6 @@ void StateMachine::Update()
     }
 
     DebugPrint();
-    printf("State: %d", GetMain().sm.GetState());
 
     //printf("Arm: %d  Tray: %d \n", armValue, trayValue);
     
@@ -93,6 +92,7 @@ void StateMachine::DebugPrint()
 {
     if (stateChange)
     {
+        printf("New State: ");
         if (currentState == State::Rest)
         {
             printf("Rest\n");

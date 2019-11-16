@@ -87,19 +87,31 @@ void RunAtonFirstPos()
     auto &main = GetMain();
     auto timeBegin = main.GetTime();
 
-    MoveExact(2000, 0);
+    main.tracker.SetCoordinates({16, 60+24, -90});
+
+
+    //MoveExactWithAngle(1000, 90, false);
 
     Do(Initialization());
     Do(Reset());
 
     GetMain().sm.intakeOverride = true;
-    motor_move(intakeLeftPort, GetMain().intake.intake_normal_speed);
-    motor_move(intakeRightPort, -GetMain().intake.intake_normal_speed);
+    motor_move(intakeLeftPort, 127);
+    motor_move(intakeRightPort, -127);
 
-    MoveExact(10000, 0);
-    MoveExact(7000, -155);
+    Do(MoveAction(5000, 70));
 
+    motor_move(intakeLeftPort, 0);
+    motor_move(intakeRightPort, 0);
+
+    Wait(1000);
+
+    TurnToAngle(20);
+
+    Do(MoveAction(7000, 100));
     Do(Unload());
-    MoveExact(-2000, -155);
+
+    Do(MoveAction(2000, -30));
     GetMain().sm.intakeOverride = false;
 }
+ 

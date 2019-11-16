@@ -67,7 +67,6 @@ void Lift::Update()
     }
     else if (sm.GetState() == State::InitializationState) 
     {
-        printf("Lift initialization code running \n");
         int currArmError = currentArm - armValue;
         totalArmError += currArmError;
 
