@@ -16,21 +16,21 @@ Cubetray::Cubetray()
 
 void Cubetray::Update()
 {
-    int kP = 25;
-    int kI = 8000;
 
     // Target value
-    int upValue = 1350;
-
-    // Get a reference of the state machine
     StateMachine& sm = GetMain().sm;
+    int currentRotation = sm.armValue;
 
-    // Get the current tray rotation from state machine
-    int currentRotation = sm.trayValue;
+    if (sm.stateChange) {
+        totalError = 0;
+    }
 
-    // If the state is the tray out state
-    if (sm.GetState() == State::TrayOut)
+    State desiredState = sm.GetState();
+    if (desiredState == State::TrayOut)
     {
+        kP = 25;
+        kI = 8000;
+
         int currError = currentRotation - upValue;
         totalError += currError;
 
@@ -40,7 +40,7 @@ void Cubetray::Update()
         //printf("Pot: %d  Error: %d  Total Error: %d Speed: %d\n", currentRotation, currError, totalError, currSpeed);
         m_direction = Direction::Up;
     }
-    else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
+    else if (desiredState == State::Rest)
     {
         motor_move(liftMotorPort, 0);
         if (currentRotation < 2850) {
@@ -52,12 +52,20 @@ void Cubetray::Update()
         m_direction = Direction::Down;
         totalError = 0;
     }
-    else
+    else if (desiredState == State::ArmsUpMid) 
     {
-        motor_move(liftMotorPort, 0);
-        motor_move(cubetrayPort, 0);
-        m_direction = Direction::None;
-        totalError = 0;
+        int currentArm = m_anglePot.get_value();
+        kP = 2;
+        kI = 4000;
+
+        if (currentArm < 2150)
+        {    
+            int currTrayError = midValue - currentRotation;
+            totalError += currTrayError;
+
+            int currTraySpeed = currTrayError / kP + totalError / kI;
+            motor_move(cubetrayPort, -currTraySpeed);
+        }
     }
 }
 
