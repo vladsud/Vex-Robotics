@@ -24,7 +24,6 @@ bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
     return sensorValue > avg ? false : true;
 }
 
-
 void Intake::Update()
 {
     StateMachine& sm = GetMain().sm;
@@ -40,6 +39,11 @@ void Intake::Update()
         motor_move(intakeRightPort, 0);
         return;
     }
+
+    if (sm.intakeOverride)
+    {
+        return;
+    }
     // Start tower stacking
     if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP)) //slow outake 
     {
@@ -50,6 +54,7 @@ void Intake::Update()
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) ||
             controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2)){
         tower = false;
+        GetMain().sm.intakeOverride = false;
         if (!is_intake)
             is_intake = 1;
         else

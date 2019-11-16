@@ -53,7 +53,7 @@ void Lift::Update()
             SetLiftMotor(currArmSpeed);
         }
     }
-    if (sm.GetState() == State::Rest) 
+    else if (sm.GetState() == State::Rest) 
     {
         if (currentArm < 2200)
         {
@@ -64,6 +64,15 @@ void Lift::Update()
             SetLiftMotor(0);
         }
 
+    }
+    else if (sm.GetState() == State::InitializationState) 
+    {
+        printf("Lift initialization code running \n");
+        int currArmError = currentArm - armValue;
+        totalArmError += currArmError;
+
+        int currArmSpeed = currArmError / kPArm + totalArmError / kI;
+        SetLiftMotor(currArmSpeed);
     }
 
     //printf("UP: %d DOWN: %d\n", goUP, goDOWN);

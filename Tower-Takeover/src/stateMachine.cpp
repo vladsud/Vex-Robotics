@@ -9,10 +9,10 @@ StateMachine::StateMachine()
 {
     // Set initial state to Rest State
     currentState = State::Rest;
-    
-    // Calculate Arm and Tray Value
-    //trayValue = GetMain().cubetray.m_anglePot.get_value();
-    //armValue = GetMain().lift.m_anglePot.get_value();
+    intakeOverride = false;
+    // Calculate Arm and Tray Valu
+    // trayValue = GetMain().cubetray.m_anglePot.get_value();
+    // armValue = GetMain().lift.m_anglePot.get_value();
 }
 
 // Update
@@ -35,9 +35,10 @@ void StateMachine::Update()
         stateChange = false;
     }
 
-    //DebugPrint();
+    DebugPrint();
+    printf("State: %d", GetMain().sm.GetState());
 
-    printf("Arm: %d  Tray: %d \n", armValue, trayValue);
+    //printf("Arm: %d  Tray: %d \n", armValue, trayValue);
     
 }
 
@@ -45,6 +46,11 @@ void StateMachine::Update()
 State StateMachine::GetState()
 {
     return currentState;
+}
+
+void StateMachine::SetState(State s)
+{
+    currentState = s;
 }
 
 State StateMachine::calculateState(State state)
@@ -102,6 +108,10 @@ void StateMachine::DebugPrint()
         if (currentState == State::ArmsUpLow)
         {
             printf("ArmsUpLow\n");
+        }
+        if (currentState == State::InitializationState)
+        {
+            printf("Initialization State\n");
         }
     }
 }

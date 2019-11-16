@@ -71,5 +71,17 @@ void Cubetray::Update()
         motor_move(cubetrayPort, -currTraySpeed);
 
     }
+    else if (desiredState == State::InitializationState) 
+    {
+        int currentArm = sm.armValue;
+        kP = 10;
+        kI = 4000;
+
+        int currTrayError = currentRotation - 2000;
+        totalError += currTrayError;
+        int currTraySpeed = currTrayError / kP + totalError / kI;
+        motor_move(cubetrayPort, -currTraySpeed);
+
+    }
 }
 

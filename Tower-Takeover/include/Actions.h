@@ -10,9 +10,14 @@ struct Action
 {
     Main &m_main = GetMain();
 
+    // Constructor put initial actions
     Action() { m_timeStart = m_main.GetTime(); }
     unsigned int GetElapsedTime() const { return m_main.GetTime() - m_timeStart; }
+
+    // Put when the program should stop
     virtual bool ShouldStop() = 0; //{ return true; }
+
+    // Called after a certain amount of time
     virtual void Stop() {}
     virtual const char* Name() { return "unknown"; }
 private:

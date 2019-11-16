@@ -3,7 +3,7 @@
 
 enum State
 {   
-    Rest, TrayOut, ArmsUpLow, ArmsUpMid, 
+    Rest, TrayOut, ArmsUpLow, ArmsUpMid, InitializationState,
 };
 
 class StateMachine
@@ -14,12 +14,14 @@ class StateMachine
         void Update();
         State calculateState(State state);
         void DebugPrint();
+        void SetState(State s);
 
         int armValue;
         int trayValue;
 
         bool isIntake;
         bool stateChange;
+        bool intakeOverride;
     private:
         State currentState;
 
