@@ -34,7 +34,6 @@ void Lift::Update()
 
     // Target value
     int armValue = 1100;
-    //int trayValue = 2250;
 
     // If button is pressed reset errors
     if (sm.stateChange)
@@ -43,55 +42,26 @@ void Lift::Update()
         totalArmError = 0;
     }   
 
-    if (sm.GetState() == State::ArmsUpMid) {
-        
-        int currArmError = currentArm - armValue;
-        totalArmError += currArmError;
-
-        int currArmSpeed = currArmError / kPArm + totalArmError / kI;
-        SetLiftMotor(currArmSpeed);
-        
-        //printf("Error:%d\n", currArmError);
-
-        /*
-        if (currentArm < 2150)
-        {    
-            int currTrayError = currentTray - trayValue;
-            totalTrayError += currTrayError;
-
-            int currTraySpeed = currTrayError / kPTray + totalTrayError / kI;
-            motor_move(cubetrayPort, -currTraySpeed);
-
-            if (currTrayError < 5) 
-            {
-            goUP = false;
-            }
-        }
-        */
-
-
-        //printf("Tray Error: %d", currTrayError);
-
-        //printf("Arm: %d\n", currentArm);
-        //printf("TrayError: %d\n", currTrayError);
-    }
-    if (sm.GetState() == State::Rest) {
-        if (currentTray < 2850) {
-            if (currentArm > 1300)
-            {
-                motor_move(cubetrayPort, 80);
-            }
-        } else {
-            motor_move(cubetrayPort, 0);
-        }
-
-        if (currentArm > 2200)
+    if (sm.GetState() == State::ArmsUpMid) 
+    {
+        if (currentTray < 2850)
         {
-            SetLiftMotor(0);
+            int currArmError = currentArm - armValue;
+            totalArmError += currArmError;
+
+            int currArmSpeed = currArmError / kPArm + totalArmError / kI;
+            SetLiftMotor(currArmSpeed);
+        }
+    }
+    if (sm.GetState() == State::Rest) 
+    {
+        if (currentArm < 2200)
+        {
+            SetLiftMotor(-120);         
         }
         else
         {
-            SetLiftMotor(-120);
+            SetLiftMotor(0);
         }
 
     }

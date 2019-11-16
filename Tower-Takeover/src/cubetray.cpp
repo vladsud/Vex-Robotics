@@ -19,7 +19,9 @@ void Cubetray::Update()
 
     // Target value
     StateMachine& sm = GetMain().sm;
+
     int currentRotation = sm.trayValue;
+    int armValue = sm.armValue;
 
     if (sm.stateChange) {
         totalError = 0;
@@ -36,19 +38,26 @@ void Cubetray::Update()
 
         int currSpeed = currError / kP + totalError / kI;
         motor_move(cubetrayPort, -currSpeed);
-        motor_move(liftMotorPort, -60);
         //printf("Pot: %d  Error: %d  Total Error: %d Speed: %d\n", currentRotation, currError, totalError, currSpeed);
     }
     else if (desiredState == State::Rest)
     {
-        motor_move(liftMotorPort, 0);
-        if (currentRotation < 2850) {
-            motor_move(cubetrayPort, 127);
-        } else {
+        if (armValue < 1900)
+        {
             motor_move(cubetrayPort, 0);
         }
+        else
+        {
+            if (currentRotation < 2850) 
+            {
+                motor_move(cubetrayPort, 127);
+            } 
+            else 
+            {
+                motor_move(cubetrayPort, 0);
+            }
+        }
         //printf("Rotation: %d", currentRotation);
-        totalError = 0;
     }
     else if (desiredState == State::ArmsUpMid) 
     {
@@ -56,14 +65,11 @@ void Cubetray::Update()
         kP = 2;
         kI = 4000;
 
-        if (currentArm < 2150)
-        {    
-            int currTrayError = midValue - currentRotation;
-            totalError += currTrayError;
+        int currTrayError = currentRotation - midValue;
+        totalError += currTrayError;
+        int currTraySpeed = currTrayError / kP + totalError / kI;
+        motor_move(cubetrayPort, -currTraySpeed);
 
-            int currTraySpeed = currTrayError / kP + totalError / kI;
-            motor_move(cubetrayPort, -currTraySpeed);
-        }
     }
 }
 
