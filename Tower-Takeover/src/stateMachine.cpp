@@ -11,8 +11,8 @@ StateMachine::StateMachine()
     currentState = State::Rest;
     
     // Calculate Arm and Tray Value
-    trayValue = GetMain().cubetray.m_anglePot.get_value();
-    armValue = GetMain().lift.m_anglePot.get_value();
+    //trayValue = GetMain().cubetray.m_anglePot.get_value();
+    //armValue = GetMain().lift.m_anglePot.get_value();
 }
 
 // Update
@@ -34,6 +34,10 @@ void StateMachine::Update()
     {
         stateChange = false;
     }
+
+    //DebugPrint();
+
+    printf("Arm: %d  Tray: %d \n", armValue, trayValue);
     
 }
 
@@ -47,34 +51,57 @@ State StateMachine::calculateState(State state)
 {
     if (state == State::Rest)
     {
-        if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
+        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
             return State::ArmsUpLow;
-        else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
+        else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
             return State::ArmsUpMid;
-        else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+        else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
             return State::Rest;
-        else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+        else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             return State::TrayOut;
     }
     if (state == State::TrayOut)
     {
-        if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
+        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
             return State::Rest;
         else
             return State::TrayOut;
     }
     if (state == State::ArmsUpMid)
     {
-        if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
             return State::Rest;
         else
             return State::ArmsUpMid;
     }
     if (state == State::ArmsUpLow)
     {
-        if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
             return State::Rest;
         else
-            return State::Rest;
+            return State::ArmsUpLow;
+    }
+}
+
+void StateMachine::DebugPrint()
+{
+    if (stateChange)
+    {
+        if (currentState == State::Rest)
+        {
+            printf("Rest\n");
+        }
+        if (currentState == State::TrayOut)
+        {
+            printf("TrayOut\n");
+        }
+        if (currentState == State::ArmsUpMid)
+        {
+            printf("ArmsUpMid\n");
+        }
+        if (currentState == State::ArmsUpLow)
+        {
+            printf("ArmsUpLow\n");
+        }
     }
 }

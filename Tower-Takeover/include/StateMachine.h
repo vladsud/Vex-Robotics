@@ -13,6 +13,7 @@ class StateMachine
         State GetState();
         void Update();
         State calculateState(State state);
+        void DebugPrint();
 
         int armValue;
         int trayValue;

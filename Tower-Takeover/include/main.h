@@ -20,13 +20,6 @@ void opcontrol();
 void autonomous();
 void initialize();
 
-enum class Direction
-{
-   None,
-   Up,
-   Down,
-};
-
 #define __noop(...)
 
 #define Assert(f) AssertCore(f, #f, __FILE__, __LINE__)

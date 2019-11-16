@@ -30,7 +30,7 @@ void Intake::Update()
     int trayLevel = GetMain().cubetray.m_anglePot.get_value();
     int armLevel = GetMain().lift.m_anglePot.get_value();
 
-    printf("tray: %d    arm: %d\n", trayLevel, armLevel);
+    //printf("tray: %d    arm: %d\n", trayLevel, armLevel);
 
     if (trayLevel < 2850 && armLevel > 2300)
     {

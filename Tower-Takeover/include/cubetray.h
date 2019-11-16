@@ -6,7 +6,6 @@ class Cubetray
 {
   
   private:
-    Direction m_direction = Direction::None;
     int totalError = 0;
     int kI = 0;
     int kP = 0;
