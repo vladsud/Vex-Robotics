@@ -23,7 +23,18 @@ void StateMachine::Update()
     armValue = GetMain().lift.m_anglePot.get_value();
 
     // Calculate the current state based on the current state
+    State oldState = currentState;
     currentState = calculateState(currentState);
+
+    if (currentState != oldState)
+    {
+        stateChange = true;
+    }
+    else
+    {
+        stateChange = false;
+    }
+    
 }
 
 // Return the current state

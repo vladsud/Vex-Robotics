@@ -37,7 +37,7 @@ void Lift::Update()
     //int trayValue = 2250;
 
     // If button is pressed reset errors
-    if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X) || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+    if (sm.stateChange)
     {
         totalTrayError = 0;
         totalArmError = 0;

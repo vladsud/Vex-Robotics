@@ -17,8 +17,8 @@ class StateMachine
         int armValue;
         int trayValue;
 
-
         bool isIntake;
+        bool stateChange;
     private:
         State currentState;
 
