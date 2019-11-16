@@ -43,6 +43,10 @@ void AssertCore(bool condition, const char *message, const char *file, int line)
 
 void Main::Update()
 {
+
+	int test = GetMain().tracker.GetGyro();
+
+
 	if (m_LastWakeUp == 0)
 		m_LastWakeUp = millis();
 

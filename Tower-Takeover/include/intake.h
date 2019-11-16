@@ -8,7 +8,7 @@ private:
     pros::ADIAnalogIn leftIntakeLineTracker;
     pros::ADIAnalogIn rightIntakeLineTracker;
 
-    int cubeIn = 800;
+    int cubeIn = 1650;
     int cubeOut = 1850;
 
     bool tower = false;

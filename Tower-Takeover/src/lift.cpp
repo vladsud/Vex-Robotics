@@ -29,8 +29,8 @@ void Lift::Update()
     int currentTray = sm.trayValue;
 
     //int kPTray = 2;
-    int kPArm = 5;
-    int kI = 4000;
+    int kPArm = 3;
+    int kI = 1000;
 
     // Target value
     int armValue = 1100;
@@ -57,20 +57,22 @@ void Lift::Update()
     {
         if (currentArm < 2200)
         {
-            SetLiftMotor(-120);         
+            SetLiftMotor(-127);         
         }
         else
         {
-            SetLiftMotor(0);
+            SetLiftMotor(-55);
         }
 
     }
     else if (sm.GetState() == State::InitializationState) 
     {
+        int initK = 2;
+        int initI = 1000;
         int currArmError = currentArm - armValue;
         totalArmError += currArmError;
 
-        int currArmSpeed = currArmError / kPArm + totalArmError / kI;
+        int currArmSpeed = currArmError / initK + totalArmError / initI;
         SetLiftMotor(currArmSpeed);
     }
 

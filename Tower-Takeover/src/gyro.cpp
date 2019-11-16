@@ -93,15 +93,15 @@ void GyroReal::ResetState()
 
 int GyroWheels::Get() const
 {
+    //printf("Original: %d\n", GetMain().drive.GetAngle());
+    //printf("Wheel!: %f\n", GetMain().drive.GetAngle() * m_multiplier);
     return m_offset + GetMain().drive.GetAngle() * m_multiplier;
 }
 
 void GyroWheels::Integrate()
 {
-    /*
     if ((GetMain().GetTime() % 2000) == 0)
         ReportStatus("Gyro: %d\n", Get() / Multiplier);
-    */
 }
 
 void GyroWheels::SetAngle(int angle)

@@ -18,8 +18,8 @@ struct Button
 class LCD
 {
 public:
-	bool AtonBlueRight = false;
-	bool AtonFirstPos = true;
+	bool AtonBlueRight = true;
+	bool AtonFirstPos = false;
 	bool AtonClimbPlatform = true;
 	bool AtonSkills = false;
     bool IsTankDrive = false;

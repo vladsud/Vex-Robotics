@@ -223,6 +223,8 @@ void Drive::UpdateDistanes()
 {
     m_left = motor_get_position(leftBackDrivePort);
     m_right = motor_get_position(rightBackDrivePort);
+
+    //printf("m_left: %d   m_right: %d\n", m_left, m_right);
     m_distanceFromBeginning = abs(m_left) + abs(m_right);
 
     m_left -= m_encoderBaseLeft;
@@ -233,6 +235,7 @@ void Drive::UpdateDistanes()
 int Drive::GetAngle()
 {
     // return motor_get_position(rightBackDrivePort) - motor_get_position(leftBackDrivePort);
+    //printf("Drive Angle: %d\n", m_right + m_encoderBaseRight - m_left - m_encoderBaseLeft);
     return m_right + m_encoderBaseRight - m_left - m_encoderBaseLeft;
 }
 
