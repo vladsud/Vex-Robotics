@@ -100,8 +100,10 @@ int GyroWheels::Get() const
 
 void GyroWheels::Integrate()
 {
-    if ((GetMain().GetTime() % 2000) == 0)
+    /*
+    if ((GetMain().GetTime() % 500) == 0)
         ReportStatus("Gyro: %d\n", Get() / Multiplier);
+    */
 }
 
 void GyroWheels::SetAngle(int angle)

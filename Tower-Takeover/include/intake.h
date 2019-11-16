@@ -17,6 +17,6 @@ public:
     void Update();
     bool IsCubeIn(pros::ADIAnalogIn& sensor);
     int is_intake = 0; 
-    int intake_normal_speed = 100; 
+    int intake_normal_speed = 127; 
     int intake_slow_speed = 60; 
 };
