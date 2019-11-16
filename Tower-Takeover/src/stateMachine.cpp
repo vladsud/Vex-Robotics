@@ -64,6 +64,8 @@ State StateMachine::calculateState(State state)
             return State::Rest;
         else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             return State::TrayOut;
+        else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
+            return State::InitializationState;
     }
     if (state == State::TrayOut)
     {
@@ -85,6 +87,14 @@ State StateMachine::calculateState(State state)
             return State::Rest;
         else
             return State::ArmsUpLow;
+    }
+    if (state == State::InitializationState)
+    {
+        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+            return State::Rest;
+        else
+            return State::InitializationState;
+        
     }
 }
 
