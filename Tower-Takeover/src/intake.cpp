@@ -27,8 +27,10 @@ bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
 
 void Intake::Update()
 {
-    int trayLevel = GetMain().cubetray.m_anglePot.get_value();
-    int armLevel = GetMain().lift.m_anglePot.get_value();
+    StateMachine& sm = GetMain().sm;
+
+    int trayLevel = sm.trayValue;
+    int armLevel = sm.armValue;
 
     //printf("tray: %d    arm: %d\n", trayLevel, armLevel);
 
@@ -81,8 +83,11 @@ void Intake::Update()
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
         if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
         {
-            motor_move(intakeLeftPort, -40);
-            motor_move(intakeRightPort, 40);
+            if (sm.GetState() == State::Rest)
+            {
+                motor_move(intakeLeftPort, -40);
+             motor_move(intakeRightPort, 40);
+            }
         }
         else
         {
