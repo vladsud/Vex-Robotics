@@ -74,8 +74,9 @@ void Cubetray::Update()
     else if (desiredState == State::InitializationState) 
     {
         int currentArm = sm.armValue;
-        if (currentArm > 1600)
+        if (currentArm < 2000)
         {
+            //printf("Move Tray Now");
             kP = 2;
             kI = 4000;
 

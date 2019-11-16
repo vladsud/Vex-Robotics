@@ -55,15 +55,24 @@ void Lift::Update()
     }
     else if (sm.GetState() == State::Rest) 
     {
+        count++;
         if (currentArm < 2200)
         {
             SetLiftMotor(-127);         
         }
         else
         {
-            SetLiftMotor(-55);
+            if (count % 100 < 50)
+            {
+                SetLiftMotor(-10);
+                printf("On\n");
+            }
+            else
+            {
+                SetLiftMotor(0);
+                printf("Off\n");
+            }
         }
-
     }
     else if (sm.GetState() == State::InitializationState) 
     {
@@ -73,6 +82,7 @@ void Lift::Update()
         totalArmError += currArmError;
 
         int currArmSpeed = currArmError / initK + totalArmError / initI;
+        printf("Arm Speed: %d   Current Arm: %d\n", currArmSpeed, currentArm);
         SetLiftMotor(currArmSpeed);
     }
 
