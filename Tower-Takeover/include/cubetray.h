@@ -9,7 +9,7 @@ class Cubetray
     int totalError = 0;
     int kI = 0;
     int kP = 0;
-    int upValue = 1350;
+    int upValue = 1400;
     int midValue = 2250;
 
   public:

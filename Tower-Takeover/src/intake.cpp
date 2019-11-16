@@ -83,10 +83,10 @@ void Intake::Update()
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
         if (!IsCubeIn(leftIntakeLineTracker) || !IsCubeIn(rightIntakeLineTracker))
         {
-            if (sm.GetState() == State::Rest)
+            if (sm.GetState() == State::Rest && sm.armValue)
             {
                 motor_move(intakeLeftPort, -40);
-             motor_move(intakeRightPort, 40);
+                motor_move(intakeRightPort, 40);
             }
         }
         else
