@@ -15,6 +15,7 @@ class StateMachine
         State calculateState(State state);
         void DebugPrint();
         void SetState(State s);
+        void PrintController();
 
         int armValue;
         int trayValue;

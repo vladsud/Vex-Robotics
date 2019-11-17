@@ -68,7 +68,7 @@ struct Unload : public Action
     }
     bool ShouldStop() override
     {
-        if (GetMain().cubetray.m_anglePot.get_value() < 1400)
+        if (GetMain().cubetray.m_anglePot.get_value() < 1200)
         {
             return true;
         }

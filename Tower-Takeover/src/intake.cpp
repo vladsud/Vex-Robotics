@@ -35,6 +35,7 @@ void Intake::Update()
 
     if (trayLevel < 2850 && armLevel > 2300)
     {
+        printf("Stop Intake because of Tray and Arm \n");
         motor_move(intakeLeftPort, 0);
         motor_move(intakeRightPort, 0);
         return;

@@ -43,8 +43,11 @@ void AssertCore(bool condition, const char *message, const char *file, int line)
 
 void Main::Update()
 {
-
-	int test = GetMain().tracker.GetGyro();
+	if (m_Ticks % 500 == 0)
+	{
+		GetMain().sm.PrintController();
+		//printf("Controller Printing... \n");
+	}
 
 
 	if (m_LastWakeUp == 0)

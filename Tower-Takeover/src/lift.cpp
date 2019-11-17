@@ -65,12 +65,12 @@ void Lift::Update()
             if (count % 100 < 50)
             {
                 SetLiftMotor(-10);
-                printf("On\n");
+                //printf("On\n");
             }
             else
             {
                 SetLiftMotor(0);
-                printf("Off\n");
+                //printf("Off\n");
             }
         }
     }

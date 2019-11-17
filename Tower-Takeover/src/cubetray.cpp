@@ -80,7 +80,7 @@ void Cubetray::Update()
             kP = 2;
             kI = 4000;
 
-            int currTrayError = currentRotation - 2500;
+            int currTrayError = currentRotation - 1300;
             totalError += currTrayError;
             int currTraySpeed = currTrayError / kP + totalError / kI;
             motor_move(cubetrayPort, -currTraySpeed);

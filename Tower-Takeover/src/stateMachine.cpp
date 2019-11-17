@@ -38,7 +38,6 @@ void StateMachine::Update()
     DebugPrint();
 
     //printf("Arm: %d  Tray: %d \n", armValue, trayValue);
-    
 }
 
 // Return the current state
@@ -94,7 +93,6 @@ State StateMachine::calculateState(State state)
             return State::Rest;
         else
             return State::InitializationState;
-        
     }
 }
 
@@ -123,5 +121,30 @@ void StateMachine::DebugPrint()
         {
             printf("Initialization State\n");
         }
+    }
+}
+
+void StateMachine::PrintController()
+{
+    //controller_clear(E_CONTROLLER_MASTER);
+    if (currentState == State::Rest)
+    {
+        controller_print(E_CONTROLLER_MASTER, 0, 0, "Rest\n");
+    }
+    if (currentState == State::TrayOut)
+    {
+        controller_print(E_CONTROLLER_MASTER, 0, 0, "TrayOut\n");
+    }
+    if (currentState == State::ArmsUpMid)
+    {
+        controller_print(E_CONTROLLER_MASTER, 0, 0, "ArmMid\n");
+    }
+    if (currentState == State::ArmsUpLow)
+    {
+        controller_print(E_CONTROLLER_MASTER, 0, 0, "ArmLow\n");
+    }
+    if (currentState == State::InitializationState)
+    {
+        controller_print(E_CONTROLLER_MASTER, 0, 0, "Init\n");
     }
 }
