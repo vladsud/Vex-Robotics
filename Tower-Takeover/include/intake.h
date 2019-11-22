@@ -3,7 +3,14 @@
 #include "pros/adi.hpp"
 #include <string>
 
-class Intake{
+enum class IntakeMode {
+    Intake,
+    Hold,
+    Stop,
+    IntakeTower,
+};
+
+class Intake {
 private:
     pros::ADIAnalogIn leftIntakeLineTracker;
     pros::ADIAnalogIn rightIntakeLineTracker;
@@ -17,5 +24,7 @@ public:
     Intake();
     void Update();
     bool IsCubeIn(pros::ADIAnalogIn& sensor);
-    bool is_intake = false; 
+    bool is_intake = false;
+    bool tower = false;
+    IntakeMode m_mode = IntakeMode::Intake;
 };

@@ -8,7 +8,7 @@
 using namespace pros;
 using namespace pros::c;
 
-static PidImpl pid(100 /*precision*/);
+static PidImpl pid(1 /*precision*/);
 
 Lift::Lift() : m_anglePot(liftPotPort)
 {
@@ -32,39 +32,25 @@ void Lift::Update()
 
     if (sm.GetState() == State::ArmsUpMid) 
     {
-        if (currentTray < 2850)
-        {
-            SetLiftMotor(pid.GetPower(currentArm, 2850, 3, 1000));
-        } else {
-            SetLiftMotor(0);
-        }
+        SetLiftMotor(pid.GetPower(currentArm, 1300, 3, 1000, PidPrecision::LowerOk));
+    }
+    else if (sm.GetState() == State::InitializationState)
+    {
+        int currArmSpeed = pid.GetPower(currentArm, 1700, 2, 1000, PidPrecision::LowerOk);
+        SetLiftMotor(currArmSpeed);
     }
     else if (sm.GetState() == State::Rest) 
     {
         count++;
-        if (currentArm < 2200)
+
+        int currArmSpeed = pid.GetPower(currentArm, 2530, 1, 0, PidPrecision::HigerOk);
+        if (currArmSpeed == 0 && (count % 100) < 50)
         {
-            SetLiftMotor(-127);         
+            currArmSpeed = -20;
         }
-        else
-        {
-            if (count % 100 < 50)
-            {
-                SetLiftMotor(-10);
-                //printf("On\n");
-            }
-            else
-            {
-                SetLiftMotor(0);
-                //printf("Off\n");
-            }
-        }
-    }
-    else if (sm.GetState() == State::InitializationState) 
-    {
-        int currArmSpeed = pid.GetPower(currentArm, 1100, 2, 1000);
-        printf("Arm Speed: %d   Current Arm: %d\n", currArmSpeed, currentArm);
         SetLiftMotor(currArmSpeed);
+    } else {
+        SetLiftMotor(0);
     }
 
     //printf("UP: %d DOWN: %d\n", goUP, goDOWN);

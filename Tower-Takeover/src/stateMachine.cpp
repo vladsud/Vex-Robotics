@@ -10,7 +10,6 @@ StateMachine::StateMachine()
 {
     // Set initial state to Rest State
     currentState = State::Rest;
-    Update();
 }
 
 // Update
@@ -45,25 +44,29 @@ void StateMachine::SetState(State s)
 
 State StateMachine::calculateState(State state)
 {
-    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B) && state != State::TrayOut)
+    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
         return State::Rest;
 
-    if (state == State::Rest)
-    {
+    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
+        return State::Rest;
+
+    if (state == State::Rest || state == State::ArmsUpMid || state == State::InitializationState) {
+        /* This state is not implemented yet, and causes transition to other states not to work!
         if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
             return State::ArmsUpLow;
-        else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
+        */
+        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
             return State::ArmsUpMid;
-        else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
-            return State::TrayOut;
         else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
             return State::InitializationState;
     }
-    if (state == State::TrayOut)
+
+    if (state == State::Rest)
     {
-        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
-            return State::Rest;
+        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+            return State::TrayOut;
     }
+
     return state;
 }
 

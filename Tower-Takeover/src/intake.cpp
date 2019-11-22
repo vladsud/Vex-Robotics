@@ -5,12 +5,18 @@ using namespace pros::c;
 #include "cycle.h"
 #include <cstdlib>
  
+void SetMotors(int power) {
+    motor_move(intakeLeftPort, power);
+    motor_move(intakeRightPort, -power);
+}
 
 Intake::Intake()
     : leftIntakeLineTracker(leftIntakeLineTrackerPort), rightIntakeLineTracker(rightIntakeLineTrackerPort)
 {
     motor_set_brake_mode(intakeLeftPort, E_MOTOR_BRAKE_HOLD);
     motor_set_brake_mode(intakeRightPort, E_MOTOR_BRAKE_HOLD);
+
+    SetMotors(intake_normal_speed);
 }
 
 bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
@@ -20,19 +26,15 @@ bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
     return sensorValue > avg ? false : true;
 }
 
-void SetMotors(int power) {
-    motor_move(intakeLeftPort, power);
-    motor_move(intakeRightPort, -power);
-}
-
 void Intake::Update()
 {
     StateMachine& sm = GetMain().sm;
 
     //printf("tray: %d    arm: %d\n", sm.trayValue, sm.armValue);
 
-    if (sm.trayValue < 2850 && sm.armValue > 2300)
+    if (sm.GetState() != State::Rest && m_mode != IntakeMode::Stop)
     {
+        m_mode = IntakeMode::Stop;
         printf("Stop Intake because of Tray and Arm \n");
         SetMotors(0);
         return;
@@ -46,13 +48,15 @@ void Intake::Update()
     bool cubeIn = IsCubeIn(leftIntakeLineTracker) && IsCubeIn(rightIntakeLineTracker);
 
     // Get new controller press
-    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1) ||
-            controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2)) {
-        is_intake = !is_intake;
-    } else if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP)) //slow outake 
+    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1)
+        || controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
+    {
+        m_mode = m_mode == IntakeMode::Intake ? IntakeMode::Hold : IntakeMode::Intake;
+    }
+    else if (m_mode == IntakeMode::IntakeTower || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP)) //slow outake 
     {
         // Start tower stacking
-        is_intake = true;
+        m_mode = IntakeMode::IntakeTower;
         // If cube is not in slowing intake
         if (!cubeIn)
         {
@@ -66,9 +70,8 @@ void Intake::Update()
         return;
     }
 
-
     // If not intaking
-    if (!is_intake) {
+    if (m_mode == IntakeMode::Hold) {
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
         if (!cubeIn && sm.GetState() == State::Rest)
         {

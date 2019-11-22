@@ -50,6 +50,8 @@ void Cubetray::Update()
     {
         //printf("Move Tray Now");
         motor_move(cubetrayPort, pid.GetPower(currentRotation, initValue, -4, -4000));
+    } else {
+        motor_move(cubetrayPort, 0);
     }
 }
 
