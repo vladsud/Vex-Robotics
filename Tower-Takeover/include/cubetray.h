@@ -5,15 +5,18 @@
 class Cubetray
 {
   
-  private:
-    const int upValue = 1400;
-    const int initValue = 2000;
-    const int midValue = 2250;
-    const int restValue = 2850;
+private:
+  const int upValue = 1400;
+  const int initValue = 2000;
+  const int midValue = 2250;
+  const int restValue = 2850;
 
-  public:
+  bool m_moving = false;
+
+public:
     Cubetray();
     void Update();
+    bool IsMoving() { return m_moving; }
     
     pros::ADIAnalogIn m_anglePot;
 };

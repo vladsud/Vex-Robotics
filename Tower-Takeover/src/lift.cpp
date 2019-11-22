@@ -28,31 +28,30 @@ void Lift::Update()
     
     // Update current Arm and Tray value
     int currentArm = sm.armValue;
-    int currentTray = sm.trayValue;
+
+    int motor = 0;
 
     if (sm.GetState() == State::ArmsUpMid) 
     {
-        SetLiftMotor(pid.GetPower(currentArm, 1300, 3, 1000, PidPrecision::LowerOk));
+        motor = pid.GetPower(currentArm, 1300, 3, 1000, PidPrecision::LowerOk);
     }
     else if (sm.GetState() == State::InitializationState)
     {
-        int currArmSpeed = pid.GetPower(currentArm, 1700, 2, 1000, PidPrecision::LowerOk);
-        SetLiftMotor(currArmSpeed);
+        motor = pid.GetPower(currentArm, 1700, 2, 1000, PidPrecision::LowerOk);
     }
     else if (sm.GetState() == State::Rest) 
     {
         count++;
 
-        int currArmSpeed = pid.GetPower(currentArm, 2530, 1, 0, PidPrecision::HigerOk);
-        if (currArmSpeed == 0 && (count % 100) < 50)
+        motor = pid.GetPower(currentArm, 2530, 1, 0, PidPrecision::HigerOk);
+        if (motor == 0 && (count % 100) < 50)
         {
-            currArmSpeed = -20;
+            motor = -20;
         }
-        SetLiftMotor(currArmSpeed);
-    } else {
-        SetLiftMotor(0);
     }
 
+    m_moving = (motor != 0);
+    SetLiftMotor(motor);
     //printf("UP: %d DOWN: %d\n", goUP, goDOWN);
 }
 
