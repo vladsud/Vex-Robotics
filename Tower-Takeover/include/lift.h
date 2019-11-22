@@ -4,15 +4,14 @@
 
 class Lift
 {
-  private:
+private:
+  int count = 0;
+  bool m_moving = false;
 
-    int totalTrayError = 0;
-    int totalArmError = 0;
-    int count = 0;
-
-  public:
-    pros::ADIAnalogIn m_anglePot;
-    Lift();
-    void Update();
-    void SetLiftMotor(int speed);
+public:
+  pros::ADIAnalogIn m_anglePot;
+  Lift();
+  void Update();
+  void SetLiftMotor(int speed);
+  bool IsMoving() { return m_moving; }
 };

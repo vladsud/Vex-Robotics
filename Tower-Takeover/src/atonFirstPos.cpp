@@ -10,22 +10,24 @@ using namespace pros::c;
 
 void RunAtonFirstPos()
 {
+    printf("Go\n");
     auto &main = GetMain();
     auto timeBegin = main.GetTime();
 
     main.tracker.SetCoordinates({16, 60+24, -90});
 
+    MoveExactWithAngle(2000, -90);
 
-    //MoveExactWithAngle(1000, 90, false);
+    printf("Done\n");
+    MoveExactWithAngle(1000, 0);
 
-    Do(Initialization());
-    Do(Reset());
+    // Do(Initialization());
+    // Do(Reset());
 
-    GetMain().sm.intakeOverride = true;
-    motor_move(intakeLeftPort, 127);
-    motor_move(intakeRightPort, -127);
+    // motor_move(intakeLeftPort, 127);
+    // motor_move(intakeRightPort, -127);
 
-    Do(MoveAction(5000, 70));
+    // Do(MoveAction(5000, 70));
 
     /*
     motor_move(intakeLeftPort, 0);
@@ -39,7 +41,6 @@ void RunAtonFirstPos()
     Do(Unload());
 
     Do(MoveAction(2000, -30));
-    GetMain().sm.intakeOverride = false;
     */
 }
  

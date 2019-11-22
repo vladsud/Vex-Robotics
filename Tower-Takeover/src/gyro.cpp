@@ -26,7 +26,7 @@ using namespace pros::c;
 
 // Rate noise elimination threshold
 // Default value (equivalence, in Pros implementaiton) is 188, which is 7 degrees / second
-#define RATE_NOISE_LIMIT_ANALOG 110 //188
+#define RATE_NOISE_LIMIT_ANALOG 128 //188
 
 
 void GyroReal::Integrate()
@@ -95,13 +95,16 @@ int GyroWheels::Get() const
 {
     //printf("Original: %d\n", GetMain().drive.GetAngle());
     //printf("Wheel!: %f\n", GetMain().drive.GetAngle() * m_multiplier);
-    return m_offset + GetMain().drive.GetAngle() * m_multiplier;
+    int res = m_offset - GetMain().drive.GetAngle() * m_multiplier;
+    return res;
 }
 
 void GyroWheels::Integrate()
 {
+    /*
     if ((GetMain().GetTime() % 500) == 0)
         ReportStatus("Gyro: %d\n", Get() / Multiplier);
+    */
 }
 
 void GyroWheels::SetAngle(int angle)
@@ -129,6 +132,8 @@ void GyroBoth::Integrate()
     m_gyro.Integrate();
     m_gyro2.Integrate();
     m_wheels.Integrate();
+
+    // printf("Gyro: %d  %d, %d, %d\n", Get(), m_gyro.Get(), m_gyro2.Get(), m_wheels.Get());
 }
 
 void GyroBoth::Freeze()
@@ -154,13 +159,15 @@ int GyroBoth::Get() const
 {
     // if ((GetMain().GetTime() % 1000) == 0)
     //     PrintValues();
-    
-    //return (m_gyro.Get() +  m_gyro2.Get() + m_wheels.Get()) / 3;
-    return m_wheels.Get();
+
+    int res = (m_gyro.Get() +  m_gyro2.Get() + m_wheels.Get()) / 3;
+    // printf("Gyro: %d   %d %d %d\n", res, m_gyro.Get(), m_gyro2.Get(), m_wheels.Get());
+    return res;
 }
 
 void GyroBoth::SetAngle(int angle)
 {
+    printf("SetAngle: %d\n", angle);
     m_gyro.SetAngle(angle);
     m_gyro2.SetAngle(angle);
     m_wheels.SetAngle(angle);

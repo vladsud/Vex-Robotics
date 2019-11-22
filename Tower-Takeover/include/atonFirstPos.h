@@ -31,6 +31,7 @@ struct Initialization : public Action
         printf("Stopped Initialization\n");
         motor_move( liftMotorPort, 0);
         motor_move(cubetrayPort, 0);
+        GetMain().sm.SetState(State::Rest);
     }
 };
 
@@ -39,7 +40,6 @@ struct Reset : public Action
     public:
     Reset()
     {
-        GetMain().sm.SetState(State::Rest);
         printf("Started Reset \n\n");
     }
     bool ShouldStop()  override

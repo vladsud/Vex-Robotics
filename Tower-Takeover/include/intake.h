@@ -3,20 +3,28 @@
 #include "pros/adi.hpp"
 #include <string>
 
-class Intake{
+enum class IntakeMode {
+    Intake,
+    Hold,
+    Stop,
+    IntakeTower,
+};
+
+class Intake {
 private:
     pros::ADIAnalogIn leftIntakeLineTracker;
     pros::ADIAnalogIn rightIntakeLineTracker;
 
-    int cubeIn = 1650;
-    int cubeOut = 1850;
+    const int cubeIn = 1650;
+    const int cubeOut = 1850;
+    const int intake_normal_speed = 127; 
+    const int intake_slow_speed = 60; 
 
-    bool tower = false;
 public:
     Intake();
     void Update();
     bool IsCubeIn(pros::ADIAnalogIn& sensor);
-    int is_intake = 0; 
-    int intake_normal_speed = 127; 
-    int intake_slow_speed = 60; 
+    bool is_intake = false;
+    bool tower = false;
+    IntakeMode m_mode = IntakeMode::Intake;
 };

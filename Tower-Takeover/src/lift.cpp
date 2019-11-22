@@ -8,6 +8,8 @@
 using namespace pros;
 using namespace pros::c;
 
+static PidImpl pid(1 /*precision*/);
+
 Lift::Lift() : m_anglePot(liftPotPort)
 {
     motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_BRAKE);
@@ -26,66 +28,30 @@ void Lift::Update()
     
     // Update current Arm and Tray value
     int currentArm = sm.armValue;
-    int currentTray = sm.trayValue;
 
-    //int kPTray = 2;
-    int kPArm = 3;
-    int kI = 1000;
-
-    // Target value
-    int armValue = 1100;
-
-    // If button is pressed reset errors
-    if (sm.stateChange)
-    {
-        totalTrayError = 0;
-        totalArmError = 0;
-    }   
+    int motor = 0;
 
     if (sm.GetState() == State::ArmsUpMid) 
     {
-        if (currentTray < 2850)
-        {
-            int currArmError = currentArm - armValue;
-            totalArmError += currArmError;
-
-            int currArmSpeed = currArmError / kPArm + totalArmError / kI;
-            SetLiftMotor(currArmSpeed);
-        }
+        motor = pid.GetPower(currentArm, 1300, 3, 1000, PidPrecision::LowerOk);
+    }
+    else if (sm.GetState() == State::InitializationState)
+    {
+        motor = pid.GetPower(currentArm, 1700, 2, 1000, PidPrecision::LowerOk);
     }
     else if (sm.GetState() == State::Rest) 
     {
         count++;
-        if (currentArm < 2200)
+
+        motor = pid.GetPower(currentArm, 2530, 1, 0, PidPrecision::HigerOk);
+        if (motor == 0 && (count % 100) < 50)
         {
-            SetLiftMotor(-127);         
-        }
-        else
-        {
-            if (count % 100 < 50)
-            {
-                SetLiftMotor(-10);
-                //printf("On\n");
-            }
-            else
-            {
-                SetLiftMotor(0);
-                //printf("Off\n");
-            }
+            motor = -20;
         }
     }
-    else if (sm.GetState() == State::InitializationState) 
-    {
-        int initK = 2;
-        int initI = 1000;
-        int currArmError = currentArm - armValue;
-        totalArmError += currArmError;
 
-        int currArmSpeed = currArmError / initK + totalArmError / initI;
-        printf("Arm Speed: %d   Current Arm: %d\n", currArmSpeed, currentArm);
-        SetLiftMotor(currArmSpeed);
-    }
-
+    m_moving = (motor != 0);
+    SetLiftMotor(motor);
     //printf("UP: %d DOWN: %d\n", goUP, goDOWN);
 }
 
