@@ -141,8 +141,8 @@ private:
 * OLD VALUES
 *
 *******************************************************************************/
-#define gyroPort 99
-#define gyroPort2 99
+#define gyroPort 4
+#define gyroPort2 5
 
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99
