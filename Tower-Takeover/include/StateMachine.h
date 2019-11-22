@@ -20,9 +20,7 @@ class StateMachine
         int armValue;
         int trayValue;
 
-        bool isIntake;
         bool stateChange;
-        bool intakeOverride;
     private:
         State currentState;
 

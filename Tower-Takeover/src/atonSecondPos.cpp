@@ -20,7 +20,6 @@ void RunAtonSecondPos()
     Do(Reset());
     
     /*
-    GetMain().sm.intakeOverride = true;
     motor_move(intakeLeftPort, 127);
     motor_move(intakeRightPort, -127);
 
@@ -38,6 +37,4 @@ void RunAtonSecondPos()
 
     Do(MoveAction(2000, -30));
     */
-
-    GetMain().sm.intakeOverride = false;
 }

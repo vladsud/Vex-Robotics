@@ -21,7 +21,6 @@ void Cubetray::Update()
     StateMachine& sm = GetMain().sm;
 
     int currentRotation = sm.trayValue;
-    int armValue = sm.armValue;
 
     if (sm.stateChange) {
         totalError = 0;
@@ -42,7 +41,7 @@ void Cubetray::Update()
     }
     else if (desiredState == State::Rest)
     {
-        if (armValue < 1900)
+        if (sm.armValue < 1900)
         {
             motor_move(cubetrayPort, 0);
         }
@@ -61,7 +60,6 @@ void Cubetray::Update()
     }
     else if (desiredState == State::ArmsUpMid) 
     {
-        int currentArm = sm.armValue;
         kP = 2;
         kI = 4000;
 
@@ -73,8 +71,7 @@ void Cubetray::Update()
     }
     else if (desiredState == State::InitializationState) 
     {
-        int currentArm = sm.armValue;
-        if (currentArm < 2000)
+        if (sm.armValue < 2000)
         {
             //printf("Move Tray Now");
             kP = 2;

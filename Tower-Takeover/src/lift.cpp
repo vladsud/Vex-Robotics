@@ -24,16 +24,17 @@ void Lift::Update()
     // Get a reference of the state machine
     StateMachine& sm = GetMain().sm;
     
+    // Target value
+    int armTarget = 1100;
+
     // Update current Arm and Tray value
     int currentArm = sm.armValue;
     int currentTray = sm.trayValue;
+    int currArmError = currentArm - armTarget;
 
     //int kPTray = 2;
     int kPArm = 3;
     int kI = 1000;
-
-    // Target value
-    int armValue = 1100;
 
     // If button is pressed reset errors
     if (sm.stateChange)
@@ -46,7 +47,6 @@ void Lift::Update()
     {
         if (currentTray < 2850)
         {
-            int currArmError = currentArm - armValue;
             totalArmError += currArmError;
 
             int currArmSpeed = currArmError / kPArm + totalArmError / kI;
@@ -78,7 +78,6 @@ void Lift::Update()
     {
         int initK = 2;
         int initI = 1000;
-        int currArmError = currentArm - armValue;
         totalArmError += currArmError;
 
         int currArmSpeed = currArmError / initK + totalArmError / initI;

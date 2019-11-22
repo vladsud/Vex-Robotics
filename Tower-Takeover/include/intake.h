@@ -10,13 +10,11 @@ private:
 
     int cubeIn = 1650;
     int cubeOut = 1850;
-
-    bool tower = false;
 public:
     Intake();
     void Update();
     bool IsCubeIn(pros::ADIAnalogIn& sensor);
-    int is_intake = 0; 
+    bool is_intake = false; 
     int intake_normal_speed = 127; 
     int intake_slow_speed = 60; 
 };
