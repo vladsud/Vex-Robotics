@@ -7,6 +7,8 @@
 using namespace pros;
 using namespace pros::c;
 
+static PidImpl pid(100);
+
 Cubetray::Cubetray() 
     : m_anglePot(cubetrayPotPort)
 {
@@ -22,67 +24,32 @@ void Cubetray::Update()
 
     int currentRotation = sm.trayValue;
 
-    if (sm.stateChange) {
-        totalError = 0;
-    }
-
     State desiredState = sm.GetState();
     if (desiredState == State::TrayOut)
     {
-        kP = 25;
-        kI = 8000;
-
-        int currError = currentRotation - upValue;
-        totalError += currError;
-
-        int currSpeed = currError / kP + totalError / kI;
-        motor_move(cubetrayPort, -currSpeed);
+        motor_move(cubetrayPort, pid.GetPower(currentRotation, upValue, -25, -8000));
         //printf("Pot: %d  Error: %d  Total Error: %d Speed: %d\n", currentRotation, currError, totalError, currSpeed);
     }
     else if (desiredState == State::Rest)
     {
-        if (sm.armValue < 1900)
+        if (sm.armValue < 1900 || currentRotation >= restValue)
         {
             motor_move(cubetrayPort, 0);
         }
         else
         {
-            if (currentRotation < 2850) 
-            {
-                motor_move(cubetrayPort, 127);
-            } 
-            else 
-            {
-                motor_move(cubetrayPort, 0);
-            }
+            motor_move(cubetrayPort, 127);
         }
         //printf("Rotation: %d", currentRotation);
     }
     else if (desiredState == State::ArmsUpMid) 
     {
-        kP = 2;
-        kI = 4000;
-
-        int currTrayError = currentRotation - midValue;
-        totalError += currTrayError;
-        int currTraySpeed = currTrayError / kP + totalError / kI;
-        motor_move(cubetrayPort, -currTraySpeed);
-
+        motor_move(cubetrayPort, pid.GetPower(currentRotation, midValue, -2, -4000));
     }
     else if (desiredState == State::InitializationState) 
     {
-        if (sm.armValue < 2000)
-        {
-            //printf("Move Tray Now");
-            kP = 2;
-            kI = 4000;
-
-            int currTrayError = currentRotation - 1300;
-            totalError += currTrayError;
-            int currTraySpeed = currTrayError / kP + totalError / kI;
-            motor_move(cubetrayPort, -currTraySpeed);
-        }
-
+        //printf("Move Tray Now");
+        motor_move(cubetrayPort, pid.GetPower(currentRotation, initValue, -4, -4000));
     }
 }
 

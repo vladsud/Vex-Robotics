@@ -4,6 +4,7 @@
 using namespace pros;
 using namespace pros::c;
 
+
 // State Initialization
 StateMachine::StateMachine()
 {
@@ -25,14 +26,8 @@ void StateMachine::Update()
 
     if (currentState != oldState)
     {
-        stateChange = true;
+        DebugPrint();
     }
-    else
-    {
-        stateChange = false;
-    }
-
-    DebugPrint();
 
     //printf("Arm: %d  Tray: %d \n", armValue, trayValue);
 }
@@ -74,29 +69,26 @@ State StateMachine::calculateState(State state)
 
 void StateMachine::DebugPrint()
 {
-    if (stateChange)
+    printf("New State: ");
+    if (currentState == State::Rest)
     {
-        printf("New State: ");
-        if (currentState == State::Rest)
-        {
-            printf("Rest\n");
-        }
-        if (currentState == State::TrayOut)
-        {
-            printf("TrayOut\n");
-        }
-        if (currentState == State::ArmsUpMid)
-        {
-            printf("ArmsUpMid\n");
-        }
-        if (currentState == State::ArmsUpLow)
-        {
-            printf("ArmsUpLow\n");
-        }
-        if (currentState == State::InitializationState)
-        {
-            printf("Initialization State\n");
-        }
+        printf("Rest\n");
+    }
+    if (currentState == State::TrayOut)
+    {
+        printf("TrayOut\n");
+    }
+    if (currentState == State::ArmsUpMid)
+    {
+        printf("ArmsUpMid\n");
+    }
+    if (currentState == State::ArmsUpLow)
+    {
+        printf("ArmsUpLow\n");
+    }
+    if (currentState == State::InitializationState)
+    {
+        printf("Initialization State\n");
     }
 }
 

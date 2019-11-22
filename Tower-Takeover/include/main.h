@@ -55,6 +55,27 @@ constexpr T min(T a, T b)
    return a > b ? b : a;
 }
 
+enum PidPrecision
+{
+   Precise, // have to stop within precision bounds
+   HigerOk, // any number above target is Ok
+   LowerOk, // any number below target is Ok
+};
+
+class PidImpl {
+public:
+   PidImpl(int precision)
+      : m_precision(precision)
+   {
+   }
+
+   int GetPower(int reading, int target, int kp, int ki, PidPrecision precision = PidPrecision::Precise);
+
+private:
+   int m_target = 0;
+   int m_precision;
+   int m_errorAccumulated = 0;
+};
 
 /*******************************************************************************
 *

@@ -6,11 +6,10 @@ class Cubetray
 {
   
   private:
-    int totalError = 0;
-    int kI = 0;
-    int kP = 0;
-    int upValue = 1400;
-    int midValue = 2250;
+    const int upValue = 1400;
+    const int initValue = 2000;
+    const int midValue = 2250;
+    const int restValue = 2850;
 
   public:
     Cubetray();

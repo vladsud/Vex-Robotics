@@ -6,8 +6,6 @@ class Lift
 {
   private:
 
-    int totalTrayError = 0;
-    int totalArmError = 0;
     int count = 0;
 
   public:

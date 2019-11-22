@@ -8,6 +8,29 @@
 
 using namespace pros::c;
 
+int PidImpl::GetPower(int reading, int target, int kp, int ki, PidPrecision precision /*= PidPrecision:Precise */)
+{
+    if (target != m_target)
+    {
+        m_target = target;
+        m_errorAccumulated = 0;
+    }
+
+    int error = reading - target;
+
+    if (error > 0 && precision == PidPrecision::HigerOk ||
+        error < 0 && precision == PidPrecision::LowerOk ||
+        (abs(error) <= m_precision))
+    {
+        m_errorAccumulated = 0;
+        return 0;
+    }
+
+    m_errorAccumulated += error;
+    return error / kp + m_errorAccumulated / ki;
+}
+
+
 PositionTracker::PositionTracker()
 {
     motor_tare_position(leftBackDrivePort);

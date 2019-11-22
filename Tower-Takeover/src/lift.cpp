@@ -8,6 +8,8 @@
 using namespace pros;
 using namespace pros::c;
 
+static PidImpl pid(100 /*precision*/);
+
 Lift::Lift() : m_anglePot(liftPotPort)
 {
     motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_BRAKE);
@@ -24,33 +26,17 @@ void Lift::Update()
     // Get a reference of the state machine
     StateMachine& sm = GetMain().sm;
     
-    // Target value
-    int armTarget = 1100;
-
     // Update current Arm and Tray value
     int currentArm = sm.armValue;
     int currentTray = sm.trayValue;
-    int currArmError = currentArm - armTarget;
-
-    //int kPTray = 2;
-    int kPArm = 3;
-    int kI = 1000;
-
-    // If button is pressed reset errors
-    if (sm.stateChange)
-    {
-        totalTrayError = 0;
-        totalArmError = 0;
-    }   
 
     if (sm.GetState() == State::ArmsUpMid) 
     {
         if (currentTray < 2850)
         {
-            totalArmError += currArmError;
-
-            int currArmSpeed = currArmError / kPArm + totalArmError / kI;
-            SetLiftMotor(currArmSpeed);
+            SetLiftMotor(pid.GetPower(currentArm, 2850, 3, 1000));
+        } else {
+            SetLiftMotor(0);
         }
     }
     else if (sm.GetState() == State::Rest) 
@@ -76,11 +62,7 @@ void Lift::Update()
     }
     else if (sm.GetState() == State::InitializationState) 
     {
-        int initK = 2;
-        int initI = 1000;
-        totalArmError += currArmError;
-
-        int currArmSpeed = currArmError / initK + totalArmError / initI;
+        int currArmSpeed = pid.GetPower(currentArm, 1100, 2, 1000);
         printf("Arm Speed: %d   Current Arm: %d\n", currArmSpeed, currentArm);
         SetLiftMotor(currArmSpeed);
     }
