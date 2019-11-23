@@ -67,7 +67,7 @@ void RunAtonFirstPos()
     SetIntake(127);
     MoveStreight(6000, 60, -90);
 
-    TurnToAngle(58);
+    TurnToAngle(60);    
     GetMain().intake.m_mode = IntakeMode::Hold;
     MoveStreight(5000, 80, 60);
     //MoveExactWithAngle(4000, -90);
