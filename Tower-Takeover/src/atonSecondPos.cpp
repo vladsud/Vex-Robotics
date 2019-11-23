@@ -65,12 +65,12 @@ void RunAtonSecondPos()
 
     TurnToAngle(-225);
     
-    MoveStreight(5000, 80, -225);
-    //GetMain().intake.m_mode = IntakeMode::Hold;
-    // MoveStreight(1000, 50, -225);
+    MoveStreight(4500, 80, -225);
+    GetMain().intake.m_mode = IntakeMode::Hold;
+    MoveStreight(500, 50, -225);
     //MoveExactWithAngle(4000, -90);
 
-    GetMain().intake.m_mode = IntakeMode::Hold;
+    //GetMain().intake.m_mode = IntakeMode::Hold;
     Do(TrayAction(State::TrayOut));
     Do(MoveAction(-1500, 60));
     Do(TrayAction(State::Rest));
