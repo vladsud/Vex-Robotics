@@ -24,7 +24,5 @@ public:
     Intake();
     void Update();
     bool IsCubeIn(pros::ADIAnalogIn& sensor);
-    bool is_intake = false;
-    bool tower = false;
     IntakeMode m_mode = IntakeMode::Intake;
 };

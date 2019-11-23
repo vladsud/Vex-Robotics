@@ -35,6 +35,12 @@ void Lift::Update()
     {
         motor = pid.GetPower(currentArm, 1300, 3, 1000, PidPrecision::LowerOk);
     }
+    else if (sm.GetState() == State::TrayOut && GetMain().cubetray.IsMoving())
+    {
+        SetLiftMotor(-30);
+        m_moving = false;
+        return;
+    }
     else if (sm.GetState() == State::InitializationState)
     {
         motor = pid.GetPower(currentArm, 1900, 2, 1000, PidPrecision::LowerOk);
