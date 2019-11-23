@@ -35,7 +35,7 @@ void Cubetray::Update()
         }
         //printf("Rotation: %d", currentRotation);
     }
-    else if (desiredState == State::ArmsUpMid) 
+    else if (desiredState == State::ArmsUpMid || desiredState == State::ArmsUpLow) 
     {
         motor = pid.GetPower(currentRotation, midValue, -2, -4000);
     }
