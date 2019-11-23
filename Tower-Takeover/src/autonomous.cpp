@@ -252,7 +252,7 @@ unsigned int HitTheWall(int distanceForward, int angle)
 
 
 // give some time for robot to completely stop
-void WaitAfterMove(unsigned int timeout)
+void WaitAfterMove(unsigned int timeout /*= 0*/)
 {
     // Not enough time in "main" atonomous
     auto& lcd = GetMain().lcd;

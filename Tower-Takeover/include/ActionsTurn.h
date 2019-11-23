@@ -90,8 +90,8 @@ struct TurnPrecise : public Action
         else
             m_power = (power + m_power) / 2;
 
-        // ReportStatus("Turn error = %d, power = %d, ideal speed = %d, actual = %d\n", error, power, idealSpeed, actualSpeed);
-        m_main.drive.OverrideInputs(0, -m_power);
+        ReportStatus("Turn error = %d, power = %d, ideal speed = %d, actual = %d\n", error, power, idealSpeed, actualSpeed);
+        m_main.drive.OverrideInputs(0, m_power);
         return false;
     }
 

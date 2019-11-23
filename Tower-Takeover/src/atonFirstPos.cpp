@@ -39,6 +39,7 @@ void MoveStreight(int distance, int power, int angle) {
     TurnToAngleIfNeeded(angle);
     // KeepAngle angleObj(angle);
     Do(MoveAction(distance, power));
+    WaitAfterMove();
 }
 
 void SetIntake()
@@ -65,6 +66,9 @@ void RunAtonFirstPos()
 
     SetIntake();
     MoveStreight(4000, 60, -90);
+
+    TurnToAngle(0);
+    MoveStreight(4000, 60, 0);
     //MoveExactWithAngle(4000, -90);
 
     Do(TrayAction(State::TrayOut));
