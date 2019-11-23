@@ -69,7 +69,7 @@ public:
    {
    }
 
-   int GetPower(int reading, int target, int kp, int ki, PidPrecision precision = PidPrecision::Precise);
+   int GetPower(int reading, int target, float kp, int ki, PidPrecision precision = PidPrecision::Precise);
 
 private:
    int m_target = 0;

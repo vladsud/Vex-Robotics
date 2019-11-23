@@ -160,8 +160,9 @@ int GyroBoth::Get() const
     // if ((GetMain().GetTime() % 1000) == 0)
     //     PrintValues();
 
-    int res = (m_gyro.Get() +  m_gyro2.Get() + m_wheels.Get()) / 3;
-    // printf("Gyro: %d   %d %d %d\n", res, m_gyro.Get(), m_gyro2.Get(), m_wheels.Get());
+    int res = (2 * m_gyro.Get() +  3 * m_gyro2.Get() + 1 * m_wheels.Get()) / 6;
+    // int res = (m_gyro.Get() +  m_gyro2.Get()) / 2;
+    printf("Gyro: %d   %d %d %d\n", res, m_gyro.Get(), m_gyro2.Get(), m_wheels.Get());
     return res;
 }
 

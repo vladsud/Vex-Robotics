@@ -25,7 +25,7 @@ void Cubetray::Update()
     if (desiredState == State::TrayOut)
     {
         motor = pid.GetPower(currentRotation, upValue, -25, -8000);
-        //printf("Pot: %d  Error: %d  Total Error: %d Speed: %d\n", currentRotation, currError, totalError, currSpeed);
+        // printf("Moving out: %d %d\n", currentRotation, motor);
     }
     else if (desiredState == State::Rest)
     {

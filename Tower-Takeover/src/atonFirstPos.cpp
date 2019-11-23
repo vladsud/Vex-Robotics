@@ -13,7 +13,7 @@ struct LiftAction : public Action
     }
     bool ShouldStop() override
     {
-        return !m_main.lift.IsMoving();
+        return GetElapsedTime() > 100 && !m_main.lift.IsMoving();
     }
 };
 
@@ -25,7 +25,11 @@ struct TrayAction : public Action
     }
 
     bool ShouldStop() override {
-        return !m_main.cubetray.IsMoving();
+        return GetElapsedTime() > 100 && !m_main.cubetray.IsMoving();
+    }
+
+    void Stop() override {
+        printf("Stop: %d\n", m_main.cubetray.IsMoving());
     }
 };
 
@@ -35,6 +39,8 @@ struct TrayAction : public Action
 
 void RunAtonFirstPos()
 {
+    printf("First aton\n");
+
     auto &main = GetMain();
     auto timeBegin = main.GetTime();
 
@@ -47,11 +53,15 @@ void RunAtonFirstPos()
     MoveExactWithAngle(4000, -90);
 
 
-    MoveExactWithAngle(6000, 50);
+    // MoveExactWithAngle(6000, 50);
     // TurnToAngle();
 
+    // Wait(1000);
     Do(TrayAction(State::TrayOut));
-    Do(MoveAction(-1000, 255));
+    // Wait(2000);
+    Do(MoveAction(-1000, 60));
+    // Wait(2000);
     Do(TrayAction(State::Rest));
+    // Wait(2000);
 }
  

@@ -19,7 +19,7 @@ class LCD
 {
 public:
 	bool AtonBlueRight = true;
-	bool AtonFirstPos = false;
+	bool AtonFirstPos = true;
 	bool AtonClimbPlatform = true;
 	bool AtonSkills = false;
     bool IsTankDrive = false;

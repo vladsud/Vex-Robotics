@@ -8,7 +8,7 @@
 
 using namespace pros::c;
 
-int PidImpl::GetPower(int reading, int target, int kp, int ki, PidPrecision precision /*= PidPrecision:Precise */)
+int PidImpl::GetPower(int reading, int target, float kp, int ki, PidPrecision precision /*= PidPrecision:Precise */)
 {
     if (target != m_target)
     {

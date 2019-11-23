@@ -31,13 +31,13 @@ void Lift::Update()
 
     int motor = 0;
 
-    if (sm.GetState() == State::ArmsUpMid) 
+    if (sm.GetState() == State::ArmsUpMid)
     {
         motor = pid.GetPower(currentArm, 1300, 3, 1000, PidPrecision::LowerOk);
     }
     else if (sm.GetState() == State::InitializationState)
     {
-        motor = pid.GetPower(currentArm, 2000, 2, 1000, PidPrecision::LowerOk);
+        motor = pid.GetPower(currentArm, 1900, 2, 1000, PidPrecision::LowerOk);
     }
     else if (sm.GetState() == State::Rest) 
     {
