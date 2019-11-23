@@ -4,43 +4,54 @@
 
 using namespace pros;
 using namespace pros::c;
+
+struct LiftAction : public Action
+{
+    LiftAction(State action)
+    {
+        m_main.sm.SetState(action);
+    }
+    bool ShouldStop() override
+    {
+        return !m_main.lift.IsMoving();
+    }
+};
+
+struct TrayAction : public Action
+{
+    TrayAction(State action)
+    {
+        m_main.sm.SetState(action);
+    }
+
+    bool ShouldStop() override {
+        return !m_main.cubetray.IsMoving();
+    }
+};
+
 // WARNING:
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
 
 void RunAtonFirstPos()
 {
-    printf("Go\n");
     auto &main = GetMain();
     auto timeBegin = main.GetTime();
 
     main.tracker.SetCoordinates({16, 60+24, -90});
 
-    MoveExactWithAngle(2000, -90);
+    Do(LiftAction(State::InitializationState));
+    Do(LiftAction(State::Rest));
 
-    printf("Done\n");
-    MoveExactWithAngle(1000, 0);
+    // Do(MoveAction(2000, 60));
+    MoveExactWithAngle(4000, -90);
 
-    // Do(Initialization());
-    // Do(Reset());
 
-    // motor_move(intakeLeftPort, 127);
-    // motor_move(intakeRightPort, -127);
+    MoveExactWithAngle(6000, 50);
+    // TurnToAngle();
 
-    // Do(MoveAction(5000, 70));
-
-    /*
-    motor_move(intakeLeftPort, 0);
-    motor_move(intakeRightPort, 0);
-
-    Wait(1000);
-
-    TurnToAngle(20);
-
-    Do(MoveAction(7000, 100));
-    Do(Unload());
-
-    Do(MoveAction(2000, -30));
-    */
+    Do(TrayAction(State::TrayOut));
+    Do(MoveAction(-1000, 255));
+    Do(TrayAction(State::Rest));
 }
  

@@ -37,7 +37,7 @@ void Lift::Update()
     }
     else if (sm.GetState() == State::InitializationState)
     {
-        motor = pid.GetPower(currentArm, 1700, 2, 1000, PidPrecision::LowerOk);
+        motor = pid.GetPower(currentArm, 2000, 2, 1000, PidPrecision::LowerOk);
     }
     else if (sm.GetState() == State::Rest) 
     {

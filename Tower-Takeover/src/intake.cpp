@@ -5,7 +5,7 @@ using namespace pros::c;
 #include "cycle.h"
 #include <cstdlib>
  
-void SetMotors(int power) {
+void SetIntakeMotors(int power) {
     motor_move(intakeLeftPort, power);
     motor_move(intakeRightPort, -power);
 }
@@ -16,7 +16,7 @@ Intake::Intake()
     motor_set_brake_mode(intakeLeftPort, E_MOTOR_BRAKE_HOLD);
     motor_set_brake_mode(intakeRightPort, E_MOTOR_BRAKE_HOLD);
 
-    SetMotors(intake_normal_speed);
+    SetIntakeMotors(intake_normal_speed);
 }
 
 bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
@@ -36,12 +36,7 @@ void Intake::Update()
     {
         m_mode = IntakeMode::Stop;
         printf("Stop Intake because of Tray and Arm \n");
-        SetMotors(0);
-        return;
-    }
-
-    if (isAuto())
-    {
+        SetIntakeMotors(0);
         return;
     }
 
@@ -60,12 +55,12 @@ void Intake::Update()
         // If cube is not in slowing intake
         if (!cubeIn)
         {
-            SetMotors(60);
+            SetIntakeMotors(60);
         }
         // When in, stop intaking and cancel action
         else
         {
-            SetMotors(0);
+            SetIntakeMotors(0);
         }
         return;
     }
@@ -75,23 +70,23 @@ void Intake::Update()
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
         if (!cubeIn && sm.GetState() == State::Rest)
         {
-            SetMotors(-40);
+            SetIntakeMotors(-40);
         }
         else
         {
-            SetMotors(0);
+            SetIntakeMotors(0);
         }
     } else {
         // Intaking up
         if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1)) //fast intake
         {
-            SetMotors(intake_normal_speed);
+            SetIntakeMotors(intake_normal_speed);
         }
 
         //Intaking down    
         if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2)) //slow outake 
         {
-            SetMotors(-intake_slow_speed);
+            SetIntakeMotors(-intake_slow_speed);
         }
     }
 }
