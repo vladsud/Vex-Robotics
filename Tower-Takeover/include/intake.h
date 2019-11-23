@@ -20,6 +20,8 @@ private:
     const int intake_normal_speed = 127; 
     const int intake_slow_speed = 60; 
 
+    int count = 0;
+
 public:
     Intake();
     void Update();

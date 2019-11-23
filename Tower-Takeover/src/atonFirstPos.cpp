@@ -42,11 +42,11 @@ void MoveStreight(int distance, int power, int angle) {
     WaitAfterMove();
 }
 
-void SetIntake()
+void SetIntake(int speed)
 {
     GetMain().intake.m_mode = IntakeMode::Intake;
 
-    SetIntakeMotors(127);
+    SetIntakeMotors(speed);
 }
 
 // WARNING:
@@ -64,15 +64,16 @@ void RunAtonFirstPos()
     Do(LiftAction(State::InitializationState));
     Do(LiftAction(State::Rest));
 
-    SetIntake();
-    MoveStreight(4000, 60, -90);
+    SetIntake(127);
+    MoveStreight(6000, 60, -90);
 
-    TurnToAngle(0);
-    MoveStreight(4000, 60, 0);
+    TurnToAngle(58);
+    GetMain().intake.m_mode = IntakeMode::Hold;
+    MoveStreight(5000, 80, 60);
     //MoveExactWithAngle(4000, -90);
 
     Do(TrayAction(State::TrayOut));
-    Do(MoveAction(-1000, 60));
+    Do(MoveAction(-1500, 60));
     Do(TrayAction(State::Rest));
 }
  

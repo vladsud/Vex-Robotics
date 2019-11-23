@@ -55,7 +55,7 @@ void Intake::Update()
         // If cube is not in slowing intake
         if (!cubeIn)
         {
-            SetIntakeMotors(60);
+            SetIntakeMotors(90);
         }
         // When in, stop intaking and cancel action
         else
@@ -70,11 +70,16 @@ void Intake::Update()
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
         if (!cubeIn && sm.GetState() == State::Rest)
         {
+            count = 0;
             SetIntakeMotors(-40);
         }
         else
         {
-            SetIntakeMotors(0);
+            count++;
+            if (count < 40)
+                SetIntakeMotors(-15);
+            else
+                SetIntakeMotors(0);
         }
     } else {
         // Intaking up

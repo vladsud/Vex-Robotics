@@ -5,7 +5,6 @@
 class Lift
 {
 private:
-  int count = 0;
   bool m_moving = false;
 
 public:

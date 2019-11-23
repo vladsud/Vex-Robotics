@@ -43,17 +43,21 @@ void Lift::Update()
     }
     else if (sm.GetState() == State::InitializationState)
     {
-        motor = pid.GetPower(currentArm, 1900, 2, 1000, PidPrecision::LowerOk);
+        motor = pid.GetPower(currentArm, 1300, 1, 1000, PidPrecision::LowerOk);
+        printf("Position: %d  Speed: %d\n", currentArm, motor);
     }
     else if (sm.GetState() == State::Rest) 
     {
-        count++;
+        //count++;
 
         motor = pid.GetPower(currentArm, 2530, 1, 0, PidPrecision::HigerOk);
+        
+        /*
         if (motor == 0 && (count % 100) < 50)
         {
             motor = -20;
         }
+        */
     }
 
     m_moving = (motor != 0);
