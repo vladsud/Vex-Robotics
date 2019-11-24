@@ -2,15 +2,12 @@
 #include "main.h"
 #include"vision.h"
 #include "pros/adi.h" // for PROS_ERR
-#include "pros/rtos.h"
 #include "errno.h"
-#include <stdio.h>
-#include <math.h>
 #include <limits.h>
-#include "pros/rtos.h"
 #include "cycle.h"
 #include "pros/motors.h"
-#include "ActionsTurn.h"
+#include "ActionsMove.h"
+#include "drive.h"
 
  #define RGB2COLOR(R, G, B) ((R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff)) 
 
@@ -497,7 +494,7 @@ void Vision::StopTurning()
         delete m_turnAction;
         m_turnAction = nullptr;
     }
-    GetMain().drive.OverrideInputs(0, 0);
+    GetDrive().OverrideInputs(0, 0);
 }
 
 void Vision::ShootingInAutonomous(bool visionMove, bool visionAngle)

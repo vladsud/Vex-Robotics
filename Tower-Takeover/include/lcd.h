@@ -1,7 +1,4 @@
 #pragma once
-// #include "pros/llemu.h"
-#include <string>
-#include "display/lvgl.h"
 
 /*******************************************************************************
 * 
@@ -14,6 +11,8 @@ struct Button
     const char* label2;
     bool& value;
 };
+
+#define LVOBJ struct _lv_obj_t
 
 class LCD
 {
@@ -28,19 +27,17 @@ public:
 	LCD();
     void PrintMessage(const char *message);
     void Update();
+    static void click_action(LVOBJ * btn);
 
 private:
-    static lv_res_t click_action(lv_obj_t * btn);
-    lv_obj_t* CreateButton(uint8_t id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled);
+    LVOBJ* CreateButton(unsigned int id, const char* label, LVOBJ* container, LVOBJ* prevElement, bool toggled);
     void CreateControls();
 
 private:
     char m_batteryBuffer[128];
-    lv_obj_t* m_textobj = nullptr;
-    lv_obj_t* m_battery = nullptr;
+    LVOBJ* m_textobj = nullptr;
+    LVOBJ* m_battery = nullptr;
     unsigned int m_count = 0;
-
-    bool lcdA;
 
     const Button m_buttons[3] = {
         {"Blue (right)", "Red (left)", AtonBlueRight},
@@ -48,3 +45,5 @@ private:
         {"Tank Drive", "Arcade Drive", IsTankDrive},
     };
 };
+
+LCD& GetLcd();

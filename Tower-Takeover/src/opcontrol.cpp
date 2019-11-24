@@ -1,17 +1,25 @@
 
 #include "main.h"
 #include "cycle.h"
-#include "logger.h"
-#include <cstdio>
+#include "forwards.h"
 
-#include "pros/adi.h"
-#include "pros/motors.h"
-#include "pros/rtos.h"
+#include "pros/misc.h"
 
 using namespace pros;
 using namespace pros::c;
 
+unsigned int _millis() {
+    return pros::c::millis();
+}
+
 static Main *g_main = nullptr;
+
+void initialize()
+{
+  SetupMain();
+  printf("Battery %.2f \n", battery_get_capacity());
+  ReportStatus("Initialized\n");
+}
 
 Main &SetupMain()
 {
@@ -26,10 +34,21 @@ Main &GetMain()
 	return *g_main;
 }
 
-Logger &GetLogger() { return GetMain().logger; }
 GyroWrapper &GetGyro() { return GetMain().gyro; }
+Drive& GetDrive() { return GetMain().drive; }
 PositionTracker &GetTracker() { return GetMain().tracker; }
 int GetGyroReading() { return GetTracker().GetGyro(); }
+StateMachine& GetStateMachine() { return GetMain().sm; }
+CubeTray& GetCubeTray() { return GetMain().cubetray; }
+Lift& GetLift() { return GetMain().lift; }
+LCD& GetLcd() { return GetMain().lcd; }
+Intake& GetIntake() { return GetMain().intake; }
+LineTracker& GetLineTrackerLeft() { return GetMain().lineTrackerLeft; }
+LineTracker& GetLineTrackerRight() { return GetMain().lineTrackerRight; }
+
+void MainRunUpdateCycle() { GetMain().Update(); }
+
+unsigned int GetTime() { return GetMain().GetTime(); }
 
 void AssertCore(bool condition, const char *message, const char *file, int line)
 {
@@ -45,7 +64,7 @@ void Main::Update()
 {
 	if (m_Ticks % 500 == 0)
 	{
-		GetMain().sm.PrintController();
+		sm.PrintController();
 		//printf("Controller Printing... \n");
 	}
 
@@ -114,11 +133,6 @@ bool Main::UpdateWithoutWaiting()
 	else
 	{
 		UpdateFastSystems();
-	}
-
-	if (PrintDiagnostics(Diagnostics::General) && (m_Ticks % 500) == 8)
-	{
-		// Not Implemented
 	}
 
 	return res;

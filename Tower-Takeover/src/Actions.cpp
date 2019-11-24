@@ -1,27 +1,66 @@
+#include "main.h"
 #include "actions.h"
+#include "aton.h"
 
-// unsigned int points[] {30, 50, 1600, UINT_MAX};
-// unsigned int speeds[] {0,  60, 4000, 4000};
-unsigned int SpeedFromDistances(unsigned int distance, const unsigned int* points, const unsigned int* speeds)
+template <typename T>
+bool DoCore(T &&action, unsigned int timeout /* = 100000 */)
 {
-    unsigned int lowPoint = 0;
-    unsigned int lowSpeed = 0;
-    while (true)
+    auto time = _millis();
+    bool timedout = false;
+
+    while (!action.ShouldStop())
     {
-        unsigned int highPoint = *points;
-        unsigned int highSpeed = *speeds;
-        Assert(lowPoint < highPoint);
-        Assert(lowSpeed <= highSpeed);
-        if (distance <= highPoint)
-            return lowSpeed + (highSpeed - lowSpeed) * (distance - lowPoint) / (highPoint - lowPoint);
-        points++;
-        speeds++;
-        lowPoint = highPoint;
-        lowSpeed = highSpeed;
+        if (action.GetElapsedTime() >= timeout)
+        {
+            timedout = true;
+            ReportStatus("!!! TIME-OUT: %s: %d\n", action.Name(), timeout);
+            break;
+        }
+
+        MainRunUpdateCycle();
+
+        // Check if we have bailed out of autonomous mode in manual skills (some key was pressed on joystick)
+        if (ShouldBailOutOfAutonomous())
+        {
+            ReportStatus("\n!!! Switching to manual mode!\n");
+            action.Stop();
+            Assert(!isAuto());
+            opcontrol(); // this does not return!
+            ReportStatus("\n!!! Error: Should never get back from opControl()!\n");
+        }
     }
+
+    action.Stop();
+    if (!timedout && false)
+    {
+        if (timeout <= 15000)
+            ReportStatus("%s took %ld ms (time-out: %d)\n", action.Name(), _millis() - time, timeout);
+        else
+            ReportStatus("%s took %ld ms\n", action.Name(), _millis() - time);
+    }
+
+    return !timedout;
 }
 
-int SpeedFromDistances(int distance, const unsigned int* points, const unsigned int* speeds)
+bool Do(Action &&action, unsigned int timeout /* = 100000 */)
 {
-    return SpeedFromDistances((unsigned int)abs(distance), points, speeds) * Sign(distance);
+    return DoCore(static_cast<Action &&>(action), timeout);
+}
+
+bool Do(Action &action, unsigned int timeout /* = 100000 */)
+{
+    return DoCore(action, timeout);
+}
+
+struct WaitAction : public Action
+{
+    unsigned int m_wait;
+    WaitAction(unsigned int wait) : m_wait(wait) {}
+    bool ShouldStop() override { return GetElapsedTime() >= m_wait; }
+    const char* Name() override { return "Wait"; } 
+};
+
+void Wait(unsigned int duration)
+{
+    Do(WaitAction(duration));
 }

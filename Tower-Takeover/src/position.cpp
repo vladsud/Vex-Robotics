@@ -1,10 +1,8 @@
 #include "position.h"
-#include "logger.h"
-#include <math.h>
+#include "main.h"
+
 #include "pros/adi.h"
 #include "pros/motors.h"
-#include <cstdio>
-
 
 using namespace pros::c;
 
@@ -167,11 +165,6 @@ void PositionTracker::Update()
     int rightEncoder = motor_get_position(rightBackDrivePort);
     int sideEncoder = 0; // encoderGet(g_sideEncoder);
     m_gyro = ::GetGyro().Get();
-
-    GetLogger().Log(LogEntry::Position,
-                    leftEncoder - m_sensor.leftEncoder[m_currentIndex],
-                    rightEncoder - m_sensor.rightEncoder[m_currentIndex],
-                    m_gyro - m_sensor.gyro[m_currentIndex]); // sideEncoder
 
     int i = Index(m_currentIndex + 1);
     m_currentIndex = i;

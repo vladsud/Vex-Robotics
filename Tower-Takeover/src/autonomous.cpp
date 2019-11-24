@@ -11,7 +11,14 @@
  */
 
 #include "aton.h"
-#include "pros/rtos.h"
+#include "actionsMove.h"
+#include "main.h"
+#include "actions.h"
+#include "drive.h"
+#include "cycle.h"
+#include "forwards.h"
+
+#include "pros/misc.h"
 
 using namespace pros::c;
 
@@ -58,54 +65,9 @@ bool SmartsOn()
     return g_autonomousSmartsOn && isAuto();
 }
 
-template <typename T>
-bool DoCore(T &&action, unsigned int timeout /* = 100000 */)
+bool ShouldBailOutOfAutonomous()
 {
-    auto time = millis();
-    bool timedout = false;
-
-    auto& main = GetMain();
-    while (!action.ShouldStop())
-    {
-        if (action.GetElapsedTime() >= timeout)
-        {
-            timedout = true;
-            ReportStatus("!!! TIME-OUT: %s: %d\n", action.Name(), timeout);
-            break;
-        }
-
-        main.Update();
-
-        // Check if we have bailed out of autonomous mode in manual skills (some key was pressed on joystick)
-        if (g_mode == AtonMode::Regular && !competition_is_autonomous())
-        {
-            ReportStatus("\n!!! Switching to manual mode!\n");
-            Assert(!isAuto());
-            opcontrol(); // this does not return!
-            ReportStatus("\n!!! Error: Should never get back from opControl()!\n");
-        }
-    }
-
-    action.Stop();
-    if (!timedout && false)
-    {
-        if (timeout <= 15000)
-            ReportStatus("%s took %ld ms (time-out: %d)\n", action.Name(), millis() - time, timeout);
-        else
-            ReportStatus("%s took %ld ms\n", action.Name(), millis() - time);
-    }
-
-    return !timedout;
-}
-
-bool Do(Action &&action, unsigned int timeout /* = 100000 */)
-{
-    return DoCore(std::move(action), timeout);
-}
-
-bool Do(Action &action, unsigned int timeout /* = 100000 */)
-{
-    return DoCore(action, timeout);
+    return (g_mode == AtonMode::Regular && !competition_is_autonomous());
 }
 
 // Scans digital buttons on joystick
@@ -125,6 +87,11 @@ bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t
     }
     return result;
 }
+
+struct EndOfAction : public Action
+{
+    bool ShouldStop() override { return false; }
+};
 
 void autonomous()
 {
@@ -205,8 +172,6 @@ void autonomous()
     ReportStatus("\n*** END AUTONOMOUS ***\n\n");
     printf("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
 
-    GetLogger().Dump();
-
     Do(EndOfAction());
 }
 
@@ -217,54 +182,10 @@ void MoveExactWithAngle(int distance, int angle, bool allowTurning /*= true*/)
     MoveExact(distance, angle);
 }
 
-void MoveExactFastWithAngle(int distance, int angle, bool stopOnHit)
-{
-    TurnToAngleIfNeeded(angle);
-    Do(MoveExactFastAction(distance, angle, stopOnHit));
-    WaitAfterMoveReportDistance(distance, 500);
-}
-
-void TurnToAngleIfNeeded(int angle)
-{
-    int angleDiff = AdjustAngle(GetGyroReading() - angle * GyroWrapper::Multiplier);
-    if (abs(angleDiff) > 8 * GyroWrapper::Multiplier)
-        TurnToAngle(angle);
-}
-
-
-void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle)
-{
-    TurnToAngleIfNeeded(angle);
-    Do(MoveExactWithLineCorrectionAction<MoveExactAction>(fullDistance, distanceAfterLine, angle));
-    WaitAfterMove();
-}
-
-
-unsigned int HitTheWall(int distanceForward, int angle)
-{
-    TurnToAngleIfNeeded(angle);
-    Do(MoveHitWallAction(distanceForward, angle), 1000 + abs(distanceForward) /*trimeout*/);
-    WaitAfterMove();
-
-    unsigned int distance = GetMain().drive.m_distance;
-    return distance;
-}
-
-
-// give some time for robot to completely stop
-void WaitAfterMove(unsigned int timeout /*= 0*/)
-{
-    // Not enough time in "main" atonomous
-    auto& lcd = GetMain().lcd;
-    if (timeout == 0)
-        timeout = lcd.AtonSkills || !lcd.AtonFirstPos || !lcd.AtonClimbPlatform ? 500 : 200;
-    Do(WaitTillStopsAction(), timeout);
-}
-
 void WaitAfterMoveReportDistance(int distance, unsigned int timeout)
 {
     WaitAfterMove(timeout);
-    unsigned int error = abs((int)abs(distance) - (int)GetMain().drive.m_distance);
+    unsigned int error = abs((int)abs(distance) - (int)GetDrive().m_distance);
     if (error >= 50)
-        ReportStatus("MoveExact (or equivalent) big Error: %d, distance travelled: %d, expected: %d\n", error, GetMain().drive.m_distance, distance);
+        ReportStatus("MoveExact (or equivalent) big Error: %d, distance travelled: %d, expected: %d\n", error, GetDrive().m_distance, distance);
 }

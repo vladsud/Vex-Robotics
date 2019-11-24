@@ -1,7 +1,6 @@
 #pragma once
-#include "main.h"
-#include "pros/adi.hpp"
 
+#include "pros/adi.hpp"
 
 class GyroReal
 {

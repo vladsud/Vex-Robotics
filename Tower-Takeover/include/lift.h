@@ -1,11 +1,12 @@
 #pragma once
-#include "main.h"
+
 #include "pros/adi.hpp"
 
 class Lift
 {
 private:
   bool m_moving = false;
+  PidImpl pid {1 /*precision*/};
 
 public:
   pros::ADIAnalogIn m_anglePot;
@@ -14,3 +15,6 @@ public:
   void SetLiftMotor(int speed);
   bool IsMoving() { return m_moving; }
 };
+
+Lift& GetLift();
+void OpenArmsOnStart();

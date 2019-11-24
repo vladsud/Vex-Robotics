@@ -1,11 +1,10 @@
 #include "drive.h"
 #include "position.h"
-#include "logger.h"
-#include "cycle.h"
-#include <math.h>
-#include <cstdio>
+#include "lcd.h"
+#include "actions.h"
 
 #include "pros/motors.h"
+#include "pros/misc.h"
 
 using namespace pros;
 using namespace pros::c;
@@ -17,6 +16,26 @@ int AdjustSpeed(int speed)
     if (speed <= -driveMotorMaxSpeed)
         speed = -driveMotorMaxSpeed;
     return speed;
+}
+
+int GetMovementJoystick(pros::controller_id_e_t joystick, pros::controller_analog_e_t axis, int minValue)
+{
+    int value = controller_get_analog(joystick, axis);
+
+    bool neg = value < 0;
+    value = abs(value);
+
+    // dead zone on joystick - it can get stuck there even without finger
+    // note: 20 is not enough!
+    const int cutoff = 25;
+    if (value <= cutoff)
+        return 0;
+
+    // Linear function that fills in range 0..(joystickMax-minValue)
+    value = (value - cutoff) * (joystickMax - minValue) / (joystickMax - cutoff);
+
+    value = value * value / (joystickMax - minValue) + minValue;
+    return neg ? value : -value;
 }
 
 double GetLeftVelocity()
@@ -60,8 +79,7 @@ double GetRobotVelocity()
 }
 
 DriveTracker::DriveTracker()
-    : m_main(GetMain()),
-      m_drive(m_main.drive)
+    : m_drive(GetDrive())
 {
     Assert(isAuto());
     m_drive.ResetTrackingState();
@@ -96,26 +114,6 @@ Drive::Drive()
     motor_set_reversed(rightBackDrivePort, true);
     motor_set_reversed(rightFrontDrivePort, true);
     ResetState();
-}
-
-int Drive::GetMovementJoystick(pros::controller_id_e_t joystick, pros::controller_analog_e_t axis, int minValue)
-{
-    int value = controller_get_analog(joystick, axis);
-
-    bool neg = value < 0;
-    value = abs(value);
-
-    // dead zone on joystick - it can get stuck there even without finger
-    // note: 20 is not enough!
-    const int cutoff = 25;
-    if (value <= cutoff)
-        return 0;
-
-    // Linear function that fills in range 0..(joystickMax-minValue)
-    value = (value - cutoff) * (joystickMax - minValue) / (joystickMax - cutoff);
-
-    value = value * value / (joystickMax - minValue) + minValue;
-    return neg ? value : -value;
 }
 
 int Drive::GetForwardLeftAxis()
@@ -153,8 +151,7 @@ void Drive::OverrideInputs(int forward, float turn)
     m_overrideForward = forward;
     m_overrideTurn = turn;
 
-    if (PrintDiagnostics(Diagnostics::Drive))
-        ReportStatus("OverrideInputs: %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn));
+    // ReportStatus("OverrideInputs: %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn));
 }
 
 void Drive::ResetState()
@@ -245,7 +242,7 @@ void Drive::Update()
     //Drive
     int forward;
     int turn;
-    if (GetMain().lcd.IsTankDrive)
+    if (GetLcd().IsTankDrive)
     {
         forward = (GetForwardLeftAxis() + GetForwardRightAxis())/2;
         turn = (GetForwardLeftAxis() - GetForwardRightAxis())/2;
@@ -370,15 +367,37 @@ void Drive::Update()
     SetLeftDrive(leftMotor);
     SetRightDrive(rightMotor);
 
-    if (PrintDiagnostics(Diagnostics::Drive))
+    /*
+    ReportStatus("Drive: gyro: %d, erorr: (%d, %d), Speeds (%d, %d)\n",
+            // left, right,
+            GetGyroReading() * 10 / GyroWrapper::Multiplier,
+            int(error), errorMultiplier,
+            // int(m_ErrorIntergral),
+            // m_distance, int(m_turn * m_distance / m_forward),
+            leftMotor,
+            rightMotor);
+    */
+}
+
+struct WaitTillStopsAction : public Action
+{
+    bool ShouldStop() override
     {
-        ReportStatus("Drive: gyro: %d, erorr: (%d, %d), Speeds (%d, %d)\n",
-               // left, right,
-               GetGyroReading() * 10 / GyroWrapper::Multiplier,
-               int(error), errorMultiplier,
-               // int(m_ErrorIntergral),
-               // m_distance, int(m_turn * m_distance / m_forward),
-               leftMotor,
-               rightMotor);
+        auto left = abs(GetLeftVelocity());
+        auto right = abs(GetRightVelocity());
+        return left <= 5 && right <= 5;
     }
+    const char* Name() override { return "WaitTillStopsAction"; } 
+};
+
+// give some time for robot to completely stop
+void WaitAfterMove(unsigned int timeout /*= 0*/)
+{
+    /*
+    // Not enough time in "main" atonomous
+    auto& lcd = GetLcd();
+    if (timeout == 0)
+        timeout = lcd.AtonSkills || !lcd.AtonFirstPos || !lcd.AtonClimbPlatform ? 500 : 200;
+    */
+    Do(WaitTillStopsAction(), timeout == 0 ? 200 : timeout);
 }

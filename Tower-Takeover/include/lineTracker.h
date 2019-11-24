@@ -1,4 +1,5 @@
 #pragma once
+
 #include "pros/adi.hpp"
 
 class LineTracker
@@ -35,3 +36,6 @@ protected:
 
     Status m_status = Status::None;
 };
+
+LineTracker& GetLineTrackerLeft();
+LineTracker& GetLineTrackerRight();

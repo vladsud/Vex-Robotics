@@ -1,5 +1,6 @@
 #include "StateMachine.h"
-#include "cycle.h"
+#include "main.h"
+#include "pros/misc.h"
 
 using namespace pros;
 using namespace pros::c;
@@ -15,10 +16,6 @@ StateMachine::StateMachine()
 // Update
 void StateMachine::Update()
 {
-    // Get the tray and arm value
-    trayValue = GetMain().cubetray.m_anglePot.get_value();
-    armValue = GetMain().lift.m_anglePot.get_value();
-
     // Calculate the current state based on the current state
     State oldState = currentState;
     currentState = calculateState(currentState);
@@ -27,8 +24,6 @@ void StateMachine::Update()
     {
         DebugPrint();
     }
-
-    //printf("Arm: %d  Tray: %d \n", armValue, trayValue);
 }
 
 // Return the current state

@@ -13,9 +13,8 @@
  */
 #include "main.h"
 #include "gyro.h"
-#include <math.h>
-#include "pros/rtos.h"
-#include "cycle.h"
+#include "drive.h"
+#include "forwards.h"
 
 using namespace pros;
 using namespace pros::c;
@@ -87,24 +86,20 @@ GyroReal::GyroReal(unsigned char port, unsigned short multiplier)
 
 void GyroReal::ResetState()
 {
-    m_lastTime = pros::c::millis() - 1;
+    m_lastTime = millis() - 1;
 }
 
 
 int GyroWheels::Get() const
 {
-    //printf("Original: %d\n", GetMain().drive.GetAngle());
-    //printf("Wheel!: %f\n", GetMain().drive.GetAngle() * m_multiplier);
-    int res = m_offset - GetMain().drive.GetAngle() * m_multiplier;
+    //printf("Original: %d\n", GetDrive().GetAngle());
+    //printf("Wheel!: %f\n", GetDrive().GetAngle() * m_multiplier);
+    int res = m_offset - GetDrive().GetAngle() * m_multiplier;
     return res;
 }
 
 void GyroWheels::Integrate()
 {
-    /*
-    if ((GetMain().GetTime() % 500) == 0)
-        ReportStatus("Gyro: %d\n", Get() / Multiplier);
-    */
 }
 
 void GyroWheels::SetAngle(int angle)
@@ -157,9 +152,6 @@ void GyroBoth::PrintValues()
 }
 int GyroBoth::Get() const
 {
-    // if ((GetMain().GetTime() % 1000) == 0)
-    //     PrintValues();
-
     int res = (2 * m_gyro.Get() +  3 * m_gyro2.Get() + 1 * m_wheels.Get()) / 6;
     // int res = (m_gyro.Get() +  m_gyro2.Get()) / 2;
     // printf("Gyro: %d   %d %d %d\n", res, m_gyro.Get(), m_gyro2.Get(), m_wheels.Get());

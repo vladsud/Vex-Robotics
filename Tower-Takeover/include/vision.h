@@ -1,4 +1,5 @@
 #pragma once
+
 #include "pros/vision.hpp"
 
 enum SigType

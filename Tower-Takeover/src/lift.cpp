@@ -1,14 +1,12 @@
+#include "main.h"
 #include "lift.h"
-#include "logger.h"
 #include "pros/motors.h"
-#include "cycle.h"
-#include <stdio.h>
-
+#include "StateMachine.h"
+#include "cubeTray.h"
+#include "Actions.h"
 
 using namespace pros;
 using namespace pros::c;
-
-static PidImpl pid(1 /*precision*/);
 
 Lift::Lift() : m_anglePot(liftPotPort)
 {
@@ -24,10 +22,10 @@ void Lift::Update()
 {
 
     // Get a reference of the state machine
-    StateMachine& sm = GetMain().sm;
+    StateMachine& sm = GetStateMachine();
     
     // Update current Arm and Tray value
-    int currentArm = sm.armValue;
+    int currentArm = m_anglePot.get_value();
 
     int motor = 0;
 
@@ -39,7 +37,7 @@ void Lift::Update()
     {
         motor = pid.GetPower(currentArm, 1500, 3, 1000, PidPrecision::LowerOk);
     }
-    else if (sm.GetState() == State::TrayOut && GetMain().cubetray.IsMoving())
+    else if (sm.GetState() == State::TrayOut && GetCubeTray().IsMoving())
     {
         SetLiftMotor(-30);
         m_moving = false;
@@ -69,3 +67,20 @@ void Lift::Update()
     //printf("UP: %d DOWN: %d\n", goUP, goDOWN);
 }
 
+struct LiftAction : public Action
+{
+    LiftAction(State action)
+    {
+        GetStateMachine().SetState(action);
+    }
+    bool ShouldStop() override
+    {
+        return GetElapsedTime() > 100 && !GetLift().IsMoving();
+    }
+};
+
+void OpenArmsOnStart()
+{
+    Do(LiftAction(State::InitializationState));
+    Do(LiftAction(State::Rest));
+}

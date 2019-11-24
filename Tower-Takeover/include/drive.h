@@ -1,4 +1,5 @@
 #pragma once
+
 #include "main.h"
 
 // units - whatever motor_get_actual_velocity() returns (RPM)
@@ -15,7 +16,6 @@ struct DriveTracker
   virtual float GetError() { Assert(false); return 0; } // for some reason linker can't find __cxa_pure_virtual
 
 protected:
-  class Main& m_main;
   class Drive& m_drive;
 };
 
@@ -61,7 +61,6 @@ class Drive
   float GetTurnAxis();
   void SetLeftDrive(int speed);
   void SetRightDrive(int speed);
-  static int GetMovementJoystick(pros::controller_id_e_t joystick, pros::controller_analog_e_t axis, int minValue);
 
 public:
   unsigned int m_distance = 0;
@@ -96,3 +95,5 @@ public:
     m_tracker = nullptr;
   }
 };
+
+Drive& GetDrive();

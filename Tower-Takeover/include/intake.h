@@ -1,7 +1,6 @@
 #pragma once
-#include "main.h"
+
 #include "pros/adi.hpp"
-#include <string>
 
 enum class IntakeMode {
     Intake,
@@ -28,3 +27,6 @@ public:
     bool IsCubeIn(pros::ADIAnalogIn& sensor);
     IntakeMode m_mode = IntakeMode::Intake;
 };
+
+Intake& GetIntake();
+void SetIntake(int speed);

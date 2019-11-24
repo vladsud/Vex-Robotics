@@ -5,10 +5,9 @@
 #include "drive.h"
 #include "gyro.h"
 #include "lcd.h"
-#include "Logger.h"
 #include "position.h"
 #include "lineTracker.h"
-#include "vision.h"
+// #include "vision.h"
 #include "intake.h"
 #include "cubetray.h"
 #include "lift.h"
@@ -38,9 +37,8 @@ class Main
 	GyroWrapper gyro;
 	PositionTracker tracker;
 	LCD lcd;
-	Logger logger;
 	Intake intake;
-	Cubetray cubetray;
+	CubeTray cubetray;
 	Lift lift;
 	//Vision vision;
 	LineTracker lineTrackerLeft {lineTrackerLeftPort};
@@ -67,9 +65,3 @@ class Main
 
 };
 
-/*******************************************************************************
-* 
-* Functions
-*
-*******************************************************************************/
-extern Main &GetMain();

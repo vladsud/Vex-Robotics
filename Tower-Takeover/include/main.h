@@ -1,20 +1,21 @@
 #pragma once
-#include <stdint.h>
-#include "pros/rtos.h"
 
-// Reduce number of includes to speed up compilation!
-// Do not include API.h - it includes a ton of headers we do not need!
-#include "pros/misc.h"
+// C++ definitions
+extern "C" int printf(const char * format, ... );
+extern "C" int sprintf(char * str, const char * format, ... );
+extern "C" double sin(double);
+float cos (float x);
+extern "C" double cos(double);
+float sin (float x);
+float atan2 (float y, float x);
+double atan2(double, double);
 
-// Helper function to use both oysticsk
-bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t button);
 bool isAuto();
 bool SmartsOn();
 class Main &SetupMain();
 int AdjustAngle(int angle);
-
-unsigned int SpeedFromDistances(unsigned int distance, const unsigned int* points, const unsigned int* speeds);
-int SpeedFromDistances(int distance, const unsigned int* points, const unsigned int* speeds);
+unsigned int GetTime();
+void MainRunUpdateCycle();
 
 void opcontrol();
 void autonomous();
@@ -25,7 +26,9 @@ void initialize();
 #define Assert(f) AssertCore(f, #f, __FILE__, __LINE__)
 #define AssertSz(f, sz) AssertCore(f, sz, __FILE__, __LINE__)
 void AssertCore(bool condition, const char *message, const char *file, int line);
-#define ReportStatus(format, ...) printf("%ld: " format, pros::c::millis(), ##__VA_ARGS__)
+
+unsigned int _millis();
+#define ReportStatus(format, ...) printf("%ld: " format, _millis(), ##__VA_ARGS__)
 
 #define CountOf(a) (sizeof(a) / sizeof(a[0]))
 #define UNUSED_VARIABLE(a) (void)a;
@@ -33,15 +36,6 @@ void AssertCore(bool condition, const char *message, const char *file, int line)
 #define joystickMax 127
 
 #define StaticAssert(a) static_assert(a, #a)
-
-inline int Sign(int value)
-{
-   if (value < 0)
-      return -1;
-   if (value > 0)
-      return 1;
-   return 0;
-}
 
 template <typename T>
 constexpr T max(T a, T b)
@@ -53,6 +47,11 @@ template <typename T>
 constexpr T min(T a, T b)
 {
    return a > b ? b : a;
+}
+
+template <typename T>
+inline T abs(T value) {
+   return value > 0 ? value : -value;
 }
 
 enum PidPrecision

@@ -1,18 +1,12 @@
 #pragma once
-#include "main.h"
-#include "cycle.h"
-#include "logger.h"
 
-#include <math.h>
-#include <cstdio>
+#include "main.h"
 
 struct Action
 {
-    Main &m_main = GetMain();
-
     // Constructor put initial actions
-    Action() { m_timeStart = m_main.GetTime(); }
-    unsigned int GetElapsedTime() const { return m_main.GetTime() - m_timeStart; }
+    Action() { m_timeStart = GetTime(); }
+    unsigned int GetElapsedTime() const { return GetTime() - m_timeStart; }
 
     // Put when the program should stop
     virtual bool ShouldStop() = 0; //{ return true; }
@@ -24,27 +18,8 @@ private:
     unsigned int m_timeStart;
 };
 
-struct EndOfAction : public Action
-{
-    bool ShouldStop() override { return false; }
-};
+bool Do(Action &&action, unsigned int timeout = 100000);
+bool Do(Action &action, unsigned int timeout = 100000);
 
-struct WaitAction : public Action
-{
-    unsigned int m_wait;
-    WaitAction(unsigned int wait) : m_wait(wait) {}
-    bool ShouldStop() override { return GetElapsedTime() >= m_wait; }
-    const char* Name() override { return "Wait"; } 
-};
-
-
-struct WaitTillStopsAction : public Action
-{
-    bool ShouldStop() override
-    {
-        auto left = abs(GetLeftVelocity());
-        auto right = abs(GetRightVelocity());
-        return left <= 5 && right <= 5;
-    }
-    const char* Name() override { return "WaitTillStopsAction"; } 
-};
+void Wait(unsigned int duration);
+void WaitAfterMove(unsigned int timeout = 0);

@@ -1,5 +1,4 @@
 #pragma once
-#include "main.h"
 
 enum State
 {   
@@ -16,10 +15,10 @@ class StateMachine
         void DebugPrint();
         void SetState(State s);
         void PrintController();
-
-        int armValue;
-        int trayValue;
     private:
         State currentState;
 
 };
+
+StateMachine& GetStateMachine();
+void DoTrayAction(State state);

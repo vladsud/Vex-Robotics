@@ -15,6 +15,8 @@ Tower-Takeover/bin/
 
 Tower-Takeover/compile_commands.json
 
+Tower-Takeover/.d
+
 *.json
 
 *.elf

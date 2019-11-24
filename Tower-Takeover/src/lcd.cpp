@@ -1,7 +1,14 @@
 #include "lcd.h"
 #include "main.h"
 #include "aton.h"
-#include <string.h>
+#include "forwards.h"
+
+// Try not to include "display/lvgl.h" - it's too big and slow to compile!
+// Better find individual headers that are needed, like below:
+// #include "display/lvgl.h"
+#include "display/lv_objx/lv_label.h"
+#include "display/lv_core/lv_obj.h"
+#include "display/lv_objx/lv_btn.h"
 
 using namespace pros::c;
 
@@ -10,26 +17,30 @@ LCD::LCD()
     CreateControls();
 }
 
-lv_res_t LCD::click_action(lv_obj_t * btn) 
+void LCD::click_action(lv_obj_t * btn) 
 {
     uint8_t id = lv_obj_get_free_num(btn);
-    auto& value = GetMain().lcd.m_buttons[id].value;
+    auto& value = GetLcd().m_buttons[id].value;
     value = !value;
 
     lv_obj_t * label = lv_obj_get_child(btn, NULL);
     
     if (value)
-        lv_label_set_text(label, GetMain().lcd.m_buttons[id].label);
+        lv_label_set_text(label, GetLcd().m_buttons[id].label);
     else
-        lv_label_set_text(label, GetMain().lcd.m_buttons[id].label2);
+        lv_label_set_text(label, GetLcd().m_buttons[id].label2);
 
-    ReportStatus("Click: %d:  %s = %d\n)", id, GetMain().lcd.m_buttons[id].label, value);
+    // ReportStatus("Click: %d:  %s = %d\n)", id, GetLcd().m_buttons[id].label, value);
+}
 
-    //GetMain().vision.SetFlipX(GetMain().lcd.AtonBlueRight);
+lv_res_t click_action(lv_obj_t * btn)
+{
+    LCD::click_action(btn);
     return LV_RES_OK;
 }
 
-lv_obj_t* LCD::CreateButton(uint8_t id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled)
+
+lv_obj_t* LCD::CreateButton(unsigned int id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled)
 {
     // ReportStatus("lcd: %d %d %s\n, id, toggled, label");
     lv_obj_t * btn = lv_btn_create(container, NULL);
@@ -49,7 +60,7 @@ lv_obj_t* LCD::CreateButton(uint8_t id, const char* label, lv_obj_t* container, 
 
     lv_obj_set_free_num(btn, id);
 
-    lv_btn_set_action(btn, LV_BTN_ACTION_CLICK, click_action); 
+    lv_btn_set_action(btn, LV_BTN_ACTION_CLICK, ::click_action); 
 
     /*Add text*/
     lv_obj_t * labelEl = lv_label_create(btn, NULL);

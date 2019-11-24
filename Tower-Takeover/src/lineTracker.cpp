@@ -1,8 +1,6 @@
 #include "lineTracker.h"
 #include "main.h"
-#include "cycle.h"
-#include <math.h>
-#include <cstdio>
+#include "drive.h"
 
 using namespace pros::c;
 
@@ -26,7 +24,7 @@ void LineTracker::Reset()
 {
     ResetCore();
     // It's important to do update right away, to detect if we are starting on white/red.
-    Assert(GetMain().drive.m_distance == 0);
+    Assert(GetDrive().m_distance == 0);
     Update();
 }
 
@@ -43,7 +41,7 @@ void LineTracker::Push(bool white)
 {
     if (m_timesIndex == CountOf(m_times))
         Shift(1);
-    m_times[m_timesIndex] = GetMain().drive.m_distance;
+    m_times[m_timesIndex] = GetDrive().m_distance;
     m_timesIndex++;
 }
 
