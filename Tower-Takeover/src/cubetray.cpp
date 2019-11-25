@@ -47,7 +47,7 @@ void CubeTray::Update()
 
     m_moving = (motor != 0);
 
-    printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
+    // printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
     motor_move(cubetrayPort, motor);
 }
 

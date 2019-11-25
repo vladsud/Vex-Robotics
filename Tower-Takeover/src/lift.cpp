@@ -52,7 +52,7 @@ void Lift::Update()
     {
         //count++;
 
-        motor = pid.GetPower(currentArm, 2530, 1, 0, PidPrecision::HigerOk);
+        motor = pid.GetPower(currentArm, 2500, 1, 0, PidPrecision::HigerOk);
         
         /*
         if (motor == 0 && (count % 100) < 50)
