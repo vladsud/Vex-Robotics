@@ -46,7 +46,7 @@ void Lift::Update()
     else if (sm.GetState() == State::InitializationState)
     {
         motor = pid.GetPower(currentArm, 1200, 1, 1000, PidPrecision::LowerOk);
-        printf("Position: %d  Speed: %d\n", currentArm, motor);
+        // printf("Position: %d  Speed: %d\n", currentArm, motor);
     }
     else if (sm.GetState() == State::Rest) 
     {

@@ -130,6 +130,7 @@ int Drive::GetForwardRightAxis()
     // motors can't move robot at slow speed, so add some boost
     if (!isAuto())
         return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_RIGHT_Y, 18);
+    return 0;
 }
 
 float Drive::GetTurnAxis()

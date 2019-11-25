@@ -3,7 +3,6 @@
 #include"vision.h"
 #include "pros/adi.h" // for PROS_ERR
 #include "errno.h"
-#include <limits.h>
 #include "cycle.h"
 #include "pros/motors.h"
 #include "ActionsMove.h"

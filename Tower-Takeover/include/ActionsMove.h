@@ -1,10 +1,8 @@
 #pragma once
 
 void MoveStop();
-void MoveWithFixedPower(int distance, int power);
-void MoveExact(int distance, int angle);
 void MoveExactFastWithAngle(int distance, int angle, bool stopOnHit = false);
-void MoveExactWithAngle(int distance, int angle, bool allowTurning = true);
+void MoveExactWithAngle(int distance, int angle, unsigned int speedLimit = UINT_MAX, bool allowTurning = true);
 unsigned int HitTheWall(int distanceForward, int angle);
 void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle);
 

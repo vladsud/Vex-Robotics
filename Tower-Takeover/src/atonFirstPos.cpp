@@ -23,18 +23,19 @@ void RunAtonFirstPos()
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});
 
+    // NOTE: Replace MoveStreight() with MoveExactWithAngle()
+
     OpenArmsOnStart();
 
     SetIntake(127);
     MoveStreight(6000, 60, -90);
 
-    TurnToAngle(60);    
+    TurnToAngle(60);
     GetIntake().m_mode = IntakeMode::Hold;
     MoveStreight(5000, 80, 60);
-    //MoveExactWithAngle(4000, -90);
 
     DoTrayAction(State::TrayOut);
-    MoveWithFixedPower(-1500, 60);
+    MoveStreight(-1500, 60, 60);
     DoTrayAction(State::Rest);
 }
  

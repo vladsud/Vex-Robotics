@@ -1,6 +1,7 @@
 #pragma once
 
 // C++ definitions
+#define UINT_MAX 0x7fffffff
 extern "C" int printf(const char * format, ... );
 extern "C" int sprintf(char * str, const char * format, ... );
 extern "C" double sin(double);

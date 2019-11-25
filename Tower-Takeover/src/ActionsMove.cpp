@@ -5,8 +5,6 @@
 #include "drive.h"
 // #include "lineTracker.h"
 
-#include <limits.h>
-
 extern const  bool g_leverageLineTrackers;
 
 int Sign(int value)
@@ -114,14 +112,10 @@ private:
     unsigned int m_origDistanceToMove; // used for logging - m_distanceToMove can change over lifetime of this class 
 };
 
-void MoveWithFixedPower(int distance, int power) {
-    Do(MoveAction(distance, power));
-}
-
 void MoveStreight(int distance, int power, int angle) {
     TurnToAngleIfNeeded(angle);
-    // KeepAngle angleObj(angle);
-    MoveWithFixedPower(distance, power);
+    KeepAngle angleObj(angle);
+    Do(MoveAction(distance, power));
     WaitAfterMove();
 }
 
@@ -144,9 +138,10 @@ struct MoveExactAction : public MoveAction
 {
     const char* Name() override { return "MoveExactAction"; }
 
-    MoveExactAction(int distance, int angle, bool stopOnCollision = false)
+    MoveExactAction(int distance, int angle, unsigned int speedLimit = UINT_MAX, bool stopOnCollision = false)
         : MoveAction(distance, 0 /*power*/),
           m_angle(angle),
+          m_speedLimit(speedLimit),
           m_engageStopOnCollision(stopOnCollision)
     {
     }
@@ -175,9 +170,12 @@ struct MoveExactAction : public MoveAction
 
         // 1 tick/ms on each wheel (roughly 36"/sec - unreachable speed) == 72 in actualSpeed
         int actualSpeed = 20 * velocity;
-        int idealSpeed = SpeedFromDistance(error);
         if (!m_forward)
             actualSpeed = -actualSpeed; // make it positive
+
+        int idealSpeed = SpeedFromDistance(error);
+        if (abs(idealSpeed) > m_speedLimit)
+            idealSpeed = m_speedLimit * Sign(idealSpeed);
 
         if ((idealSpeed == 0 && abs(actualSpeed) <= 100) || error < -30)
             return true;
@@ -237,12 +235,15 @@ struct MoveExactAction : public MoveAction
     KeepAngle m_angle;
     static const int maxSpeed = 127;
     int m_power = 45;
+    unsigned int m_speedLimit;
     bool m_engageStopOnCollision = false;
 };
 
-void MoveExact(int distance, int angle)
+void MoveExactWithAngle(int distance, int angle, unsigned int speedLimit, bool allowTurning /*= true*/)
 {
-    Do(MoveExactAction(distance, angle));
+    if (allowTurning)
+        TurnToAngleIfNeeded(angle);
+    Do(MoveExactAction(distance, angle, speedLimit));
     WaitAfterMoveReportDistance(distance);
 }
 
@@ -253,7 +254,7 @@ struct MoveExactFastAction : public MoveExactAction
     static const int distanceToAdd = 20;
 
     MoveExactFastAction(int distance, int angle, bool stopOnCollision = false)
-        : MoveExactAction(distance + Sign(distance) * distanceToAdd, angle, stopOnCollision)
+        : MoveExactAction(distance + Sign(distance) * distanceToAdd, angle, UINT_MAX, stopOnCollision)
     {}
 
     bool ShouldStop() override
@@ -286,7 +287,7 @@ struct MoveHitWallAction : public MoveExactAction
     static const int distanceToKeep = 400;
 
     MoveHitWallAction(int distance, int angle)
-        : MoveExactAction(distance + Sign(distance) * distanceToKeep, angle, true /*stopOnCollision*/)
+        : MoveExactAction(distance + Sign(distance) * distanceToKeep, angle, UINT_MAX, true /*stopOnCollision*/)
     {
     }
 
@@ -491,7 +492,7 @@ struct TurnPrecise : public Action
             m_power = (power + m_power) / 2;
 
         // ReportStatus("Turn error = %d, power = %d, ideal speed = %d, actual = %d\n", error, power, idealSpeed, actualSpeed);
-        m_drive.OverrideInputs(0, m_power);
+        m_drive.OverrideInputs(0, -m_power);
         return false;
     }
 

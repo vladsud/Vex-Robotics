@@ -52,7 +52,7 @@ void GyroReal::Integrate()
     // Multiplier is (0.0007...<<18) dpms * DT ms * (reading<<4) quid = degrees<<22
     // So we need to get from LSL22 to LSL10 = LSR12
     int32_t d = (timeDiff * reading + 0x800) >> 12;
-    m_value += d;
+    m_value -= d;
 }
 
 GyroReal::GyroReal(unsigned char port, unsigned short multiplier)
@@ -94,7 +94,7 @@ int GyroWheels::Get() const
 {
     //printf("Original: %d\n", GetDrive().GetAngle());
     //printf("Wheel!: %f\n", GetDrive().GetAngle() * m_multiplier);
-    int res = m_offset - GetDrive().GetAngle() * m_multiplier;
+    int res = m_offset + GetDrive().GetAngle() * m_multiplier;
     return res;
 }
 
@@ -107,6 +107,7 @@ void GyroWheels::SetAngle(int angle)
     m_offset = 0;
     auto curr = Get();
     m_offset = angle - curr;
+    Assert(Get() == angle);
 }
 
 void GyroWheels::ResetState()

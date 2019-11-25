@@ -91,7 +91,7 @@ class PositionTracker
     void SetCoordinates(Coordinates cord);
     void SetAngle(int degrees);
     void FlipX(bool flip);
-    int GetGyro();
+    int GetGyrorReading();
 
   private:
     int Index(int i)

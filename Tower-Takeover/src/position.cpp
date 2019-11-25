@@ -232,7 +232,7 @@ void PositionTracker::FlipX(bool flip)
     m_flipX = flip;
 }
 
-int PositionTracker::GetGyro()
+int PositionTracker::GetGyrorReading()
 {
     int angle = ::GetGyro().Get();
     if (m_flipX)

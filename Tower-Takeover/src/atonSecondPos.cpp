@@ -20,6 +20,8 @@ void RunAtonSecondPos()
 
     OpenArmsOnStart();
 
+    // NOTE: Replace MoveStreight() with MoveExactWithAngle()
+
     SetIntake(127);
     MoveStreight(5000, 80, -90);
 
@@ -28,10 +30,8 @@ void RunAtonSecondPos()
     MoveStreight(4500, 80, -225);
     GetIntake().m_mode = IntakeMode::Hold;
     MoveStreight(500, 50, -225);
-    //MoveExactWithAngle(4000, -90);
 
-    // GetIntake().m_mode = IntakeMode::Hold;
     DoTrayAction(State::TrayOut);
-    MoveWithFixedPower(-1500, 60);
+    MoveStreight(-1500, 60, -225);
     DoTrayAction(State::Rest);
 }

@@ -146,7 +146,6 @@ void autonomous()
     // Debugging code - should not run in real autonomous
     if (g_mode == AtonMode::TestRun && !competition_is_autonomous())
     {
-        // MoveExactWithAngle(6000, 10, false);
         // lcd.AtonClimbPlatform = false;
         // lcd.AtonFirstPos = false;
 
@@ -173,13 +172,6 @@ void autonomous()
     printf("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
 
     Do(EndOfAction());
-}
-
-void MoveExactWithAngle(int distance, int angle, bool allowTurning /*= true*/)
-{
-    if (allowTurning)
-        TurnToAngleIfNeeded(angle);
-    MoveExact(distance, angle);
 }
 
 void WaitAfterMoveReportDistance(int distance, unsigned int timeout)
