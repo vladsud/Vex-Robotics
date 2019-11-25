@@ -1,0 +1,6 @@
+#include "..\src\gyro.cpp"
+#include "..\src\intake.cpp"
+#include "..\src\lcd.cpp"
+#include "..\src\lineTracker.cpp"
+#include "..\src\position.cpp"
+#include "..\src\opcontrol.cpp"

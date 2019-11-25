@@ -1,4 +1,5 @@
 #pragma once
+#include "main.h"
 
 void MoveStop();
 void MoveExactFastWithAngle(int distance, int angle, bool stopOnHit = false);

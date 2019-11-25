@@ -1,5 +1,5 @@
 @echo off
-touch combined\combined.cpp
+touch src\actionsMove.cpp
 
 set start=%time%
 make

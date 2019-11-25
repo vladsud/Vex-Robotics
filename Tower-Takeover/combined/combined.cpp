@@ -6,13 +6,6 @@
 #include "..\src\autonomous.cpp"
 #include "..\src\cubetray.cpp"
 #include "..\src\drive.cpp"
-#include "..\src\gyro.cpp"
-#include "..\src\intake.cpp"
-#include "..\src\lcd.cpp"
 #include "..\src\lift.cpp"
-#include "..\src\lineTracker.cpp"
-#include "..\src\opcontrol.cpp"
-#include "..\src\position.cpp"
 #include "..\src\stateMachine.cpp"
 #include "..\src\vision.cpp"
- 

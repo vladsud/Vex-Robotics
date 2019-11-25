@@ -1,12 +1,22 @@
 #pragma once
 
+extern "C" {
+   void autonomous();
+   void initialize();
+   void disabled(void);
+   void competition_initialize(void);
+   void opcontrol();
+}
+
 // C++ definitions
 #define UINT_MAX 0x7fffffff
-extern "C" int printf(const char * format, ... );
-extern "C" int sprintf(char * str, const char * format, ... );
-extern "C" double sin(double);
+extern "C" {
+   int printf(const char * format, ... );
+   int sprintf(char * str, const char * format, ... );
+   double sin(double);
+   double cos(double);
+}
 float cos (float x);
-extern "C" double cos(double);
 float sin (float x);
 float atan2 (float y, float x);
 double atan2(double, double);
@@ -17,10 +27,6 @@ class Main &SetupMain();
 int AdjustAngle(int angle);
 unsigned int GetTime();
 void MainRunUpdateCycle();
-
-void opcontrol();
-void autonomous();
-void initialize();
 
 #define __noop(...)
 
