@@ -16,7 +16,7 @@ $(shell mkdir -p $(DEPDIR))
 DEPFLAGS = -MT $$@ -MMD -MP -MF $(DEPDIR)/$$*.Td
 RENAMEDEPENDENCYFILE = $(VV)mv -f $(DEPDIR)/$$*.Td $(DEPDIR)/$$*.d && touch $$@
 
-LIBRARIES+=$(wildcard $(FWDIR)/*.a)
+LIBRARIES+=$(wildcard $(FWDIR)/lib*.a)
 # Cannot include newlib and libc because not all of the req'd stubs are implemented
 EXCLUDE_COLD_LIBRARIES+=$(FWDIR)/libc.a $(FWDIR)/libm.a
 COLD_LIBRARIES=$(filter-out $(EXCLUDE_COLD_LIBRARIES), $(LIBRARIES))
@@ -214,8 +214,9 @@ $(MONOLITH_BIN): $(MONOLITH_ELF) $(BINDIR)
 	$(call test_output_2,Creating $@ for $(DEVICE) ,$(OBJCOPY) $< -O binary -R .hot_init $@,$(DONE_STRING))
 
 $(MONOLITH_ELF): $(ELF_DEPS) $(LIBRARIES)
-	$(call _pros_ld_timestamp)
-	$(call test_output_2,Linking project with $(ARCHIVE_TEXT_LIST) ,$(LD) $(LDFLAGS) $(ELF_DEPS) $(LDTIMEOBJ) $(call wlprefix,-T$(FWDIR)/v5.ld $(LNK_FLAGS)) -o $@,$(OK_STRING))
+#	$(call _pros_ld_timestamp)
+#	$(call test_output_2,Linking project with $(ARCHIVE_TEXT_LIST) ,$(LD) $(LDFLAGS) $(ELF_DEPS) $(LDTIMEOBJ) $(call wlprefix,-T$(FWDIR)/v5.ld $(LNK_FLAGS)) -o $@,$(OK_STRING))
+	$(call test_output_2,Linking project with $(ARCHIVE_TEXT_LIST) ,$(LD) $(LDFLAGS) $(ELF_DEPS) $(call wlprefix,-T$(FWDIR)/v5.ld $(LNK_FLAGS)) -o $@,$(OK_STRING))
 	@echo Section sizes:
 	-$(VV)$(SIZETOOL) $(SIZEFLAGS) $@ $(SIZES_SED) $(SIZES_NUMFMT)
 
@@ -256,8 +257,8 @@ endef
 $(foreach cext,$(CEXTS),$(eval $(call c_rule,$(cext))))
 
 define cxx_rule
-$(BINDIR)/%.$1.o: $(SRCDIR)/%.$1
-$(BINDIR)/%.$1.o: $(SRCDIR)/%.$1 $(DEPDIR)/$(basename %).d
+$(BINDIR)/%.$1.o: $(SRCDIR)/%.$1 $(INCDIR)/*.h src/*
+#$(BINDIR)/%.$1.o: $(SRCDIR)/%.$1 $(DEPDIR)/$(basename %).d
 	$(VV)mkdir -p $$(dir $$@)
 	$(VV)mkdir -p $(DEPDIR)/$$(dir $$(patsubst bin/%, %, $$@))
 	$$(call test_output_2,Compiled $$< ,$(CXX) -c $(INCLUDE) -iquote"$(INCDIR)/$$(dir $$*)" $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(DEPFLAGS) -o $$@ $$<,$(OK_STRING))
