@@ -31,7 +31,7 @@ void RunAtonFirstPos()
     MoveStreight(6000, 60, -90);
 
     TurnToAngle(61);    
-    GetMain().intake.m_mode = IntakeMode::Hold;
+    GetIntake().m_mode = IntakeMode::Hold;
     MoveStreight(5000, 80, 60);
 
     DoTrayAction(State::TrayOut);

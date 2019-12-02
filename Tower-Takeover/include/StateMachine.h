@@ -15,6 +15,8 @@ class StateMachine
         void DebugPrint();
         void SetState(State s);
         void PrintController();
+
+        bool GetStateChange();
         bool stateChange = false;
     private:
         State currentState;

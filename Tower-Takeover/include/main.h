@@ -120,14 +120,14 @@ private:
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define liftPotPort 
+#define liftPotPort 99
 #define cubetrayPotPort 7
 
 #define gyroPort 8
 #define gyroPort2 1
 
-#define leftIntakeLineTrackerPort 
-#define rightIntakeLineTrackerPort 
+#define leftIntakeLineTrackerPort 99
+#define rightIntakeLineTrackerPort 99
 
 /*******************************************************************************
 *
