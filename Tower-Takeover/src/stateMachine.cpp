@@ -22,8 +22,15 @@ void StateMachine::Update()
 
     if (currentState != oldState)
     {
+        stateChange = true;
         DebugPrint();
     }
+    else
+    {
+        stateChange = false;
+    }
+
+    //printf("Arm: %d  Tray: %d \n", armValue, trayValue);
 }
 
 // Return the current state
@@ -35,6 +42,11 @@ State StateMachine::GetState()
 void StateMachine::SetState(State s)
 {
     currentState = s;
+}
+
+bool StateMachine::GetStateChange()
+{
+    return stateChange;
 }
 
 State StateMachine::calculateState(State state)

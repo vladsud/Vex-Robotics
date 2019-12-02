@@ -17,8 +17,8 @@ struct Button
 class LCD
 {
 public:
-	bool AtonBlueRight = false;
-	bool AtonFirstPos = false;
+	bool AtonBlueRight = true;
+	bool AtonFirstPos = true;
 	bool AtonClimbPlatform = true;
 	bool AtonSkills = false;
     bool IsTankDrive = false;
@@ -39,10 +39,10 @@ private:
     LVOBJ* m_battery = nullptr;
     unsigned int m_count = 0;
 
-    const Button m_buttons[3] = {
+    const Button m_buttons[2] = {
         {"Blue (right)", "Red (left)", AtonBlueRight},
         {"First", "Second", AtonFirstPos},
-        {"Tank Drive", "Arcade Drive", IsTankDrive},
+        // {"Tank Drive", "Arcade Drive", IsTankDrive},
     };
 };
 

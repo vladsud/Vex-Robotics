@@ -102,15 +102,15 @@ private:
 *
 * 
 *******************************************************************************/
-#define leftBackDrivePort 8
-#define leftFrontDrivePort 5
-#define rightFrontDrivePort 7
-#define rightBackDrivePort 3
+#define leftBackDrivePort 15
+#define leftFrontDrivePort 11
+#define rightFrontDrivePort 20
+#define rightBackDrivePort 16
 
-#define intakeLeftPort 20
-#define intakeRightPort 16
-#define cubetrayPort 11
-#define liftMotorPort 9
+#define intakeLeftPort 4
+#define intakeRightPort 9
+#define cubetrayPort 1
+#define liftMotorPort 6
 
 #define VisionPort 99
 
@@ -120,11 +120,14 @@ private:
 * ANALOG SENSORS
 *
 *******************************************************************************/
-#define liftPotPort 3
-#define cubetrayPotPort 2
+#define liftPotPort 
+#define cubetrayPotPort 7
 
-#define leftIntakeLineTrackerPort 6
-#define rightIntakeLineTrackerPort 7
+#define gyroPort 8
+#define gyroPort2 1
+
+#define leftIntakeLineTrackerPort 
+#define rightIntakeLineTrackerPort 
 
 /*******************************************************************************
 *
@@ -147,8 +150,5 @@ private:
 * OLD VALUES
 *
 *******************************************************************************/
-#define gyroPort 4
-#define gyroPort2 5
-
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99

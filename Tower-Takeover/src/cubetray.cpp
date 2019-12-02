@@ -24,7 +24,11 @@ void CubeTray::Update()
 
     if (desiredState == State::TrayOut)
     {
-        motor = pid.GetPower(currentRotation, upValue, -25, -8000);
+        // only run if the button is held down
+        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+        {
+            motor = pid.GetPower(currentRotation, upValue, -25, -8000);
+        }
         // printf("Moving out: %d %d\n", currentRotation, motor);
     }
     else if (desiredState == State::Rest)

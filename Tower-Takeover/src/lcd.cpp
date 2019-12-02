@@ -102,8 +102,30 @@ void LCD::Update()
     {
         sprintf(m_batteryBuffer, "Battery %.0f %%", battery_get_capacity());
         lv_label_set_text(m_battery, m_batteryBuffer);
+
+
+        static lv_style_t style_screen;
+        lv_style_copy(&style_screen, &lv_style_plain);
+
+        float temp = motor_get_temperature(liftMotorPort);
+        printf("Motor Temperature: %lf\n", temp);
+
+        if (temp >= 55)
+        {
+            style_screen.body.main_color = LV_COLOR_RED;
+            style_screen.body.grad_color = LV_COLOR_RED;
+        }
+        else
+        {
+            style_screen.body.main_color = LV_COLOR_BLACK;
+            style_screen.body.grad_color = LV_COLOR_BLACK;
+        }
+        lv_obj_set_style(lv_scr_act(), &style_screen);
     }
     m_count++;
+
+ 
+
 }
 
 void LCD::PrintMessage(const char *message)

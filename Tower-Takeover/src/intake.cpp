@@ -57,7 +57,7 @@ void Intake::Update()
         // If cube is not in slowing intake
         if (!cubeIn)
         {
-            SetIntakeMotors(90);
+            SetIntakeMotors(intake_normal_speed);
         }
         // When in, stop intaking and cancel action
         else
@@ -79,7 +79,9 @@ void Intake::Update()
         {
             count++;
             if (count < 40)
-                SetIntakeMotors(-15);
+            {
+                SetIntakeMotors(-20);
+            }
             else
                 SetIntakeMotors(0);
         }
