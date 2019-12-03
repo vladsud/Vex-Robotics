@@ -25,24 +25,23 @@ float Lift::get_value()
 
 void Lift::Update()
 {
-
     // Get a reference of the state machine
     StateMachine& sm = GetStateMachine();
     
     // Update current Arm and Tray value
     currentPosition = motor_get_position(liftMotorPort);
 
-    printf("Current Arm: %1f", currentPosition);
+    // printf("Current Arm: %.1f\n", currentPosition);
 
     int motor = 0;
 
     if (sm.GetState() == State::ArmsUpMid)
     {
-        motor = pid.GetPower(currentPosition, 1300, 3, 1000, PidPrecision::LowerOk);
+        motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000, PidPrecision::HigerOk);
     }
     else if (sm.GetState() == State::ArmsUpLow)
     {
-        motor = pid.GetPower(currentPosition, 1500, 3, 1000, PidPrecision::LowerOk);
+        motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000);
     }
     else if (sm.GetState() == State::TrayOut && GetCubeTray().IsMoving())
     {
@@ -52,14 +51,14 @@ void Lift::Update()
     }
     else if (sm.GetState() == State::InitializationState)
     {
-        motor = pid.GetPower(currentPosition, 1200, 1, 1000, PidPrecision::LowerOk);
+        motor = pid.GetPower(currentPosition, ArmsMidPos, 1, 1000, PidPrecision::HigerOk);
         // printf("Position: %d  Speed: %d\n", currentArm, motor);
     }
     else if (sm.GetState() == State::Rest) 
     {
         //count++;
 
-        motor = pid.GetPower(currentPosition, 2500, 1, 0, PidPrecision::HigerOk);
+        motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);
         
         /*
         if (motor == 0 && (count % 100) < 50)
@@ -68,9 +67,13 @@ void Lift::Update()
         }
         */
     }
+    else if (sm.GetState() == State::Debug)
+    {
+        motor = 0;
+    }
 
     m_moving = (motor != 0);
-    SetLiftMotor(motor);
+    SetLiftMotor(-motor);
     //printf("UP: %d DOWN: %d\n", goUP, goDOWN);
 }
 

@@ -16,6 +16,13 @@ StateMachine::StateMachine()
 // Update
 void StateMachine::Update()
 {
+
+
+    // DEBUG CODE: REMOVE!!
+    // currentState = State::Debug;
+    // return;
+
+
     // Calculate the current state based on the current state
     State oldState = currentState;
     currentState = calculateState(currentState);
@@ -102,6 +109,10 @@ void StateMachine::DebugPrint()
     {
         printf("Initialization State\n");
     }
+    if (currentState == State::Debug)
+    {
+        printf("Debug State\n");
+    }
 }
 
 void StateMachine::PrintController()
@@ -126,5 +137,9 @@ void StateMachine::PrintController()
     if (currentState == State::InitializationState)
     {
         controller_print(E_CONTROLLER_MASTER, 0, 0, "Init\n");
+    }
+    if (currentState == State::Debug)
+    {
+        controller_print(E_CONTROLLER_MASTER, 0, 0, "Debug\n");
     }
 }

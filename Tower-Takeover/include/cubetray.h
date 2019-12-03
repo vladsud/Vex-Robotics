@@ -5,10 +5,9 @@
 class CubeTray
 {  
 private:
-  const int upValue = 1350;
-  const int initValue = 2000;
-  const int midValue = 2250;
-  const int restValue = 2850;
+  const int upValue = 2385;
+  const int midValue = 1432;
+  const int restValue = 820;
 
   bool m_moving = false;
   PidImpl pid {100};

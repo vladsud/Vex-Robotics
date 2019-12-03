@@ -12,6 +12,7 @@ extern bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digi
 void SetIntakeMotors(int power) {
     motor_move(intakeLeftPort, power);
     motor_move(intakeRightPort, -power);
+    printf("Set Intake to : %d", power);
 }
 
 Intake::Intake()
@@ -21,6 +22,7 @@ Intake::Intake()
     motor_set_brake_mode(intakeRightPort, E_MOTOR_BRAKE_HOLD);
 
     SetIntakeMotors(intake_normal_speed);
+    m_mode = IntakeMode::Stop;
 }
 
 bool Intake::IsCubeIn(pros::ADIAnalogIn& sensor)
@@ -68,7 +70,7 @@ void Intake::Update()
     }
 
     // If not intaking
-    if (m_mode == IntakeMode::Hold) {
+    else if (m_mode == IntakeMode::Hold) {
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
         if (!cubeIn && sm.GetState() == State::Rest)
         {
@@ -98,6 +100,8 @@ void Intake::Update()
             SetIntakeMotors(-intake_slow_speed);
         }
     }
+
+    // printf("Left: %.1f   Right: %.1f \n", motor_get_actual_velocity(intakeLeftPort), motor_get_actual_velocity(intakeRightPort));
 }
 
 void SetIntake(int speed)

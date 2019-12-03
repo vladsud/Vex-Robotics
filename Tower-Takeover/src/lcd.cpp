@@ -108,7 +108,7 @@ void LCD::Update()
         lv_style_copy(&style_screen, &lv_style_plain);
 
         float temp = motor_get_temperature(liftMotorPort);
-        printf("Motor Temperature: %lf\n", temp);
+        printf("Motor Temperature: %.2f\n", temp);
 
         if (temp >= 55)
         {
@@ -123,9 +123,6 @@ void LCD::Update()
         lv_obj_set_style(lv_scr_act(), &style_screen);
     }
     m_count++;
-
- 
-
 }
 
 void LCD::PrintMessage(const char *message)

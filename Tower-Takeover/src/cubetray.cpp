@@ -25,7 +25,7 @@ void CubeTray::Update()
     if (desiredState == State::TrayOut)
     {
         // only run if the button is held down
-        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
         {
             motor = pid.GetPower(currentRotation, upValue, -25, -8000);
         }
@@ -33,9 +33,9 @@ void CubeTray::Update()
     }
     else if (desiredState == State::Rest)
     {
-        if (GetLift().get_value() >= 1900 && currentRotation < restValue)
+        if (GetLift().get_value() < GetLift().ArmsLowPos && currentRotation >= restValue)
         {
-            motor = 127;
+            motor = -127;
         }
         //printf("Rotation: %d", currentRotation);
     }
@@ -46,7 +46,11 @@ void CubeTray::Update()
     else if (desiredState == State::InitializationState) 
     {
         //printf("Move Tray Now");
-        motor = pid.GetPower(currentRotation, initValue, -4, -4000);
+        motor = pid.GetPower(currentRotation, midValue, -4, -4000);
+    }
+    else if (sm.GetState() == State::Debug)
+    {
+        motor = 0;
     }
 
     m_moving = (motor != 0);
