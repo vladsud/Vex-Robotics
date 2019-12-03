@@ -33,7 +33,7 @@ void CubeTray::Update()
     }
     else if (desiredState == State::Rest)
     {
-        if (GetLift().m_anglePot.get_value() >= 1900 && currentRotation < restValue)
+        if (GetLift().get_value() >= 1900 && currentRotation < restValue)
         {
             motor = 127;
         }
