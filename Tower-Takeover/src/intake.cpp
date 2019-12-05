@@ -21,7 +21,6 @@ Intake::Intake()
     motor_set_brake_mode(intakeLeftPort, E_MOTOR_BRAKE_HOLD);
     motor_set_brake_mode(intakeRightPort, E_MOTOR_BRAKE_HOLD);
 
-    SetIntakeMotors(intake_normal_speed);
     m_mode = IntakeMode::Stop;
 }
 
@@ -87,7 +86,12 @@ void Intake::Update()
             else
                 SetIntakeMotors(0);
         }
-    } else {
+    } 
+    else if (m_mode == IntakeMode::Stop)
+    {
+        SetIntakeMotors(0);
+    }
+    else {
         // Intaking up
         if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1)) //fast intake
         {
