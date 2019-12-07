@@ -19,7 +19,7 @@ public:
 
   float get_value();
 
-  int ArmsMidPos = 1950;
+  int ArmsMidPos = 1980;
   int ArmsLowPos = 1550;
   int RestPos = 0;
 
