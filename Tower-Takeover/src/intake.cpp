@@ -34,7 +34,7 @@ void Intake::Update()
 {
     StateMachine& sm = GetStateMachine();
 
-    if (sm.GetState() != State::Rest && m_mode != IntakeMode::Stop)
+    if (sm.GetState() == State::TrayOut && m_mode != IntakeMode::Stop)
     {
         m_mode = IntakeMode::Stop;
         printf("Stop Intake because of Tray and Arm \n");
@@ -133,6 +133,17 @@ void Intake::Update()
 
 void SetIntake(int speed)
 {
-    GetIntake().m_mode = IntakeMode::Intake;
+    if (speed > 0)
+    {
+        GetIntake().m_mode = IntakeMode::Intake;
+    }
+    else if (speed < 0)
+    {
+        GetIntake().m_mode = IntakeMode::Outtake;
+    }
+    else
+    {
+        GetIntake().m_mode = IntakeMode::Hold;
+    }
     SetIntakeMotors(speed);
 }

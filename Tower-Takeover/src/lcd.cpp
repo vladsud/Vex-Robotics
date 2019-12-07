@@ -107,10 +107,10 @@ void LCD::Update()
         static lv_style_t style_screen;
         lv_style_copy(&style_screen, &lv_style_plain);
 
-        float temp = motor_get_temperature(liftMotorPort);
-        printf("Motor Temperature: %.2f\n", temp);
-
-        if (temp >= 55)
+        float tempLift = motor_get_temperature(liftMotorPort);
+        float tempIntakeLeft = motor_get_temperature(liftMotorPort);
+        float tempIntakeRight = motor_get_temperature(liftMotorPort);
+        if (tempLift >= 55 || tempIntakeLeft >= 55 || tempIntakeRight >= 55)
         {
             style_screen.body.main_color = LV_COLOR_RED;
             style_screen.body.grad_color = LV_COLOR_RED;

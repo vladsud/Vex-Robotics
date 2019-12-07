@@ -42,7 +42,7 @@ void CubeTray::Update()
     }
     else if (desiredState == State::Rest)
     {
-        if (GetLift().get_value() < GetLift().ArmsLowPos && currentRotation >= restValue + 15)
+        if (GetLift().get_value() < GetLift().ArmsLowPos + 300 && currentRotation >= restValue + 15)
         {
             motor = -127;
         }
