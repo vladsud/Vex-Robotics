@@ -441,7 +441,7 @@ struct TurnPrecise : public Action
     {
         // 10 points per degree of angle
         static constexpr unsigned int points[] = { 8,  9, 200, 500, UINT_MAX};
-        static constexpr unsigned int speeds[] = { 0, 18,  80, 200, 221};
+        static constexpr unsigned int speeds[] = { 0, 18,  80, 120, 150};
 
         // positive for positive (clock-wise) turns
         int error = GetError();

@@ -18,7 +18,7 @@ using namespace pros::c;
 
 void RunAtonProtected()
 {
-    printf("Unprotected aton\n");
+    printf("Protected aton\n");
 
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});

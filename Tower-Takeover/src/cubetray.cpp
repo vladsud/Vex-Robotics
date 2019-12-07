@@ -25,7 +25,7 @@ void CubeTray::Update()
     if (desiredState == State::TrayOut)
     {
         // only run if the button is held down
-        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+        if (isAuto() || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
         {
             if (currentRotation < midValue - 300)
             {
@@ -35,8 +35,6 @@ void CubeTray::Update()
             {
                 motor = pid.GetPower(currentRotation, upValue, -19, -8000);
             }
-            
-
         }
         // printf("Moving out: %d %d\n", currentRotation, motor);
     }

@@ -13,7 +13,7 @@
 
 void RunAtonUnprotected()
 {
-    printf("Protected aton\n");
+    printf("Unprotected aton\n");
 
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});
@@ -23,13 +23,18 @@ void RunAtonUnprotected()
     OpenArmsOnStart();
 
     SetIntake(127);
-    MoveStreight(6000, 60, -90);
-
-    TurnToAngle(60);    
+    MoveStreight(5800, 60, -90);
+ 
+    int turnAngle = 67;
+    TurnToAngle(turnAngle);    
     GetIntake().m_mode = IntakeMode::Hold;
-    MoveStreight(5000, 80, 60);
+    MoveStreight(4400, 80, turnAngle);
 
     DoTrayAction(State::TrayOut);
-    MoveStreight(-1500, 60, 60);
+    Do(MoveAction(300, 30));
+    
+    Do(MoveAction(-1500, 60));
+    // MoveStreight(-1500, 60, 60);
+    
     DoTrayAction(State::Rest);
 }

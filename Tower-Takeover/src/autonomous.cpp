@@ -130,17 +130,16 @@ void autonomous()
 
     if (lcd.AtonSkills)
     {
-        lcd.AtonBlue = false;
+        lcd.AtonRed = false;
         lcd.AtonProtected = false;
-        lcd.AtonClimbPlatform = true;
     }
 
     // setup coordinates
-    if (main.lcd.AtonBlue)
+    if (main.lcd.AtonRed)
         ReportStatus("Flipping coordinates\n");
-    main.tracker.FlipX(main.lcd.AtonBlue);
-    main.drive.FlipX(main.lcd.AtonBlue);
-    //main.vision.SetFlipX(main.lcd.AtonBlue);
+    main.tracker.FlipX(main.lcd.AtonRed);
+    main.drive.FlipX(main.lcd.AtonRed);
+    //main.vision.SetFlipX(main.lcd.AtonRed);
 
 #ifndef OFFICIAL_RUN
     // Debugging code - should not run in real autonomous

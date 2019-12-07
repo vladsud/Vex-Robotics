@@ -94,7 +94,7 @@ void Intake::Update()
     // If not intaking
     if (m_mode == IntakeMode::Hold) {
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
-        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT))
+        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT) || isAuto())
         {
             if (!cubeIn && sm.GetState() == State::Rest)
             {
