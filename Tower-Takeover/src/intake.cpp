@@ -47,7 +47,7 @@ void Intake::Update()
     // Get new controller press
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
-        if (m_mode == IntakeMode::Intake)
+        if (m_mode == IntakeMode::Intake || m_mode == IntakeMode::IntakeTower)
         {
             m_mode = IntakeMode::Hold;
         }
@@ -58,7 +58,7 @@ void Intake::Update()
     }
     else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
-        if (m_mode == IntakeMode::Outtake)
+        if (m_mode == IntakeMode::Outtake || m_mode == IntakeMode::IntakeTower)
         {
             m_mode = IntakeMode::Hold;
         } 
