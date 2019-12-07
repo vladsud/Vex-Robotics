@@ -14,12 +14,13 @@ private:
     pros::ADIAnalogIn leftIntakeLineTracker;
     pros::ADIAnalogIn rightIntakeLineTracker;
 
-    const int cubeIn = 1650;
-    const int cubeOut = 1850;
+    const int cubeIn = 2600;
+    const int cubeOut = 2800;
     const int intake_normal_speed = 127; 
     const int intake_slow_speed = 60; 
 
     int count = 0;
+    int count2 = 0;
 
 public:
     Intake();

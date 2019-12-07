@@ -12,7 +12,6 @@ extern bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digi
 void SetIntakeMotors(int power) {
     motor_move(intakeLeftPort, power);
     motor_move(intakeRightPort, -power);
-    printf("Set Intake to : %d", power);
 }
 
 Intake::Intake()
@@ -58,34 +57,42 @@ void Intake::Update()
         // If cube is not in slowing intake
         if (!cubeIn)
         {
+            count2 = 0;
             SetIntakeMotors(intake_normal_speed);
         }
         // When in, stop intaking and cancel action
         else
         {
+            if (count2 < 10)
+            {
+                SetIntakeMotors(intake_normal_speed);
+                count2++;
+            }
             SetIntakeMotors(0);
         }
         return;
     }
 
     // If not intaking
-    else if (m_mode == IntakeMode::Hold) {
+    if (m_mode == IntakeMode::Hold) {
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
-        if (!cubeIn && sm.GetState() == State::Rest)
+        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT))
         {
-            count = 0;
-            SetIntakeMotors(-40);
+            if (!cubeIn && sm.GetState() == State::Rest)
+            {
+                count = 0;
+                SetIntakeMotors(-40);
+            }
+            else
+            {
+                SetIntakeMotors(0);
+            }
         }
         else
         {
-            count++;
-            if (count < 40)
-            {
-                SetIntakeMotors(-20);
-            }
-            else
-                SetIntakeMotors(0);
+            SetIntakeMotors(0);
         }
+        
     } 
     else if (m_mode == IntakeMode::Stop)
     {

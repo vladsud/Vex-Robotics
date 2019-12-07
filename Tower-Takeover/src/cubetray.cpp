@@ -27,13 +27,22 @@ void CubeTray::Update()
         // only run if the button is held down
         if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
         {
-            motor = pid.GetPower(currentRotation, upValue, -25, -8000);
+            if (currentRotation < midValue)
+            {
+                motor = pid.GetPower(currentRotation, upValue, -10, -2000);
+            }
+            else
+            {
+                motor = pid.GetPower(currentRotation, upValue, -20, -8000);
+            }
+            
+
         }
         // printf("Moving out: %d %d\n", currentRotation, motor);
     }
     else if (desiredState == State::Rest)
     {
-        if (GetLift().get_value() < GetLift().ArmsLowPos && currentRotation >= restValue)
+        if (GetLift().get_value() < GetLift().ArmsLowPos && currentRotation >= restValue + 15)
         {
             motor = -127;
         }
