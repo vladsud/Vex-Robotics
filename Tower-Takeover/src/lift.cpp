@@ -65,13 +65,14 @@ void Lift::Update()
 
     m_moving = (motor != 0);
 
+
     // hack to keep arms low
     m_count++;
-    if (sm.GetState() == State::Rest && motor == 0 && (m_count % 20) < 10)
+    if (sm.GetState() == State::Rest && motor == 0 && (m_count % 100) < 50)
     {
-        motor = -10;
+        motor = 20;
     }
-   
+    
     SetLiftMotor(-motor);
 }
 

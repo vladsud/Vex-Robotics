@@ -20,7 +20,7 @@ public:
   float get_value();
 
   int ArmsMidPos = 1950;
-  int ArmsLowPos = 1600;
+  int ArmsLowPos = 1550;
   int RestPos = 0;
 
 };

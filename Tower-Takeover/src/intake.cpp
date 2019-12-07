@@ -50,7 +50,7 @@ void Intake::Update()
         if (m_mode == IntakeMode::Intake)
         {
             m_mode = IntakeMode::Hold;
-        } 
+        }
         else
         {
             m_mode = IntakeMode::Intake;
@@ -86,6 +86,7 @@ void Intake::Update()
                 count++;
             }
             SetIntakeMotors(0);
+            m_mode = IntakeMode::Hold;
         }
         return;
     }
