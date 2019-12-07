@@ -16,9 +16,9 @@ using namespace pros::c;
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
 
-void RunAtonFirstPos()
+void RunAtonProtected()
 {
-    printf("First aton\n");
+    printf("Protected aton\n");
 
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});

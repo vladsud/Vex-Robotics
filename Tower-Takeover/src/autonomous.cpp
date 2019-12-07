@@ -131,7 +131,7 @@ void autonomous()
     if (lcd.AtonSkills)
     {
         lcd.AtonBlueRight = false;
-        lcd.AtonFirstPos = false;
+        lcd.AtonProtected = false;
         lcd.AtonClimbPlatform = true;
     }
 
@@ -147,22 +147,22 @@ void autonomous()
     if (g_mode == AtonMode::TestRun && !competition_is_autonomous())
     {
         // lcd.AtonClimbPlatform = false;
-        // lcd.AtonFirstPos = false;
+        // lcd.AtonProtected = false;
 
-        RunAtonFirstPos();
-        // RunAtonSecondPos();
+        RunAtonProtected();
+        // RunAtonUnprotected();
         // RunSuperSkills();
     }
     else
 #endif // !OFFICIAL_RUN
     {
-        // if you remove this (super skills) to run old skills, fix lcd.AtonFirstPos = true above!!!
+        // if you remove this (super skills) to run old skills, fix lcd.AtonProtected = true above!!!
         if (lcd.AtonSkills)
             RunSuperSkills();
-        else if (lcd.AtonFirstPos)
-            RunAtonFirstPos();
+        else if (lcd.AtonProtected)
+            RunAtonProtected();
         else
-            RunAtonSecondPos();
+            RunAtonUnprotected();
     }
     // unused variables in final build
     UNUSED_VARIABLE(time);

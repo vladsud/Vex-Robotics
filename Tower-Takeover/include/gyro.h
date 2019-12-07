@@ -66,7 +66,6 @@ class GyroBoth
     int Get() const;
     void SetAngle(int angle);
     void ResetState();
-    void PrintValues();
 };
 
 

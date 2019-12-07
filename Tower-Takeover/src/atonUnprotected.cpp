@@ -11,9 +11,9 @@
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
 
-void RunAtonSecondPos()
+void RunAtonUnprotected()
 {
-    printf("Second aton\n");
+    printf("Unprotected aton\n");
 
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});

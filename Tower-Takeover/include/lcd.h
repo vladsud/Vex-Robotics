@@ -18,7 +18,7 @@ class LCD
 {
 public:
 	bool AtonBlueRight = true;
-	bool AtonFirstPos = true;
+	bool AtonProtected = true;
 	bool AtonClimbPlatform = true;
 	bool AtonSkills = false;
     bool IsTankDrive = false;
@@ -41,7 +41,7 @@ private:
 
     const Button m_buttons[2] = {
         {"Blue (right)", "Red (left)", AtonBlueRight},
-        {"First", "Second", AtonFirstPos},
+        {"Protected", "Unprotected", AtonProtected},
         // {"Tank Drive", "Arcade Drive", IsTankDrive},
     };
 };

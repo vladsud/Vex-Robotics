@@ -398,7 +398,7 @@ void WaitAfterMove(unsigned int timeout /*= 0*/)
     // Not enough time in "main" atonomous
     auto& lcd = GetLcd();
     if (timeout == 0)
-        timeout = lcd.AtonSkills || !lcd.AtonFirstPos || !lcd.AtonClimbPlatform ? 500 : 200;
+        timeout = lcd.AtonSkills || !lcd.AtonProtected || !lcd.AtonClimbPlatform ? 500 : 200;
     */
     Do(WaitTillStopsAction(), timeout == 0 ? 200 : timeout);
 }

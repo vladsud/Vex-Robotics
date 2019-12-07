@@ -146,11 +146,6 @@ void GyroBoth::Unfreeze()
     m_wheels.Unfreeze();
 }
 
-void GyroBoth::PrintValues()
-{
-    ReportStatus("Gyro readings: %d %d %d\n", m_gyro.Get() / Multiplier, m_gyro2.Get() / Multiplier, m_wheels.Get() / Multiplier);
-
-}
 int GyroBoth::Get() const
 {
     int res = (2 * m_gyro.Get() +  3 * m_gyro2.Get() + 1 * m_wheels.Get()) / 6;
