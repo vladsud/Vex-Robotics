@@ -45,7 +45,7 @@ void Lift::Update()
     }
     else if (sm.GetState() == State::TrayOut && GetCubeTray().IsMoving())
     {
-        SetLiftMotor(-30);
+        //SetLiftMotor(-30);
         m_moving = false;
         return;
     }

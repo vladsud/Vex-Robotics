@@ -5,6 +5,7 @@
 enum class IntakeMode {
     Intake,
     Hold,
+    Outtake,
     Stop,
     IntakeTower,
 };
@@ -20,7 +21,6 @@ private:
     const int intake_slow_speed = 60; 
 
     int count = 0;
-    int count2 = 0;
 
 public:
     Intake();

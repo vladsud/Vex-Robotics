@@ -27,13 +27,13 @@ void CubeTray::Update()
         // only run if the button is held down
         if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
         {
-            if (currentRotation < midValue)
+            if (currentRotation < midValue - 300)
             {
-                motor = pid.GetPower(currentRotation, upValue, -10, -2000);
+                motor = pid.GetPower(currentRotation, upValue, -16, -2000);
             }
             else
             {
-                motor = pid.GetPower(currentRotation, upValue, -20, -8000);
+                motor = pid.GetPower(currentRotation, upValue, -19, -8000);
             }
             
 

@@ -45,10 +45,27 @@ void Intake::Update()
     bool cubeIn = IsCubeIn(leftIntakeLineTracker) && IsCubeIn(rightIntakeLineTracker);
 
     // Get new controller press
-    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1)
-        || controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
+    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
-        m_mode = m_mode == IntakeMode::Intake ? IntakeMode::Hold : IntakeMode::Intake;
+        if (m_mode == IntakeMode::Intake)
+        {
+            m_mode = IntakeMode::Hold;
+        } 
+        else
+        {
+            m_mode = IntakeMode::Intake;
+        }
+    }
+    else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
+    {
+        if (m_mode == IntakeMode::Outtake)
+        {
+            m_mode = IntakeMode::Hold;
+        } 
+        else
+        {
+            m_mode = IntakeMode::Outtake;
+        }
     }
     else if (m_mode == IntakeMode::IntakeTower || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP)) //slow outake 
     {
@@ -57,16 +74,16 @@ void Intake::Update()
         // If cube is not in slowing intake
         if (!cubeIn)
         {
-            count2 = 0;
+            count = 0;
             SetIntakeMotors(intake_normal_speed);
         }
         // When in, stop intaking and cancel action
         else
         {
-            if (count2 < 10)
+            if (count < 10)
             {
                 SetIntakeMotors(intake_normal_speed);
-                count2++;
+                count++;
             }
             SetIntakeMotors(0);
         }
@@ -76,11 +93,10 @@ void Intake::Update()
     // If not intaking
     if (m_mode == IntakeMode::Hold) {
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
-        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT))
+        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT))
         {
             if (!cubeIn && sm.GetState() == State::Rest)
             {
-                count = 0;
                 SetIntakeMotors(-40);
             }
             else
@@ -100,13 +116,13 @@ void Intake::Update()
     }
     else {
         // Intaking up
-        if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1)) //fast intake
+        if (m_mode == IntakeMode::Intake) //fast intake
         {
             SetIntakeMotors(intake_normal_speed);
         }
 
         //Intaking down    
-        if (joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2)) //slow outake 
+        if (m_mode == IntakeMode::Outtake) //slow outake 
         {
             SetIntakeMotors(-intake_slow_speed);
         }
