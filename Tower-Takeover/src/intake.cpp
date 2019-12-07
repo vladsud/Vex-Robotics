@@ -15,7 +15,7 @@ void SetIntakeMotors(int power) {
 }
 
 Intake::Intake()
-    : leftIntakeLineTracker(leftIntakeLineTrackerPort), rightIntakeLineTracker(rightIntakeLineTrackerPort)
+    : intakeLineTracker(intakeLineTrackerPort)
 {
     motor_set_brake_mode(intakeLeftPort, E_MOTOR_BRAKE_HOLD);
     motor_set_brake_mode(intakeRightPort, E_MOTOR_BRAKE_HOLD);
@@ -42,7 +42,7 @@ void Intake::Update()
         return;
     }
 
-    bool cubeIn = IsCubeIn(leftIntakeLineTracker) && IsCubeIn(rightIntakeLineTracker);
+    bool cubeIn = IsCubeIn(intakeLineTracker);
 
     // Get new controller press
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))

@@ -56,16 +56,7 @@ void Lift::Update()
     }
     else if (sm.GetState() == State::Rest) 
     {
-        //count++;
-
-        motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);
-        
-        /*
-        if (motor == 0 && (count % 100) < 50)
-        {
-            motor = -20;
-        }
-        */
+        motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);        
     }
     else if (sm.GetState() == State::Debug)
     {
@@ -73,8 +64,15 @@ void Lift::Update()
     }
 
     m_moving = (motor != 0);
+
+    // hack to keep arms low
+    m_count++;
+    if (sm.GetState() == State::Rest && motor == 0 && (m_count % 20) < 10)
+    {
+        motor = -10;
+    }
+   
     SetLiftMotor(-motor);
-    //printf("UP: %d DOWN: %d\n", goUP, goDOWN);
 }
 
 struct LiftAction : public Action

@@ -12,8 +12,7 @@ enum class IntakeMode {
 
 class Intake {
 private:
-    pros::ADIAnalogIn leftIntakeLineTracker;
-    pros::ADIAnalogIn rightIntakeLineTracker;
+    pros::ADIAnalogIn intakeLineTracker;
 
     const int cubeIn = 2600;
     const int cubeOut = 2800;

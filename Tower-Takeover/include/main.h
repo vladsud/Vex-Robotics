@@ -126,8 +126,7 @@ private:
 #define gyroPort 8
 #define gyroPort2 1
 
-#define leftIntakeLineTrackerPort 99
-#define rightIntakeLineTrackerPort 99
+#define intakeLineTrackerPort 3
 
 /*******************************************************************************
 *

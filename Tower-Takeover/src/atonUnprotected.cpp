@@ -13,25 +13,23 @@
 
 void RunAtonUnprotected()
 {
-    printf("Unprotected aton\n");
+    printf("Protected aton\n");
 
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});
 
-    OpenArmsOnStart();
-
     // NOTE: Replace MoveStreight() with MoveExactWithAngle()
 
-    SetIntake(127);
-    MoveStreight(5000, 80, -90);
+    OpenArmsOnStart();
 
-    TurnToAngle(-225);
-    
-    MoveStreight(4500, 80, -225);
+    SetIntake(127);
+    MoveStreight(6000, 60, -90);
+
+    TurnToAngle(60);    
     GetIntake().m_mode = IntakeMode::Hold;
-    MoveStreight(500, 50, -225);
+    MoveStreight(5000, 80, 60);
 
     DoTrayAction(State::TrayOut);
-    MoveStreight(-1500, 60, -225);
+    MoveStreight(-1500, 60, 60);
     DoTrayAction(State::Rest);
 }

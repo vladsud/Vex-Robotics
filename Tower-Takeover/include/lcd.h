@@ -17,7 +17,7 @@ struct Button
 class LCD
 {
 public:
-	bool AtonBlueRight = true;
+	bool AtonBlue = true;
 	bool AtonProtected = true;
 	bool AtonClimbPlatform = true;
 	bool AtonSkills = false;
@@ -40,7 +40,7 @@ private:
     unsigned int m_count = 0;
 
     const Button m_buttons[2] = {
-        {"Blue (right)", "Red (left)", AtonBlueRight},
+        {"Blue", "Red", AtonBlue},
         {"Protected", "Unprotected", AtonProtected},
         // {"Tank Drive", "Arcade Drive", IsTankDrive},
     };

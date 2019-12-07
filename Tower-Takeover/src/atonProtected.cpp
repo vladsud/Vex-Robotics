@@ -18,24 +18,26 @@ using namespace pros::c;
 
 void RunAtonProtected()
 {
-    printf("Protected aton\n");
+    printf("Unprotected aton\n");
 
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});
 
-    // NOTE: Replace MoveStreight() with MoveExactWithAngle()
-
     OpenArmsOnStart();
 
-    SetIntake(127);
-    MoveStreight(6000, 60, -90);
+    // NOTE: Replace MoveStreight() with MoveExactWithAngle()
 
-    TurnToAngle(60);    
+    SetIntake(127);
+    MoveStreight(5000, 80, -90);
+
+    TurnToAngle(-225);
+    
+    MoveStreight(4500, 80, -225);
     GetIntake().m_mode = IntakeMode::Hold;
-    MoveStreight(5000, 80, 60);
+    MoveStreight(500, 50, -225);
 
     DoTrayAction(State::TrayOut);
-    MoveStreight(-1500, 60, 60);
+    MoveStreight(-1500, 60, -225);
     DoTrayAction(State::Rest);
 }
  

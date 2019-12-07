@@ -9,6 +9,7 @@ private:
   PidImpl pid {1 /*precision*/};
 
   float currentPosition;
+  int m_count = 0;
 
 public:
   Lift();
@@ -18,8 +19,8 @@ public:
 
   float get_value();
 
-  int ArmsMidPos = 1900;
-  int ArmsLowPos = 1420;
+  int ArmsMidPos = 1950;
+  int ArmsLowPos = 1600;
   int RestPos = 0;
 
 };
