@@ -52,7 +52,7 @@ void Lift::Update()
     else if (sm.GetState() == State::InitializationState)
     {
         // OpenArmsOnStart();
-        motor = pid.GetPower(currentPosition, ArmsMidPos - 250, 1, 1000, PidPrecision::HigerOk);
+        motor = pid.GetPower(currentPosition, ArmsMidPos - 150, 1, 500, PidPrecision::HigerOk);
         if (motor == 0)
         {
             sm.SetState(State::Rest);

@@ -13,4 +13,4 @@ int CalcAngleToPoint(double x, double y);
 void TurnToAngleIfNeeded(int angle);
 
 void WaitAfterMoveReportDistance(int distance, unsigned int timeout = 0);
-void MoveStreight(int distance, int power, int angle);
+void MoveStraight(int distance, int power, int angle);

@@ -53,7 +53,7 @@ void CubeTray::Update()
     else if (desiredState == State::InitializationState) 
     {
         //printf("Move Tray Now");
-        motor = pid.GetPower(currentRotation, midValue, -4, -4000);
+        motor = pid.GetPower(currentRotation, midValue - 300, -4, -4000);
     }
     else if (sm.GetState() == State::Debug)
     {

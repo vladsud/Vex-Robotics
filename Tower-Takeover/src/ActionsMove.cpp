@@ -112,7 +112,7 @@ private:
     unsigned int m_origDistanceToMove; // used for logging - m_distanceToMove can change over lifetime of this class 
 };
 
-void MoveStreight(int distance, int power, int angle) {
+void MoveStraight(int distance, int power, int angle) {
     TurnToAngleIfNeeded(angle);
     KeepAngle angleObj(angle);
     Do(MoveAction(distance, power));
