@@ -22,42 +22,35 @@ void CubeTray::Update()
     State desiredState = sm.GetState();
     int motor = 0;
 
-    if (desiredState == State::TrayOut)
+    switch (desiredState)
     {
-        // only run if the button is held down
-        if (isAuto() || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
-        {
-            if (currentRotation < midValue - 300)
+        case State::TrayOut:
+            // only run if the button is held down
+            if (isAuto() || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             {
-                motor = pid.GetPower(currentRotation, upValue, -16, -2000);
+                if (currentRotation < cubeArmsUp - 300)
+                {
+                    motor = pid.GetPower(currentRotation, cubeTeayOut, -16, -2000);
+                }
+                else
+                {
+                    motor = pid.GetPower(currentRotation, cubeTeayOut, -19, -8000);
+                }
             }
-            else
+            break;
+        case State::Rest:
+            if (GetLift().get_value() < GetLift().ArmsTrayCanMoveDown && currentRotation >= restValue + 15)
             {
-                motor = pid.GetPower(currentRotation, upValue, -19, -8000);
+                motor = -127;
             }
-        }
-        // printf("Moving out: %d %d\n", currentRotation, motor);
-    }
-    else if (desiredState == State::Rest)
-    {
-        if (GetLift().get_value() < GetLift().ArmsLowPos + 300 && currentRotation >= restValue + 15)
-        {
-            motor = -127;
-        }
-        //printf("Rotation: %d", currentRotation);
-    }
-    else if (desiredState == State::ArmsUpMid || desiredState == State::ArmsUpLow) 
-    {
-        motor = pid.GetPower(currentRotation, midValue, -2, -4000);
-    }
-    else if (desiredState == State::InitializationState) 
-    {
-        //printf("Move Tray Now");
-        motor = pid.GetPower(currentRotation, midValue - 300, -4, -4000);
-    }
-    else if (sm.GetState() == State::Debug)
-    {
-        motor = 0;
+            break;
+        case State::ArmsUpMid:
+        case State::ArmsUpLow: 
+            motor = pid.GetPower(currentRotation, cubeArmsUp, -2, -4000);
+            break;
+        case State::InitializationState: 
+            motor = pid.GetPower(currentRotation, cubeInitialization, -4, -4000);
+            break;
     }
 
     m_moving = (motor != 0);

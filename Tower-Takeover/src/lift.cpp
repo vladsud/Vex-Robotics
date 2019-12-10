@@ -35,41 +35,28 @@ void Lift::Update()
 
     int motor = 0;
 
-    if (sm.GetState() == State::ArmsUpMid)
-    {
-        motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000, PidPrecision::HigerOk);
-    }
-    else if (sm.GetState() == State::ArmsUpLow)
-    {
-        motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000);
-    }
-    else if (sm.GetState() == State::TrayOut && GetCubeTray().IsMoving())
-    {
-        //SetLiftMotor(-30);
-        m_moving = false;
-        return;
-    }
-    else if (sm.GetState() == State::InitializationState)
-    {
-        // OpenArmsOnStart();
-        motor = pid.GetPower(currentPosition, ArmsMidPos - 150, 1, 500, PidPrecision::HigerOk);
-        if (motor == 0)
-        {
+    switch (sm.GetState()) {
+        case State::ArmsUpMid:
+            motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000, PidPrecision::HigerOk);
+            break;
+        case State::ArmsUpLow:
+            motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000, PidPrecision::HigerOk);
+            break;
+        case State::TrayOut:
+            // if (GetCubeTray().IsMoving())
+            break;
+        case State::InitializationState:
+            motor = pid.GetPower(currentPosition, ArmsInitialization, 1, 500, PidPrecision::HigerOk);
+            if (motor != 0)
+                break;
             sm.SetState(State::Rest);
-        }
-        // printf("Position: %d  Speed: %d\n", currentArm, motor);
-    }
-    else if (sm.GetState() == State::Rest) 
-    {
-        motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);        
-    }
-    else if (sm.GetState() == State::Debug)
-    {
-        motor = 0;
+            // fall through
+        case State::Rest: 
+            motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);        
+            break;
     }
 
     m_moving = (motor != 0);
-
 
     // hack to keep arms low
     m_count++;
