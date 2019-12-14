@@ -23,24 +23,28 @@ void RunAtonProtected()
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});
 
-
-    Do(MoveAction(500, 60));
-    Do(MoveAction(-500, 60));
-
+    
+    Do(MoveAction(1000, 80));
+    Do(MoveAction(-1000, 80));
+    
     OpenArmsOnStart();
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
     SetIntake(127);
     Wait(500);
-    MoveStraight(5000, 80, -90);
+    MoveStraight(5000, 70, -90);
 
     TurnToAngle(-210);
     
-    MoveStraight(4500, 80, -210);
+    MoveStraight(2000, 80, -210);
+    MoveStraight(1500, 50, -210);
+
     GetIntake().m_mode = IntakeMode::Hold;
 
-    Do(MoveAction(500, 50));
+    //Wait(500);
+
+    Do(MoveAction(700, 50));
 
     DoTrayAction(State::TrayOut);
 

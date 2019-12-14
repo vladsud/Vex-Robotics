@@ -23,15 +23,15 @@ void RunAtonUnprotected()
     OpenArmsOnStart();
 
     SetIntake(127);
-    MoveStraight(5800, 60, -90);
+    MoveStraight(5800, 45, -90);
  
     int turnAngle = 67;
     TurnToAngle(turnAngle);    
     GetIntake().m_mode = IntakeMode::Hold;
-    MoveStraight(4400, 80, turnAngle);
+    MoveStraight(4000, 80, turnAngle);
 
     DoTrayAction(State::TrayOut);
-    Do(MoveAction(300, 30));
+    //Do(MoveAction(300, 30));
     
     Do(MoveAction(-1500, 60));
     // MoveStraight(-1500, 60, 60);

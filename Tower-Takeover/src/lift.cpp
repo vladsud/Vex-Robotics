@@ -3,6 +3,7 @@
 #include "pros/motors.h"
 #include "StateMachine.h"
 #include "cubeTray.h"
+#include "intake.h"
 #include "Actions.h"
 
 using namespace pros;
@@ -80,8 +81,16 @@ struct LiftAction : public Action
     }
 };
 
+
 void OpenArmsOnStart()
 {
     Do(LiftAction(State::InitializationState));
+    SetIntake(-70);
     Do(LiftAction(State::Rest));
+    SetIntake(0);
+}
+
+void TowerMid()
+{
+    Do(LiftAction(State::ArmsUpMid));
 }

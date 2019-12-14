@@ -98,9 +98,15 @@ void Intake::Update()
                 !cubeIn && sm.GetState() == State::Rest)
         {
             SetIntakeMotors(-40);
+            count = 0;
         }
         else
         {
+            if (count < 15)
+            {
+                SetIntakeMotors(-40);
+                count++;
+            }
             SetIntakeMotors(0);
         }
     } 

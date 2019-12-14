@@ -29,3 +29,4 @@ public:
 
 Lift& GetLift();
 void OpenArmsOnStart();
+void TowerMid();
