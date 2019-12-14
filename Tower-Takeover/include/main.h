@@ -76,6 +76,9 @@ public:
    }
 
    int GetPower(int reading, int target, float kp, int ki, PidPrecision precision = PidPrecision::Precise);
+   void Reset() {
+      m_target = 0;
+   }
 
 private:
    int m_target = 0;

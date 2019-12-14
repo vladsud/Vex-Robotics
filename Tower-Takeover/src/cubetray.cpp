@@ -28,17 +28,20 @@ void CubeTray::Update()
             // only run if the button is held down
             if (isAuto() || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             {
-                if (currentRotation < cubeArmsUp - 300)
+                // Start fast, slow down half way through
+                if (currentRotation < cubeSlowerOut)
                 {
-                    motor = pid.GetPower(currentRotation, cubeTeayOut, -16, -2000);
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -16, -2000);
+                } else {
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -19, -8000);
                 }
-                else
-                {
-                    motor = pid.GetPower(currentRotation, cubeTeayOut, -19, -8000);
-                }
+            } else if (currentRotation < restValue + 100) {
+                // if tray is barely out and no buttons are pressed, reset back to original state
+                sm.SetState(State::Rest);
             }
             break;
         case State::Rest:
+            pid.Reset();
             if (GetLift().get_value() < GetLift().ArmsTrayCanMoveDown && currentRotation >= restValue + 15)
             {
                 motor = -127;
