@@ -180,6 +180,7 @@ void setMotors(uint8_t forwardPort, uint8_t backPort, int speed)
     const int speedLimitOnReverse = 20;
 
     speed = AdjustSpeed(speed);
+    /*
     if (speed < 0 && motor_get_actual_velocity(forwardPort) > 70)
     {
         motor_move(forwardPort, max(speed, -1));
@@ -191,6 +192,7 @@ void setMotors(uint8_t forwardPort, uint8_t backPort, int speed)
         motor_move(forwardPort, speed);
     }
     else
+    */
     {
         motor_move(backPort, speed);
         motor_move(forwardPort, speed);

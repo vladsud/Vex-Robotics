@@ -2,6 +2,8 @@
 #include "main.h"
 #include "drive.h"
 
+#if LineTracker
+
 using namespace pros::c;
 
 LineTracker::LineTracker(unsigned int port)
@@ -121,3 +123,5 @@ bool LineTracker::HasWhiteLine(int shouldHaveTravelled)
 
     return true;
 }
+
+#endif // LineTracker

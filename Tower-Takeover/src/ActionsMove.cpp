@@ -311,7 +311,7 @@ unsigned int HitTheWall(int distanceForward, int angle)
     return distance;
 }
 
-#if 0
+#if LineTracker
 template<typename TMoveAction>
 struct MoveExactWithLineCorrectionAction : public TMoveAction
 {

@@ -1,5 +1,7 @@
 #pragma once
 
+#if LineTracker
+
 #include "pros/adi.hpp"
 
 class LineTracker
@@ -39,3 +41,5 @@ protected:
 
 LineTracker& GetLineTrackerLeft();
 LineTracker& GetLineTrackerRight();
+
+#endif // LineTracker

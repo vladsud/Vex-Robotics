@@ -41,9 +41,10 @@ class Main
 	CubeTray cubetray;
 	Lift lift;
 	//Vision vision;
+#if LineTracker
 	LineTracker lineTrackerLeft {lineTrackerLeftPort};
 	LineTracker lineTrackerRight {lineTrackerRightPort};
-
+#endif
 	// Time is im milliseconds!
 	// But time resolution might be coarser, in the range of 1-10 ms
 	unsigned int GetTime() { return m_Ticks; }

@@ -43,8 +43,11 @@ CubeTray& GetCubeTray() { return GetMain().cubetray; }
 Lift& GetLift() { return GetMain().lift; }
 LCD& GetLcd() { return GetMain().lcd; }
 Intake& GetIntake() { return GetMain().intake; }
+
+#if LineTracker
 LineTracker& GetLineTrackerLeft() { return GetMain().lineTrackerLeft; }
 LineTracker& GetLineTrackerRight() { return GetMain().lineTrackerRight; }
+#endif // LineTracker
 
 void MainRunUpdateCycle() { GetMain().Update(); }
 
@@ -90,12 +93,15 @@ void Main::UpdateFastSystems()
 	gyro.Integrate();
 	tracker.Update();
 
-	
+#if LineTracker
+	// Line trackers depend on it
+	drive.UpdateDistanes();
+
 	// We go through line very quickly, so we do not have enough precision if we check it
 	// every 10 ms.
-	drive.UpdateDistanes();
 	lineTrackerLeft.Update();
 	lineTrackerRight.Update();
+#endif // LineTracker
 }
 
 void Main::UpdateAllSystems()
