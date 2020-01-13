@@ -52,14 +52,14 @@ void CubeTray::Update()
             motor = pid.GetPower(currentRotation, cubeArmsUp, -2, -4000);
             break;
         case State::InitializationState: 
-            motor = pid.GetPower(currentRotation, cubeInitialization, -4, -4000);
+            // motor = pid.GetPower(currentRotation, cubeInitialization + 5, -4, -4000);
             break;
     }
 
     m_moving = (motor != 0);
 
-    // printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
-    motor_move(cubetrayPort, motor);
+    printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
+    motor_move(cubetrayPort, -motor);
 }
 
 struct TrayAction : public Action

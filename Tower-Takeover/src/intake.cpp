@@ -10,8 +10,8 @@ using namespace pros::c;
 extern bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t button);
 
 void SetIntakeMotors(int power) {
-    motor_move(intakeLeftPort, power);
-    motor_move(intakeRightPort, -power);
+    motor_move(intakeLeftPort, -power);
+    motor_move(intakeRightPort, power);
 }
 
 Intake::Intake()
