@@ -5,11 +5,11 @@
 class CubeTray
 {  
 private:
-  const int cubeTrayOut = 2200;
-  const int cubeArmsUp = 1500;
-  const int cubeSlowerOut = 1200;
-  const int cubeInitialization = 1200;
-  const int restValue = 806;
+  const int cubeTrayOut = 2800;
+  const int cubeArmsUp = 1830;
+  const int cubeSlowerOut = (cubeArmsUp + restValue)/2;
+  const int cubeInitialization = 1324;
+  const int restValue = 1425;
 
   bool m_moving = false;
   PidImpl pid {100};

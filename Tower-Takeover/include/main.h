@@ -106,14 +106,14 @@ private:
 * 
 *******************************************************************************/
 #define leftBackDrivePort 15
-#define leftFrontDrivePort 11
-#define rightFrontDrivePort 20
+#define leftFrontDrivePort 17
+#define rightFrontDrivePort 11
 #define rightBackDrivePort 16
 
-#define intakeLeftPort 4
-#define intakeRightPort 9
-#define cubetrayPort 1
-#define liftMotorPort 6
+#define intakeLeftPort 1
+#define intakeRightPort 21
+#define cubetrayPort 2
+#define liftMotorPort 20
 
 #define VisionPort 99
 
@@ -124,7 +124,7 @@ private:
 *
 *******************************************************************************/
 #define liftPotPort 99
-#define cubetrayPotPort 7
+#define cubetrayPotPort 1
 
 #define gyroPort 8
 #define gyroPort2 1
