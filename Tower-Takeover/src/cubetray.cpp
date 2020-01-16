@@ -31,10 +31,14 @@ void CubeTray::Update()
                 // Start fast, slow down half way through
                 if (currentRotation < cubeSlowerOut)
                 {
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -16, -2000);
-                } else {
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -19, -8000);
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -10, -2000);
                 }
+                else
+                {
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -16, -8000);
+                }
+                motor = (motor + m_power * 7) / 8;
+                m_power = motor;
             } else if (currentRotation < restValue + 100) {
                 // if tray is barely out and no buttons are pressed, reset back to original state
                 sm.SetState(State::Rest);
@@ -59,6 +63,7 @@ void CubeTray::Update()
     m_moving = (motor != 0);
 
     printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
+
     motor_move(cubetrayPort, -motor);
 }
 

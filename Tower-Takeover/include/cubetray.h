@@ -5,14 +5,15 @@
 class CubeTray
 {  
 private:
-  const int cubeTrayOut = 2800;
+  const int cubeTrayOut = 2600;
+  const int cubeSlowerOut = 2000;
   const int cubeArmsUp = 1830;
-  const int cubeSlowerOut = (cubeArmsUp + restValue)/2;
-  const int cubeInitialization = 1324;
   const int restValue = 1425;
+  const int cubeInitialization = 1324;
 
   bool m_moving = false;
-  PidImpl pid {100};
+  PidImpl pid {50};
+  int m_power = 0;
 
 public:
     CubeTray();

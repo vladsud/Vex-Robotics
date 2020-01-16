@@ -26,10 +26,10 @@ int PidImpl::GetPower(int reading, int target, float kp, int ki, PidPrecision pr
 
     m_errorAccumulated += error;
     float res = (float) error / kp + m_errorAccumulated / ki;
-    if (res > 255)
-        res = 255;
-    else if (res < -255)
-        res = -255;
+    if (res > 127)
+        res = 127;
+    else if (res < -127)
+        res = -127;
     return res;
 }
 
