@@ -3,7 +3,7 @@
 #include "lift.h"
 #include "cubetray.h"
 #include "Actions.h"
-
+#include "intake.h"
 #include "pros/motors.h"
 
 using namespace pros;
@@ -31,11 +31,13 @@ void CubeTray::Update()
                 // Start fast, slow down half way through
                 if (currentRotation < cubeSlowerOut)
                 {
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -10, -2000);
+                    // Fast
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -14, -8000);
                 }
                 else
                 {
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -16, -8000);
+                    // Slow
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -23, -5000);
                 }
                 motor = (motor + m_power * 7) / 8;
                 m_power = motor;
@@ -86,3 +88,14 @@ void DoTrayAction(State state)
 {
     Do(TrayAction(State::TrayOut));
 }
+
+
+void OpenTrayOnStart()
+{
+    // Do(LiftAction(State::InitializationState));
+    SetIntake(-70);
+    DoTrayAction(State::Rest);
+    Wait(500);
+    SetIntake(70);
+    // SetIntake(0);
+} 

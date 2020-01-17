@@ -20,7 +20,7 @@ void RunAtonUnprotected()
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
-    OpenArmsOnStart();
+    OpenTrayOnStart();
 
     SetIntake(127);
     MoveStraight(5800, 45, -90);

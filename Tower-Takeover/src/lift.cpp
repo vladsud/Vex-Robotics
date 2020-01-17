@@ -82,13 +82,6 @@ struct LiftAction : public Action
 };
 
 
-void OpenArmsOnStart()
-{
-    Do(LiftAction(State::InitializationState));
-    SetIntake(-70);
-    Do(LiftAction(State::Rest));
-    SetIntake(0);
-}
 
 void TowerMid()
 {

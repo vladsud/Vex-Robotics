@@ -126,8 +126,8 @@ private:
 #define liftPotPort 99
 #define cubetrayPotPort 1
 
-#define gyroPort 8
-#define gyroPort2 1
+#define gyroPort 3
+#define gyroPort2 99
 
 #define intakeLineTrackerPort 3
 

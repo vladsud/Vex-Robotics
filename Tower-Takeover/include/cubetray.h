@@ -24,3 +24,4 @@ public:
 };
 
 CubeTray& GetCubeTray();
+void OpenTrayOnStart();

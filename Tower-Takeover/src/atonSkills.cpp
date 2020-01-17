@@ -20,7 +20,7 @@ void RunSuperSkills()
     Do(MoveAction(-500, 60));
 
     // Initialize
-    OpenArmsOnStart();
+    OpenTrayOnStart();
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
