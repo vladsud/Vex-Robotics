@@ -39,7 +39,7 @@ void Intake::Update()
     {
         m_mode = IntakeMode::Stop;
         printf("Stop Intake because of Tray and Arm \n");
-        motor = 0;
+        SetIntakeMotors(0);
         return;
     }
 
@@ -105,11 +105,13 @@ void Intake::Update()
             }
 
         }
-        //return;
     }
 
     // If not intaking
     if (m_mode == IntakeMode::Hold) {
+        
+        /*
+
         //printf("Left: %d Right: %d LeftBool: %d RightBool %d \n", leftIntakeLineTracker.get_value(), rightIntakeLineTracker.get_value(), IsCubeIn(leftIntakeLineTracker), IsCubeIn(rightIntakeLineTracker));
         
         // Rest move it down
@@ -121,7 +123,7 @@ void Intake::Update()
         }
         // If hits sensor --> do 15 count of moving down then stop
         else
-        {/*
+        {
             if (count < 15)
             {
                 motor = -40;
@@ -131,10 +133,13 @@ void Intake::Update()
             {
                 motor = 0;
             }
-            */
-           motor = 0;
         }
 
+        */
+        if ((motor_get_actual_velocity(intakeLeftPort) + motor_get_actual_velocity(intakeRightPort)) < 0 && motor == 0)
+        {
+            motor = 60;
+        }
 
     } 
     else if (m_mode == IntakeMode::Stop)
@@ -154,8 +159,6 @@ void Intake::Update()
             motor = -intake_slow_speed;
         }
     }
-
-
 
     SetIntakeMotors(motor);
 

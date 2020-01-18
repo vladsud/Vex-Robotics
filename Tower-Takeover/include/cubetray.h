@@ -6,7 +6,7 @@ class CubeTray
 {  
 private:
   const int cubeTrayOut = 2600;
-  const int cubeSlowerOut = 2000;
+  const int cubeSlowerOut = 1750;
   const int cubeArmsUp = 1830;
   const int restValue = 1425;
   const int cubeInitialization = 1324;

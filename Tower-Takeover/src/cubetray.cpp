@@ -32,19 +32,26 @@ void CubeTray::Update()
                 if (currentRotation < cubeSlowerOut)
                 {
                     // Fast
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -14, -8000);
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -3000); 
                 }
                 else
                 {
                     // Slow
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -23, -5000);
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -25, -8000);
                 }
+                
                 motor = (motor + m_power * 7) / 8;
                 m_power = motor;
-            } else if (currentRotation < restValue + 100) {
+                // motor = pid.GetPower(currentRotation, cubeTrayOut, -25, -8000);
+
+            } 
+            /*
+            else if (currentRotation < restValue + 100) 
+            {
                 // if tray is barely out and no buttons are pressed, reset back to original state
                 sm.SetState(State::Rest);
             }
+            */
             break;
         case State::Rest:
             pid.Reset();
@@ -86,16 +93,17 @@ struct TrayAction : public Action
 
 void DoTrayAction(State state)
 {
-    Do(TrayAction(State::TrayOut));
+    Do(TrayAction(state));
 }
 
 
 void OpenTrayOnStart()
 {
     // Do(LiftAction(State::InitializationState));
-    SetIntake(-70);
+    SetIntake(-127);
     DoTrayAction(State::Rest);
-    Wait(500);
+    Wait(1250);
     SetIntake(70);
+    Wait(500);
     // SetIntake(0);
 } 

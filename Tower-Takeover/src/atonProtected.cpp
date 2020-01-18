@@ -23,10 +23,11 @@ void RunAtonProtected()
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});
 
-    
+    /*
     Do(MoveAction(1000, 80));
     Do(MoveAction(-1000, 80));
-    
+    */
+   
     OpenTrayOnStart();
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
