@@ -65,16 +65,13 @@ State StateMachine::calculateState(State state)
         return State::Rest;
 
     if (state == State::Rest || state == State::ArmsUpMid || state == State::ArmsUpLow || state == State::InitializationState) {
-        /* This state is not implemented yet, and causes transition to other states not to work!
-        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
-            return State::ArmsUpLow;
-        */
         if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
             return State::ArmsUpMid;
         if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
             return State::ArmsUpLow;
-        else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
+        /* else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
             return State::InitializationState;
+        */
     }
 
     if (state == State::Rest)
