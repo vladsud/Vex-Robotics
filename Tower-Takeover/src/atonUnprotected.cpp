@@ -35,11 +35,12 @@ void RunAtonUnprotected()
     // Turn and go to zone
     int turnAngle = 46;
     if (!GetLcd().AtonRed)
-        turnAngle = 45;
+        turnAngle = 49;
     TurnToAngle(turnAngle);   
     GetIntake().m_mode = IntakeMode::Hold;
     Wait(500);
-    MoveStraight(1550, 80, turnAngle);
+    Do(MoveAction(1550, 80));
+    //MoveStraight(1550, 80, turnAngle);
 
     // Correct to zone
     // Do(MoveAction(500, 80), 1000);

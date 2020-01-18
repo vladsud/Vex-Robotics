@@ -17,7 +17,7 @@ struct Button
 class LCD
 {
 public:
-	bool AtonRed = true;
+	bool AtonRed = false;
 	bool AtonProtected = false;
 	bool AtonSkills = false;
     bool IsTankDrive = false;
