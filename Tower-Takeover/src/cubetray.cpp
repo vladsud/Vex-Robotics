@@ -39,7 +39,7 @@ void CubeTray::Update()
                 else
                 {
                     // Slow
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -21, -7000);
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
                 }
                 
                 motor = (motor + m_power * 7) / 8;
