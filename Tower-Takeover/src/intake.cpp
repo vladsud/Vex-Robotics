@@ -43,6 +43,13 @@ void Intake::Update()
         return;
     }
 
+    if (sm.GetState() == State::InitializationState)
+    {
+        // m_mode = IntakeMode::Outtake;
+        SetIntakeMotors(-127);
+        return;
+    }
+
     bool cubeIn = IsCubeIn(intakeLineTracker);
 
     // If slipping then passive power

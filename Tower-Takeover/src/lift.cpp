@@ -47,10 +47,12 @@ void Lift::Update()
             // if (GetCubeTray().IsMoving())
             break;
         case State::InitializationState:
+            /*
             motor = pid.GetPower(currentPosition, ArmsInitialization, 1, 500, PidPrecision::HigerOk);
             if (motor != 0)
                 break;
             sm.SetState(State::Rest);
+            */
             // fall through
         case State::Rest: 
             motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);        
