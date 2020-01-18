@@ -34,12 +34,12 @@ void CubeTray::Update()
                 if (currentRotation < cubeSlowerOut)
                 {
                     // Fast
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -3000); 
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -2000); 
                 }
                 else
                 {
                     // Slow
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -25, -8000);
+                    motor = pid.GetPower(currentRotation, cubeTrayOut, -21, -7000);
                 }
                 
                 motor = (motor + m_power * 7) / 8;
@@ -74,6 +74,10 @@ void CubeTray::Update()
 
     printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
 
+    if (motor > 90)
+    {
+        motor = 90;
+    }
     motor_move(cubetrayPort, -motor);
 }
 
