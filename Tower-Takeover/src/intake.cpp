@@ -60,7 +60,7 @@ void Intake::Update()
     // Get new controller press
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
-        if (m_mode == IntakeMode::Intake || m_mode == IntakeMode::IntakeTower)
+        if (m_mode == IntakeMode::Intake || m_mode == IntakeMode::IntakeTower || m_mode == IntakeMode::Transition)
         {
             m_mode = IntakeMode::Hold;
         }
@@ -71,7 +71,7 @@ void Intake::Update()
     }
     else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
-        if (m_mode == IntakeMode::Outtake || m_mode == IntakeMode::IntakeTower)
+        if (m_mode == IntakeMode::Outtake || m_mode == IntakeMode::IntakeTower || m_mode == IntakeMode::Transition)
         {
             m_mode = IntakeMode::Hold;
         } 
@@ -86,24 +86,27 @@ void Intake::Update()
         m_mode = IntakeMode::IntakeTower;
         // If cube is not in slowing intake
         if (!cubeIn)
-        {
+        {   
             count = 0;
             motor = intake_normal_speed;
         }
         // When in, stop intaking and cancel action
         else
         {
-            if (count < 50)
-            {
-                motor = -intake_slow_speed;
-                count++;
-            }
-            else
-            {
-                motor = 0;
-                m_mode = IntakeMode::Hold;
-            }
-
+            m_mode = IntakeMode::Transition;
+        }
+    }
+    else if (m_mode == IntakeMode::Transition)
+    {
+        if (count < 40)
+        {
+            motor = -intake_slow_speed;
+            count++;
+        }
+        else
+        {
+            motor = 0;
+            m_mode = IntakeMode::Stop;
         }
     }
 
