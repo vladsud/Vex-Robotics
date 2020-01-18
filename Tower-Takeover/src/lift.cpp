@@ -11,7 +11,7 @@ using namespace pros::c;
 
 Lift::Lift()
 {
-    motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_BRAKE);
+    motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_HOLD);
 }
 
 void Lift::SetLiftMotor(int speed)

@@ -25,11 +25,13 @@ void RunAtonUnprotected()
     SetIntake(127);
     MoveStraight(5800, 45, -90);
  
-    int turnAngle = 67;
+    int turnAngle = 76;
     TurnToAngle(turnAngle);    
     GetIntake().m_mode = IntakeMode::Hold;
     MoveStraight(4000, 80, turnAngle);
 
+    SetIntake(-20);
+    Wait(300);
     DoTrayAction(State::TrayOut);
     //Do(MoveAction(300, 30));
     

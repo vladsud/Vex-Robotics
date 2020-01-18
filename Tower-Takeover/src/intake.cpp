@@ -98,7 +98,7 @@ void Intake::Update()
     }
     else if (m_mode == IntakeMode::Transition)
     {
-        if (count < 40)
+        if (count < 50)
         {
             motor = -intake_slow_speed;
             count++;

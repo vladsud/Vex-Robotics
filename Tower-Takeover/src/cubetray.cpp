@@ -22,9 +22,11 @@ void CubeTray::Update()
     State desiredState = sm.GetState();
     int motor = 0;
 
+    // bool fast = true;
     switch (desiredState)
     {
         case State::TrayOut:
+
             // only run if the button is held down
             if (isAuto() || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             {
@@ -42,9 +44,8 @@ void CubeTray::Update()
                 
                 motor = (motor + m_power * 7) / 8;
                 m_power = motor;
-                // motor = pid.GetPower(currentRotation, cubeTrayOut, -25, -8000);
 
-            } 
+            }
             /*
             else if (currentRotation < restValue + 100) 
             {
@@ -102,8 +103,8 @@ void OpenTrayOnStart()
     // Do(LiftAction(State::InitializationState));
     SetIntake(-127);
     DoTrayAction(State::Rest);
-    Wait(1250);
+    Wait(1500);
     SetIntake(70);
-    Wait(500);
+    // Wait(500);
     // SetIntake(0);
 } 
