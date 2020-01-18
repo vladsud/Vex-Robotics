@@ -29,16 +29,16 @@ void RunAtonUnprotected()
     MoveStraight(5450, 85, -90);
     
     // Turn and go to zone
-    int turnAngle = 69;
+    int turnAngle = 71;
     if (!GetLcd().AtonRed)
         turnAngle = 76;
     TurnToAngle(turnAngle);   
     GetIntake().m_mode = IntakeMode::Hold;
     Wait(500);
-    MoveStraight(4000, 80, turnAngle);
+    MoveStraight(4250, 80, turnAngle);
 
     // Correct to zone
-    Do(MoveAction(150, 100), 1000);
+    // Do(MoveAction(500, 80), 1000);
 
     // Out take
     SetIntake(-20);
@@ -46,10 +46,10 @@ void RunAtonUnprotected()
     DoTrayAction(State::TrayOut);
     
     // Push forward a bit
-    Do(MoveAction(300, 30), 1000);
+    Do(MoveAction(300, 30), 500);
     
     // Move back
-    Do(MoveAction(-1800, 60));
+    Do(MoveAction(-1800, 70));
     // MoveStraight(-1500, 60, 60);
     
     DoTrayAction(State::Rest);

@@ -34,18 +34,20 @@ void CubeTray::Update()
                 if (currentRotation < cubeSlowerOut)
                 {
                     // Fast
-                    motor = 135;
+                    motor = 100;
                     //motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -2000); 
                 }
+                /*
                 else if (currentRotation < (cubeSlowerOut + cubeTrayOut)/2)
                 {
                     // Slow
                     motor = 60;
                     // motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
                 }
+                */
                 else if (currentRotation < cubeTrayOut)
                 {
-                    motor = 35;
+                    motor = 20;
                 }
                 else
                 {
@@ -116,7 +118,7 @@ void OpenTrayOnStart()
     // Do(LiftAction(State::InitializationState));
     SetIntake(-127);
     DoTrayAction(State::Rest);
-    Wait(1500);
+    Wait(1250);
     // SetIntake(70);
     // Wait(500);
     // SetIntake(0);
