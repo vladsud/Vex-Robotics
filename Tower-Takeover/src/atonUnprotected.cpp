@@ -6,10 +6,12 @@
 #include "cubetray.h"
 #include "position.h"
 #include "lift.h"
+#include "lcd.h"
 
 // WARNING:
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
+
 
 void RunAtonUnprotected()
 {
@@ -28,12 +30,15 @@ void RunAtonUnprotected()
     
     // Turn and go to zone
     int turnAngle = 69;
-    TurnToAngle(turnAngle);    
+    if (!GetLcd().AtonRed)
+        turnAngle = 76;
+    TurnToAngle(turnAngle);   
     GetIntake().m_mode = IntakeMode::Hold;
+    Wait(500);
     MoveStraight(4000, 80, turnAngle);
 
     // Correct to zone
-    Do(MoveAction(200, 30), 1000);
+    Do(MoveAction(150, 100), 1000);
 
     // Out take
     SetIntake(-20);

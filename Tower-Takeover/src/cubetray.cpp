@@ -34,16 +34,28 @@ void CubeTray::Update()
                 if (currentRotation < cubeSlowerOut)
                 {
                     // Fast
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -2000); 
+                    motor = 135;
+                    //motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -2000); 
+                }
+                else if (currentRotation < (cubeSlowerOut + cubeTrayOut)/2)
+                {
+                    // Slow
+                    motor = 60;
+                    // motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
+                }
+                else if (currentRotation < cubeTrayOut)
+                {
+                    motor = 35;
                 }
                 else
                 {
-                    // Slow
-                    motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
+                    motor = 0;
                 }
                 
-                motor = (motor + m_power * 7) / 8;
-                m_power = motor;
+                
+                
+                // motor = (motor + m_power * 7) / 8;
+                // m_power = motor;
 
             }
             /*
@@ -58,12 +70,13 @@ void CubeTray::Update()
             pid.Reset();
             if (GetLift().get_value() < GetLift().ArmsTrayCanMoveDown && currentRotation >= restValue + 15)
             {
-                motor = -127;
+                motor = -200;
             }
             break;
         case State::ArmsUpMid:
         case State::ArmsUpLow: 
             motor = pid.GetPower(currentRotation, cubeArmsUp, -2, -4000);
+            motor * 200 / 127;
             break;
         case State::InitializationState: 
             // motor = pid.GetPower(currentRotation, cubeInitialization + 5, -4, -4000);
@@ -74,11 +87,7 @@ void CubeTray::Update()
 
     printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
 
-    if (motor > 90)
-    {
-        motor = 90;
-    }
-    motor_move(cubetrayPort, -motor);
+    motor_move_velocity(cubetrayPort, -motor);
 }
 
 struct TrayAction : public Action
@@ -108,7 +117,7 @@ void OpenTrayOnStart()
     SetIntake(-127);
     DoTrayAction(State::Rest);
     Wait(1500);
-    SetIntake(70);
+    // SetIntake(70);
     // Wait(500);
     // SetIntake(0);
 } 

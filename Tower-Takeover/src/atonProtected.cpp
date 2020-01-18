@@ -33,13 +33,14 @@ void RunAtonProtected()
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
     SetIntake(127);
-    Wait(500);
-    MoveStraight(5000, 70, -90);
+    // Wait(500);
+    MoveStraight(5000, 90, -90);
 
-    TurnToAngle(-210);
+    int turnAngle = -230;
+    TurnToAngle(turnAngle);
     
-    MoveStraight(2000, 80, -210);
-    MoveStraight(1500, 50, -210);
+    MoveStraight(3500, 90, turnAngle);
+    //MoveStraight(1500, 50, -210);
 
     GetIntake().m_mode = IntakeMode::Hold;
 
@@ -50,7 +51,7 @@ void RunAtonProtected()
     DoTrayAction(State::TrayOut);
 
     // TODO: add quick time out
-    // Do(MoveAction(150, 30));
+    Do(MoveAction(150, 30), 1000);
     
     Do(MoveAction(-1500, 60));
     DoTrayAction(State::Rest);
