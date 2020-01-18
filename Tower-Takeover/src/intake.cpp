@@ -146,10 +146,19 @@ void Intake::Update()
         }
 
         */
+
+
+
+
+
+
+        /*
         if ((motor_get_actual_velocity(intakeLeftPort) + motor_get_actual_velocity(intakeRightPort)) < 0 && motor == 0)
         {
             motor = 60;
         }
+        */
+        motor = 0;
 
     } 
     else if (m_mode == IntakeMode::Stop)

@@ -22,19 +22,28 @@ void RunAtonUnprotected()
 
     OpenTrayOnStart();
 
+    // Intake
     SetIntake(127);
-    MoveStraight(5300, 85, -90);
- 
-    int turnAngle = 72;
+    MoveStraight(5450, 85, -90);
+    
+    // Turn and go to zone
+    int turnAngle = 69;
     TurnToAngle(turnAngle);    
     GetIntake().m_mode = IntakeMode::Hold;
     MoveStraight(4000, 80, turnAngle);
 
+    // Correct to zone
+    Do(MoveAction(200, 30), 1000);
+
+    // Out take
     SetIntake(-20);
     Wait(200);
     DoTrayAction(State::TrayOut);
-    Do(MoveAction(300, 30));
     
+    // Push forward a bit
+    Do(MoveAction(300, 30), 1000);
+    
+    // Move back
     Do(MoveAction(-1800, 60));
     // MoveStraight(-1500, 60, 60);
     
