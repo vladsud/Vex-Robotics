@@ -36,10 +36,10 @@ void RunAtonProtected()
     // Wait(500);
     MoveStraight(5000, 90, -90);
 
-    int turnAngle = -230;
+    int turnAngle = -240;
     TurnToAngle(turnAngle);
     
-    MoveStraight(3500, 90, turnAngle);
+    MoveStraight(4000, 90, turnAngle);
     //MoveStraight(1500, 50, -210);
 
     GetIntake().m_mode = IntakeMode::Hold;

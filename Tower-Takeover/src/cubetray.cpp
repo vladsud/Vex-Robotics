@@ -34,7 +34,7 @@ void CubeTray::Update()
                 if (currentRotation < cubeSlowerOut)
                 {
                     // Fast
-                    motor = 100;
+                    motor = 120;
                     //motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -2000); 
                 }
                 /*
@@ -47,7 +47,7 @@ void CubeTray::Update()
                 */
                 else if (currentRotation < cubeTrayOut)
                 {
-                    motor = 20;
+                    motor = 30;
                 }
                 else
                 {
