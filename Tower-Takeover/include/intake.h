@@ -8,15 +8,14 @@ enum class IntakeMode {
     Outtake,
     Stop,
     IntakeTower,
-    Transition,
 };
 
 class Intake {
 private:
     pros::ADIAnalogIn intakeLineTracker;
 
-    const int cubeIn = 2340;
-    const int cubeOut = 2925;
+    const int cubeIn = 2830;
+    const int cubeOut = 2930;
     const int intake_normal_speed = 127; 
     const int intake_slow_speed = 85; 
 

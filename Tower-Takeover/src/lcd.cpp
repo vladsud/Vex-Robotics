@@ -108,9 +108,10 @@ void LCD::Update()
         lv_style_copy(&style_screen, &lv_style_plain);
 
         float tempLift = motor_get_temperature(liftMotorPort);
-        float tempIntakeLeft = motor_get_temperature(liftMotorPort);
-        float tempIntakeRight = motor_get_temperature(liftMotorPort);
-        if (tempLift >= 55 || tempIntakeLeft >= 55 || tempIntakeRight >= 55)
+        float tempTray = motor_get_temperature(cubetrayPort);
+        float tempIntakeLeft = motor_get_temperature(intakeLeftPort);
+        float tempIntakeRight = motor_get_temperature(intakeRightPort);
+        if (tempLift >= 55 || tempTray >= 55 || tempIntakeLeft >= 55 || tempIntakeRight >= 55)
         {
             style_screen.body.main_color = LV_COLOR_RED;
             style_screen.body.grad_color = LV_COLOR_RED;
@@ -120,6 +121,15 @@ void LCD::Update()
             style_screen.body.main_color = LV_COLOR_BLACK;
             style_screen.body.grad_color = LV_COLOR_BLACK;
         }
+
+
+        sprintf(m_batteryBuffer, "Battery %.0f %%", battery_get_capacity());
+        lv_label_set_text(m_battery, m_batteryBuffer);
+
+        sprintf(m_textBuffer, "lift: %.0f tray: %.0f left: %.0f right: %.0f", tempLift, tempTray, tempIntakeLeft, tempIntakeRight);
+
+        PrintMessage(m_textBuffer);
+
         lv_obj_set_style(lv_scr_act(), &style_screen);
     }
     m_count++;

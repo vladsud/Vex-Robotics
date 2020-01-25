@@ -35,6 +35,15 @@ void Intake::Update()
 {
     StateMachine& sm = GetStateMachine();
     int motor = 0;
+
+    // If towering but still in intake tower mode --> turn it of
+    /*
+    if (sm.GetState() == State::ArmsUpLow || sm.GetState() == State::ArmsUpLow && m_mode == IntakeMode::IntakeTower) 
+    {
+        m_mode = IntakeMode::Hold;
+    }
+    */
+
     if (sm.GetState() == State::TrayOut && m_mode != IntakeMode::Stop)
     {
         m_mode = IntakeMode::Stop;
@@ -67,7 +76,7 @@ void Intake::Update()
     // Get new controller press
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L1))
     {
-        if (m_mode == IntakeMode::Intake || m_mode == IntakeMode::IntakeTower || m_mode == IntakeMode::Transition)
+        if (m_mode == IntakeMode::Intake || m_mode == IntakeMode::IntakeTower)
         {
             m_mode = IntakeMode::Hold;
         }
@@ -78,7 +87,7 @@ void Intake::Update()
     }
     else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_L2))
     {
-        if (m_mode == IntakeMode::Outtake || m_mode == IntakeMode::IntakeTower || m_mode == IntakeMode::Transition)
+        if (m_mode == IntakeMode::Outtake || m_mode == IntakeMode::IntakeTower)
         {
             m_mode = IntakeMode::Hold;
         } 
@@ -87,36 +96,22 @@ void Intake::Update()
             m_mode = IntakeMode::Outtake;
         }
     }
-    else if (m_mode == IntakeMode::IntakeTower || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP))
+    else if (m_mode == IntakeMode::IntakeTower || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
     {
         // Start tower stacking
         m_mode = IntakeMode::IntakeTower;
         // If cube is not in slowing intake
         if (!cubeIn)
         {   
-            count = 0;
             motor = intake_normal_speed;
         }
         // When in, stop intaking and cancel action
         else
         {
-            m_mode = IntakeMode::Transition;
-        }
-    }
-    else if (m_mode == IntakeMode::Transition)
-    {
-        if (count < 50)
-        {
-            motor = -intake_slow_speed;
-            count++;
-        }
-        else
-        {
             motor = 0;
-            m_mode = IntakeMode::Stop;
+            m_mode = IntakeMode::Hold;
         }
     }
-
     // If not intaking
     if (m_mode == IntakeMode::Hold) {
         

@@ -34,6 +34,7 @@ private:
 
 private:
     char m_batteryBuffer[128];
+    char m_textBuffer[128];
     LVOBJ* m_textobj = nullptr;
     LVOBJ* m_battery = nullptr;
     unsigned int m_count = 0;

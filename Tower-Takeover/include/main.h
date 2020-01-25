@@ -117,6 +117,7 @@ private:
 
 #define VisionPort 99
 
+#define inertialPort 99
 
 /*******************************************************************************
 *
@@ -124,10 +125,10 @@ private:
 *
 *******************************************************************************/
 #define liftPotPort 99
-#define cubetrayPotPort 1
+#define cubetrayPotPort 4
 
-#define gyroPort 3
-#define gyroPort2 6
+#define gyroPort 2
+#define gyroPort2 3
 
 #define intakeLineTrackerPort 8
 

@@ -21,7 +21,7 @@ public:
 
   int ArmsInitialization = 1830;
   int ArmsMidPos = 2020;
-  int ArmsLowPos = 1550;
+  int ArmsLowPos = 1625;
   int ArmsTrayCanMoveDown = 1200;
   int RestPos = 0;
 
