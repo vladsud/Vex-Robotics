@@ -45,7 +45,7 @@ void Lift::Update()
             break;
         case State::TrayOut:
             // if (GetCubeTray().IsMoving())
-            motor = 60;
+            // motor = 60;
             break;
         case State::InitializationState:
             /*

@@ -20,6 +20,7 @@ private:
     const int intake_slow_speed = 85; 
 
     int count = 0;
+    int m_tick = 0;
 
 public:
     Intake();

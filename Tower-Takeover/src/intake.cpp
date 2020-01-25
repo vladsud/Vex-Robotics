@@ -43,6 +43,20 @@ void Intake::Update()
         m_mode = IntakeMode::Hold;
     }
     */
+   
+    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_DOWN))
+    {
+        m_tick = 0;
+    }
+
+    if (m_tick <= 8)
+    {
+        SetIntakeMotors(-80);
+        m_mode = IntakeMode::Hold;
+        m_tick++;
+        return;
+    }
+    
 
     if (sm.GetState() == State::TrayOut && m_mode != IntakeMode::Stop)
     {
@@ -96,7 +110,7 @@ void Intake::Update()
             m_mode = IntakeMode::Outtake;
         }
     }
-    else if (m_mode == IntakeMode::IntakeTower || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
+    else if (m_mode == IntakeMode::IntakeTower || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y) || joystickGetDigital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_LEFT))
     {
         // Start tower stacking
         m_mode = IntakeMode::IntakeTower;

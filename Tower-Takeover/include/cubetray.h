@@ -7,9 +7,9 @@ class CubeTray
 private:
   const int cubeTrayOut = 2575;
   const int cubeSlowerOut = 1750;
-  const int cubeArmsUp = 1650;
-  const int restValue = 1390;
-  const int cubeInitialization = 1324;
+  const int cubeArmsUp = 1450;
+  const int restValue = 1310;
+  const int cubeInitialization = 1270;
 
   bool m_moving = false;
   PidImpl pid {50};

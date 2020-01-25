@@ -34,20 +34,20 @@ void CubeTray::Update()
                 if (currentRotation < cubeSlowerOut)
                 {
                     // Fast
-                    motor = 80;
+                    motor = 90;
                     // motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -2500); 
                 }
                 
                 else if (currentRotation < (cubeSlowerOut + cubeTrayOut)/2)
                 {
                     // Slow
-                    motor = 30;
+                    motor = 40;
                     // motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
                 }
                 else if (currentRotation < cubeTrayOut)
                 {
                     //motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
-                    motor = 15;
+                    motor = 50;
                 }
                 else
                 {
@@ -70,7 +70,7 @@ void CubeTray::Update()
             break;
         case State::Rest:
             pid.Reset();
-            if (GetLift().get_value() < GetLift().ArmsTrayCanMoveDown && currentRotation >= restValue + 15)
+            if (GetLift().get_value() < GetLift().ArmsTrayCanMoveDown && currentRotation >= restValue)
             {
                 motor = -200;
             }
