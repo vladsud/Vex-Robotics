@@ -41,13 +41,13 @@ void CubeTray::Update()
                 else if (currentRotation < (cubeSlowerOut + cubeTrayOut)/2)
                 {
                     // Slow
-                    motor = 40;
+                    motor = 50;
                     // motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
                 }
                 else if (currentRotation < cubeTrayOut)
                 {
                     //motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
-                    motor = 50;
+                    motor = 20;
                 }
                 else
                 {
@@ -82,11 +82,14 @@ void CubeTray::Update()
         case State::InitializationState: 
             // motor = pid.GetPower(currentRotation, cubeInitialization + 5, -4, -4000);
             break;
+        case State::OutABit:
+            motor = motor = pid.GetPower(currentRotation, outABitValue, -7, -4000) * 200 / 127;
+            break;
     }
 
     m_moving = (motor != 0);
 
-    printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
+    // printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
 
     motor_move_velocity(cubetrayPort, -motor);
 }
@@ -116,8 +119,11 @@ void OpenTrayOnStart()
 {
     // Do(LiftAction(State::InitializationState));
     SetIntake(-127);
-    DoTrayAction(State::Rest);
+    DoTrayAction(State::OutABit);
+    // DoTrayAction(State::ArmsUpLow);;
     Wait(1250);
+    DoTrayAction(State::Rest);
+
     // SetIntake(70);
     // Wait(500);
     // SetIntake(0);

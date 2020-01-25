@@ -2,7 +2,7 @@
 
 enum State
 {   
-    Rest, TrayOut, ArmsUpLow, ArmsUpMid, InitializationState, Debug
+    Rest, TrayOut, ArmsUpLow, ArmsUpMid, InitializationState, Debug, OutABit
 };
 
 class StateMachine
