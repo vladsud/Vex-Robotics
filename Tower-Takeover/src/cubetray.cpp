@@ -10,17 +10,19 @@ using namespace pros;
 using namespace pros::c;
 
 CubeTray::CubeTray() 
-    : m_anglePot(cubetrayPotPort)
 {
-    motor_set_brake_mode(cubetrayPort, E_MOTOR_BRAKE_HOLD);
+    //motor_set_brake_mode(cubetrayPort, E_MOTOR_BRAKE_HOLD);
+    motor_tare_position(cubetrayPort);
 }
 
 void CubeTray::Update()
 {
     StateMachine& sm = GetStateMachine();
-    int currentRotation = GetCubeTray().m_anglePot.get_value();
+    currentRotation = motor_get_position(cubetrayPort) * -1;
+
     State desiredState = sm.GetState();
     int motor = 0;
+ 
 
     // bool fast = true;
     switch (desiredState)
@@ -41,7 +43,7 @@ void CubeTray::Update()
                 else if (currentRotation < (cubeSlowerOut + cubeTrayOut)/2)
                 {
                     // Slow
-                    motor = 50;
+                    motor = 30;
                     // motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
                 }
                 else if (currentRotation < cubeTrayOut)
@@ -53,9 +55,6 @@ void CubeTray::Update()
                 {
                     motor = 0;
                 }
-                
-                
-                
                 // motor = (motor + m_power * 7) / 8;
                 // m_power = motor;
 
@@ -83,11 +82,20 @@ void CubeTray::Update()
             // motor = pid.GetPower(currentRotation, cubeInitialization + 5, -4, -4000);
             break;
         case State::OutABit:
-            motor = motor = pid.GetPower(currentRotation, outABitValue, -7, -4000) * 200 / 127;
+            if (currentRotation < outABitValue)
+                motor = 100;
+            else
+            {
+                motor = 0;
+            }
+            
+            //motor = pid.GetPower(currentRotation, outABitValue, -1, -4000) * 200 / 127;
             break;
     }
 
     m_moving = (motor != 0);
+
+    printf("Position: %f\n", currentRotation);
 
     // printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
 
@@ -111,7 +119,7 @@ struct TrayAction : public Action
 
 void DoTrayAction(State state)
 {
-    Do(TrayAction(state));
+    Do(TrayAction(state), 3500);
 }
 
 

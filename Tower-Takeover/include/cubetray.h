@@ -5,23 +5,23 @@
 class CubeTray
 {  
 private:
-  const int cubeTrayOut = 2575;
-  const int cubeSlowerOut = 1750;
-  const int cubeArmsUp = 1450;
-  const int restValue = 1350;
-  const int cubeInitialization = 1270;
-  const int outABitValue = 1400;
+  const int cubeTrayOut = 3200;
+  const int cubeSlowerOut = 1700;
+  const int cubeArmsUp = 700;
+  const int restValue = 400;
+  const int cubeInitialization = 0;
+  const int outABitValue = 450;
 
   bool m_moving = false;
   PidImpl pid {50};
   int m_power = 0;
 
+  float currentRotation;
+
 public:
     CubeTray();
     void Update();
     bool IsMoving() { return m_moving; }
-    
-    pros::ADIAnalogIn m_anglePot;
 };
 
 CubeTray& GetCubeTray();

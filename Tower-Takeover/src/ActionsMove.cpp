@@ -415,7 +415,7 @@ struct TurnPrecise : public Action
     TurnPrecise(int turn)
         : m_turn(AdjustAngle(turn))
     {
-        // ReportStatus("TurnPrecise: %d, curr=%d\n", m_turn / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
+        ReportStatus("TurnPrecise: %d, curr=%d\n", m_turn / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
 
         m_drive.ResetTrackingState();
         m_initialAngle = GetGyroReading();
@@ -439,6 +439,8 @@ struct TurnPrecise : public Action
 
     bool ShouldStop() override
     {
+        ReportStatus("TurnPrecise: %d, curr=%d\n", m_turn / GyroWrapper::Multiplier, GetGyroReading() / GyroWrapper::Multiplier);
+
         // 10 points per degree of angle
         static constexpr unsigned int points[] = { 8,  9, 200, 500, UINT_MAX};
         static constexpr unsigned int speeds[] = { 0, 25,  100, 150, 200};
@@ -491,7 +493,7 @@ struct TurnPrecise : public Action
         else
             m_power = (power + m_power) / 2;
 
-        // ReportStatus("Turn error = %d, power = %d, ideal speed = %d, actual = %d\n", error, power, idealSpeed, actualSpeed);
+        ReportStatus("Turn error = %d, power = %d, ideal speed = %d, actual = %d\n", error, power, idealSpeed, actualSpeed);
         m_drive.OverrideInputs(0, -m_power);
         return false;
     }

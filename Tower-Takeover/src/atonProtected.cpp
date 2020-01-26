@@ -28,6 +28,11 @@ void RunAtonProtected()
     Do(MoveAction(-1000, 80));
     */
    
+
+
+/*
+
+
     OpenTrayOnStart();
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
@@ -55,5 +60,10 @@ void RunAtonProtected()
     
     Do(MoveAction(-1500, 60));
     DoTrayAction(State::Rest);
+
+
+
+
+    */
 }
  
