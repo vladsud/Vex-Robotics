@@ -18,35 +18,29 @@ void RunAtonUnprotected()
     ReportStatus(Log::Info, "Unprotected aton\n");
 
     auto timeBegin = GetTime();
-    GetTracker().SetCoordinates({16, 60+24, -90});
+    GetTracker().SetCoordinates({16, 60+24, 0});
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
+    /*
     OpenTrayOnStart();
 
     Do(MoveAction(300, 80), 500);
     Do(MoveAction(-300, 80), 500);
+    */
 
-    // Intake
     SetIntake(127);
-    MoveStraight(5450, 85, -90);
-    
-    Wait(300);
-    MoveStraight(4700, -85, -90);
-    
+    const unsigned int intakeSpeed = 27;
 
-    // Turn and go to zone
-    int turnAngle = 57;
-    if (!GetLcd().AtonRed)
-        turnAngle = 85;
-    TurnToAngle(turnAngle);   
+    MoveExactWithAngle(4800, 0, intakeSpeed);
+    MoveExactWithAngle(-6200, -40);
+    MoveExactWithAngle(5200, 0, intakeSpeed);
+    MoveExactWithAngle(3800, 90+67);
+
     GetIntake().m_mode = IntakeMode::Hold;
-    Wait(500);
-    Do(MoveAction(1150, 80));
-    //MoveStraight(1550, 80, turnAngle);
 
-    // Correct to zone
-    // Do(MoveAction(500, 80), 1000);
+
+    return;
 
     // Out take
     SetIntake(-20);
@@ -57,7 +51,7 @@ void RunAtonUnprotected()
     // Do(MoveAction(300, 30), 500);
     
     // Move back
-    MoveStraight(-1800, 70, turnAngle);
+    // MoveStraight(-1800, 70, turnAngle);
     
     DoTrayAction(State::Rest);
 }

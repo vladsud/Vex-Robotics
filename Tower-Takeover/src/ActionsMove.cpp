@@ -7,7 +7,7 @@
 
 #ifdef LineTracker
 #include "lineTracker.h"
-extern const  bool g_leverageLineTrackers;
+extern const bool g_leverageLineTrackers;
 #endif // LineTracker
 
 /*******************************************************************************
@@ -184,11 +184,16 @@ struct MoveExactAction : public MoveActionBase, public Motion
  * MoveExactWithAngle
  * 
  ******************************************************************************/
-void MoveExactWithAngle(int distance, int angle, unsigned int speedLimit, bool allowTurning /*= true*/)
+void MoveExactWithAngle(
+        int distance,
+        int angle,
+        unsigned int speedLimit,
+        unsigned int timeout /*= 100000U*/,
+        bool allowTurning /*= true*/)
 {
     if (allowTurning)
         TurnToAngleIfNeeded(angle);
-    Do(MoveExactAction(distance, angle, speedLimit));
+    Do(MoveExactAction(distance, angle, speedLimit), timeout);
     WaitAfterMoveReportDistance(distance);
 }
 
@@ -399,8 +404,9 @@ void TurnToAngle(int turn)
     auto angle = turn - GetGyroReading();
     Do(TurnPrecise(angle));
     WaitAfterMove();
-    if (abs(turn - GetGyroReading()) >= 0.5)
-        ReportStatus(Log::Warning, "!!! Turn Error: curr angle = %f, desired angle = %f\n", (float)GetGyroReading(), (float)turn);
+    float err = turn - GetGyroReading();
+    if (abs(err) >= 0.5)
+        ReportStatus(Log::Warning, "!!! Turn Error: curr angle = %f, desired angle = %f\n", err, (float)turn);
 }
 
 void TurnToAngleIfNeeded(int angle)

@@ -89,9 +89,17 @@ struct LiftAction : public Action
     }
 };
 
-
-
 void TowerMid()
 {
     Do(LiftAction(State::ArmsUpMid));
+}
+
+void TowerRest()
+{
+    Do(LiftAction(State::Rest));
+}
+
+void TowerLow()
+{
+    Do(LiftAction(State::ArmsUpLow));
 }

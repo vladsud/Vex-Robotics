@@ -29,3 +29,5 @@ public:
 
 Lift& GetLift();
 void TowerMid();
+void TowerLow();
+void TowerRest();

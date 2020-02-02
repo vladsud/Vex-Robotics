@@ -2,7 +2,12 @@
 #include "main.h"
 
 void MoveStop();
-void MoveExactWithAngle(int distance, int angle, unsigned int speedLimit = UINT_MAX, bool allowTurning = true);
+void MoveExactWithAngle(
+    int distance,
+    int angle,
+    unsigned int speedLimit = UINT_MAX,
+    unsigned int timeout = 1000000,
+    bool allowTurning = true);
 int HitTheWall(int distanceForward, int angle);
 void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle);
 
