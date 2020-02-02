@@ -47,22 +47,18 @@ class Main
 #endif
 	// Time is im milliseconds!
 	// But time resolution might be coarser, in the range of 1-10 ms
-	unsigned int GetTime() { return m_Ticks; }
+	unsigned int GetTime();
 	void Update();
-	void UpdateAllSystems();
 	void ResetState();
 
 	int initialTime;
 
   protected:
-	// returns true when it's good time for external system (like autonomous) consume some CPU cycles
-	bool UpdateWithoutWaiting();
 	void UpdateFastSystems();
+	void UpdateSlowSystems();
 
   private:
 	unsigned long m_Ticks = 0; // in ms
 	unsigned long m_LastWakeUp = 0;
-	int m_TicksToMainUpdate = allSystemsPullTime;
-
 };
 

@@ -15,6 +15,8 @@
 #include "gyro.h"
 #include "drive.h"
 #include "forwards.h"
+#include "pros/imu.h"
+#include "errno.h"
 
 using namespace pros;
 using namespace pros::c;
@@ -28,12 +30,16 @@ using namespace pros::c;
 #define RATE_NOISE_LIMIT_ANALOG 128 //188
 
 
-void GyroReal::Integrate()
+/*******************************************************************************
+ * 
+ * LegacyGyro class
+ * 
+ ******************************************************************************/
+void LegacyGyro::Integrate()
 {
     unsigned long time = millis();
     // Same as analogReadCalibratedHR(). // LSLed by 4 as offset
     int32_t reading = m_sensor.get_value() << 4;
-    reading *= m_multiplier;
     reading = int(reading) - int(m_calibValue);
 
     Assert(m_lastTime != 0);
@@ -43,71 +49,76 @@ void GyroReal::Integrate()
     Assert(timeDiff != 0);
     Assert(timeDiff <= 10); // that would be pretty catastrophic
 
-    if (reading >= -m_limit && reading <= m_limit)
+    if (abs(reading) < m_limit)
         return;
 
-    if (m_freeze)
-        return;
-
-    // Multiplier is (0.0007...<<18) dpms * DT ms * (reading<<4) quid = degrees<<22
-    // So we need to get from LSL22 to LSL10 = LSR12
-    int32_t d = (timeDiff * reading + 0x800) >> 12;
-    m_value -= d;
+    m_value += timeDiff * reading;
 }
 
-GyroReal::GyroReal(unsigned char port, unsigned short multiplier)
-    : m_multiplier(multiplier == 0 ? GYRO_MULTIPLIER_DEFAULT : multiplier),
-      m_sensor(port)
+float LegacyGyro::GetAngle() const
+{
+    return m_value * m_multiplier;
+}
+
+void LegacyGyro::SetAngle(float angle)
+{
+    m_value = angle / m_multiplier;
+}
+
+LegacyGyro::LegacyGyro(unsigned char port, unsigned short multiplier)
+    // Multiplier is (0.0007...<<18) dpms * DT ms * (reading<<4) quid = degrees<<22
+    : m_multiplier(float(multiplier == 0 ? GYRO_MULTIPLIER_DEFAULT : multiplier) / (1 << 22)),
+      m_sensor(port),
+      m_calibValue(0),
+      m_limit(RATE_NOISE_LIMIT_ANALOG)
 {
     // Same as analogCalibrate()
-    uint32_t total = 0;
-    unsigned int Measurements = 1024;
+    unsigned int Measurements = 0;
     unsigned int ActualMeasurement = 0;
-    m_limit = RATE_NOISE_LIMIT_ANALOG * m_multiplier;
 
-    for (unsigned int i = 0; i < Measurements; i++)
+    while (ActualMeasurement < 1024)
     {
+        Measurements++;
         uint32_t value = m_sensor.get_value();
-        if (value == 0 && i < 1024)
-        {
-            Measurements++;
-        }
-        else
+        if (value != 0 || Measurements >= 1024)
         {
             ActualMeasurement++;
             Assert(0 <= value && value <= 4096);
-            total += value;
+            m_calibValue += value;
         }
         task_delay(1);
     }
 
-    m_calibValue = total / (ActualMeasurement / 16) * m_multiplier;
+    m_calibValue /= (ActualMeasurement >> 4);
 }
 
-void GyroReal::ResetState()
+void LegacyGyro::ResetState()
 {
     m_lastTime = millis() - 1;
 }
 
 
-int GyroWheels::Get() const
+/*******************************************************************************
+ * 
+ * GyroWheels class
+ * 
+ ******************************************************************************/
+float GyroWheels::GetAngle() const
 {
-    //printf("Original: %d\n", GetDrive().GetAngle());
-    //printf("Wheel!: %f\n", GetDrive().GetAngle() * m_multiplier);
-    int res = m_offset + GetDrive().GetAngle() * m_multiplier;
-    return res;
+    int angle = GetDrive().GetAngle();
+    return m_offset + angle * m_multiplier;
 }
 
 void GyroWheels::Integrate()
 {
 }
 
-void GyroWheels::SetAngle(int angle)
+void GyroWheels::SetAngle(float angle)
 {
     m_offset = 0;
-    auto curr = Get();
+    auto curr = GetAngle();
     m_offset = angle - curr;
-    Assert(Get() == angle);
+    Assert(GetAngle() == angle);
 }
 
 void GyroWheels::ResetState()
@@ -116,10 +127,46 @@ void GyroWheels::ResetState()
 }
 
 
+/*******************************************************************************
+ * 
+ * GyroInertial class
+ * 
+ ******************************************************************************/
+GyroInertial::GyroInertial(uint8_t port)
+    : m_port(port)
+{
+    auto res = imu_reset(m_port);
+    if (res != 1)
+    {  
+        ReportStatus(Log::Error, "Failed to init Inertial sensor: %d %d\n", res, errno);
+        return;
+    }
+    // Right way to do it - test imu_get_status(m_port) for E_IMU_STATUS_CALIBRATING
+    // But it always returns 18 right away
+    delay(2200);
+}
+
+void GyroInertial::ResetState()
+{
+}
+
+float GyroInertial::GetAngle() const
+{
+    return m_offset - imu_get_rotation(m_port);
+}
+
+void GyroInertial::SetAngle(float angle)
+{
+    m_offset = angle + imu_get_rotation(m_port);
+}
+
+
+/*******************************************************************************
+ * 
+ * GyroBoth class
+ * 
+ ******************************************************************************/
 GyroBoth::GyroBoth()
-    : m_gyro(gyroPort),
-    m_gyro2(gyroPort2),
-    m_wheels()
 {
 }
 
@@ -127,40 +174,37 @@ void GyroBoth::Integrate()
 {
     m_gyro.Integrate();
     m_gyro2.Integrate();
+    m_gyroImu.Integrate();
     m_wheels.Integrate();
 
-    // printf("Gyro: %d  %d, %d, %d\n", Get(), m_gyro.Get(), m_gyro2.Get(), m_wheels.Get());
+    // ReportStatus(Log::Gyro, "Combined = %f, gyro1 = %f, gyro2 = %f, Wheels = %f\n", GetAngle(), m_gyro.GetAngle(), m_gyro2.GetAngle(), m_wheels.GetAngle());
+    ReportStatus(Log::Gyro, "Combined = %f, gyro1 = %f, Wheels = %f\n", GetAngle(), m_gyro.GetAngle(), m_wheels.GetAngle());
 }
 
-void GyroBoth::Freeze()
+float GyroBoth::GetAngle() const
 {
-    m_gyro.Freeze();
-    m_gyro2.Freeze();
-    m_wheels.Freeze();
+    // float res = (2 * m_gyro.GetAngle() +  3 * m_gyro2.GetAngle() + 1 * m_wheels.GetAngle()) / 6;
+    float res = (m_gyro.GetAngle() + m_gyro2.GetAngle()) / 2;
+
+    if (0) {
+        static int count = 0;
+        count++;
+        if ((count % 100) == 0)
+            printf("Combined = %f, gyro1 = %f, gyro2 = %f, imu = %f, wheels = %f\n",
+                res,
+                m_gyro.GetAngle(),
+                m_gyro2.GetAngle(),
+                m_gyroImu.GetAngle(),
+                m_wheels.GetAngle());
+    }
+    return res;
 }
 
-void GyroBoth::Unfreeze()
+void GyroBoth::SetAngle(float angle)
 {
-    m_gyro.Unfreeze();
-    m_gyro2.Unfreeze();
-    m_wheels.Unfreeze();
-}
-
-int GyroBoth::Get() const
-{
-    // int res = (2 * m_gyro.Get() +  3 * m_gyro2.Get() + 1 * m_wheels.Get()) / 6;
-    //int res = (m_gyro.Get() +  m_gyro2.Get()) / 2;
-    // printf("Gyro: %d   %d %d %d\n", res, m_gyro.Get(), m_gyro2.Get(), m_wheels.Get()/1024);
-    //return res;
-
-    return m_wheels.Get();
-}
-
-void GyroBoth::SetAngle(int angle)
-{
-    printf("SetAngle: %d\n", angle);
     m_gyro.SetAngle(angle);
     m_gyro2.SetAngle(angle);
+    m_gyroImu.SetAngle(angle);
     m_wheels.SetAngle(angle);
 }
 
@@ -168,15 +212,6 @@ void GyroBoth::ResetState()
 {
     m_gyro.ResetState();
     m_gyro2.ResetState();
+    m_gyroImu.ResetState();
     m_wheels.ResetState();
-}
-
-
-int AdjustAngle(int angle)
-{
-    while (angle > 180 * GyroWrapper::Multiplier)
-        angle -= - 360 * GyroWrapper::Multiplier;
-    while (angle < -180 * GyroWrapper::Multiplier)
-        angle += 360 * GyroWrapper::Multiplier;
-    return angle;
 }

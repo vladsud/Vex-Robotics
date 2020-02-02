@@ -2,6 +2,7 @@
 #include "main.h"
 #include "aton.h"
 #include "forwards.h"
+#include "pros/motors.h"
 
 // Try not to include "display/lvgl.h" - it's too big and slow to compile!
 // Better find individual headers that are needed, like below:
@@ -29,8 +30,6 @@ void LCD::click_action(lv_obj_t * btn)
         lv_label_set_text(label, GetLcd().m_buttons[id].label);
     else
         lv_label_set_text(label, GetLcd().m_buttons[id].label2);
-
-    // ReportStatus("Click: %d:  %s = %d\n)", id, GetLcd().m_buttons[id].label, value);
 }
 
 lv_res_t click_action(lv_obj_t * btn)
@@ -42,7 +41,6 @@ lv_res_t click_action(lv_obj_t * btn)
 
 lv_obj_t* LCD::CreateButton(unsigned int id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled)
 {
-    // ReportStatus("lcd: %d %d %s\n, id, toggled, label");
     lv_obj_t * btn = lv_btn_create(container, NULL);
     lv_btn_set_toggle(btn, true);
     
@@ -100,7 +98,7 @@ void LCD::Update()
 {
     if ((m_count % 50) == 0)
     {
-        sprintf(m_batteryBuffer, "Battery %.0f %%", battery_get_capacity());
+        snprintf(RgC(m_batteryBuffer), "Battery %.0f %%", battery_get_capacity());
         lv_label_set_text(m_battery, m_batteryBuffer);
 
 
@@ -123,10 +121,10 @@ void LCD::Update()
         }
 
 
-        sprintf(m_batteryBuffer, "Battery %.0f %%", battery_get_capacity());
+        snprintf(RgC(m_batteryBuffer), "Battery %.0f %%", battery_get_capacity());
         lv_label_set_text(m_battery, m_batteryBuffer);
 
-        sprintf(m_textBuffer, "lift: %.0f tray: %.0f left: %.0f right: %.0f", tempLift, tempTray, tempIntakeLeft, tempIntakeRight);
+        snprintf(RgC(m_textBuffer), "lift: %.0f tray: %.0f left: %.0f right: %.0f", tempLift, tempTray, tempIntakeLeft, tempIntakeRight);
 
         PrintMessage(m_textBuffer);
 

@@ -4,3 +4,4 @@
 #include "../src/lineTracker.cpp"
 #include "../src/position.cpp"
 #include "../src/opcontrol.cpp"
+#include "../src/logging.cpp"

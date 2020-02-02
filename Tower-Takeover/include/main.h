@@ -1,5 +1,13 @@
 #pragma once
 
+/*****************************
+ *
+ * Forward declarations
+ * 
+ ****************************/
+
+typedef unsigned int  size_t;
+
 extern "C" {
    void autonomous();
    void initialize();
@@ -12,38 +20,83 @@ extern "C" {
 #define UINT_MAX 0x7fffffff
 extern "C" {
    int printf(const char * format, ... );
-   int sprintf(char * str, const char * format, ... );
    double sin(double);
    double cos(double);
+   int snprintf(char * str, size_t n, const char * format, ... );
 }
+
 float cos (float x);
 float sin (float x);
 float atan2 (float y, float x);
 double atan2(double, double);
 
+unsigned int _millis();
+
+/*****************************
+ *
+ * Autonomous & cycle update
+ * 
+ ****************************/
 bool isAuto();
 bool SmartsOn();
 class Main &SetupMain();
-int AdjustAngle(int angle);
 unsigned int GetTime();
 void MainRunUpdateCycle();
 
-#define __noop(...)
 
-#define Assert(f) AssertCore(f, #f, __FILE__, __LINE__)
-#define AssertSz(f, sz) AssertCore(f, sz, __FILE__, __LINE__)
-void AssertCore(bool condition, const char *message, const char *file, int line);
+/*****************************
+ *
+ * Logging
+ * 
+ ****************************/
+enum class Log
+{
+   Motion = 0,
+   Drive,
+   Gyro,
+   States,
+   
+   Verbose,
+   // Starting with Info, all categories below are enabled by default
+   Info,
+   Warning,
+   Error,
 
-unsigned int _millis();
-#define ReportStatus(format, ...) printf("%ld: " format, _millis(), ##__VA_ARGS__)
+   Max,
+};
 
-#define CountOf(a) (sizeof(a) / sizeof(a[0]))
-#define UNUSED_VARIABLE(a) (void)a;
+void EnableLogs(Log logCategory);
+const char* LogCategoryName(Log logCategory);
 
-#define joystickMax 127
+void ReportStatusCore(Log logCategory, const char* format, ...);
+#define ReportStatusCoreInline(logCategory, format, ...) printf(format, ##__VA_ARGS__)
+#define ReportStatus(logCategory, format, ...) ReportStatusCore(logCategory, "%4ld: %s" format, _millis(), LogCategoryName(logCategory), ##__VA_ARGS__)
+
+#define Assert(f) AssertSz(f, #f)
+#define AssertSz(f, format, ...) do { \
+   if (!(f)) \
+      ReportStatus(Log::Error, "\n*** ASSERT: %s:%d: " format " ***\n\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+   } while(false)
 
 #define StaticAssert(a) static_assert(a, #a)
 
+
+/*****************************
+ *
+ * Macros
+ * 
+ ****************************/
+#define __noop(...)
+#define CountOf(a) (sizeof(a) / sizeof(a[0]))
+#define RgC(a) a, CountOf(a)
+#define UNUSED_VARIABLE(a) (void)a;
+
+
+/*****************************
+ *
+ * min / max / abs
+ * 
+ ****************************/
 template <typename T>
 constexpr T max(T a, T b)
 {
@@ -61,10 +114,15 @@ inline T abs(T value) {
    return value > 0 ? value : -value;
 }
 
+/*****************************
+ *
+ * PidPrecision & PidImpl
+ * 
+ ****************************/
 enum PidPrecision
 {
    Precise, // have to stop within precision bounds
-   HigerOk, // any number above target is Ok
+   HigherOk, // any number above target is Ok
    LowerOk, // any number below target is Ok
 };
 
@@ -86,6 +144,14 @@ private:
    int m_errorAccumulated = 0;
 };
 
+/*****************************
+ *
+ * Defines
+ * 
+ ****************************/
+
+#define joystickMax 127
+
 /*******************************************************************************
 *
 * MOTOR SPEEDS
@@ -94,7 +160,7 @@ private:
 #define shooterMotorSpeed 127
 #define intakeMotorSpeedUp 127
 #define intakeMotorSpeedDown 127
-#define driveMotorMaxSpeed 127
+#define MotorMaxSpeed 127
 
 
 /*******************************************************************************
@@ -127,6 +193,7 @@ private:
 #define liftPotPort 99
 #define cubetrayPotPort 4
 
+#define gyroPortImu 18
 #define gyroPort 2
 #define gyroPort2 3
 

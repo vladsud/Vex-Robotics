@@ -16,7 +16,7 @@ int PidImpl::GetPower(int reading, int target, float kp, int ki, PidPrecision pr
 
     int error = reading - target;
 
-    if (error > 0 && precision == PidPrecision::HigerOk ||
+    if (error > 0 && precision == PidPrecision::HigherOk ||
         error < 0 && precision == PidPrecision::LowerOk ||
         (abs(error) <= m_precision))
     {
@@ -26,23 +26,16 @@ int PidImpl::GetPower(int reading, int target, float kp, int ki, PidPrecision pr
 
     m_errorAccumulated += error;
     float res = (float) error / kp + m_errorAccumulated / ki;
-    if (res > 127)
-        res = 127;
-    else if (res < -127)
-        res = -127;
+    if (res > MotorMaxSpeed)
+        res = MotorMaxSpeed;
+    else if (res < -MotorMaxSpeed)
+        res = -MotorMaxSpeed;
     return res;
 }
 
 
 PositionTracker::PositionTracker()
 {
-    motor_tare_position(leftBackDrivePort);
-    motor_set_encoder_units(leftBackDrivePort, pros::E_MOTOR_ENCODER_COUNTS);
-    motor_tare_position(rightBackDrivePort);
-    motor_set_encoder_units(rightBackDrivePort, pros::E_MOTOR_ENCODER_COUNTS);
-    // motor_tare_position(g_sideEncoder);
-    // motor_set_encoder_units(g_sideEncoder, pros::E_MOTOR_ENCODER_COUNTS);
-
     m_gyro = 0; // Can't call GetGyro() here - it's not yet initialized
 
     for (int i = 0; i < SamplesToTrack; i++)
@@ -115,7 +108,7 @@ void PositionTracker::RecalcPosition(int index, unsigned int multiplier)
         //     sin(0.4*pi/180)/(0.4*pi/180) = 0.99999
         double gyroSpeed = m_position.gyroSpeed[index];
         double angleDiffHalf = gyroSpeed * GyroToRadiants / 2;
-        if (abs((int)gyroSpeed) >= GyroWrapper::Multiplier / 16)
+        if (abs(gyroSpeed * 16) >= 1)
         {
             double sinDiffHalf = sin(angleDiffHalf);
             double coeff = sinDiffHalf / angleDiffHalf;
@@ -164,7 +157,7 @@ void PositionTracker::Update()
     int leftEncoder = motor_get_position(leftBackDrivePort);
     int rightEncoder = motor_get_position(rightBackDrivePort);
     int sideEncoder = 0; // encoderGet(g_sideEncoder);
-    m_gyro = ::GetGyro().Get();
+    m_gyro = GetGyro().GetAngle();
 
     int i = Index(m_currentIndex + 1);
     m_currentIndex = i;
@@ -189,10 +182,10 @@ void PositionTracker::Update()
     if (udpateCycle == 0)
         lcdPrint(uart1, 1, "XYA %d %d %d",
             int(m_position.X[m_currentIndex] * inchesPerClick * 10), int(m_position.Y[m_currentIndex] * inchesPerClick * 10),
-            int(m_sensor.gyro[m_currentIndex] * 10 / GyroWrapper::Multiplier) % 3600);
+            int(m_sensor.gyro[m_currentIndex] * 10) % 3600);
     if (udpateCycle == 1)
         lcdPrint(uart1, 2, "LRA: %d %d %d",
-            motor_get_position(leftBackDrivePort), motor_get_position(rightBackDrivePort), int(m_gyro / GyroWrapper::Multiplier) % 360);
+            motor_get_position(leftBackDrivePort), motor_get_position(rightBackDrivePort), int(m_gyro) % 360);
 #endif
 }
 
@@ -204,7 +197,7 @@ PositionInfo PositionTracker::LatestPosition(bool clicks)
     info.leftSpeed = m_position.leftSpeed[index] / PositionTrackingRefreshRate;
     info.rightSpeed = m_position.rightSpeed[index] / PositionTrackingRefreshRate;
     info.gyroSpeed = m_position.gyroSpeed[index] / PositionTrackingRefreshRate;
-    info.gyro = ::GetGyro().Get();
+    info.gyro = GetGyro().GetAngle();
 
     if (clicks)
     {
@@ -232,9 +225,9 @@ void PositionTracker::FlipX(bool flip)
     m_flipX = flip;
 }
 
-int PositionTracker::GetGyrorReading()
+float PositionTracker::GetGyrorReading()
 {
-    int angle = ::GetGyro().Get();
+    float angle = GetGyro().GetAngle();
     if (m_flipX)
         angle = -angle;
     return angle;
@@ -242,13 +235,12 @@ int PositionTracker::GetGyrorReading()
 
 void PositionTracker::SetAngle(int degrees)
 {
-    degrees *= GyroWrapper::Multiplier;
     if (m_flipX)
         degrees = -degrees;
     for (int i = 0; i < SamplesToTrack; i++)
         m_sensor.gyro[i] = degrees;
 
-    ::GetGyro().SetAngle(degrees);
+    GetGyro().SetAngle(degrees);
 }
 
 void PositionTracker::SetCoordinates(Coordinates coord)

@@ -16,6 +16,8 @@ StateMachine::StateMachine()
 // Update
 void StateMachine::Update()
 {
+    if ((GetTime() % 500) == 0)
+        PrintController();
 
 
     // DEBUG CODE: REMOVE!!
@@ -36,8 +38,6 @@ void StateMachine::Update()
     {
         stateChange = false;
     }
-
-    //printf("Arm: %d  Tray: %d \n", armValue, trayValue);
 }
 
 // Return the current state
@@ -58,24 +58,24 @@ bool StateMachine::GetStateChange()
 
 State StateMachine::calculateState(State state)
 {
-    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
+    if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B))
         return State::Rest;
 
-    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
+    if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
         return State::Rest;
 
     if (state == State::Rest || state == State::ArmsUpMid || state == State::ArmsUpLow || state == State::InitializationState) {
-        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
+        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
             return State::ArmsUpMid;
-        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
+        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
             return State::ArmsUpLow;
-        else if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP))
+        else if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_Y))
             return State::InitializationState;
     }
 
     if (state == State::Rest)
     {
-        if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             return State::TrayOut;
     }
 
@@ -84,30 +84,29 @@ State StateMachine::calculateState(State state)
 
 void StateMachine::DebugPrint()
 {
-    printf("New State: ");
     if (currentState == State::Rest)
     {
-        printf("Rest\n");
+        ReportStatus(Log::States, "state = Rest\n");
     }
     if (currentState == State::TrayOut)
     {
-        printf("TrayOut\n");
+        ReportStatus(Log::States, "state = TrayOut\n");
     }
     if (currentState == State::ArmsUpMid)
     {
-        printf("ArmsUpMid\n");
+        ReportStatus(Log::States, "state = ArmsUpMid\n");
     }
     if (currentState == State::ArmsUpLow)
     {
-        printf("ArmsUpLow\n");
+        ReportStatus(Log::States, "state = ArmsUpLow\n");
     }
     if (currentState == State::InitializationState)
     {
-        printf("Initialization State\n");
+        ReportStatus(Log::States, "state =  Initialization\n");
     }
     if (currentState == State::Debug)
     {
-        printf("Debug State\n");
+        ReportStatus(Log::States, "state = Debug\n");
     }
 }
 

@@ -11,6 +11,7 @@ using namespace pros::c;
 
 Lift::Lift()
 {
+    motor_set_encoder_units(liftMotorPort, pros::E_MOTOR_ENCODER_COUNTS);
     motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_HOLD);
 }
 
@@ -19,7 +20,7 @@ void Lift::SetLiftMotor(int speed)
     motor_move(liftMotorPort, speed);
 }
 
-float Lift::get_value()
+int Lift::get_value()
 {
     return currentPosition;
 }
@@ -38,37 +39,41 @@ void Lift::Update()
 
     switch (sm.GetState()) {
         case State::ArmsUpMid:
-            motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000, PidPrecision::HigerOk);
+            motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000);
             break;
         case State::ArmsUpLow:
-            motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000, PidPrecision::HigerOk);
+            motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000);
             break;
         case State::TrayOut:
-            // if (GetCubeTray().IsMoving())
-            // motor = 60;
             break;
-        case State::InitializationState:
+        case State::Rest:
+            motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);
             /*
-            motor = pid.GetPower(currentPosition, ArmsInitialization, 1, 500, PidPrecision::HigerOk);
-            if (motor != 0)
-                break;
-            sm.SetState(State::Rest);
+            // We hit plates around cube tray :(
+            // So move down only if one of the following is true
+            // 1) arms are too high: save to move
+            // 2) tray is close to rest position: we are not hitting plates
+            // 3) tray is no longer moving: likely we have some malfunction, can push through?
+            auto& tray = GetCubeTray();
+            if (currentPosition > RestPos + 300 ||
+                    tray.m_anglePot.get_value() < CubeTray::restValue + 300 ||
+                    !tray.IsMoving())
+                motor = pid.GetPower(currentPosition, RestPos, 5, 0);
             */
-            // fall through
-        case State::Rest: 
-            motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);        
             break;
     }
 
     m_moving = (motor != 0);
 
+    /*
     // hack to keep arms low
     m_count++;
     if (sm.GetState() == State::Rest && motor == 0 && (m_count % 100) < 50)
     {
         motor = 20;
     }
-    
+    */
+   
     SetLiftMotor(-motor);
 }
 

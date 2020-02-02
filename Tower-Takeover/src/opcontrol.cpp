@@ -4,6 +4,7 @@
 #include "forwards.h"
 
 #include "pros/misc.h"
+#include "pros/imu.h"
 
 using namespace pros;
 using namespace pros::c;
@@ -17,8 +18,8 @@ static Main *g_main = nullptr;
 void initialize()
 {
   SetupMain();
-  printf("Battery %.2f \n", battery_get_capacity());
-  ReportStatus("Initialized\n");
+  ReportStatus(Log::Info, "Battery %.2f \n", battery_get_capacity());
+  ReportStatus(Log::Info, "Initialized\n");
 }
 
 Main &SetupMain()
@@ -37,7 +38,7 @@ Main &GetMain()
 GyroWrapper &GetGyro() { return GetMain().gyro; }
 Drive& GetDrive() { return GetMain().drive; }
 PositionTracker &GetTracker() { return GetMain().tracker; }
-int GetGyroReading() { return GetTracker().GetGyrorReading(); }
+float GetGyroReading() { return GetTracker().GetGyrorReading(); }
 StateMachine& GetStateMachine() { return GetMain().sm; }
 CubeTray& GetCubeTray() { return GetMain().cubetray; }
 Lift& GetLift() { return GetMain().lift; }
@@ -53,39 +54,51 @@ void MainRunUpdateCycle() { GetMain().Update(); }
 
 unsigned int GetTime() { return GetMain().GetTime(); }
 
-void AssertCore(bool condition, const char *message, const char *file, int line)
+
+unsigned int Main::GetTime()
 {
-	if (!condition)
-	{
-		ReportStatus("\n*** ASSERT: %s:%d: %s ***\n\n", file, line, message);
-		if (g_main != nullptr)
-			g_main->lcd.PrintMessage(message);
-	}
+	// Can use m_LastWakeUp + 1 instead
+	return millis();
 }
 
 void Main::Update()
 {
-	if (m_Ticks % 500 == 0)
-	{
-		sm.PrintController();
-		//printf("Controller Printing... \n");
+	/*
+	if ((m_Ticks % 1000) == 0) {
+		printf("%d: Gyro: %f\n", m_Ticks, GetGyro().GetAngle());
 	}
+	*/
 
-
-	if (m_LastWakeUp == 0)
-		m_LastWakeUp = millis();
+	// Run through all key motor subsystems - this applies commands that were just issues (in autonomous mode)
+	UpdateSlowSystems();
 
 	do
 	{
-		// task_delay_until( )is better then delay() as it allows us to "catch up" if we spend too much time in one cycle,
+		// Check that full cycle fits into 1ms
+		// Assert(m_LastWakeUp + 1 == millis());
+
+		// task_delay_until() is better then delay() as it allows us to "catch up" if we spend too much time in one cycle,
 		// i.e. have consistent frequency of updates.
 		// That said, it assumes that we are missing the tick infrequently.
 		// If it's not the case, we can hog CPU and not allow other tasks to have their share.
 		task_delay_until(&m_LastWakeUp, trackerPullTime);
+		// Assert(m_LastWakeUp + 1 == millis());
 
 		m_Ticks += trackerPullTime;
-		m_TicksToMainUpdate -= trackerPullTime;
-	} while (!UpdateWithoutWaiting());
+
+		// Note: Code below should match code in ResetState() in terms of what gets updated
+
+		UpdateFastSystems();
+
+		StaticAssert((allSystemsPullTime % trackerPullTime) == 0);
+	} while ((m_Ticks % allSystemsPullTime) != 0);
+
+	drive.UpdateOdometry();
+
+	// Good place for external code to consume some cycles:
+	// We have just updated all the odometry (gyro, drive, position)
+	// In autonomous mode it's perfect time to run logic and issue commands to various subsystems.
+	// Once we return to Update(), these commands will take immidiate effect through UpdateSlowSystems() call above
 }
 
 void Main::UpdateFastSystems()
@@ -94,9 +107,6 @@ void Main::UpdateFastSystems()
 	tracker.Update();
 
 #if LineTracker
-	// Line trackers depend on it
-	drive.UpdateDistanes();
-
 	// We go through line very quickly, so we do not have enough precision if we check it
 	// every 10 ms.
 	lineTrackerLeft.Update();
@@ -104,10 +114,8 @@ void Main::UpdateFastSystems()
 #endif // LineTracker
 }
 
-void Main::UpdateAllSystems()
+void Main::UpdateSlowSystems()
 {
-	UpdateFastSystems();
-
 	lcd.Update();
 
 	sm.Update();
@@ -119,38 +127,21 @@ void Main::UpdateAllSystems()
 	drive.Update();
 }
 
-bool Main::UpdateWithoutWaiting()
-{
-	bool res = false;
-
-	// If this assert fires, than numbers do not represent actual timing.
-	// It's likley not a big deal, but something somwhere might not work because of it.
-	StaticAssert((trackerPullTime % trackerPullTime) == 0);
-
-	if (m_TicksToMainUpdate / trackerPullTime == 0)
-	{
-		m_TicksToMainUpdate = allSystemsPullTime;
-
-		UpdateAllSystems();
-
-		// Good place for external code to consume some cycles
-		res = true;
-	}
-	else
-	{
-		UpdateFastSystems();
-	}
-
-	return res;
-}
-
 void Main::ResetState()
 {
 	// reset wake-up logic
-	m_LastWakeUp = millis() - 1;
+	m_LastWakeUp = millis();
+
+	// Code relies we have some granulariy
+	m_Ticks = (millis() / trackerPullTime) * trackerPullTime;
 
 	drive.ResetState();
 	gyro.ResetState();
+
+	// Last part of Update() cycle.
+	// UpdateSlowSystems() will be called right away in both automonomous & op control modess
+    UpdateFastSystems();
+	drive.UpdateOdometry();
 }
 
 //Operator Control
@@ -166,7 +157,6 @@ void opcontrol()
 
 	Main &main = SetupMain();
 	main.ResetState();
-	main.UpdateAllSystems();
 
 	while (true)
 	{

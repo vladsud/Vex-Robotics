@@ -80,13 +80,13 @@ bool IsValidObject(pros::vision_object_s_t& obj, SigType type, bool report)
     if (obj.signature == VISION_OBJECT_ERR_SIG)
     {
         if (report)
-            ReportStatus("Failed to retrive object\n");
+            ReportStatus(Log::Vision, "Failed to retrive object\n");
         return false;
     }
     auto index = obj.signature;
     if (index <= 0 || index > CountOf(g_signatures))
     {
-        // ReportStatus("   Vision: Wrong index: %d\n", index);
+        // ReportStatus(Log::Vision, "   Vision: Wrong index: %d\n", index);
         return false;
     }
 
@@ -125,9 +125,9 @@ void Vision::SetFlipX(bool blue)
     for (int i = 0; i < CountOf(g_signatures); i++)
     {
         if (1 != m_sensor.set_signature(i+1, &g_signatures[i].sig))
-            ReportStatus("Faield to set vision signature %d\n", i);
+            ReportStatus(Log::Vision, "Faield to set vision signature %d\n", i);
     }
-    ReportStatus("Camera is initialized\n");
+    ReportStatus(Log::Vision, "Camera is initialized\n");
 } 
 
 bool Vision::IsShooting()
@@ -154,7 +154,7 @@ bool Vision::ReadObjects()
             // EINVAL = 22 - incorrect port or port type
             // EACCES = 13 - someone else is talking to same port
             if (!m_reportedError)
-                ReportStatus("Vision sensor error: %d\n", errno);
+                ReportStatus(Log::Vision, "Vision sensor error: %d\n", errno);
             m_reportedError = true;
         }
         return false;
@@ -162,7 +162,7 @@ bool Vision::ReadObjects()
 
     if (m_objCount > CountOf(m_objects))
         m_objCount = CountOf(m_objects);
-    // ReportStatus("Vision: %d m_objects: time = %d\n", m_objCount, millis());
+    // ReportStatus(Log::Vision, "Vision: %d m_objects: time = %d\n", m_objCount, millis());
     return true;
 }
 
@@ -179,7 +179,7 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
 
         /*
         if (moveBase || moveAngle)
-            ReportStatus("   obj: id=%d, x=%d, y=%d, w=%d, h=%d, a=%d\n",
+            ReportStatus(Log::Vision, "   obj: id=%d, x=%d, y=%d, w=%d, h=%d, a=%d\n",
                 objectMainColor.signature,
                 objectMainColor.x_middle_coord,
                 objectMainColor.y_middle_coord,
@@ -290,7 +290,7 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
 
     /*
     if ((m_m_objCount % 10) == 0)
-        ReportStatus("(%3d) Vision best match: confidence=%2d coord=(%3d, %3d), size=(%3d, %3d)\n",
+        ReportStatus(Log::Vision, "(%3d) Vision best match: confidence=%2d coord=(%3d, %3d), size=(%3d, %3d)\n",
             m_brightness,
             obj.confidence,
             obj.mainColor->x_middle_coord,
@@ -308,13 +308,13 @@ bool Vision::FindObject(unsigned int xDistanceMax, unsigned yDistanceMax, unsign
             y_angle = y_angle * 3;
 
         auto& main = GetMain();
-        ReportStatus("Tracking: confidence = %d, dimentions = (%d, %d) coord = (%d %d), angle diff = (%d, %d), angle: %d, angle diff: %d\n",
+        ReportStatus(Log::Vision, "Tracking: confidence = %d, dimentions = (%d, %d) coord = (%d %d), angle diff = (%d, %d), angle: %d, angle diff: %d\n",
             obj.confidence, obj.mainColor->width, obj.mainColor->height, x, y, y_angle, main.shooter.MovingRelativeTo(), (int)motor_get_position(angleMotorPort),
             m_turnAction ? m_turnAction->GetError() : 0);
 
         if (moveBase)
         {
-            int angle = -x * GyroWrapper::Multiplier / 4;
+            int angle = (float)-x / 4;
             if (!m_turnAction)
                 m_turnAction = new TurnPrecise(angle);
             m_turnAction->ChangeTurn(angle);
@@ -370,7 +370,7 @@ void Vision::Update()
     {
         if ((m_count % 100) == 0)
         {
-            ReportStatus("Brightness = %3d, detections (high / medium / low): %3d / %3d / %3d == %3d\n",
+            ReportStatus(Log::Vision, "Brightness = %3d, detections (high / medium / low): %3d / %3d / %3d == %3d\n",
                 m_brightness,
                 m_detectionsHigh, m_detectionsMedium, m_detectionsLow,
                 m_detectionsHigh + m_detectionsMedium + m_detectionsLow);
@@ -442,7 +442,7 @@ void Vision::Update()
             m_countNotFound++;
             if (m_countNotFound >= 10)
             {
-                ReportStatus("Stopping vision motion\n");
+                ReportStatus(Log::Vision, "Stopping vision motion\n");
                 m_fOnTarget = false;
                 m_countNotFound = 0;
                 StopTurning();
@@ -456,7 +456,7 @@ void Vision::Update()
             if (found)
                 m_foundCount++;
             if (!found)
-                ReportStatus("not found (objects inspected: %d)\n", m_objCount);
+                ReportStatus(Log::Vision, "not found (objects inspected: %d)\n", m_objCount);
         }
     }
 

@@ -18,7 +18,7 @@ using namespace pros::c;
 
 void RunAtonProtected()
 {
-    printf("Protected aton\n");
+    ReportStatus(Log::Info, "Protected aton\n");
 
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});
@@ -51,14 +51,14 @@ void RunAtonProtected()
 
     //Wait(500);
 
-    Do(MoveAction(700, 50));
+    MoveStraight(700, 50, turnAngle);
 
     DoTrayAction(State::TrayOut);
 
     // TODO: add quick time out
     Do(MoveAction(150, 30), 1000);
     
-    Do(MoveAction(-1500, 60));
+    MoveStraight(-1500, 60, turnAngle);
     DoTrayAction(State::Rest);
 
 

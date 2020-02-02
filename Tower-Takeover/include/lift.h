@@ -6,9 +6,9 @@ class Lift
 {
 private:
   bool m_moving = false;
-  PidImpl pid {1 /*precision*/};
+  PidImpl pid {50 /*precision*/};
 
-  float currentPosition;
+  int currentPosition;
   int m_count = 0;
 
 public:
@@ -17,7 +17,7 @@ public:
   void SetLiftMotor(int speed);
   bool IsMoving() {return m_moving; }
 
-  float get_value();
+  int get_value();
 
   int ArmsInitialization = 1830;
   int ArmsMidPos = 1950;

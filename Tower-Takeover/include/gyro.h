@@ -2,91 +2,81 @@
 
 #include "pros/adi.hpp"
 
-class GyroReal
+class LegacyGyro
 {
     pros::ADIAnalogIn m_sensor;
-    int32_t m_value = 0;
-    int32_t m_multiplier = 0;
+    int64_t m_value = 0;
     uint32_t m_calibValue = 0;
-    uint32_t m_stddev = 0;
-    int32_t m_limit = 0;
     unsigned long m_lastTime = 0;
-    bool m_freeze = false;
+    const float m_multiplier;
+    const int32_t m_limit;
 
   public:
-    // Devide by this nuber to convert gyro value to degrees
-    static constexpr int Multiplier = 1 << 10;
-    int Get() const { return m_value; }
-    void SetAngle(int angle) { m_value = angle; }
+    float GetAngle() const;
+    void SetAngle(float angle);
     void ResetState();
 
     void Integrate();
-    GyroReal(unsigned char port, unsigned short multiplier = 0);
+    LegacyGyro(unsigned char port, unsigned short multiplier = 0);
+};
 
-    void Freeze() { m_freeze = true; }
-    void Unfreeze() { m_freeze = false; }
+class GyroNothing
+{
+  public:
+    float GetAngle() const;
+    void SetAngle(float angle) {}
+    void ResetState() {}
+    void Integrate() {}
+    GyroNothing() {}
+    GyroNothing(unsigned int) {}
+};
+
+class GyroInertial
+{
+    const uint8_t m_port;
+    float m_offset = 0;
+
+  public:
+    float GetAngle() const;
+    void SetAngle(float angle);
+    void ResetState();
+
+    void Integrate() {}
+    GyroInertial(uint8_t port);
 };
 
 
 class GyroWheels
 {
-    int32_t m_offset = 0;
-    const float m_multiplier = 86.23f;
+    float m_offset = 0;
+    const float m_multiplier = 0.07;
 
   public:
-    // Devide by this nuber to convert gyro value to degrees
-    static constexpr int Multiplier = 1 << 10;
-
     GyroWheels() {}
-    void Integrate(); // {}
-    void Freeze() { }
-    void Unfreeze() { }
+    void Integrate();
 
-    int Get() const;
-    void SetAngle(int angle);
+    float GetAngle() const;
+    void SetAngle(float angle);
     void ResetState();
 };
 
 
 class GyroBoth
 {
-    GyroReal m_gyro;
-    GyroReal m_gyro2;
+    // GyroInertial
+    GyroNothing m_gyroImu {gyroPortImu};
     GyroWheels m_wheels;
+    LegacyGyro m_gyro {gyroPort};
+    LegacyGyro m_gyro2 {gyroPort2};
 
   public:
-    // Devide by this nuber to convert gyro value to degrees
-    static constexpr int Multiplier = 1 << 10;
-
     GyroBoth();
     void Integrate();
-    void Freeze();
-    void Unfreeze();
 
-    int Get() const;
-    void SetAngle(int angle);
+    float GetAngle() const;
+    void SetAngle(float angle);
     void ResetState();
 };
 
-
 using GyroWrapper = GyroBoth;
-
-class GyroFreezer
-{
-  GyroWrapper& m_gyro;
-
-public:
-  GyroFreezer(GyroWrapper& gyro)
-    :m_gyro(gyro)
-  {
-    m_gyro.Freeze();
-  }
-
-  ~GyroFreezer()
-  {
-    m_gyro.Unfreeze();
-  }
-
-};
-
 GyroWrapper &GetGyro();

@@ -1,0 +1,7 @@
+0: A: err=0, left = 1, right = 5
+1: A: err=0, left = 2, right = 4
+1: B: drive=5, speed = 4
+2: A: err=2, left = 3, right = 3
+2: B: drive=10, speed = 4
+3: foo = 5
+foo = 5

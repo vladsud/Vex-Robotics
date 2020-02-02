@@ -11,7 +11,7 @@ struct Action
     // Put when the program should stop
     virtual bool ShouldStop() = 0; //{ return true; }
 
-    // Called after a certain amount of time
+    // Called when action is done - either completed or timed out
     virtual void Stop() {}
     virtual const char* Name() { return "unknown"; }
 private:

@@ -26,7 +26,7 @@ void LineTracker::Reset()
 {
     ResetCore();
     // It's important to do update right away, to detect if we are starting on white/red.
-    Assert(GetDrive().m_distance == 0);
+    Assert(GetDrive().GetDistance() == 0);
     Update();
 }
 
@@ -43,7 +43,7 @@ void LineTracker::Push(bool white)
 {
     if (m_timesIndex == CountOf(m_times))
         Shift(1);
-    m_times[m_timesIndex] = GetDrive().m_distance;
+    m_times[m_timesIndex] = GetDrive().GetRealTimeDistance();
     m_timesIndex++;
 }
 
@@ -53,7 +53,6 @@ void LineTracker::Update()
     if (m_minvalue > value)
         m_minvalue = value;
 
-    // ReportStatus("Line %d\n", value);
     StaticAssert(WhiteLevel < BlackLevel);
 
     if (m_status != Status::HitBlack && value > BlackLevel)
@@ -68,11 +67,11 @@ void LineTracker::Update()
         if (m_times[m_timesIndex-1] == 0)
         {
             m_timesIndex--;
-            // ReportStatus("   Starting on white: brightness=%d\n", value);
+            // ReportStatus(Log::Warning, "   Starting on white: brightness=%d\n", value);
         }
         else
         {
-            // ReportStatus("   White line hit: dist=%d, brightness=%d\n", m_times[m_timesIndex-1], value);
+            // ReportStatus(Log::Info, "   White line hit: dist=%d, brightness=%d\n", m_times[m_timesIndex-1], value);
         }
         m_status = Status::HitWhite;
     }
@@ -93,15 +92,15 @@ int LineTracker::IndexForWhiteLine()
     return index;
  }
 
-unsigned int LineTracker::GetWhiteLineDistance(bool pop)
+int LineTracker::GetWhiteLineDistance(bool pop)
 {
     int index = IndexForWhiteLine();
     Assert(index >= 0);
     if (index == -1)
         return 0;
 
-    // unsigned int result = (m_times[index] + m_times[index+1]) / 2;
-    unsigned int result = m_times[index];
+    // int result = (m_times[index] + m_times[index+1]) / 2;
+    int result = m_times[index];
     if (pop)
         Shift(index+1);
     return result;
@@ -115,7 +114,7 @@ bool LineTracker::HasWhiteLine(int shouldHaveTravelled)
 
     if (abs(shouldHaveTravelled - (int)m_times[index]) > 400)
     {
-        ReportStatus("Single line correction IGNORED: Travelled: %d, should: %d\n",
+        ReportStatus(Log::Warning, "Single line correction IGNORED: Travelled: %d, should: %d\n",
             m_times[index], shouldHaveTravelled);
         Shift(index+1);
         return false;

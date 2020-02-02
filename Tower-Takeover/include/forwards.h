@@ -1,6 +1,5 @@
 #pragma once
-
-#include "stdint.h"
+// #include "stdint.h"
 
 namespace pros { namespace c { extern "C" {
    double battery_get_capacity(void);

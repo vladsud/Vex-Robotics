@@ -1,0 +1,14 @@
+{
+  "exclude": [
+    "dist",
+    "node_modules"
+  ],
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist",
+    "strict": true, /* Enable all strict type-checking options. */
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}

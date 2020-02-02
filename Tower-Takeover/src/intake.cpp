@@ -10,9 +10,10 @@ using namespace pros::c;
 extern bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t button);
 
 void SetIntakeMotors(int power) {
+    motor_set_encoder_units(intakeLeftPort, pros::E_MOTOR_ENCODER_COUNTS);
+    motor_set_encoder_units(intakeRightPort, pros::E_MOTOR_ENCODER_COUNTS);
     motor_move(intakeLeftPort, -power);
     motor_move(intakeRightPort, power);
-    
 }
 
 Intake::Intake()
@@ -61,7 +62,6 @@ void Intake::Update()
     if (sm.GetState() == State::TrayOut && m_mode != IntakeMode::Stop)
     {
         m_mode = IntakeMode::Stop;
-        printf("Stop Intake because of Tray and Arm \n");
         SetIntakeMotors(0);
         return;
     }

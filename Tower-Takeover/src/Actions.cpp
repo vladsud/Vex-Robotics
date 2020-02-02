@@ -10,36 +10,35 @@ bool DoCore(T &&action, unsigned int timeout /* = 100000 */)
 
     while (!action.ShouldStop())
     {
-        if (action.GetElapsedTime() >= timeout)
-        {
-            timedout = true;
-            ReportStatus("!!! TIME-OUT: %s: %d\n", action.Name(), timeout);
+        timedout = action.GetElapsedTime() >= timeout;
+        if (timedout)
             break;
-        }
 
         MainRunUpdateCycle();
 
         // Check if we have bailed out of autonomous mode in manual skills (some key was pressed on joystick)
         if (ShouldBailOutOfAutonomous())
         {
-            ReportStatus("\n!!! Switching to manual mode!\n");
+            ReportStatus(Log::Info, "\n!!! Switching to manual mode!\n");
             action.Stop();
             Assert(!isAuto());
             opcontrol(); // this does not return!
-            ReportStatus("\n!!! Error: Should never get back from opControl()!\n");
+            ReportStatus(Log::Error, "\n!!! Error: Should never get back from opControl()!\n");
         }
     }
 
     action.Stop();
-    if (!timedout && false)
-    {
-        if (timeout <= 15000)
-            ReportStatus("%s took %ld ms (time-out: %d)\n", action.Name(), _millis() - time, timeout);
-        else
-            ReportStatus("%s took %ld ms\n", action.Name(), _millis() - time);
-    }
 
-    return !timedout;
+    if (timedout)
+    {
+        ReportStatus(Log::Warning, "!!! TIME-OUT: %s: %d\n", action.Name(), timeout);
+        return false;
+    }
+    if (timeout <= 15000)
+        ReportStatus(Log::Verbose, "%s took %ld ms (time-out: %d)\n", action.Name(), _millis() - time, timeout);
+    else
+        ReportStatus(Log::Verbose, "%s took %ld ms\n", action.Name(), _millis() - time);
+    return true;
 }
 
 bool Do(Action &&action, unsigned int timeout /* = 100000 */)

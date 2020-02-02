@@ -79,7 +79,7 @@ bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t
     // this is very useful to run autonomous skills in manual skills mode.
     if (result && g_mode != AtonMode::Regular)
     {
-        ReportStatus("\n!!! Cancelling autonomous mode, running opControl()!\n");
+        ReportStatus(Log::Warning, "\n!!! Cancelling autonomous mode, running opControl()!\n");
         Assert(isAuto());
         Assert(!competition_is_autonomous());
         g_mode = AtonMode::Regular;
@@ -95,13 +95,13 @@ struct EndOfAction : public Action
 
 void autonomous()
 {
-    ReportStatus("Main Battery Level: %.2f\n" , battery_get_capacity());
+    ReportStatus(Log::Info, "Main Battery Level: %.2f\n" , battery_get_capacity());
 
     // Safety net: run autonomous only once!
     // In case manual auto was still in place when running on competition.
     if (g_alreadyRunAutonomous && !competition_is_autonomous())
     {
-        ReportStatus("\n!!! Safety: running second aton, switching to manaul mode!\n");
+        ReportStatus(Log::Error, "\n!!! Safety: running second aton, switching to manaul mode!\n");
         g_mode = AtonMode::Regular;
         return;
     }
@@ -113,7 +113,7 @@ void autonomous()
         delay(4000);
 #endif
 
-    ReportStatus("\n*** Autonomous: Start ***\n\n");
+    ReportStatus(Log::Info, "\n*** Autonomous: Start ***\n\n");
 
     Main &main = SetupMain();
     auto time = main.GetTime();
@@ -121,7 +121,6 @@ void autonomous()
 
     // all system update their counters, like distance counter.
     main.ResetState();
-    main.UpdateAllSystems();
 
     auto &lcd = main.lcd;
 
@@ -135,8 +134,6 @@ void autonomous()
     }
 
     // setup coordinates
-    if (main.lcd.AtonRed)
-        ReportStatus("Flipping coordinates\n");
     main.tracker.FlipX(main.lcd.AtonRed);
     main.drive.FlipX(main.lcd.AtonRed);
     //main.vision.SetFlipX(main.lcd.AtonRed);
@@ -167,8 +164,8 @@ void autonomous()
     UNUSED_VARIABLE(time);
     UNUSED_VARIABLE(time2);
 
-    ReportStatus("\n*** END AUTONOMOUS ***\n\n");
-    printf("Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
+    ReportStatus(Log::Info, "\n*** END AUTONOMOUS ***\n\n");
+    ReportStatus(Log::Info, "Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
 
     Do(EndOfAction());
 }
@@ -176,7 +173,7 @@ void autonomous()
 void WaitAfterMoveReportDistance(int distance, unsigned int timeout)
 {
     WaitAfterMove(timeout);
-    unsigned int error = abs((int)abs(distance) - (int)GetDrive().m_distance);
+    unsigned int error = abs(distance - GetDrive().GetDistance());
     if (error >= 50)
-        ReportStatus("MoveExact (or equivalent) big Error: %d, distance travelled: %d, expected: %d\n", error, GetDrive().m_distance, distance);
+        ReportStatus(Log::Warning, "MoveExact (or equivalent) big Error: %d, distance travelled: %d, expected: %d\n", error, GetDrive().GetDistance(), distance);
 }

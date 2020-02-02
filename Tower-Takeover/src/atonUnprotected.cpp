@@ -15,7 +15,7 @@
 
 void RunAtonUnprotected()
 {
-    printf("Unprotected aton\n");
+    ReportStatus(Log::Info, "Unprotected aton\n");
 
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});
@@ -57,8 +57,7 @@ void RunAtonUnprotected()
     // Do(MoveAction(300, 30), 500);
     
     // Move back
-    Do(MoveAction(-1800, 70));
-    // MoveStraight(-1500, 60, 60);
+    MoveStraight(-1800, 70, turnAngle);
     
     DoTrayAction(State::Rest);
 }

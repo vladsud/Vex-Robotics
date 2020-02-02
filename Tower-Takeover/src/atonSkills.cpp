@@ -10,14 +10,14 @@
 #include "pros/motors.h"
 void RunSuperSkills()
 {
-    printf("Skillz aton\n");
+    ReportStatus(Log::Info, "Skillz aton\n");
 
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, -90});
 
     // Pushe cubes away
-    Do(MoveAction(500, 60));
-    Do(MoveAction(-500, 60));
+    MoveStraight(500, 60, -90);
+    MoveStraight(-500, 60, -90);
 
     // Initialize
     OpenTrayOnStart();
@@ -39,24 +39,25 @@ void RunSuperSkills()
     MoveStraight(7000, 80, -90);
 
     // Turn toward tower
-    TurnToAngle(-180);
+    int angle = -180;
+    TurnToAngle(angle);
     
     // Go to tower
     GetIntake().m_mode = IntakeMode::Hold;
-    MoveStraight(4500, 80, -180);
+    MoveStraight(4500, 80, angle);
 
     // Stack
     DoTrayAction(State::TrayOut);
 
     // TODO: add quick time out
-    Do(MoveAction(150, 30));
+    MoveStraight(150, 30, angle);
     
-    Do(MoveAction(-1500, 60));
+    MoveStraight(-1500, 60, angle);
 
     DoTrayAction(State::Rest);
 
     // Go back
-    MoveStraight(-4500, 80, -180);
+    MoveStraight(-4500, 80, angle);
 
     // Go to tower
     MoveStraight(4500, 80, 90);

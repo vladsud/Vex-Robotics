@@ -9,3 +9,4 @@
 #include "../src/lift.cpp"
 #include "../src/stateMachine.cpp"
 #include "../src/vision.cpp"
+#include "../src/motion.cpp"

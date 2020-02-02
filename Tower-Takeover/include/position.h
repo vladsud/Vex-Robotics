@@ -2,7 +2,7 @@
 
 #include "Gyro.h"
 
-int GetGyroReading();
+float GetGyroReading();
 
 static const int PositionTrackingRefreshRate = 2;
 
@@ -49,7 +49,7 @@ struct PositionInfo
     double leftSpeed; // per ms
     double rightSpeed;  // per ms
     double gyroSpeed;  // per ms
-    int gyro;
+    float gyro;
     double X;
     double Y;
 };
@@ -66,7 +66,7 @@ class PositionTracker
 {
   public:
     static constexpr double Pi = 3.14159265358;
-    static constexpr double GyroToRadiants = Pi / GyroWrapper::Multiplier / 180;
+    static constexpr double GyroToRadiants = Pi / 180;
     static constexpr double inchesPerClick = 4.11161263 * Pi / 360; // 0.03588
     static constexpr double distanceRightWheelFromCenter = 7.2908 / inchesPerClick;
     static constexpr double distanceLeftWheelFromCenter = 7.2908 / inchesPerClick;
@@ -74,7 +74,7 @@ class PositionTracker
     static constexpr double one_by_wheelDistance = 1 / (distanceRightWheelFromCenter + distanceLeftWheelFromCenter);
 
   private:
-    int m_gyro = 0;
+    float m_gyro = 0;
     int m_count = 0;
     bool m_flipX = false;
 
@@ -91,7 +91,7 @@ class PositionTracker
     void SetCoordinates(Coordinates cord);
     void SetAngle(int degrees);
     void FlipX(bool flip);
-    int GetGyrorReading();
+    float GetGyrorReading();
 
   private:
     int Index(int i)

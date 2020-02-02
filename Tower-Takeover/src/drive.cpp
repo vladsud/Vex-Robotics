@@ -9,12 +9,18 @@
 using namespace pros;
 using namespace pros::c;
 
+
+/*******************************************************************************
+ *
+ * Standalone functions
+ * 
+ ******************************************************************************/
 int AdjustSpeed(int speed)
 {
-    if (speed > driveMotorMaxSpeed)
-        speed = driveMotorMaxSpeed;
-    if (speed <= -driveMotorMaxSpeed)
-        speed = -driveMotorMaxSpeed;
+    if (speed > MotorMaxSpeed)
+        speed = MotorMaxSpeed;
+    if (speed <= -MotorMaxSpeed)
+        speed = -MotorMaxSpeed;
     return speed;
 }
 
@@ -38,46 +44,49 @@ int GetMovementJoystick(pros::controller_id_e_t joystick, pros::controller_analo
     return neg ? value : -value;
 }
 
-double GetLeftVelocity()
+
+/*******************************************************************************
+ *
+ * Motor class
+ * 
+ ******************************************************************************/
+Motor::Motor(unsigned int port)
+    : m_port(port)
 {
-    return (
-        motor_get_actual_velocity(leftBackDrivePort) + 
-        motor_get_actual_velocity(leftFrontDrivePort)
-    ) / 2;
+    HardReset();
 }
 
-double GetRightVelocity()
+void Motor::HardReset()
 {
-    return (
-        motor_get_actual_velocity(rightBackDrivePort) +
-        motor_get_actual_velocity(rightFrontDrivePort)
-    ) / 2;
+    motor_tare_position(m_port);
+    motor_set_encoder_units(m_port, pros::E_MOTOR_ENCODER_COUNTS);
+    Reset();
+    Update();
+    m_prevValue = m_currValue;
 }
 
-double GetForwardVelocity()
+void Motor::Reset()
 {
-    return (
-        motor_get_actual_velocity(rightFrontDrivePort) +
-        motor_get_actual_velocity(leftFrontDrivePort)
-    ) / 2;
+    m_base = motor_get_position(m_port);
 }
 
-double GetBackVelocity()
+void Motor::Update()
 {
-    return (
-        motor_get_actual_velocity(rightBackDrivePort) +
-        motor_get_actual_velocity(leftBackDrivePort)
-    ) / 2;
+    m_prevValue = m_currValue;
+    m_currValue = motor_get_position(m_port);
 }
 
-double GetRobotVelocity()
+int Motor::GetRealTimePos()
 {
-    return (
-        GetLeftVelocity() +
-        GetRightVelocity()
-    ) / 2;
+    return motor_get_position(m_port) - m_base;
 }
 
+
+/*******************************************************************************
+ *
+ * DriveTracker class
+ * 
+ ******************************************************************************/
 DriveTracker::DriveTracker()
     : m_drive(GetDrive())
 {
@@ -93,23 +102,54 @@ DriveTracker::~DriveTracker()
 }
 
 
+/*******************************************************************************
+ *
+ * KeepAngle class
+ * 
+ ******************************************************************************/
 KeepAngle::KeepAngle(int angle)
 {
     if (m_drive.IsXFlipped())
         angle = -angle;
-    angle *= GyroWrapper::Multiplier;
 
-    AssertSz(abs(angle - GetGyro().Get()) <= 20 * GyroWrapper::Multiplier, "Angle is too far from current one!");
+    AssertSz(abs(angle - GetGyro().GetAngle()) <= 5, "Angle is too far from current one!");
     m_angle = angle;
 }
 
 float KeepAngle::GetError()
 {
-    return (m_angle - GetGyro().Get()) * 2.0 / GyroWrapper::Multiplier;
+    return (m_angle - GetGyro().GetAngle()) * 2.0;
 }
 
 
+/*******************************************************************************
+ *
+ * Drive class
+ * 
+ ******************************************************************************/
+int Drive::GetFrontVelocity()
+{
+    return m_motorRightFront.GetVelocity() + m_motorLeftFront.GetVelocity();
+}
+
+int Drive::GetBackVelocity()
+{
+    return m_motorRightBack.GetVelocity() + m_motorLeftBack.GetVelocity();
+}
+
+int Drive::GetRobotVelocity()
+{
+    return (
+        GetFrontVelocity() +
+        GetBackVelocity()
+    ) / 2;
+}
+
 Drive::Drive()
+  : m_motorLeftFront(leftFrontDrivePort)
+  , m_motorLeftBack(leftBackDrivePort)
+  , m_motorRightFront(rightFrontDrivePort)
+  , m_motorRightBack(rightBackDrivePort)
 {
     motor_set_reversed(rightBackDrivePort, true);
     motor_set_reversed(rightFrontDrivePort, true);
@@ -118,31 +158,40 @@ Drive::Drive()
 
 int Drive::GetForwardLeftAxis()
 {
+    Assert(!isAuto());
     // motors can't move robot at slow speed, so add some boost
-    if (isAuto())
-        return m_overrideForward;
     return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_LEFT_Y, 18);
 }
 
 
 int Drive::GetForwardRightAxis()
 {
+    Assert(!isAuto());
     // motors can't move robot at slow speed, so add some boost
-    if (!isAuto())
-        return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_RIGHT_Y, 18);
-    return 0;
+    return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_RIGHT_Y, 18);
 }
 
-float Drive::GetTurnAxis()
+int Drive::GetForward()
+{
+    if (isAuto())
+        return m_overrideForward;
+    if (GetLcd().IsTankDrive)
+        return (GetForwardLeftAxis() + GetForwardRightAxis())/2;
+    return GetForwardLeftAxis();
+}
+
+int Drive::GetTurnAxis()
 {
     // We adjust speed to put more power to motors initially to move robot from still position.
     if (isAuto())
         return m_overrideTurn;
+    if (GetLcd().IsTankDrive)
+        return (GetForwardLeftAxis() - GetForwardRightAxis())/2;
     // convert joystick metric to drive metric
-    return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_RIGHT_X, 25) * driveMotorMaxSpeed / joystickMax;
+    return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_RIGHT_X, 25) * MotorMaxSpeed / joystickMax;
 }
 
-void Drive::OverrideInputs(int forward, float turn)
+void Drive::OverrideInputs(int forward, int turn)
 {
     Assert(isAuto());
 
@@ -151,24 +200,24 @@ void Drive::OverrideInputs(int forward, float turn)
 
     m_overrideForward = forward;
     m_overrideTurn = turn;
-
-    // ReportStatus("OverrideInputs: %d %d %d %d\n", int(m_overrideForward), int(m_overrideTurn), int(m_forward), int(m_turn));
 }
 
 void Drive::ResetState()
 {
     m_tracker = nullptr;
-    m_distanceFromBeginning = 0;
-    motor_tare_position(leftBackDrivePort);
-    motor_tare_position(rightBackDrivePort);
-    // motor_tare_position(g_sideEncoder);
+    m_motorLeftBack.HardReset();
+    m_motorRightBack.HardReset();
+    m_motorLeftFront.HardReset();
+    m_motorRightFront.HardReset();
     ResetTrackingState();
 }
 
 void Drive::ResetTrackingState()
 {
-    m_encoderBaseLeft = motor_get_position(leftBackDrivePort);
-    m_encoderBaseRight = motor_get_position(rightBackDrivePort);
+    m_motorLeftBack.Reset();
+    m_motorRightBack.Reset();
+    m_motorLeftFront.Reset();
+    m_motorRightFront.Reset();
     m_distance = 0;
     m_left = 0;
     m_right = 0;
@@ -209,118 +258,84 @@ void Drive::SetRightDrive(int speed)
     setMotors(rightFrontDrivePort, rightBackDrivePort, speed);
 }
 
-void Drive::StartHoldingPosition()
+int Drive::GetRealTimeDistance()
 {
-    m_holdingPosition = true;
-    ResetTrackingState();
+    return m_motorLeftBack.GetRealTimePos() + m_motorRightBack.GetRealTimePos();
 }
 
-void Drive::HoldPosition()
-{
-}
-
-void Drive::UpdateDistanes()
-{
-    m_left = motor_get_position(leftBackDrivePort);
-    m_right = motor_get_position(rightBackDrivePort);
-
-    //printf("m_left: %d   m_right: %d\n", m_left, m_right);
-    m_distanceFromBeginning = abs(m_left) + abs(m_right);
-
-    m_left -= m_encoderBaseLeft;
-    m_right -= m_encoderBaseRight;
-    m_distance = abs(m_left) + abs(m_right);
-}
 
 int Drive::GetAngle()
 {
-    // return motor_get_position(rightBackDrivePort) - motor_get_position(leftBackDrivePort);
-    //printf("Drive Angle: %d\n", m_right + m_encoderBaseRight - m_left - m_encoderBaseLeft);
-    return m_right + m_encoderBaseRight - m_left - m_encoderBaseLeft;
+    return m_motorRightBack.GetRawPos() - m_motorLeftBack.GetRawPos();
 }
 
+// This method has to run before Update() in each update cycle!
+void Drive::UpdateOdometry()
+{
+    m_motorLeftFront.Update();
+    m_motorLeftBack.Update();
+    m_motorRightFront.Update();
+    m_motorRightBack.Update();
+    m_left = m_motorLeftBack.GetPos();
+    m_right = m_motorRightBack.GetPos();
+    m_distance = m_left + m_right;
+}
 
 void Drive::Update()
 {
     //Drive
-    int forward;
-    int turn;
-    if (GetLcd().IsTankDrive)
-    {
-        forward = (GetForwardLeftAxis() + GetForwardRightAxis())/2;
-        turn = (GetForwardLeftAxis() - GetForwardRightAxis())/2;
-    }   
-    else
-    {
-        forward = GetForwardLeftAxis();
-        turn = GetTurnAxis();
-    }
+    const int forward = GetForward();
+    const int turn = GetTurnAxis();
     
-
-    if (m_holdingPosition)
-    {
-        if (forward == 0 && turn == 0)
-        {
-            HoldPosition();
-            return;
-        }
-        m_holdingPosition = false;
-    }
-
     // It's hard to make this work in automnomous mode, as sometimes direcitons change as part of single attion.
     // So each autonomous action resets state manually
-    bool keepDirection = isAuto() || KeepDrection(forward, turn);
-
-    if (!keepDirection)
+    if (!isAuto() && !KeepDrection(forward, turn))
         ResetTrackingState();
 
-    UpdateDistanes();
-
-    if (turn == 0 && forward == 0)
+    // Remember direction of movement!
+    if (turn != 0 || forward != 0)
     {
-        SetLeftDrive(0);
-        SetRightDrive(0);
-        return;
+        m_forward = forward;
+        m_turn = turn;
     }
 
-    m_forward = forward;
-    m_turn = turn;
-
-    int turnAbs = abs(m_turn);
-    int forwardAbs = abs(m_forward);
+    int turnAbs = abs(turn);
+    int forwardAbs = abs(forward);
 
     bool smartsOn = SmartsOn();
 
     float error;
     // turn is aded to left!
-    // when m_distance = 2*m_forward, we expect left-right to be 2*turn
-    Assert(m_tracker == nullptr || (turnAbs == 0 && smartsOn && isAuto())); // tracker is used in very limited cases
-    if (turnAbs < forwardAbs)
+    // when GetDistance() = 2*forward, we expect left-right to be 2*turn
+    if (m_tracker)
     {
-        // Use gyro only in limited cases, until proven to be working well.
-        if (turnAbs == 0 && m_tracker != nullptr)
-        {
-            // Gyro moves positive counter-clock-wise.
-            // gyroDiff > 0: clock-wise movement
-            float gyroDiff = m_tracker->GetError();
-            error = gyroDiff - m_turn * m_distance / m_forward;
-        }
-        else
-        {
-            error = m_left - m_right - m_turn * m_distance / forwardAbs;
-        }
+        // tracker is used in very limited cases
+        Assert(turnAbs == 0);
+        Assert(isAuto());
+        Assert(smartsOn);
+
+        // Gyro moves positive counter-clock-wise.
+        // gyroDiff > 0: clock-wise movement
+        float gyroDiff = m_tracker->GetError();
+        if (forward != 0)
+            gyroDiff -= turn * abs(GetDistance()) / forward;
+        error = gyroDiff;
     }
-    else if (m_forward == 0)
+    else if (turnAbs < forwardAbs || (turn == 0 && forward == 0 && m_forward != 0))
+    {
+        error = m_left - m_right;
+        if (forwardAbs != 0)
+            error -= turn * abs(GetDistance()) / forwardAbs;
+    }
+    else if (forward == 0)
         error = m_left + m_right;
     else
         smartsOn = false;
 
     if (!smartsOn)
     {
-        int turn = m_turn;
-
-        SetLeftDrive(m_forward + turn);
-        SetRightDrive(m_forward - turn);
+        SetLeftDrive(forward + turn);
+        SetRightDrive(forward - turn);
         return;
     }
 
@@ -358,37 +373,29 @@ void Drive::Update()
     }
     else
     {
-        if (m_turn * errorMultiplier > 0)
+        if (turn * errorMultiplier > 0)
             leftAdjustment = errorMultiplier;
         else
             rightAdjustment = -errorMultiplier;
     }
 
-    int leftMotor = m_forward - leftAdjustment + m_turn;
-    int rightMotor = m_forward + rightAdjustment - m_turn;
+    int leftMotor = forward - leftAdjustment + turn;
+    int rightMotor = forward + rightAdjustment - turn;
 
     SetLeftDrive(leftMotor);
     SetRightDrive(rightMotor);
 
-    /*
-    ReportStatus("Drive: gyro: %d, erorr: (%d, %d), Speeds (%d, %d)\n",
-            // left, right,
-            GetGyroReading() * 10 / GyroWrapper::Multiplier,
+    ReportStatus(Log::Drive, "error = %d, errInt = %d, left = %d, right = %d\n",
             int(error), errorMultiplier,
-            // int(m_ErrorIntergral),
-            // m_distance, int(m_turn * m_distance / m_forward),
             leftMotor,
             rightMotor);
-    */
 }
 
 struct WaitTillStopsAction : public Action
 {
     bool ShouldStop() override
     {
-        auto left = abs(GetLeftVelocity());
-        auto right = abs(GetRightVelocity());
-        return left <= 5 && right <= 5;
+        return abs(GetDrive().GetRobotVelocity()) <= 2;
     }
     const char* Name() override { return "WaitTillStopsAction"; } 
 };
