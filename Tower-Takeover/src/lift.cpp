@@ -46,8 +46,12 @@ void Lift::Update()
             break;
         case State::TrayOut:
             break;
+        case State::OutABit:
+            motor = pid.GetPower(currentPosition, 300, 3, 1000);
+            break;
         case State::Rest:
             motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);
+        
             /*
             // We hit plates around cube tray :(
             // So move down only if one of the following is true

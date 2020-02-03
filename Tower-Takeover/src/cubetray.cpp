@@ -38,20 +38,30 @@ void CubeTray::Update()
                 if (currentRotation < cubeSlowerOut)
                 {
                     // Fast
-                    motor = 90;
+                    if (isAuto())
+                        motor = 120;
+                    else
+                        motor = 90;
+                    
                     // motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -2500); 
                 }
                 
                 else if (currentRotation < (cubeSlowerOut + cubeTrayOut)/2)
                 {
                     // Slow
-                    motor = 30;
+                    if (isAuto())
+                        motor = 70;
+                    else
+                        motor = 40;
                     // motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
                 }
                 else if (currentRotation < cubeTrayOut)
                 {
                     //motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
-                    motor = 20;
+                    if (isAuto())
+                        motor = 50;
+                    else
+                        motor = 20;
                 }
                 else
                 {
@@ -114,22 +124,23 @@ struct TrayAction : public Action
     }
 };
 
-void DoTrayAction(State state)
+void DoTrayAction(State state, int timeout)
 {
-    Do(TrayAction(state), 3500);
+    Do(TrayAction(state), timeout);
 }
 
 
-void OpenTrayOnStart()
+void OpenTrayOnStart(int time)
 {
     // Do(LiftAction(State::InitializationState));
     SetIntake(-127);
-    DoTrayAction(State::OutABit);
+    DoTrayAction(State::OutABit, 500);
+
     // DoTrayAction(State::ArmsUpLow);;
-    Wait(1250);
+    Wait(time);
     DoTrayAction(State::Rest);
 
     // SetIntake(70);
-    // Wait(500);
+    Wait(300);
     // SetIntake(0);
 } 

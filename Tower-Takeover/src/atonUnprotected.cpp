@@ -22,20 +22,20 @@ void RunAtonUnprotected()
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
+    
+    OpenTrayOnStart(300);
     /*
-    OpenTrayOnStart();
-
     Do(MoveAction(300, 80), 500);
     Do(MoveAction(-300, 80), 500);
     */
 
     SetIntake(127);
-    const unsigned int intakeSpeed = 35;
+    const unsigned int intakeSpeed = 43;
 
     MoveExactWithAngle(4800, 0, intakeSpeed);
-    MoveExactWithAngle(-6300, -40);
-    MoveExactWithAngle(5300, 0, intakeSpeed);
-    MoveExactWithAngle(4000, 90+65);
+    MoveExactWithAngle(-5850, -47);
+    MoveExactWithAngle(5400, -3, intakeSpeed - 5);
+    MoveExactWithAngle(4200, 90+65);
     // Do(MoveAction(400, 90), 1000);
     // MoveExactWithAngle(900, 90+65, intakeSpeed, 1000);
 

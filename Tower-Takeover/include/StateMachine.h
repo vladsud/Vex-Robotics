@@ -24,4 +24,4 @@ class StateMachine
 };
 
 StateMachine& GetStateMachine();
-void DoTrayAction(State state);
+void DoTrayAction(State state, int timeout = 3500);

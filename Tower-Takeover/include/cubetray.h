@@ -8,7 +8,7 @@ private:
   const int cubeTrayOut = 3200;
   const int cubeSlowerOut = 1700;
   const int cubeArmsUp = 700;
-  const int restValue = 400;
+  const int restValue = 250;
   const int cubeInitialization = 0;
   const int outABitValue = 450;
 
@@ -25,4 +25,4 @@ public:
 };
 
 CubeTray& GetCubeTray();
-void OpenTrayOnStart();
+void OpenTrayOnStart(int time);
