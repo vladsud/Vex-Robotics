@@ -19,7 +19,7 @@ class LCD
 public:
 	bool AtonRed = false;
 	bool AtonProtected = false;
-	bool AtonSkills = true;
+	bool AtonSkills = false;
     bool IsTankDrive = false;
 
 public:
