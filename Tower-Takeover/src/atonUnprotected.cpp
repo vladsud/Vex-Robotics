@@ -32,10 +32,19 @@ void RunAtonUnprotected()
     SetIntake(127);
     const unsigned int intakeSpeed = 43;
 
+    /*
     MoveExactWithAngle(4800, 0, intakeSpeed);
-    MoveExactWithAngle(-5850, -47);
-    MoveExactWithAngle(5400, -3, intakeSpeed - 5);
-    MoveExactWithAngle(4200, 90+65);
+    MoveExactWithAngle(-5700, -53);
+    MoveExactWithAngle(5400, -7, intakeSpeed - 5);
+    MoveExactWithAngle(4300, 90+63);
+    */
+
+    MoveExactWithAngle(4800, 0, intakeSpeed);
+    MoveExactWithAngle(-6000, -45);
+    MoveExactWithAngle(5300, 0, intakeSpeed - 5);
+    MoveExactWithAngle(4450, 90+67);
+
+
     // Do(MoveAction(400, 90), 1000);
     // MoveExactWithAngle(900, 90+65, intakeSpeed, 1000);
 
