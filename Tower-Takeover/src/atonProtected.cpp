@@ -6,6 +6,8 @@
 #include "cubetray.h"
 #include "position.h"
 #include "lift.h"
+#include "lcd.h"
+
 
 #include "pros/motors.h"
 
@@ -29,41 +31,32 @@ void RunAtonProtected()
     */
 
 
-
-/*
-
-
-    OpenTrayOnStart();
+    OpenTrayOnStart(300);
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
     SetIntake(127);
-    // Wait(500);
-    MoveStraight(5000, 90, -90);
+    const unsigned int intakeSpeed = 43;
 
-    int turnAngle = -240;
-    TurnToAngle(turnAngle);
-    
-    MoveStraight(4000, 90, turnAngle);
-    //MoveStraight(1500, 50, -210);
+    MoveExactWithAngle(4000, -90, intakeSpeed);
+    MoveExactWithAngle(2000, -90, intakeSpeed - 20);
+
+    const unsigned int turnAngle = -180-55;
+
+    MoveExactWithAngle(5000, turnAngle, intakeSpeed);
 
     GetIntake().m_mode = IntakeMode::Hold;
 
-    //Wait(500);
-
-    MoveStraight(700, 50, turnAngle);
+    MoveExactWithAngle(1200, turnAngle, intakeSpeed, 3000);
 
     DoTrayAction(State::TrayOut);
-
-    // TODO: add quick time out
-    Do(MoveAction(150, 30), 1000);
     
-    MoveStraight(-1500, 60, turnAngle);
+    Do(MoveAction(-1500, 30), 1000);
+
     DoTrayAction(State::Rest);
 
 
 
 
-    */
 }
  
