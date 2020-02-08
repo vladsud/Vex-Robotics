@@ -4,6 +4,7 @@
 #include "cubetray.h"
 #include "Actions.h"
 #include "intake.h"
+#include "lcd.h"
 #include "pros/motors.h"
 #include "pros/misc.h"
 
@@ -30,7 +31,6 @@ void CubeTray::Update()
     switch (desiredState)
     {
         case State::TrayOut:
-
             // only run if the button is held down
             if (isAuto() || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             {
@@ -38,18 +38,17 @@ void CubeTray::Update()
                 if (currentRotation < cubeSlowerOut)
                 {
                     // Fast
-                    if (isAuto())
+                    if (isAuto() && !GetLcd().AtonSkills)
                         motor = 120;
                     else
                         motor = 90;
                     
                     // motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -2500); 
                 }
-                
                 else if (currentRotation < (cubeSlowerOut + cubeTrayOut)/2)
                 {
                     // Slow
-                    if (isAuto())
+                    if (isAuto() && !GetLcd().AtonSkills)
                         motor = 70;
                     else
                         motor = 40;
@@ -58,7 +57,7 @@ void CubeTray::Update()
                 else if (currentRotation < cubeTrayOut)
                 {
                     //motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
-                    if (isAuto())
+                    if (isAuto() && !GetLcd().AtonSkills)
                         motor = 50;
                     else
                         motor = 20;
@@ -66,10 +65,10 @@ void CubeTray::Update()
                 else
                 {
                     motor = 0;
+                    m_tick = 0;
                 }
                 // motor = (motor + m_power * 7) / 8;
                 // m_power = motor;
-
             }
             /*
             else if (currentRotation < restValue + 100) 

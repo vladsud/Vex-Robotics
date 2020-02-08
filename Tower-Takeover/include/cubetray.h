@@ -15,6 +15,7 @@ private:
   bool m_moving = false;
   PidImpl pid {50};
   int m_power = 0;
+  int m_tick = 0;
 
   float currentRotation;
 

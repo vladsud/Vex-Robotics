@@ -15,12 +15,63 @@ void RunSuperSkills()
     auto timeBegin = GetTime();
     GetTracker().SetCoordinates({16, 60+24, 0});
 
+    OpenTrayOnStart(300);
+
+    // ============= First Stack ===============
+    SetIntake(127);
+    // Go forward pick up row of cubes
+    MoveExactWithAngle(15000,0,30); 
+    // Go backward to create angle
+    MoveExactWithAngle(-3000,0,30); 
+    // Go forward to stack
+    MoveExactWithAngle(6800,47,30, 3500); 
+    // MoveExactWithAngle(-300,48,30, 3500); 
+
+    // Stack
+
+    // out take a bit
+    SetIntake(-80);
+    Wait(200);
+
+    DoTrayAction(State::TrayOut);
+    // push a bit
+    // MoveExactWithAngle(1000,45,15,700);
+    // go back
+    // MoveExactWithAngle(-1200,46,30);
+    Do(MoveAction(-1200, 30), 1000);
+
+    // Reset tray
+    DoTrayAction(State::Rest);
+    SetIntake(0);
+    // Smash into war
+    MoveExactWithAngle(2000,0,30, 1500); 
+
+    // ============= Stack first tower ===============
+    // Reset angle
+    GetGyro().SetAngle(0);
+    // Back up
+    MoveExactWithAngle(-1400,0,30, 1500); 
+    // Start intake
+    SetIntake(127);
+    // Go forward to pick up cube
+    MoveExactWithAngle(5000,-90, 30, 2500); 
+    // Hold cube
+    SetIntake(0);
+    // Go to back
+    MoveExactWithAngle(-1500,-90,30, 1500); 
+    ArmsMid();
+    MoveExactWithAngle(1500,-90,30, 1500); 
+    SetIntake(-60); 
+    Wait(500);
+    MoveExactWithAngle(-3000,-90,30, 4000); 
+
     //MoveExactWithAngle()
    // OpenTrayOnStart();
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
     // Stacking first cube
+    /*
     GetIntake().m_mode = IntakeMode::IntakeTower;
     MoveExactWithAngle(550,0,50); 
     Wait(100);
@@ -70,5 +121,5 @@ void RunSuperSkills()
 
     // Get second cube
    // GetIntake().m_mode = IntakeMode::IntakeTower;
-    
+    */
 }

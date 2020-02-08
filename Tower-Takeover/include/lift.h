@@ -28,6 +28,6 @@ public:
 };
 
 Lift& GetLift();
-void TowerMid();
+void ArmsMid();
 void TowerLow();
 void TowerRest();

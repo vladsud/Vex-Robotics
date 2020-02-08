@@ -183,7 +183,7 @@ void GyroBoth::Integrate()
 
 float GyroBoth::GetAngle() const
 {
-    float res = (1 * m_gyro.GetAngle() +  1 * m_gyro2.GetAngle() + 3 * m_wheels.GetAngle()) / 5;
+    float res = (1 * m_gyro.GetAngle() +  3 * m_gyro2.GetAngle() + 1 * m_wheels.GetAngle()) / 5;
     // float res = (m_gyro.GetAngle() + m_gyro2.GetAngle()) / 2;
     // float res = m_wheels.GetAngle();
     

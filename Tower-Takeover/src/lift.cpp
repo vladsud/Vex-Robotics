@@ -93,7 +93,7 @@ struct LiftAction : public Action
     }
 };
 
-void TowerMid()
+void ArmsMid()
 {
     Do(LiftAction(State::ArmsUpMid));
 }
