@@ -57,7 +57,7 @@ void RunAtonUnprotected()
     int angle2 = 67;
     if (GetLcd().AtonRed)
     {
-        angle2 = 73;
+        angle2 = 71;
         distance2 = 4700;
     }
     MoveExactWithAngle(distance2, 90+angle2);
