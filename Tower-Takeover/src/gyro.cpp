@@ -183,19 +183,19 @@ void GyroBoth::Integrate()
 
 float GyroBoth::GetAngle() const
 {
-    float res = (1 * m_gyro.GetAngle() +  3 * m_gyro2.GetAngle() + 1 * m_wheels.GetAngle()) / 5;
+    float res = (1 * m_gyro.GetAngle() +  0 * m_gyro2.GetAngle() + 1 * m_wheels.GetAngle()) / 2;
     // float res = (m_gyro.GetAngle() + m_gyro2.GetAngle()) / 2;
     // float res = m_wheels.GetAngle();
     
-    if (0) {
+    if (1) {
         static int count = 0;
         count++;
         if ((count % 100) == 0)
-            printf("Combined = %f, gyro1 = %f, gyro2 = %f, imu = %f, wheels = %f\n",
+            printf("Combined = %f, gyro1 = %f, gyro2 = %f, wheels = %f\n",
                 res,
                 m_gyro.GetAngle(),
                 m_gyro2.GetAngle(),
-                m_gyroImu.GetAngle(),
+                // m_gyroImu.GetAngle(),
                 m_wheels.GetAngle());
     }
     return res;

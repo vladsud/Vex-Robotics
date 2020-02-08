@@ -38,27 +38,48 @@ void RunAtonUnprotected()
     MoveExactWithAngle(5400, -7, intakeSpeed - 5);
     MoveExactWithAngle(4300, 90+63);
     */
-    int distance0 = 4800;
+
+    // ===== GO FORWARD =====
+    // BLUE
+    int distance0 = 3700;
+    // RED
     if (GetLcd().AtonRed)
-        distance0 = 5000;
+        distance0 = 3500;
     MoveExactWithAngle(distance0, 0, intakeSpeed);
 
-    int distance1 = -6000;
-    int angle1 = -45;
+    // ===== Go Sideways Back =====
+    // BLUE
+    int distance1 = -5700;
+    int angle1 = -68;
+    // RED
     if (GetLcd().AtonRed)
     {
-        distance1 = -6200;
-        angle1 = -42;
+        distance1 = -5400;
+        angle1 = -50;
     }
     MoveExactWithAngle(distance1, angle1);
-    MoveExactWithAngle(5300, 0, intakeSpeed - 5);
-    
-    int distance2 = 4450;
-    int angle2 = 67;
+
+    // ===== GO FORWARD Again =====
+    // BLUE
+    int distance3 = 5600;
+    int angle3 = -3;
+    // RED
     if (GetLcd().AtonRed)
     {
-        angle2 = 71;
-        distance2 = 4700;
+        distance3 = 5600;
+        angle3 = 4;
+    }
+    MoveExactWithAngle(distance3, angle3, intakeSpeed - 5);
+    
+    // ===== GO STACK =====
+    // BLUE
+    int distance2 = 5100;
+    int angle2 = 63;
+    // RED
+    if (GetLcd().AtonRed)
+    {
+        angle2 = 65;
+        distance2 = 5000;
     }
     MoveExactWithAngle(distance2, 90+angle2);
 

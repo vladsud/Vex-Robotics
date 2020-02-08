@@ -64,7 +64,7 @@ State StateMachine::calculateState(State state)
     if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
         return State::Rest;
 
-    if (state == State::Rest || state == State::ArmsUpMid || state == State::ArmsUpLow || state == State::InitializationState) {
+    if (state == State::Rest || state == State::ArmsUpMid || state == State::ArmsUpLow) {
         if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X))
             return State::ArmsUpMid;
         if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
@@ -72,6 +72,9 @@ State StateMachine::calculateState(State state)
         else if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP))
             return State::InitializationState;
     }
+    if (state == State::InitializationState)
+        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP))
+            return State::Rest;
 
     if (state == State::Rest)
     {

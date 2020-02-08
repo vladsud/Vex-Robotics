@@ -89,7 +89,7 @@ void CubeTray::Update()
         case State::ArmsUpLow: 
             motor = pid.GetPower(currentRotation, cubeArmsUp, -7, -4000) * 200 / 127;
             break;
-        case State::OutABit:
+        case State::InitializationState:
             if (currentRotation < outABitValue)
                 motor = 100;
             else
@@ -133,7 +133,7 @@ void OpenTrayOnStart(int time)
 {
     // Do(LiftAction(State::InitializationState));
     SetIntake(-127);
-    DoTrayAction(State::OutABit, 500);
+    DoTrayAction(State::InitializationState, 500);
 
     // DoTrayAction(State::ArmsUpLow);;
     Wait(time);
