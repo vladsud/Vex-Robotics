@@ -3,7 +3,7 @@
 class CubeTray
 {  
 private:
-  const int cubeTrayOut = 1490;
+  const int cubeTrayOut = 1440;
   const int cubeSlowerOut = 2300;
   const int cubeArmsUp = 2500;
   const int restValue = 2930;

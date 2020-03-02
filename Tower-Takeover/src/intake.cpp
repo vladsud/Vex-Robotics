@@ -50,7 +50,7 @@ void Intake::Update()
         m_tick = 0;
     }
 
-    if (m_tick <= 5)
+    if (m_tick <= 10)
     {
         SetIntakeMotors(-80);
         m_mode = IntakeMode::Hold;

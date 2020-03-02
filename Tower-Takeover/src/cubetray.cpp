@@ -33,7 +33,7 @@ void CubeTray::Update()
             // only run if the button is held down
             if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             {
-                if (currentRotation >= restValue - 30)
+                if (currentRotation >= restValue - 500)
                 {
                     GetIntake().m_tick = 0;
                     printf("ticks: %d\n", GetIntake().m_tick);
@@ -45,7 +45,7 @@ void CubeTray::Update()
                 if (currentRotation > cubeSlowerOut)
                 {
                     motor = pid.GetPower(cubeTrayOut, currentRotation, -7, -3000) * 200 / 127;
-                    if (GetIntake().m_tick > 5)
+                    if (GetIntake().m_tick > 10)
                     {
                         if (currentRotation > cubeSlowerOut + 300)
                         {
