@@ -12,8 +12,8 @@ extern bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digi
 void SetIntakeMotors(int power) {
     motor_set_encoder_units(intakeLeftPort, pros::E_MOTOR_ENCODER_COUNTS);
     motor_set_encoder_units(intakeRightPort, pros::E_MOTOR_ENCODER_COUNTS);
-    motor_move(intakeLeftPort, -power);
-    motor_move(intakeRightPort, power);
+    motor_move(intakeLeftPort, power);
+    motor_move(intakeRightPort, -power);
 }
 
 Intake::Intake()
@@ -50,7 +50,7 @@ void Intake::Update()
         m_tick = 0;
     }
 
-    if (m_tick <= 8)
+    if (m_tick <= 5)
     {
         SetIntakeMotors(-80);
         m_mode = IntakeMode::Hold;

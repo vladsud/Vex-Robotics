@@ -12,60 +12,77 @@ using namespace pros;
 using namespace pros::c;
 
 CubeTray::CubeTray() 
+    : m_anglePot(cubetrayPotPort)
 {
-    motor_set_encoder_units(cubetrayPort, pros::E_MOTOR_ENCODER_COUNTS);
     motor_set_brake_mode(cubetrayPort, E_MOTOR_BRAKE_HOLD);
-    motor_tare_position(cubetrayPort);
 }
-
 void CubeTray::Update()
 {
     StateMachine& sm = GetStateMachine();
-    currentRotation = motor_get_position(cubetrayPort) * -1;
+    int currentRotation = m_anglePot.get_value();
 
     State desiredState = sm.GetState();
     int motor = 0;
  
-
+    // printf("current rotation: %d\n", currentRotation);
     // bool fast = true;
     switch (desiredState)
     {
         case State::TrayOut:
+            isForced = false;
             // only run if the button is held down
+            if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
+            {
+                if (currentRotation >= restValue - 30)
+                {
+                    GetIntake().m_tick = 0;
+                    printf("ticks: %d\n", GetIntake().m_tick);
+                }
+            }
             if (isAuto() || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             {
                 // Start fast, slow down half way through
-                if (currentRotation < cubeSlowerOut)
+                if (currentRotation > cubeSlowerOut)
                 {
-                    // Fast
-                    if (isAuto() && !GetLcd().AtonSkills)
-                        motor = 120;
+                    motor = pid.GetPower(cubeTrayOut, currentRotation, -7, -3000) * 200 / 127;
+                    if (GetIntake().m_tick > 5)
+                    {
+                        if (currentRotation > cubeSlowerOut + 300)
+                        {
+                            SetIntake(20);
+                            printf("%s\n", "intake down");
+                        }
+                        else
+                        {
+                            SetIntake(0);
+                        }
+                    }
                     else
-                        motor = 90;
-                    
-                    // motor = pid.GetPower(currentRotation, cubeTrayOut, -17, -2500); 
+                    {
+                        printf("%s\n", "ticking");
+                    }
                 }
-                else if (currentRotation < (cubeSlowerOut + cubeTrayOut)/2)
+                else if (currentRotation > cubeTrayOut + 250)
                 {
-                    // Slow
-                    if (isAuto() && !GetLcd().AtonSkills)
-                        motor = 70;
-                    else
-                        motor = 40;
-                    // motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
-                }
-                else if (currentRotation < cubeTrayOut)
-                {
-                    //motor = pid.GetPower(currentRotation, cubeTrayOut, -22, -12000);
-                    if (isAuto() && !GetLcd().AtonSkills)
+                    motor = pid.GetPower(cubeTrayOut, currentRotation, -16, -3000) * 200 / 127;
+                    if (motor < 50)
                         motor = 50;
-                    else
-                        motor = 20;
+                    SetIntake(0);
+                }
+                else if (currentRotation > cubeTrayOut)
+                {
+                    motor = 20;
                 }
                 else
                 {
+                    if (!rumbled)
+                    {
+                        rumbled = true;
+                        controller_rumble(E_CONTROLLER_MASTER, "-");
+                    }
                     motor = 0;
                     m_tick = 0;
+                    SetIntake(0);
                 }
                 // motor = (motor + m_power * 7) / 8;
                 // m_power = motor;
@@ -79,18 +96,28 @@ void CubeTray::Update()
             */
             break;
         case State::Rest:
+            rumbled = false;
             pid.Reset();
-            if (currentRotation >= restValue + 15)
-                motor = -200;
-            else if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2))
-                motor = -30;
+            if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2) || isForced || isAuto())
+            {
+                if (currentRotation <= restValue - 100)
+                    motor = -200;
+                else if (currentRotation <= restValue - 50)
+                    motor = -30;
+                else
+                {
+                    motor = 0;
+                }
+            }
             break;
         case State::ArmsUpMid:
+            motor = pid.GetPower(cubeArmsUp, currentRotation, -7, -4000) * 200 / 127;
+            break;
         case State::ArmsUpLow: 
-            motor = pid.GetPower(currentRotation, cubeArmsUp, -7, -4000) * 200 / 127;
+            motor = pid.GetPower(cubeArmsUp, currentRotation, -7, -4000) * 200 / 127;
             break;
         case State::InitializationState:
-            if (currentRotation < outABitValue)
+            if (currentRotation > outABitValue)
                 motor = 100;
             else
             {
@@ -103,9 +130,10 @@ void CubeTray::Update()
 
     m_moving = (motor != 0);
 
-    // printf("m_moving: %d     current: %d     Power: %d\n", m_moving, currentRotation, motor);
+    // printf("isForced: %d     current: %d     power: %d\n", isForced, currentRotation, motor);
 
     motor_move_velocity(cubetrayPort, -motor);
+    
 }
 
 struct TrayAction : public Action

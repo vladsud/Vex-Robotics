@@ -22,10 +22,10 @@ protected:
   int m_angle;
 };
 
-class Motor
+class NewMotor
 {
 public:
-  Motor(unsigned int port);
+  NewMotor(unsigned int port);
   // Resets "base" of the motor.
   // GetPos() & GetRealTimePos() will start counting from current position,
   // while GetRawPos() is not affected by this call.
@@ -54,10 +54,10 @@ private:
 
 class Drive
 {
-  Motor m_motorLeftFront;
-  Motor m_motorLeftBack;
-  Motor m_motorRightFront;
-  Motor m_motorRightBack;
+  NewMotor m_motorLeftFront;
+  NewMotor m_motorLeftBack;
+  NewMotor m_motorRightFront;
+  NewMotor m_motorRightBack;
   int m_distance = 0;
   int m_forward = 0;
   int m_overrideForward = 0;

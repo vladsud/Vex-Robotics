@@ -47,16 +47,16 @@ int GetMovementJoystick(pros::controller_id_e_t joystick, pros::controller_analo
 
 /*******************************************************************************
  *
- * Motor class
+ * NewMotor class
  * 
  ******************************************************************************/
-Motor::Motor(unsigned int port)
+NewMotor::NewMotor(unsigned int port)
     : m_port(port)
 {
     HardReset();
 }
 
-void Motor::HardReset()
+void NewMotor::HardReset()
 {
     motor_tare_position(m_port);
     motor_set_encoder_units(m_port, pros::E_MOTOR_ENCODER_COUNTS);
@@ -65,18 +65,18 @@ void Motor::HardReset()
     m_prevValue = m_currValue;
 }
 
-void Motor::Reset()
+void NewMotor::Reset()
 {
     m_base = motor_get_position(m_port);
 }
 
-void Motor::Update()
+void NewMotor::Update()
 {
     m_prevValue = m_currValue;
     m_currValue = motor_get_position(m_port);
 }
 
-int Motor::GetRealTimePos()
+int NewMotor::GetRealTimePos()
 {
     return motor_get_position(m_port) - m_base;
 }

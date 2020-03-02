@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 
 /*****************************
  *
@@ -25,10 +26,12 @@ extern "C" {
    int snprintf(char * str, size_t n, const char * format, ... );
 }
 
+/*
 float cos (float x);
 float sin (float x);
 float atan2 (float y, float x);
 double atan2(double, double);
+*/
 
 unsigned int _millis();
 
@@ -171,15 +174,15 @@ private:
 *
 * 
 *******************************************************************************/
-#define leftBackDrivePort 15
+#define leftBackDrivePort 8
 #define leftFrontDrivePort 17
-#define rightFrontDrivePort 11
-#define rightBackDrivePort 16
+#define rightFrontDrivePort 20
+#define rightBackDrivePort 19
 
-#define intakeLeftPort 1
-#define intakeRightPort 21
-#define cubetrayPort 2
-#define liftMotorPort 20
+#define intakeLeftPort 9
+#define intakeRightPort 3
+#define cubetrayPort 5
+#define liftMotorPort 1
 
 #define VisionPort 99
 
@@ -190,14 +193,21 @@ private:
 * ANALOG SENSORS
 *
 *******************************************************************************/
+
+#define leftEncoderPortTop 'B'
+#define leftEncoderPortBottom 'A' 
+#define rightEncoderPortTop 'C'
+#define rightEncoderPortBottom 'D'
+
+
 #define liftPotPort 99
-#define cubetrayPotPort 4
+#define cubetrayPotPort 5
 
-#define gyroPortImu 18
-#define gyroPort 2
-#define gyroPort2 3
+#define gyroPortImu 99
+#define gyroPort 99
+#define gyroPort2 99
 
-#define intakeLineTrackerPort 8
+#define intakeLineTrackerPort 99
 
 /*******************************************************************************
 *

@@ -1,28 +1,29 @@
 #pragma once
 
-#include "pros/adi.hpp"
-
 class CubeTray
 {  
 private:
-  const int cubeTrayOut = 3200;
-  const int cubeSlowerOut = 1700;
-  const int cubeArmsUp = 700;
-  const int restValue = 250;
-  const int cubeInitialization = 0;
-  const int outABitValue = 450;
+  const int cubeTrayOut = 1490;
+  const int cubeSlowerOut = 2300;
+  const int cubeArmsUp = 2500;
+  const int restValue = 2930;
+  const int outABitValue = 2800;
 
   bool m_moving = false;
   PidImpl pid {50};
   int m_power = 0;
   int m_tick = 0;
+  bool rumbled = false;
 
-  float currentRotation;
+  pros::ADIAnalogIn m_anglePot;
 
 public:
     CubeTray();
     void Update();
     bool IsMoving() { return m_moving; }
+
+    bool isForced = false;
+
 };
 
 CubeTray& GetCubeTray();

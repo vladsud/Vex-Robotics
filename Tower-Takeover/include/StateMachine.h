@@ -1,9 +1,12 @@
 #pragma once
+#include "okapi/api.hpp"
 
 enum State
 {   
-    Rest, TrayOut, ArmsUpLow, ArmsUpMid, InitializationState, Debug, OutABit
+    Rest, TrayOut, ArmsUpLow, ArmsUpMid, InitializationState, Debug
 };
+
+extern std::shared_ptr<okapi::OdomChassisController> chassis;
 
 class StateMachine
 {
@@ -25,3 +28,4 @@ class StateMachine
 
 StateMachine& GetStateMachine();
 void DoTrayAction(State state, int timeout = 3500);
+void DoLiftAction(State state, int timeout = 3500);

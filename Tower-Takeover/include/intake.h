@@ -20,13 +20,13 @@ private:
     const int intake_slow_speed = 85; 
 
     int count = 0;
-    int m_tick = 100;
 
 public:
     Intake();
     void Update();
     bool IsCubeIn(pros::ADIAnalogIn& sensor);
     IntakeMode m_mode = IntakeMode::Stop;
+    int m_tick = 100;
 };
 
 Intake& GetIntake();

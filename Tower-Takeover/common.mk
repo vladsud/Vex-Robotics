@@ -5,7 +5,7 @@ MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=softfp -Os -g
 CPPFLAGS=-D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES
 GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables
 
-WARNFLAGS+=
+WARNFLAGS+=-Wno-psabi
 
 SPACE :=
 SPACE +=
@@ -16,7 +16,7 @@ $(shell mkdir -p $(DEPDIR))
 DEPFLAGS = -MT $$@ -MMD -MP -MF $(DEPDIR)/$$*.Td
 RENAMEDEPENDENCYFILE = $(VV)mv -f $(DEPDIR)/$$*.Td $(DEPDIR)/$$*.d && touch $$@
 
-LIBRARIES+=$(wildcard $(FWDIR)/lib*.a)
+LIBRARIES+=$(wildcard $(FWDIR)/lib*.a) $(FWDIR)/okapilib.a
 # Cannot include newlib and libc because not all of the req'd stubs are implemented
 EXCLUDE_COLD_LIBRARIES+=$(FWDIR)/libc.a $(FWDIR)/libm.a
 COLD_LIBRARIES=$(filter-out $(EXCLUDE_COLD_LIBRARIES), $(LIBRARIES))

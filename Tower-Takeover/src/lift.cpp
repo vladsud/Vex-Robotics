@@ -40,18 +40,16 @@ void Lift::Update()
     switch (sm.GetState()) {
         case State::ArmsUpMid:
             motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000);
+            GetCubeTray().isForced = true;
             break;
         case State::ArmsUpLow:
             motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000);
+            GetCubeTray().isForced = true;
             break;
         case State::TrayOut:
             break;
-        case State::OutABit:
-            motor = pid.GetPower(currentPosition, 300, 3, 1000);
-            break;
         case State::Rest:
             motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);
-        
             /*
             // We hit plates around cube tray :(
             // So move down only if one of the following is true
@@ -93,6 +91,10 @@ struct LiftAction : public Action
     }
 };
 
+void DoLiftAction(State state, int timeout)
+{
+    Do(LiftAction(state), timeout);
+}
 void ArmsMid()
 {
     Do(LiftAction(State::ArmsUpMid));
