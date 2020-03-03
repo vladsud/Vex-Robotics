@@ -51,21 +51,16 @@ void CubeTray::Update()
                 if (currentRotation > cubeSlowerOut)
                 {
                     motor = pid.GetPower(cubeTrayOut, currentRotation, -7, -3000) * 200 / 127;
-                    if (GetIntake().m_tick > 10)
+                    if (GetIntake().m_tick > GetIntake().tickDown)
                     {
                         if (currentRotation > cubeSlowerOut + 300)
                         {
                             SetIntake(20);
-                            printf("%s\n", "intake down");
                         }
                         else
                         {
                             SetIntake(0);
                         }
-                    }
-                    else
-                    {
-                        printf("%s\n", "ticking");
                     }
                 }
                 else if (currentRotation > cubeTrayOut + 250)

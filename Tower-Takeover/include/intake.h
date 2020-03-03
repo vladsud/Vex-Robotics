@@ -27,6 +27,7 @@ public:
     bool IsCubeIn(pros::ADIAnalogIn& sensor);
     IntakeMode m_mode = IntakeMode::Stop;
     int m_tick = 100;
+    const int tickDown = 20;
 };
 
 Intake& GetIntake();
