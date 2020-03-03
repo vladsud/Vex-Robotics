@@ -39,17 +39,31 @@ void Lift::Update()
 
     switch (sm.GetState()) {
         case State::ArmsUpMid:
-            motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000);
+            if (GetCubeTray().get_value() < GetCubeTray().cubeArmsCanUp)
+                motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000);
             GetCubeTray().isForced = true;
             break;
         case State::ArmsUpLow:
-            motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000);
+            if (GetCubeTray().get_value() < GetCubeTray().cubeArmsCanUp)
+                motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000);
             GetCubeTray().isForced = true;
             break;
         case State::TrayOut:
             break;
         case State::Rest:
-            motor = pid.GetPower(currentPosition, RestPos, 1, 0, PidPrecision::LowerOk);
+            motor = pid.GetPower(currentPosition, RestPos, 30, 0, PidPrecision::LowerOk);
+            if (currentPosition < RestPos + 100)
+            {
+                motor = 0;
+                motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_BRAKE);
+            }
+            else
+            {
+                motor_set_brake_mode(liftMotorPort, E_MOTOR_BRAKE_HOLD);
+            }
+            
+                
+
             /*
             // We hit plates around cube tray :(
             // So move down only if one of the following is true

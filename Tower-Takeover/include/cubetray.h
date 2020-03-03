@@ -18,9 +18,11 @@ private:
   pros::ADIAnalogIn m_anglePot;
 
 public:
+    const int cubeArmsCanUp = 2900;
     CubeTray();
     void Update();
     bool IsMoving() { return m_moving; }
+    int get_value();
 
     bool isForced = false;
 

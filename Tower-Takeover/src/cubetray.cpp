@@ -16,6 +16,12 @@ CubeTray::CubeTray()
 {
     motor_set_brake_mode(cubetrayPort, E_MOTOR_BRAKE_HOLD);
 }
+
+int CubeTray::get_value()
+{
+    return m_anglePot.get_value();
+}
+
 void CubeTray::Update()
 {
     StateMachine& sm = GetStateMachine();
@@ -100,13 +106,16 @@ void CubeTray::Update()
             pid.Reset();
             if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2) || isForced || isAuto())
             {
-                if (currentRotation <= restValue - 100)
-                    motor = -200;
-                else if (currentRotation <= restValue - 50)
-                    motor = -30;
-                else
+                if (GetLift().get_value() < GetLift().ArmsTrayCanMoveDown)
                 {
-                    motor = 0;
+                    if (currentRotation <= restValue - 100)
+                        motor = -200;
+                    else if (currentRotation <= restValue - 50)
+                        motor = -30;
+                    else
+                    {
+                        motor = 0;
+                    }
                 }
             }
             break;

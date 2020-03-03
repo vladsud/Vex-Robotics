@@ -187,7 +187,7 @@ float GyroBoth::GetAngle() const
     // float res = (m_gyro.GetAngle() + m_gyro2.GetAngle()) / 2;
     // float res = m_wheels.GetAngle();
     
-    if (1) {
+    if (0) {
         static int count = 0;
         count++;
         if ((count % 100) == 0)
