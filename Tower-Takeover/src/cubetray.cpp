@@ -112,6 +112,9 @@ void CubeTray::Update()
                         motor = 0;
                     }
                 }
+                if (abs(motor_get_actual_velocity(cubetrayPort)) < 1 && currentRotation >= restValue - 100)
+                    motor = 0;
+
             }
             break;
         case State::ArmsUpMid:

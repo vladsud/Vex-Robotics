@@ -6,7 +6,7 @@ private:
   const int cubeTrayOut = 1440;
   const int cubeSlowerOut = 2300;
   const int cubeArmsUp = 2500;
-  const int restValue = 2930;
+  const int restValue = 2885;
   const int outABitValue = 2800;
 
   bool m_moving = false;
