@@ -100,32 +100,12 @@ void LegacyGyro::ResetState()
 
 /*******************************************************************************
  * 
- * GyroWheels class
+ * GyroInertial class
  * 
  ******************************************************************************/
-float GyroWheels::GetAngle() const
-{
-    int angle = GetDrive().GetAngle();
-    return m_offset + angle * m_multiplier;
+float GyroNothing::GetAngle() const{
+    AssertSz(false, "GyroNothing is used");
 }
-
-void GyroWheels::Integrate()
-{
-}
-
-void GyroWheels::SetAngle(float angle)
-{
-    m_offset = 0;
-    auto curr = GetAngle();
-    m_offset = angle - curr;
-    Assert(GetAngle() == angle);
-}
-
-void GyroWheels::ResetState()
-{
-    m_offset = 0;
-}
-
 
 /*******************************************************************************
  * 
@@ -175,29 +155,17 @@ void GyroBoth::Integrate()
     m_gyro.Integrate();
     m_gyro2.Integrate();
     m_gyroImu.Integrate();
-    m_wheels.Integrate();
 
-    // ReportStatus(Log::Gyro, "Combined = %f, gyro1 = %f, gyro2 = %f, Wheels = %f\n", GetAngle(), m_gyro.GetAngle(), m_gyro2.GetAngle(), m_wheels.GetAngle());
-    ReportStatus(Log::Gyro, "Combined = %f, gyro1 = %f, Wheels = %f\n", GetAngle(), m_gyro.GetAngle(), m_wheels.GetAngle());
+    /*
+    m_count++;
+    if ((m_count % 10) == 0)
+        ReportStatus(Log::Gyro, "%f\n", GetAngle());
+    */
 }
 
 float GyroBoth::GetAngle() const
 {
-    float res = (1 * m_gyro.GetAngle() +  0 * m_gyro2.GetAngle() + 1 * m_wheels.GetAngle()) / 2;
-    // float res = (m_gyro.GetAngle() + m_gyro2.GetAngle()) / 2;
-    // float res = m_wheels.GetAngle();
-    
-    if (0) {
-        static int count = 0;
-        count++;
-        if ((count % 100) == 0)
-            printf("Combined = %f, gyro1 = %f, gyro2 = %f, wheels = %f\n",
-                res,
-                m_gyro.GetAngle(),
-                m_gyro2.GetAngle(),
-                // m_gyroImu.GetAngle(),
-                m_wheels.GetAngle());
-    }
+    float res = (1 * m_gyro.GetAngle() +  3 * m_gyro2.GetAngle()) / 4;
     return res;
 }
 
@@ -206,7 +174,6 @@ void GyroBoth::SetAngle(float angle)
     m_gyro.SetAngle(angle);
     m_gyro2.SetAngle(angle);
     m_gyroImu.SetAngle(angle);
-    m_wheels.SetAngle(angle);
 }
 
 void GyroBoth::ResetState()
@@ -214,5 +181,4 @@ void GyroBoth::ResetState()
     m_gyro.ResetState();
     m_gyro2.ResetState();
     m_gyroImu.ResetState();
-    m_wheels.ResetState();
 }

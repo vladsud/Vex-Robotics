@@ -69,7 +69,7 @@ int Motion::SpeedFromDistance(int error)
 
 bool Motion::ShouldStop()
 {
-    int error = GetError();
+    int error = GetError() / 3;
     int sign = Sign(error);
     int actualSpeed = m_lastError - error;
     m_lastError = error;

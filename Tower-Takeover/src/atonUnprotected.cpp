@@ -18,7 +18,7 @@ void RunAtonUnprotected()
     ReportStatus(Log::Info, "Unprotected aton\n");
 
     auto timeBegin = GetTime();
-    GetTracker().SetCoordinates({16, 60+24, 0});
+    GetTracker().SetAngle(0);
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 

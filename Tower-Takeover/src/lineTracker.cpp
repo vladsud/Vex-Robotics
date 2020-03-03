@@ -43,7 +43,7 @@ void LineTracker::Push(bool white)
 {
     if (m_timesIndex == CountOf(m_times))
         Shift(1);
-    m_times[m_timesIndex] = GetDrive().GetRealTimeDistance();
+    m_times[m_timesIndex] = GetDrive().GetDistance();
     m_timesIndex++;
 }
 

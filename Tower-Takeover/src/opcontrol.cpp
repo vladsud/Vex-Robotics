@@ -38,7 +38,6 @@ Main &GetMain()
 GyroWrapper &GetGyro() { return GetMain().gyro; }
 Drive& GetDrive() { return GetMain().drive; }
 PositionTracker &GetTracker() { return GetMain().tracker; }
-float GetGyroReading() { return GetTracker().GetGyrorReading(); }
 StateMachine& GetStateMachine() { return GetMain().sm; }
 CubeTray& GetCubeTray() { return GetMain().cubetray; }
 Lift& GetLift() { return GetMain().lift; }
@@ -63,12 +62,6 @@ unsigned int Main::GetTime()
 
 void Main::Update()
 {
-	/*
-	if ((m_Ticks % 1000) == 0) {
-		printf("%d: Gyro: %f\n", m_Ticks, GetGyro().GetAngle());
-	}
-	*/
-
 	// Run through all key motor subsystems - this applies commands that were just issues (in autonomous mode)
 	UpdateSlowSystems();
 
@@ -92,8 +85,6 @@ void Main::Update()
 
 		StaticAssert((allSystemsPullTime % trackerPullTime) == 0);
 	} while ((m_Ticks % allSystemsPullTime) != 0);
-
-	drive.UpdateOdometry();
 
 	// Good place for external code to consume some cycles:
 	// We have just updated all the odometry (gyro, drive, position)
@@ -135,13 +126,13 @@ void Main::ResetState()
 	// Code relies we have some granulariy
 	m_Ticks = (millis() / trackerPullTime) * trackerPullTime;
 
+	tracker.ResetState();
 	drive.ResetState();
 	gyro.ResetState();
 
 	// Last part of Update() cycle.
-	// UpdateSlowSystems() will be called right away in both automonomous & op control modess
+	// UpdateSlowSystems() will be called right away in both automonomous & op control modes
     UpdateFastSystems();
-	drive.UpdateOdometry();
 }
 
 //Operator Control

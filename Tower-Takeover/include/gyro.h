@@ -45,32 +45,16 @@ class GyroInertial
     GyroInertial(uint8_t port);
 };
 
-
-class GyroWheels
-{
-    float m_offset = 0;
-    const float m_multiplier = 0.07;
-
-  public:
-    GyroWheels() {}
-    void Integrate();
-
-    float GetAngle() const;
-    void SetAngle(float angle);
-    void ResetState();
-};
-
-
 class GyroBoth
 {
-    // GyroInertial
-    GyroNothing m_gyroImu {gyroPortImu};
-    GyroWheels m_wheels;
-    LegacyGyro m_gyro {gyroPort};
-    LegacyGyro m_gyro2 {gyroPort2};
+    GyroNothing m_gyroImu {gyroPortImu}; // GyroInertial
+    GyroNothing m_gyro {gyroPort}; // LegacyGyro
+    GyroNothing m_gyro2 {gyroPort2}; // LegacyGyro
+    unsigned int m_count = 0;
 
   public:
     GyroBoth();
+
     void Integrate();
 
     float GetAngle() const;

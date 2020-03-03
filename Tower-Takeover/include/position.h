@@ -4,110 +4,139 @@
 
 float GetGyroReading();
 
-static const int PositionTrackingRefreshRate = 2;
-
-// This is used to do initial smothening of readings by doing averaging across that many neihbors on each side
-// 2 is too small.
-// 3-5 seems about right.
-static const int c_initialSmoothingRange = 3;
-
-// This is how many samples to use in both directions (past & future) to calculate velocity of changes.
-// The bigger the number - the more fluid calculations we do.
-// But, we assume constant acceleration, and that's simply not the case if sample size is big.
-// So we should keep it relatively small (which also helps with calculation complexity).
-// Also Gyro likely does not need that match smoothing - it intergrates every 2ms, and produces rather good results.
-// At the same time, it should be at least 2 * initialSmoothingRange, otherwise we are smoothing twice same data point, likely at expense of accuracy.
-// And we have huge latency in motor power (15ms), so acceleration unlikely to change that rapidly.
-// 6 or 8 looks good numbers, 10 results in changes being observed  too early / late compared to actual phisics
-static const int c_finalSmoothingRange = 8;
-
-// Add two extra to reduce chances of running into prboblems.
-static const int SamplesToTrack = 60; //4 + max (2*c_finalSmoothingRange + c_initialSmoothingRange + 1, 2*c_initialSmoothingRange+1);
-
-struct SensorData
-{
-    double leftEncoder[SamplesToTrack];
-    double rightEncoder[SamplesToTrack];
-    double sideEncoder[SamplesToTrack];
-    double gyro[SamplesToTrack];
+struct Sensors {
+    int leftEncoder;
+    int rightEncoder;
+    int rightWheels;
+    int leftWheels;
+    int sideEncoder;
+    float angle;
 };
 
-struct PositionData
+struct SensorSpeed : public Sensors
 {
-    double leftSpeed[SamplesToTrack];
-    double rightSpeed[SamplesToTrack];
-    double sideSpeed[SamplesToTrack];
-    double gyroSpeed[SamplesToTrack];
-
-    double X[SamplesToTrack];
-    double Y[SamplesToTrack];
+    Sensors last;
+    unsigned int time;
 };
 
 // This is the structure we expose to other modules
-struct PositionInfo
+struct Position
 {
-    double leftSpeed; // per ms
-    double rightSpeed;  // per ms
-    double gyroSpeed;  // per ms
-    float gyro;
     double X;
     double Y;
+    float angle;
 };
 
-struct Coordinates
+struct PositionSpeed
 {
-    double X;
-    double Y;
-    int angle;
+    Position pos;
+    Position last;
+    unsigned int time;
 };
+
+
+/*******************************************************************************
+ *
+ * Encoder class
+ * 
+ ******************************************************************************/
+class Encoder
+{
+public:
+  Encoder(std::uint8_t portTop, std::uint8_t portBottom, bool reverse);
+  // Resets encoder for all usages:
+  // All external accesses to this encoder will see current pos being reset
+  void HardReset();
+  // Returns cached position
+  int GetPos();
+
+private:
+  pros::c::adi_encoder_t m_encoder;
+};
+
+
+/*******************************************************************************
+ *
+ * CMotor class
+ * 
+ ******************************************************************************/
+class CMotor
+{
+public:
+  CMotor(unsigned int port);
+  // Resets motor for all usages:
+  // All external accesses to this motor will see current pos being reset
+  void HardReset();
+  // Returns cached position
+  int GetPos();
+
+private:
+  const unsigned int m_port;
+};
+
 
 // Main class
 class PositionTracker
 {
-  public:
-    static constexpr double Pi = 3.14159265358;
-    static constexpr double GyroToRadiants = Pi / 180;
-    static constexpr double inchesPerClick = 4.11161263 * Pi / 360; // 0.03588
-    static constexpr double distanceRightWheelFromCenter = 7.2908 / inchesPerClick;
-    static constexpr double distanceLeftWheelFromCenter = 7.2908 / inchesPerClick;
-    static constexpr double distanceMiddleWheelFromCenter = 5.0 / inchesPerClick;
-    static constexpr double one_by_wheelDistance = 1 / (distanceRightWheelFromCenter + distanceLeftWheelFromCenter);
+public:
+    static constexpr float WHEEL_DIAMETER_IN_LR = 2.783;
+    static constexpr float WHEEL_DIAMETER_IN_S = 2.783;
+    static constexpr float PI = 3.14159265358;
+    static constexpr int TICKS_PER_ROTATION = 360;
+    static constexpr float SPIN_TO_IN_LR = WHEEL_DIAMETER_IN_LR * PI / TICKS_PER_ROTATION; // 0.024
+    static constexpr float SPIN_TO_IN_S = WHEEL_DIAMETER_IN_S * PI / TICKS_PER_ROTATION;
+    static constexpr float AngleToRadiants = PI / 180;
+    // static constexpr float inchesPerClick = 4.11161263 * PI / TICKS_PER_ROTATION; // 0.03588
+    static constexpr float DISTANCE_LR = 10.0;
+    static constexpr double DISTANCE_S = 5.0;
 
-  private:
-    float m_gyro = 0;
+private:
+    CMotor m_motorLeftFront {leftFrontDrivePort};
+    CMotor m_motorLeftBack {leftBackDrivePort};
+    CMotor m_motorRightFront {rightFrontDrivePort};
+    CMotor m_motorRightBack {rightBackDrivePort};
+    Encoder m_leftEncoder {leftEncoderPortTop, leftEncoderPortBottom, true};
+    Encoder m_rightEncoder {rightEncoderPortTop, rightEncoderPortBottom, true};
+
     int m_count = 0;
     bool m_flipX = false;
+    float m_angleOffset = 0;
 
-    SensorData m_sensor;
-    PositionData m_position;
-    int m_currentIndex = 0;
+    // Raw data from sensors
+    Sensors m_sensorsRaw;
+    SensorSpeed m_sensorSpeedRaw;
 
-  public:
+    // Synthesized sensor data
+    Sensors m_sensors;
+    SensorSpeed m_sensorSpeed;
+
+    // Speed over 10ms
+    SensorSpeed m_sensorSpeedSlow;
+
+    // Clculated position
+    Position m_position;
+
+private:
+    void ReadSensors(Sensors& sensor);
+    void UpdateSensorSpeed(const Sensors& pos, SensorSpeed& speed, unsigned int timeDiff);
+    void InitSensorSpeed(const Sensors& pos, SensorSpeed& speed);
+    void SynthesizeSensors(const Sensors& pos, const SensorSpeed& speed, Sensors& posOut);
+
+public:
     PositionTracker();
     // Recalc. Expensive operation that should happen time to time
     void Update();
+    void ResetState();
 
-    PositionInfo LatestPosition(bool clicks);
-    void SetCoordinates(Coordinates cord);
+    int GetRobotVelocity();
+    Position LatestPosition();
+    void SetCoordinates(Position cord);
     void SetAngle(int degrees);
+    float GetAngle();
     void FlipX(bool flip);
-    float GetGyrorReading();
 
-  private:
-    int Index(int i)
-    {
-        return (i + SamplesToTrack) % SamplesToTrack;
-    }
-    void RecalcPosition(int index, unsigned int multiplier);
-
-    template <typename T1, typename T2>
-    void SmoothSeries(T1 *dataIn, T2 *dataSpeedOut, unsigned int initialSmoothingRange, unsigned int finalSmoothingRange);
-
-    template <typename T>
-    T &Value(T *data, int index)
-    {
-        return data[Index(index)];
-    }
+    int GetLeftPos();
+    int GetRightPos();
 };
 
 PositionTracker &GetTracker();

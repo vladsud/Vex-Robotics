@@ -1,19 +1,42 @@
 #pragma once
 
-/*******************************************************************************
-* 
-* LCD
-*
-*******************************************************************************/
-struct Button
+#define LVOBJ struct _lv_obj_t
+
+void DumpLogs();
+
+enum class ButtonType
 {
+    ToggleButton,
+    ActionButton,
+};
+
+struct ToggleButton
+{
+    ButtonType type = ButtonType::ToggleButton;
     const char* label;
     const char* label2;
     bool& value;
 };
 
-#define LVOBJ struct _lv_obj_t
+struct ActionButton
+{
+    ButtonType type = ButtonType::ActionButton;
+    const char* label;
+    void (*action)();
+};
 
+union Button
+{
+    ToggleButton toggle;
+    ActionButton action;
+};
+
+
+/*******************************************************************************
+* 
+* LCD
+*
+*******************************************************************************/
 class LCD
 {
 public:
@@ -26,10 +49,13 @@ public:
 	LCD();
     void PrintMessage(const char *message);
     void Update();
+    static void click_toggle(LVOBJ * btn);
     static void click_action(LVOBJ * btn);
 
 private:
-    LVOBJ* CreateButton(unsigned int id, const char* label, LVOBJ* container, LVOBJ* prevElement, bool toggled);
+    LVOBJ* CreateButtonCore(unsigned int id, const char* label, LVOBJ* container, LVOBJ* prevElement);
+    LVOBJ* CreateToggleButton(unsigned int id, const char* label, LVOBJ* container, LVOBJ* prevElement, bool toggled);
+    LVOBJ* CreateActionButton(unsigned int id, const char* label, LVOBJ* container, LVOBJ* prevElement);
     void CreateControls();
 
 private:
@@ -39,10 +65,11 @@ private:
     LVOBJ* m_battery = nullptr;
     unsigned int m_count = 0;
 
-    const Button m_buttons[2] = {
-        {"Red", "Blue", AtonRed},
-        {"Protected", "Unprotected", AtonProtected},
-        // {"Tank Drive", "Arcade Drive", IsTankDrive},
+    const Button m_buttons[3] = {
+        {.toggle = {ButtonType::ToggleButton, "Red", "Blue", AtonRed}},
+        {.toggle = {ButtonType::ToggleButton, "Protected", "Unprotected", AtonProtected}},
+        {.action = {ButtonType::ActionButton, "Dump", DumpLogs}},
+        // {ButtonType::ToggleButton, "Tank Drive", "Arcade Drive", IsTankDrive},
     };
 };
 

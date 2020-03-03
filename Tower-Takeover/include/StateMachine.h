@@ -1,12 +1,12 @@
 #pragma once
-#include "okapi/api.hpp"
+//#include "okapi/api.hpp"
 
 enum State
 {   
     Rest, TrayOut, ArmsUpLow, ArmsUpMid, InitializationState, Debug
 };
 
-extern std::shared_ptr<okapi::OdomChassisController> chassis;
+// extern std::shared_ptr<okapi::OdomChassisController> chassis;
 
 class StateMachine
 {

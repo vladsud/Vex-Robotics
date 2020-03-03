@@ -56,7 +56,7 @@ struct MotionResults
 
 MotionResults RunModel(TestMotion& motion)
 {
-    // EnableLogs(Log::Motion);
+    // EnableConsoleLogs(Log::Motion);
 
     ResetTime();
     int distance = motion.m_distance;

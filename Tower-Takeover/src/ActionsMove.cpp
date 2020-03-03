@@ -47,14 +47,10 @@ struct MoveActionBase : public Action
     {
         if (m_stopOnCollision)
         {
-            // in RPM
-            unsigned int fwrd = abs(m_drive.GetFrontVelocity());
-            unsigned int back = abs(m_drive.GetBackVelocity());
-            
-            if (fwrd <= 5 || back <= 5)
+            if (GetTracker().GetRobotVelocity() <= 5)
             {
-                ReportStatus(Log::Info, "   Collision detected! distance %d / %d, speeds: %d, %d\n",
-                        m_drive.GetDistance(), m_origDistanceToMove, fwrd, back);
+                ReportStatus(Log::Info, "   Collision detected! distance %d / %d\n",
+                        m_drive.GetDistance(), m_origDistanceToMove);
                 m_stopOnCollision = false;
                 return true;
             }
@@ -156,7 +152,7 @@ struct MoveExactAction : public MoveActionBase, public Motion
     {
         if (m_engageStopOnCollision && !m_stopOnCollision)
         {
-            if (abs(m_drive.GetRobotVelocity()) >= 20 || GetElapsedTime() >= 500)
+            if (abs(GetTracker().GetRobotVelocity()) >= 20 || GetElapsedTime() >= 500)
                 m_stopOnCollision = true;
         }
 
@@ -301,7 +297,7 @@ struct MoveExactWithLineCorrectionAction : public TMoveAction
                 diff = -diff;
 
             float angle = atan2(diff, DistanveBetweenLineSensors * 2); // left & right is double of distanve
-            int angleI = angle * 180 / PositionTracker::Pi;
+            int angleI = angle * 180 / PositionTracker::PI;
 
             ReportStatus(Log::info, "Double line correction: travelled: %d, Dist: %d -> %d, angle+: %d\n",
                 distance, TMoveAction::m_distanceToMove - int(distance), m_distanceAfterLine, angleI);
@@ -414,4 +410,30 @@ void TurnToAngleIfNeeded(int angle)
     float angleDiff = AdjustAngle(GetGyroReading() - angle);
     if (abs(angleDiff) > 8)
         TurnToAngle(angle);
+}
+
+/*******************************************************************************
+ *
+ * WaitAfterMove()
+* 
+ ******************************************************************************/
+struct WaitTillStopsAction : public Action
+{
+    bool ShouldStop() override
+    {
+        return abs(GetTracker().GetRobotVelocity()) <= 2;
+    }
+    const char* Name() override { return "WaitTillStopsAction"; } 
+};
+
+// give some time for robot to completely stop
+void WaitAfterMove(unsigned int timeout /*= 0*/)
+{
+    /*
+    // Not enough time in "main" atonomous
+    auto& lcd = GetLcd();
+    if (timeout == 0)
+        timeout = lcd.AtonSkills || !lcd.AtonProtected || !lcd.AtonClimbPlatform ? 500 : 200;
+    */
+    Do(WaitTillStopsAction(), timeout == 0 ? 200 : timeout);
 }

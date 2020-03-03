@@ -22,11 +22,9 @@
 *******************************************************************************/
 class Main
 {
-	// Gyro updates every 2ms, so it's useful to have same frequency of updates to get as accurate position info as possible.
-	// Also more often we check sensors, the more precise we capture moment when encoder clicks, allowing us more precise estimation of speed.
+	// More often we check sensors, the more precise we capture moment when encoder clicks, allowing us more precise estimation of speed.
 	// Main user of faster update - position trackign code.
-	// But, it can't ft into 1ms, so we use 2ms update cycle
-	static const int trackerPullTime = PositionTrackingRefreshRate; // 2
+	static const int trackerPullTime = 1;
 	// For everything else 10ms is sufficient.
 	static const int allSystemsPullTime = 10;
 

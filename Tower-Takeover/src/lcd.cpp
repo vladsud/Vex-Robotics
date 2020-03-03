@@ -18,18 +18,10 @@ LCD::LCD()
     CreateControls();
 }
 
-void LCD::click_action(lv_obj_t * btn) 
+lv_res_t click_toggle(lv_obj_t * btn)
 {
-    uint8_t id = lv_obj_get_free_num(btn);
-    auto& value = GetLcd().m_buttons[id].value;
-    value = !value;
-
-    lv_obj_t * label = lv_obj_get_child(btn, NULL);
-    
-    if (value)
-        lv_label_set_text(label, GetLcd().m_buttons[id].label);
-    else
-        lv_label_set_text(label, GetLcd().m_buttons[id].label2);
+    LCD::click_toggle(btn);
+    return LV_RES_OK;
 }
 
 lv_res_t click_action(lv_obj_t * btn)
@@ -38,11 +30,29 @@ lv_res_t click_action(lv_obj_t * btn)
     return LV_RES_OK;
 }
 
+void LCD::click_toggle(lv_obj_t * btn) 
+{
+    uint8_t id = lv_obj_get_free_num(btn);
+    auto& value = GetLcd().m_buttons[id].toggle.value;
+    value = !value;
 
-lv_obj_t* LCD::CreateButton(unsigned int id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled)
+    lv_obj_t * label = lv_obj_get_child(btn, NULL);
+    
+    if (value)
+        lv_label_set_text(label, GetLcd().m_buttons[id].toggle.label);
+    else
+        lv_label_set_text(label, GetLcd().m_buttons[id].toggle.label2);
+}
+
+void LCD::click_action(lv_obj_t * btn) 
+{
+    uint8_t id = lv_obj_get_free_num(btn);
+    GetLcd().m_buttons[id].action.action();
+}
+
+lv_obj_t* LCD::CreateButtonCore(unsigned int id, const char* label, lv_obj_t* container, lv_obj_t* prevElement)
 {
     lv_obj_t * btn = lv_btn_create(container, NULL);
-    lv_btn_set_toggle(btn, true);
     
     if (prevElement)
         lv_obj_align(btn, prevElement, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
@@ -51,18 +61,33 @@ lv_obj_t* LCD::CreateButton(unsigned int id, const char* label, lv_obj_t* contai
 
     lv_cont_set_fit(btn, true, true); // enable auto-resize
     // lv_obj_set_size(btn, 100, 50);
-    lv_btn_set_toggle(btn, true); // it's a toggle-button
-    
-    if (toggled)
-        lv_btn_set_state(btn, LV_BTN_STATE_TGL_REL);
 
     lv_obj_set_free_num(btn, id);
-
-    lv_btn_set_action(btn, LV_BTN_ACTION_CLICK, ::click_action); 
 
     /*Add text*/
     lv_obj_t * labelEl = lv_label_create(btn, NULL);
     lv_label_set_text(labelEl, label);    
+
+    return btn;
+}
+
+lv_obj_t* LCD::CreateToggleButton(unsigned int id, const char* label, lv_obj_t* container, lv_obj_t* prevElement, bool toggled)
+{
+    lv_obj_t * btn = CreateButtonCore(id, label, container, prevElement);
+
+    lv_btn_set_toggle(btn, true); // it's a toggle-button    
+    if (toggled)
+        lv_btn_set_state(btn, LV_BTN_STATE_TGL_REL);
+    lv_btn_set_action(btn, LV_BTN_ACTION_CLICK, ::click_toggle); 
+
+    return btn;
+}
+
+LVOBJ* LCD::CreateActionButton(unsigned int id, const char* label, LVOBJ* container, LVOBJ* prevElement)
+{
+    lv_obj_t * btn = CreateButtonCore(id, label, container, prevElement);
+
+    lv_btn_set_action(btn, LV_BTN_ACTION_CLICK, ::click_action); 
 
     return btn;
 }
@@ -82,12 +107,22 @@ void LCD::CreateControls()
     lv_obj_t* last = nullptr;
 
     for (int i = 0; i < CountOf(m_buttons); i++){
-        last = CreateButton(
-            i,
-            m_buttons[i].value ? m_buttons[i].label : m_buttons[i].label2, 
-            container,
-            last,
-            m_buttons[i].value);
+        if (m_buttons[i].action.type == ButtonType::ToggleButton)
+        {
+            last = CreateToggleButton(
+                i,
+                m_buttons[i].toggle.value ? m_buttons[i].toggle.label : m_buttons[i].toggle.label2, 
+                container,
+                last,
+                m_buttons[i].toggle.value);
+        } else {
+            last = CreateActionButton(
+                i,
+                m_buttons[i].action.label,
+                container,
+                last);
+
+        }
     }
 
     lv_cont_set_fit(container, true, true);

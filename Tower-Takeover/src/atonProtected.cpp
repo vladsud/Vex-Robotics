@@ -23,7 +23,7 @@ void RunAtonProtected()
     ReportStatus(Log::Info, "Protected aton\n");
 
     auto timeBegin = GetTime();
-    GetTracker().SetCoordinates({16, 60+24, -90});
+    GetTracker().SetAngle(0);
 
     /*
     Do(MoveAction(1000, 80));

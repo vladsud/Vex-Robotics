@@ -1,10 +1,6 @@
 #include "drive.h"
-#include "position.h"
 #include "lcd.h"
-#include "actions.h"
-
-#include "pros/motors.h"
-#include "pros/misc.h"
+#include "position.h"
 
 using namespace pros;
 using namespace pros::c;
@@ -47,43 +43,6 @@ int GetMovementJoystick(pros::controller_id_e_t joystick, pros::controller_analo
 
 /*******************************************************************************
  *
- * NewMotor class
- * 
- ******************************************************************************/
-NewMotor::NewMotor(unsigned int port)
-    : m_port(port)
-{
-    HardReset();
-}
-
-void NewMotor::HardReset()
-{
-    motor_tare_position(m_port);
-    motor_set_encoder_units(m_port, pros::E_MOTOR_ENCODER_COUNTS);
-    Reset();
-    Update();
-    m_prevValue = m_currValue;
-}
-
-void NewMotor::Reset()
-{
-    m_base = motor_get_position(m_port);
-}
-
-void NewMotor::Update()
-{
-    m_prevValue = m_currValue;
-    m_currValue = motor_get_position(m_port);
-}
-
-int NewMotor::GetRealTimePos()
-{
-    return motor_get_position(m_port) - m_base;
-}
-
-
-/*******************************************************************************
- *
  * DriveTracker class
  * 
  ******************************************************************************/
@@ -112,13 +71,17 @@ KeepAngle::KeepAngle(int angle)
     if (m_drive.IsXFlipped())
         angle = -angle;
 
-    AssertSz(abs(angle - GetGyro().GetAngle()) <= 5, "Angle is too far from current one!");
+    AssertSz(abs(GetError()) <= 10, "Angle is too far from current one!");
     m_angle = angle;
 }
 
 float KeepAngle::GetError()
 {
-    return (m_angle - GetGyro().GetAngle()) * 2.0;
+    auto angle = GetTracker().GetAngle();
+    if (m_drive.IsXFlipped())
+        angle = -angle;
+
+    return (m_angle - angle) * 2.0;
 }
 
 
@@ -127,33 +90,8 @@ float KeepAngle::GetError()
  * Drive class
  * 
  ******************************************************************************/
-int Drive::GetFrontVelocity()
-{
-    return m_motorRightFront.GetVelocity() + m_motorLeftFront.GetVelocity();
-}
-
-int Drive::GetBackVelocity()
-{
-    return m_motorRightBack.GetVelocity() + m_motorLeftBack.GetVelocity();
-}
-
-int Drive::GetRobotVelocity()
-{
-    return (
-        GetFrontVelocity() +
-        GetBackVelocity()
-    ) / 2;
-}
-
 Drive::Drive()
-  : m_motorLeftFront(leftFrontDrivePort)
-  , m_motorLeftBack(leftBackDrivePort)
-  , m_motorRightFront(rightFrontDrivePort)
-  , m_motorRightBack(rightBackDrivePort)
 {
-    motor_set_reversed(rightBackDrivePort, true);
-    motor_set_reversed(rightFrontDrivePort, true);
-    ResetState();
 }
 
 int Drive::GetForwardLeftAxis()
@@ -162,7 +100,6 @@ int Drive::GetForwardLeftAxis()
     // motors can't move robot at slow speed, so add some boost
     return -GetMovementJoystick(E_CONTROLLER_MASTER, E_CONTROLLER_ANALOG_LEFT_Y, 18);
 }
-
 
 int Drive::GetForwardRightAxis()
 {
@@ -205,31 +142,22 @@ void Drive::OverrideInputs(int forward, int turn)
 void Drive::ResetState()
 {
     m_tracker = nullptr;
-    m_motorLeftBack.HardReset();
-    m_motorRightBack.HardReset();
-    m_motorLeftFront.HardReset();
-    m_motorRightFront.HardReset();
     ResetTrackingState();
 }
 
 void Drive::ResetTrackingState()
 {
-    m_motorLeftBack.Reset();
-    m_motorRightBack.Reset();
-    m_motorLeftFront.Reset();
-    m_motorRightFront.Reset();
-    m_distance = 0;
-    m_left = 0;
-    m_right = 0;
+    auto& tracker = GetTracker();
+    m_encoderLeftBase = tracker.GetLeftPos();
+    m_encoderRightBase = tracker.GetRightPos();
     m_ErrorIntergral = 0;
 }
 
 void setMotors(uint8_t forwardPort, uint8_t backPort, int speed)
 {
-    const int speedLimitOnReverse = 20;
-
-    speed = AdjustSpeed(speed);
     /*
+    const int speedLimitOnReverse = 20;
+    speed = AdjustSpeed(speed);
     if (speed < 0 && motor_get_actual_velocity(forwardPort) > 70)
     {
         motor_move(forwardPort, max(speed, -1));
@@ -243,8 +171,8 @@ void setMotors(uint8_t forwardPort, uint8_t backPort, int speed)
     else
     */
     {
-        motor_move(backPort, speed);
-        motor_move(forwardPort, speed);
+        motor_move(backPort, AdjustSpeed(speed));
+        motor_move(forwardPort, AdjustSpeed(speed));
     }
 } 
 
@@ -258,32 +186,22 @@ void Drive::SetRightDrive(int speed)
     setMotors(rightFrontDrivePort, rightBackDrivePort, speed);
 }
 
-int Drive::GetRealTimeDistance()
-{
-    return m_motorLeftBack.GetRealTimePos() + m_motorRightBack.GetRealTimePos();
+int Drive::GetLeft() {
+    return GetTracker().GetLeftPos() - m_encoderLeftBase;
 }
 
-
-int Drive::GetAngle()
-{
-    return m_motorRightBack.GetRawPos() - m_motorLeftBack.GetRawPos();
+int Drive::GetRight() {
+    return GetTracker().GetRightPos() - m_encoderRightBase;
 }
 
-// This method has to run before Update() in each update cycle!
-void Drive::UpdateOdometry()
+int Drive::GetDistance()
 {
-    m_motorLeftFront.Update();
-    m_motorLeftBack.Update();
-    m_motorRightFront.Update();
-    m_motorRightBack.Update();
-    m_left = m_motorLeftBack.GetPos();
-    m_right = m_motorRightBack.GetPos();
-    m_distance = m_left + m_right;
+    return GetLeft() + GetRight();
 }
 
 void Drive::Update()
 {
-    //Drive
+    // Drive
     const int forward = GetForward();
     const int turn = GetTurnAxis();
     
@@ -323,12 +241,12 @@ void Drive::Update()
     }
     else if (turnAbs < forwardAbs || (turn == 0 && forward == 0 && m_forward != 0))
     {
-        error = m_left - m_right;
+        error = GetLeft() - GetRight();
         if (forwardAbs != 0)
             error -= turn * abs(GetDistance()) / forwardAbs;
     }
     else if (forward == 0)
-        error = m_left + m_right;
+        error = GetLeft() + GetRight();
     else
         smartsOn = false;
 
@@ -389,25 +307,4 @@ void Drive::Update()
             int(error), errorMultiplier,
             leftMotor,
             rightMotor);
-}
-
-struct WaitTillStopsAction : public Action
-{
-    bool ShouldStop() override
-    {
-        return abs(GetDrive().GetRobotVelocity()) <= 2;
-    }
-    const char* Name() override { return "WaitTillStopsAction"; } 
-};
-
-// give some time for robot to completely stop
-void WaitAfterMove(unsigned int timeout /*= 0*/)
-{
-    /*
-    // Not enough time in "main" atonomous
-    auto& lcd = GetLcd();
-    if (timeout == 0)
-        timeout = lcd.AtonSkills || !lcd.AtonProtected || !lcd.AtonClimbPlatform ? 500 : 200;
-    */
-    Do(WaitTillStopsAction(), timeout == 0 ? 200 : timeout);
 }

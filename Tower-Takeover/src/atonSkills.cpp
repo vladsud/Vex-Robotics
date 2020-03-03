@@ -13,7 +13,7 @@ void RunSuperSkills()
     ReportStatus(Log::Info, "Skillz aton\n");
 
     auto timeBegin = GetTime();
-    GetTracker().SetCoordinates({16, 60+24, 0});
+    GetTracker().SetAngle(0);
 
     OpenTrayOnStart(300);
 
@@ -48,7 +48,7 @@ void RunSuperSkills()
 
     // ============= Stack first tower ===============
     // Reset angle
-    GetGyro().SetAngle(0);
+    GetTracker().SetAngle(0);
     // Back up
     MoveExactWithAngle(-1400,0,30, 1500); 
     // Start intake

@@ -21,9 +21,9 @@ extern "C" {
 #define UINT_MAX 0x7fffffff
 extern "C" {
    int printf(const char * format, ... );
-   double sin(double);
-   double cos(double);
    int snprintf(char * str, size_t n, const char * format, ... );
+//   double sin(double);
+//   double cos(double);
 }
 
 /*
@@ -68,7 +68,7 @@ enum class Log
    Max,
 };
 
-void EnableLogs(Log logCategory);
+void EnableConsoleLogs(Log logCategory);
 const char* LogCategoryName(Log logCategory);
 
 void ReportStatusCore(Log logCategory, const char* format, ...);
@@ -194,10 +194,10 @@ private:
 *
 *******************************************************************************/
 
-#define leftEncoderPortTop 'B'
-#define leftEncoderPortBottom 'A' 
-#define rightEncoderPortTop 'C'
-#define rightEncoderPortBottom 'D'
+#define leftEncoderPortTop 'A'
+#define leftEncoderPortBottom 'B' 
+#define rightEncoderPortTop 'G'
+#define rightEncoderPortBottom 'H'
 
 
 #define liftPotPort 99
@@ -232,3 +232,4 @@ private:
 *******************************************************************************/
 #define lineTrackerLeftPort 99
 #define lineTrackerRightPort 99
+

@@ -22,51 +22,19 @@ protected:
   int m_angle;
 };
 
-class NewMotor
-{
-public:
-  NewMotor(unsigned int port);
-  // Resets "base" of the motor.
-  // GetPos() & GetRealTimePos() will start counting from current position,
-  // while GetRawPos() is not affected by this call.
-  void Reset();
-  // Similar to Reset(), but resets motor for all usages:
-  // All external accesses to this motor will see current pos being reset
-  // GetRawPos() wills start counting from zero.
-  void HardReset();
-  // Update motor position - affects GetVelocity(), GetPos() & GetRawPos() results
-  void Update();
-  // Get velocity of motor (in between two Update() calls)
-  int GetVelocity() { return m_currValue - m_prevValue; }
-  // Returns cached position
-  int GetPos() { return m_currValue - m_base; }
-  // retrns uncached position
-  int GetRealTimePos();
-  // returns cached raw position
-  int GetRawPos() { return m_currValue; }
-
-private:
-  const unsigned int m_port;
-  int m_prevValue;
-  int m_currValue;
-  int m_base;
-};
-
 class Drive
 {
-  NewMotor m_motorLeftFront;
-  NewMotor m_motorLeftBack;
-  NewMotor m_motorRightFront;
-  NewMotor m_motorRightBack;
-  int m_distance = 0;
   int m_forward = 0;
+
   int m_overrideForward = 0;
-  int m_left = 0;
-  int m_right = 0;
-  int m_turn = 0;
   int m_overrideTurn = 0;
+
+  int m_turn = 0;
   float m_ErrorIntergral = 0;
   bool m_flipX = false;
+
+  int m_encoderLeftBase = 0;
+  int m_encoderRightBase = 0;
 
   DriveTracker* m_tracker = nullptr;
 
@@ -85,28 +53,21 @@ class Drive
   void SetRightDrive(int speed);
 
 public:
-  int GetDistance() { return m_distance; }
-  int GetRealTimeDistance();
-
-public:
   Drive();
   void FlipX(bool flip) { m_flipX = flip; }
   bool IsXFlipped() const { return m_flipX; }
-  int GetAngle();
 
   // Forward: Positive turn - turn right (clockwise)
   // Backwards: Positive turn - turn left (clockwise)
   void OverrideInputs(int forward, int turn);
   void ResetTrackingState();
-  void UpdateOdometry();
   void Update();
 
   void ResetState();
-
-  int GetFrontVelocity();
-  int GetBackVelocity();
-  int GetRobotVelocity();
-
+  int GetDistance();
+  int GetLeft();
+  int GetRight();
+  
   void StartTracking(DriveTracker* tracker)
   {
     Assert(m_tracker == nullptr);
