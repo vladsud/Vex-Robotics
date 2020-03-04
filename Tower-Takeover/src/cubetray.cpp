@@ -50,6 +50,8 @@ void CubeTray::Update()
                 if (currentRotation > cubeSlowerOut)
                 {
                     motor = pid.GetPower(cubeTrayOut, currentRotation, -7, -3000) * 200 / 127;
+                    if (isAuto())
+                        motor = pid.GetPower(cubeTrayOut, currentRotation, -5, -3000) * 200 / 127;
                     if (GetIntake().m_tick > GetIntake().tickDown)
                     {
                         if (currentRotation > cubeSlowerOut + 300)

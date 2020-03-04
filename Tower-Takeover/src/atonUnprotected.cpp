@@ -18,7 +18,7 @@ void RunAtonUnprotected()
     ReportStatus(Log::Info, "Unprotected aton\n");
 
     auto timeBegin = GetTime();
-    GetTracker().SetAngle(0);
+    GetTracker().SetCoordinates({16, 60+24, 0});
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
@@ -30,7 +30,7 @@ void RunAtonUnprotected()
     */
 
     SetIntake(127);
-    const unsigned int intakeSpeed = 43;
+    const unsigned int intakeSpeed = 35;
 
     /*
     MoveExactWithAngle(4800, 0, intakeSpeed);
@@ -49,8 +49,8 @@ void RunAtonUnprotected()
 
     // ===== Go Sideways Back =====
     // BLUE
-    int distance1 = -5700;
-    int angle1 = -68;
+    int distance1 = -4100;
+    int angle1 = -31;
     // RED
     if (GetLcd().AtonRed)
     {
@@ -61,30 +61,32 @@ void RunAtonUnprotected()
 
     // ===== GO FORWARD Again =====
     // BLUE
-    int distance3 = 5600;
-    int angle3 = -3;
+    int distance3 = 3500;
+    int angle3 = 0;
     // RED
     if (GetLcd().AtonRed)
     {
         distance3 = 5600;
         angle3 = 4;
-    }
-    MoveExactWithAngle(distance3, angle3, intakeSpeed - 5);
+    } 
+    MoveExactWithAngle(distance3, angle3, intakeSpeed - 16);
     
     // ===== GO STACK =====
     // BLUE
-    int distance2 = 5100;
-    int angle2 = 63;
+    int distance2 = 2500;
+    int angle2 = 68;
     // RED
     if (GetLcd().AtonRed)
     {
         angle2 = 65;
         distance2 = 5000;
     }
+    TurnToAngle(90 + angle2);
+    GetStateMachine().SetState(State::TrayOut);
     MoveExactWithAngle(distance2, 90+angle2);
 
 
-    // Do(MoveAction(400, 90), 1000);
+    Do(MoveAction(400, 50), 500);
     // MoveExactWithAngle(900, 90+65, intakeSpeed, 1000);
 
     GetIntake().m_mode = IntakeMode::Hold;
@@ -93,15 +95,16 @@ void RunAtonUnprotected()
     //return;
 
     // Out take
-    SetIntake(-20);
-    Wait(200);
-    DoTrayAction(State::TrayOut);
+    // SetIntake(-20);
+    // Wait(200);
+    // DoTrayAction(State::TrayOut);
     
     // Push forward a bit
     // Do(MoveAction(300, 30), 500);
     
     // Move back (straight no matter the angle)
     Do(MoveAction(-2000, 60), 1000);
+    
     // MoveStraight(-1800, 70, turnAngle);
     
     DoTrayAction(State::Rest);
