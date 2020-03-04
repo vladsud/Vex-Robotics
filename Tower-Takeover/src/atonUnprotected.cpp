@@ -60,6 +60,7 @@ void RunAtonUnprotected()
     MoveExactWithAngle(distance1, angle1);
 
     // ===== GO FORWARD Again =====
+    int intakeSpeed2 = 19;
     // BLUE
     int distance3 = 3500;
     int angle3 = 0;
@@ -69,12 +70,12 @@ void RunAtonUnprotected()
         distance3 = 5600;
         angle3 = 4;
     } 
-    MoveExactWithAngle(distance3, angle3, intakeSpeed - 16);
+    MoveExactWithAngle(distance3, angle3, intakeSpeed2);
     
     // ===== GO STACK =====
     // BLUE
-    int distance2 = 2500;
-    int angle2 = 68;
+    int distance2 = 2800;
+    int angle2 = 67;
     // RED
     if (GetLcd().AtonRed)
     {
@@ -82,15 +83,14 @@ void RunAtonUnprotected()
         distance2 = 5000;
     }
     TurnToAngle(90 + angle2);
-    GetStateMachine().SetState(State::TrayOut);
-    MoveExactWithAngle(distance2, 90+angle2);
 
+    MoveExactWithAngleAndTray(distance2, 90 + angle2, 1500, UINT_MAX, 4000, false);
 
-    Do(MoveAction(400, 50), 500);
+    DoTrayAction(State::TrayOut);
+    // Do(MoveAction(600, 40), 500);
     // MoveExactWithAngle(900, 90+65, intakeSpeed, 1000);
 
     GetIntake().m_mode = IntakeMode::Hold;
-
 
     //return;
 

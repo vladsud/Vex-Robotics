@@ -67,6 +67,8 @@ void CubeTray::Update()
                 else if (currentRotation > cubeTrayOut + 250)
                 {
                     motor = pid.GetPower(cubeTrayOut, currentRotation, -16, -3000) * 200 / 127;
+                    if (isAuto())
+                        motor = pid.GetPower(cubeTrayOut, currentRotation, -8, -3000) * 200 / 127;
                     if (motor < 50)
                         motor = 50;
                     SetIntake(0);

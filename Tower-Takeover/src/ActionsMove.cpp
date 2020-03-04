@@ -4,6 +4,8 @@
 #include "actions.h"
 #include "position.h"
 #include "drive.h"
+#include "stateMachine.h"
+#include "intake.h"
 
 #ifdef LineTracker
 #include "lineTracker.h"
@@ -439,43 +441,50 @@ void WaitAfterMove(unsigned int timeout /*= 0*/)
 }
 
 
-struct MoveExactActionWithTray : public MoveActionBase
+
+/*******************************************************************************
+ * 
+ * MoveExactWithTray
+ * 
+ ******************************************************************************/
+
+struct MoveExactActionWithTray : public MoveExactAction
 {
-    MoveExactActionWithTray(int distance, int angle, unsigned int speedLimit = UINT_MAX, bool stopOnCollision = false)
-        : MoveExactAction(distance, angle, speedLimit, stopOnCollision)
+    MoveExactActionWithTray(int distance, int angle, int ticks, unsigned int speedLimit = UINT_MAX, bool stopOnCollision = false)
+        : ticksUntil(ticks), MoveExactAction(distance, angle, speedLimit, stopOnCollision)
     {
 
     }
 
     bool ShouldStop() override
     {
-        if (GetError() < 200) {
-            GetStateMachine().SetState();
+        if (GetError() < ticksUntil + 500) {
+            SetIntake(-80);
+        }
+        if (GetError() < ticksUntil) {
+            SetIntake(0);
+            GetStateMachine().SetState(State::TrayOut);
         }
         return MoveExactAction::ShouldStop();
     }
+
+    protected:
+        int ticksUntil;
 };
 
-
-/*******************************************************************************
- * 
- * MoveExactWithAngle
- * 
- ******************************************************************************/
 void MoveExactWithAngleAndTray(
         int distance,
         int angle,
+        int ticksUntil,
         unsigned int speedLimit,
         unsigned int timeout /*= 100000U*/,
         bool allowTurning /*= true*/)
 {
     if (allowTurning)
         TurnToAngleIfNeeded(angle);
-    Do(MoveExactActionWithTray(distance, angle, speedLimit), timeout);
+    Do(MoveExactActionWithTray(distance, angle, ticksUntil, speedLimit), timeout);
 
-    DoTrayAction(State::InitializationState);
+    DoTrayAction(State::TrayOut);
 
     WaitAfterMoveReportDistance(distance);
-
-    DoTrayAction(State::Rest);
 }
