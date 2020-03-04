@@ -437,3 +437,45 @@ void WaitAfterMove(unsigned int timeout /*= 0*/)
     */
     Do(WaitTillStopsAction(), timeout == 0 ? 200 : timeout);
 }
+
+
+struct MoveExactActionWithTray : public MoveActionBase
+{
+    MoveExactActionWithTray(int distance, int angle, unsigned int speedLimit = UINT_MAX, bool stopOnCollision = false)
+        : MoveExactAction(distance, angle, speedLimit, stopOnCollision)
+    {
+
+    }
+
+    bool ShouldStop() override
+    {
+        if (GetError() < 200) {
+            GetStateMachine().SetState();
+        }
+        return MoveExactAction::ShouldStop();
+    }
+};
+
+
+/*******************************************************************************
+ * 
+ * MoveExactWithAngle
+ * 
+ ******************************************************************************/
+void MoveExactWithAngleAndTray(
+        int distance,
+        int angle,
+        unsigned int speedLimit,
+        unsigned int timeout /*= 100000U*/,
+        bool allowTurning /*= true*/)
+{
+    if (allowTurning)
+        TurnToAngleIfNeeded(angle);
+    Do(MoveExactActionWithTray(distance, angle, speedLimit), timeout);
+
+    DoTrayAction(State::InitializationState);
+
+    WaitAfterMoveReportDistance(distance);
+
+    DoTrayAction(State::Rest);
+}
