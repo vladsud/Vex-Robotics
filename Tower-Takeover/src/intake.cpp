@@ -10,8 +10,6 @@ using namespace pros::c;
 extern bool joystickGetDigital(pros::controller_id_e_t id, pros::controller_digital_e_t button);
 
 void SetIntakeMotors(int power) {
-    motor_set_encoder_units(intakeLeftPort, pros::E_MOTOR_ENCODER_COUNTS);
-    motor_set_encoder_units(intakeRightPort, pros::E_MOTOR_ENCODER_COUNTS);
     motor_move(intakeLeftPort, power);
     motor_move(intakeRightPort, -power);
 }
@@ -21,6 +19,9 @@ Intake::Intake()
 {
     motor_set_brake_mode(intakeLeftPort, E_MOTOR_BRAKE_HOLD);
     motor_set_brake_mode(intakeRightPort, E_MOTOR_BRAKE_HOLD);
+
+    motor_set_encoder_units(intakeLeftPort, pros::E_MOTOR_ENCODER_COUNTS);
+    motor_set_encoder_units(intakeRightPort, pros::E_MOTOR_ENCODER_COUNTS);
 
     m_mode = IntakeMode::Stop;
 }
@@ -44,7 +45,13 @@ void Intake::Update()
         m_mode = IntakeMode::Hold;
     }
     */
-   
+    if (sm.GetState() == State::InitializationState)
+    {
+        SetIntakeMotors(-127);
+        m_mode = IntakeMode::Initialization;
+        return;
+    }
+
     if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_DOWN))
     {
         m_tick = 0;
@@ -66,12 +73,6 @@ void Intake::Update()
         return;
     }
 
-    if (sm.GetState() == State::InitializationState)
-    {
-        // m_mode = IntakeMode::Outtake;
-        SetIntakeMotors(-127);
-        return;
-    }
 
     bool cubeIn = IsCubeIn(intakeLineTracker);
 

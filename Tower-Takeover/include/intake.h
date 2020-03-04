@@ -8,6 +8,7 @@ enum class IntakeMode {
     Outtake,
     Stop,
     IntakeTower,
+    Initialization
 };
 
 class Intake {

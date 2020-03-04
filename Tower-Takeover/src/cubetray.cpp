@@ -42,7 +42,6 @@ void CubeTray::Update()
                 if (currentRotation >= restValue - 500)
                 {
                     GetIntake().m_tick = 0;
-                    printf("ticks: %d\n", GetIntake().m_tick);
                 }
             }
             if (isAuto() || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
@@ -168,7 +167,7 @@ void OpenTrayOnStart(int time)
 {
     // Do(LiftAction(State::InitializationState));
     SetIntake(-127);
-    DoTrayAction(State::InitializationState, 500);
+    DoTrayAction(State::InitializationState, time + 100);
 
     // DoTrayAction(State::ArmsUpLow);;
     Wait(time);

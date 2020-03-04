@@ -69,12 +69,15 @@ State StateMachine::calculateState(State state)
             return State::ArmsUpMid;
         if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_A))
             return State::ArmsUpLow;
-        else if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP))
-            return State::InitializationState;
     }
-    if (state == State::InitializationState)
-        if (controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP))
+
+    if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_UP))
+    {
+        if (state == State::Rest)
+            return State::InitializationState;
+        else if (state == State::InitializationState)
             return State::Rest;
+    }
 
     if (state == State::Rest)
     {
