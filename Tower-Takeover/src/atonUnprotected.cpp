@@ -47,23 +47,11 @@ void RunAtonUnprotected()
         distance0 = 3500;
     
     MoveExactWithAngle(distance0, 0, intakeSpeed);
-    Wait(200);
-    SetIntake(0);
-    DoLiftAction(State::DoubleCube, 600);
-    SetIntake(127);
-    MoveExactWithAngle(400, 0, 30);
-    Wait(150);
-    SetIntake(0);
-    MoveExactWithAngle(-700, 0, 40);
-    GetStateMachine().SetState(State::Rest);
-    Wait(200);
-    SetIntake(127);
-    MoveExactWithAngle(2100, 0, intakeSpeed);
-    Wait(400);
+
     // ===== Go Sideways Back =====
     // BLUE
-    int distance1 = -4100;
-    int angle1 = -31;
+    int distance1 = -2500;
+    int angle1 = -50;
     // RED
     if (GetLcd().AtonRed)
     {
@@ -75,7 +63,7 @@ void RunAtonUnprotected()
     // ===== GO FORWARD Again =====
     int intakeSpeed2 = 19;
     // BLUE
-    int distance3 = 3500;
+    int distance3 = 3000;
     int angle3 = 0;
     // RED
     if (GetLcd().AtonRed)
@@ -85,20 +73,34 @@ void RunAtonUnprotected()
     } 
     MoveExactWithAngle(distance3, angle3, intakeSpeed2);
     
+    // ===== Get Tower Cube =====
+    // BLUE
+    int distance4 = 400;
+    int angle4 = -35;
+    // RED
+    if (GetLcd().AtonRed)
+    {
+        distance4 = 5600;
+        angle4 = 4;
+    } 
+    MoveExactWithAngle(distance4, angle4, intakeSpeed2);
+    Wait(300);
+    MoveExactWithAngle(-500, angle4, intakeSpeed2);
+    
     // ===== GO STACK =====
     // BLUE
-    int distance2 = 2800;
-    int angle2 = 67;
+    int distance2 = 3300;
+    int angle2 = 63;
     // RED
     if (GetLcd().AtonRed)
     {
         angle2 = 65;
         distance2 = 5000;
     }
-    TurnToAngle(90 + angle2);
+    printf("%s\n", "Moving Exact With Angle and Tray");
+    Wait(500);
 
-    MoveExactWithAngleAndTray(distance2, 90 + angle2, 1500, UINT_MAX, 4000, false);
-
+    MoveExactWithAngleAndTray(distance2, 90 + angle2, 1500, UINT_MAX, 4000, true);
     DoTrayAction(State::TrayOut);
     // Do(MoveAction(600, 40), 500);
     // MoveExactWithAngle(900, 90+65, intakeSpeed, 1000);
