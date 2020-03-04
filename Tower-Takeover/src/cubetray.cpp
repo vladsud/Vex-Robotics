@@ -121,10 +121,14 @@ void CubeTray::Update()
             }
             break;
         case State::ArmsUpMid:
-            motor = pid.GetPower(cubeArmsUp, currentRotation, -7, -4000) * 200 / 127;
+            motor = 200;
+            if (currentRotation < cubeArmsUp)
+                motor = 0;
             break;
         case State::ArmsUpLow: 
-            motor = pid.GetPower(cubeArmsUp, currentRotation, -7, -4000) * 200 / 127;
+            motor = 200;
+            if (currentRotation < cubeArmsUp)
+                motor = 0;
             break;
         case State::InitializationState:
             if (currentRotation > outABitValue)

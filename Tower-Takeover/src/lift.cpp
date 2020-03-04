@@ -39,13 +39,11 @@ void Lift::Update()
 
     switch (sm.GetState()) {
         case State::ArmsUpMid:
-            if (GetCubeTray().get_value() < GetCubeTray().cubeArmsCanUp)
-                motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000);
+            motor = pid.GetPower(currentPosition, ArmsMidPos, 3, 1000);
             GetCubeTray().isForced = true;
             break;
         case State::ArmsUpLow:
-            if (GetCubeTray().get_value() < GetCubeTray().cubeArmsCanUp)
-                motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000);
+            motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000);
             GetCubeTray().isForced = true;
             break;
         case State::TrayOut:
