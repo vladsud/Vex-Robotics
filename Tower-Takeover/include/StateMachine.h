@@ -3,7 +3,7 @@
 
 enum State
 {   
-    Rest, TrayOut, ArmsUpLow, ArmsUpMid, InitializationState, Debug
+    Rest, TrayOut, ArmsUpLow, ArmsUpMid, InitializationState, DoubleCube, Debug
 };
 
 // extern std::shared_ptr<okapi::OdomChassisController> chassis;

@@ -30,7 +30,7 @@ void RunAtonUnprotected()
     */
 
     SetIntake(127);
-    const unsigned int intakeSpeed = 35;
+    const unsigned int intakeSpeed = 17;
 
     /*
     MoveExactWithAngle(4800, 0, intakeSpeed);
@@ -41,12 +41,25 @@ void RunAtonUnprotected()
 
     // ===== GO FORWARD =====
     // BLUE
-    int distance0 = 3700;
+    int distance0 = 1900;
     // RED
     if (GetLcd().AtonRed)
         distance0 = 3500;
+    
     MoveExactWithAngle(distance0, 0, intakeSpeed);
-
+    Wait(200);
+    SetIntake(0);
+    DoLiftAction(State::DoubleCube, 600);
+    SetIntake(127);
+    MoveExactWithAngle(400, 0, 30);
+    Wait(150);
+    SetIntake(0);
+    MoveExactWithAngle(-700, 0, 40);
+    GetStateMachine().SetState(State::Rest);
+    Wait(200);
+    SetIntake(127);
+    MoveExactWithAngle(2100, 0, intakeSpeed);
+    Wait(400);
     // ===== Go Sideways Back =====
     // BLUE
     int distance1 = -4100;

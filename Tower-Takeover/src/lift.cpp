@@ -46,6 +46,10 @@ void Lift::Update()
             motor = pid.GetPower(currentPosition, ArmsLowPos, 3, 1000);
             GetCubeTray().isForced = true;
             break;
+        case State::DoubleCube:
+            motor = pid.GetPower(currentPosition, DoubleCube, 3, 1000);
+            GetCubeTray().isForced = true;
+            break;
         case State::TrayOut:
             break;
         case State::Rest:

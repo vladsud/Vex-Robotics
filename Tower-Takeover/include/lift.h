@@ -25,6 +25,8 @@ public:
   int ArmsTrayCanMoveDown = 1200;
   int RestPos = 0;
 
+  int DoubleCube = 600;
+
 };
 
 Lift& GetLift();
