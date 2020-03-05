@@ -30,32 +30,37 @@ void RunAtonProtected()
     Do(MoveAction(-1000, 80));
     */
 
-
-    OpenTrayOnStart(300);
+    OpenTrayOnStart(500);
 
     // NOTE: Replace MoveStraight() with MoveExactWithAngle()
 
     SetIntake(127);
-    const unsigned int intakeSpeed = 43;
+    const unsigned int intakeSpeed = 35;
 
-    MoveExactWithAngle(4000, -90, intakeSpeed);
-    MoveExactWithAngle(2000, -90, intakeSpeed - 20);
+    MoveExactWithAngle(1200, 0, intakeSpeed);
+    Wait(300);
+    
+    MoveExactWithAngle(1000, 90, intakeSpeed);
+
+    MoveExactWithAngle(900, 45, intakeSpeed);
+
+    MoveExactWithAngle(1700, 0, intakeSpeed);
 
     const unsigned int turnAngle = -180-55;
 
-    MoveExactWithAngle(5000, turnAngle, intakeSpeed);
+    MoveExactWithAngle(3300, -90, intakeSpeed);
+
+    MoveExactWithAngle(2300, -180, intakeSpeed);
 
     GetIntake().m_mode = IntakeMode::Hold;
 
-    MoveExactWithAngle(1200, turnAngle, intakeSpeed, 3000);
+    MoveExactWithAngleAndTray(900, -180 + 45, 1000,  intakeSpeed, 3000, true);
 
     DoTrayAction(State::TrayOut);
     
     Do(MoveAction(-1500, 30), 1000);
 
     DoTrayAction(State::Rest);
-
-
 
 
 }
