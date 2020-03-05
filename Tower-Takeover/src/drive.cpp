@@ -81,7 +81,7 @@ float KeepAngle::GetError()
     if (m_drive.IsXFlipped())
         angle = -angle;
 
-    return (m_angle - angle) * 2.0;
+    return AdjustAngle(m_angle - angle) * 2.0;
 }
 
 

@@ -10,7 +10,7 @@ struct LogCategoryInfo {
 };
 
 static LogCategoryInfo Categories[(int)Log::Max] = {
-  { "Motion: ",  false},
+  { "Motion: ",  true},
   { "Drive: ",   false},
   { "Gyro: ",    false, true},
   { "States: ",  false, true},

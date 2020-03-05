@@ -402,9 +402,9 @@ void TurnToAngle(int turn)
     auto angle = turn - GetGyroReading();
     Do(TurnPrecise(angle));
     WaitAfterMove();
-    float err = turn - GetGyroReading();
+    float err = AdjustAngle(turn - GetGyroReading());
     if (abs(err) >= 0.5)
-        ReportStatus(Log::Warning, "!!! Turn Error: curr angle = %f, desired angle = %f\n", err, (float)turn);
+        ReportStatus(Log::Warning, "!!! Turn Error: error = %f, desired angle = %f\n", err, (float)turn);
 }
 
 void TurnToAngleIfNeeded(int angle)

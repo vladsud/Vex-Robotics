@@ -1,6 +1,8 @@
 #pragma once
 #include "main.h"
 
+float AdjustAngle(float);
+
 void MoveStop();
 void MoveExactWithAngle(
     int distance,

@@ -180,7 +180,7 @@ private:
 #define rightBackDrivePort 19
 
 #define intakeLeftPort 9
-#define intakeRightPort 3
+#define intakeRightPort 4
 #define cubetrayPort 5
 #define liftMotorPort 1
 
