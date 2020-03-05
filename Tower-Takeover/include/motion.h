@@ -12,10 +12,6 @@ struct Model
     // Power to use when starting motion.Used to improve precision -
     // putting all power to wheels momentaraly results in wheel sleepage / robot sliding 
     unsigned int initialPower;
-    // amount of power to add on each cycle (10ms).
-    // 1 = full power in 1.3 seconds
-    // (45, 2) - full power in 410ms
-    unsigned int initialPowerDelta;
 
     // These 3 cofficients are used to calculate power
     int basePower;

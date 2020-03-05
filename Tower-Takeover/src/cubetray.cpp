@@ -161,7 +161,8 @@ struct TrayAction : public Action
         return GetElapsedTime() > 100 && !GetCubeTray().IsMoving();
     }
 
-    void Stop() override {
+    const char* Name() override {
+        return "TrayAction";
     }
 };
 

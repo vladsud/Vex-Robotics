@@ -12,16 +12,19 @@
 // All coordinates and gyro-based turns are from the POV of RED (Left) position
 // For Blue (right) automatic transformation happens
 
+void PrintPos(const char *name)
+{
+    // auto pos = GetTracker().LatestPosition();
+    // printf("%s: angle = %f, XY = (%f, %f)\n", name, pos.angle, pos.X, pos.Y);
+}
 
 void RunAtonUnprotected()
 {
     ReportStatus(Log::Info, "Unprotected aton\n");
 
     auto timeBegin = GetTime();
-    GetTracker().SetCoordinates({16, 60+24, 0});
-
-    // NOTE: Replace MoveStraight() with MoveExactWithAngle()
-
+    auto& tracker = GetTracker();
+    tracker.SetCoordinates({16, 60+24, 0});
     
     OpenTrayOnStart(300);
     /*
@@ -30,77 +33,32 @@ void RunAtonUnprotected()
     */
 
     SetIntake(127);
-    const unsigned int intakeSpeed = 17;
-
-    /*
-    MoveExactWithAngle(4800, 0, intakeSpeed);
-    MoveExactWithAngle(-5700, -53);
-    MoveExactWithAngle(5400, -7, intakeSpeed - 5);
-    MoveExactWithAngle(4300, 90+63);
-    */
+    const unsigned int intakeSpeed = 30;
+    const unsigned int intakeSpeed2 = 30;
 
     // ===== GO FORWARD =====
-    // BLUE
-    int distance0 = 1900;
-    // RED
-    if (GetLcd().AtonRed)
-        distance0 = 3500;
-    
-    MoveExactWithAngle(distance0, 0, intakeSpeed);
+    MoveExactWithAngle(2700, 0, intakeSpeed);
 
     // ===== Go Sideways Back =====
-    // BLUE
-    int distance1 = -2500;
-    int angle1 = -50;
-    // RED
-    if (GetLcd().AtonRed)
-    {
-        distance1 = -5400;
-        angle1 = -50;
-    }
-    MoveExactWithAngle(distance1, angle1);
+    MoveExactWithAngle(-3100, -42);
+
+    PrintPos("Pos1");
 
     // ===== GO FORWARD Again =====
-    int intakeSpeed2 = 19;
-    // BLUE
-    int distance3 = 3000;
-    int angle3 = 0;
-    // RED
-    if (GetLcd().AtonRed)
-    {
-        distance3 = 5600;
-        angle3 = 4;
-    } 
-    MoveExactWithAngle(distance3, angle3, intakeSpeed2);
+    MoveExactWithAngle(3400, 0, intakeSpeed2);
     
     // ===== Get Tower Cube =====
-    // BLUE
-    int distance4 = 400;
-    int angle4 = -35;
-    // RED
-    if (GetLcd().AtonRed)
-    {
-        distance4 = 5600;
-        angle4 = 4;
-    } 
-    MoveExactWithAngle(distance4, angle4, intakeSpeed2);
-    Wait(300);
-    MoveExactWithAngle(-500, angle4, intakeSpeed2);
-    
-    // ===== GO STACK =====
-    // BLUE
-    int distance2 = 3300;
-    int angle2 = 63;
-    // RED
-    if (GetLcd().AtonRed)
-    {
-        angle2 = 65;
-        distance2 = 5000;
-    }
-    printf("%s\n", "Moving Exact With Angle and Tray");
-    Wait(500);
+    /*
+    MoveExactWithAngle(400, -35, intakeSpeed2);
+    MoveExactWithAngle(-500, -35, intakeSpeed2);
+    */
 
-    MoveExactWithAngleAndTray(distance2, 90 + angle2, 1500, UINT_MAX, 4000, true);
+    // ===== GO STACK =====
+    printf("%s\n", "Moving Exact With Angle and Tray");
+    EnableConsoleLogs(Log::Automation);
+    MoveExactWithAngleAndTray(3000, 180-18, 1500, UINT_MAX, 4000, true);
+
+    PrintPos("EndPos");
     DoTrayAction(State::TrayOut);
     // Do(MoveAction(600, 40), 500);
     // MoveExactWithAngle(900, 90+65, intakeSpeed, 1000);
@@ -118,7 +76,7 @@ void RunAtonUnprotected()
     // Do(MoveAction(300, 30), 500);
     
     // Move back (straight no matter the angle)
-    Do(MoveAction(-2000, 60), 1000);
+    Do(MoveAction(-1000, 65), 1000);
     
     // MoveStraight(-1800, 70, turnAngle);
     

@@ -32,10 +32,8 @@ void RunAtonProtected()
 
     OpenTrayOnStart(500);
 
-    // NOTE: Replace MoveStraight() with MoveExactWithAngle()
-
     SetIntake(127);
-    const unsigned int intakeSpeed = 35;
+    const unsigned int intakeSpeed = 105;
 
     MoveExactWithAngle(1200, 0, intakeSpeed);
     Wait(300);

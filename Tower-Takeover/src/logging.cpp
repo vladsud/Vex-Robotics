@@ -10,14 +10,15 @@ struct LogCategoryInfo {
 };
 
 static LogCategoryInfo Categories[(int)Log::Max] = {
-  { "Motion: ",  true},
-  { "Drive: ",   false},
-  { "Gyro: ",    false, true},
-  { "States: ",  false, true},
-  { "",          false },       // Verbose
-  { "",          true,  true},  // info
-  { "WARNING: ", true,  true,},
-  { "ERROR: ",   true,  true },
+  { "Motion: ",   false},
+  { "Drive: ",    false},
+  { "Gyro: ",     false, true},
+  { "States: ",   false, true},
+  { "Automation: ", false, true},
+  { "",           false },       // Verbose
+  { "",           true,  true},  // info
+  { "WARNING: ",  true,  true,},
+  { "ERROR: ",    true,  true },
 };
 
 /*******************************************************************************
@@ -73,7 +74,7 @@ public:
   void Add(char* string)
   {
 
-    if (!m_curr)
+    if (!m_curr && !isAuto())
       return;
 
     while (m_curr < m_over)

@@ -58,6 +58,7 @@ enum class Log
    Drive,
    Gyro,
    States,
+   Automation,
    
    Verbose,
    // Starting with Info, all categories below are enabled by default

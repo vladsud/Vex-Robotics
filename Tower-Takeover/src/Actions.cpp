@@ -31,13 +31,17 @@ bool DoCore(T &&action, unsigned int timeout /* = 100000 */)
 
     if (timedout)
     {
-        ReportStatus(Log::Warning, "!!! TIME-OUT: %s: %d\n", action.Name(), timeout);
+        ReportStatus(Log::Warning, "!!! TIME-OUT: %s: %d ms\n", action.Name(), timeout);
         return false;
     }
-    if (timeout <= 15000)
-        ReportStatus(Log::Verbose, "%s took %ld ms (time-out: %d)\n", action.Name(), _millis() - time, timeout);
-    else
-        ReportStatus(Log::Verbose, "%s took %ld ms\n", action.Name(), _millis() - time);
+
+    auto const duration = _millis() - time;
+    if (duration != 0) {
+        if (timeout - duration < 20)
+            ReportStatus(Log::Automation, "%s took %ld ms (time-out: %d)\n", action.Name(), duration, timeout);
+        else
+            ReportStatus(Log::Automation, "%s took %ld ms\n", action.Name(), duration);
+    }
     return true;
 }
 

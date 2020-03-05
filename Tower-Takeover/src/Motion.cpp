@@ -2,22 +2,20 @@
 #include "cycle.h"
 const Model moveModel = {
     45,  /*initialPower */
-    2,  /*initialPowerDelta */
-    -5,   /* basePower */
-    1.78, /* speedCoeff */
-    3,  /* diffCoeff */
-    {31, 100, 1600, UINT_MAX},
-    { 7,  15,   80, 80},
+    0,   /* basePower */
+    1.8, /* speedCoeff */
+    4.0,  /* diffCoeff */
+    { 40, 150, 300, 4800, UINT_MAX},
+    { 10, 20,  30,  240, 240},
 };
 
 const Model turnModel = {
     45,  /*initialPower */
-    2,  /*initialPowerDelta */
     0,   /* basePower */
-    1.0, /* speedCoeff */
-    2.1, /* diffCoeff */
-    { 80,  2000, 5000, UINT_MAX},
-    {  25,   80,  120, 150},
+    0.4, /* speedCoeff */
+    0.5, /* diffCoeff */
+    { 50,  500, 6000, UINT_MAX},
+    {  30, 50,   200, 200},
 };
 
 int Sign(int value)
@@ -69,7 +67,7 @@ int Motion::SpeedFromDistance(int error)
 
 bool Motion::ShouldStop()
 {
-    int error = GetError() / 3;
+    int error = GetError();
     int sign = Sign(error);
     int actualSpeed = m_lastError - error;
     m_lastError = error;

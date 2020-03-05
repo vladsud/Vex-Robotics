@@ -71,8 +71,8 @@ KeepAngle::KeepAngle(int angle)
     if (m_drive.IsXFlipped())
         angle = -angle;
 
-    AssertSz(abs(GetError()) <= 10, "Angle is too far from current one!");
     m_angle = angle;
+    AssertSz(abs(GetError()) <= 20, "Angle is too far from current one %f %f!", GetError(), m_angle);
 }
 
 float KeepAngle::GetError()
@@ -81,7 +81,7 @@ float KeepAngle::GetError()
     if (m_drive.IsXFlipped())
         angle = -angle;
 
-    return AdjustAngle(m_angle - angle) * 2.0;
+    return AdjustAngle(m_angle - angle);
 }
 
 
@@ -261,12 +261,7 @@ void Drive::Update()
 
     // power is non-linear!
     int errorMultiplier;
-    if (forwardAbs > 90)
-        errorMultiplier = error * (40 + 4 * abs(error)) / 20; // + m_ErrorIntergral * 0.1;
-    else if (forwardAbs > 50)
-        errorMultiplier = error * (40 + 8 * abs(error)) / 20; // + m_ErrorIntergral * 0.1;
-    else
-        errorMultiplier = error * (40 + 8 * abs(error)) / 20; // + m_ErrorIntergral * 0.1;
+    errorMultiplier = error * 5;
 
     // if we were going forward for a while and then started turning slightly, then there is huge amount of inertia
     // If we allow unbounded adjustments, then speed of one motor will drop to zero and below because of this interia,

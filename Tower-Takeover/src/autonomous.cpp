@@ -164,8 +164,8 @@ void autonomous()
     UNUSED_VARIABLE(time);
     UNUSED_VARIABLE(time2);
 
-    ReportStatus(Log::Info, "\n*** END AUTONOMOUS ***\n\n");
-    ReportStatus(Log::Info, "Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
+    ReportStatus(Log::Info, "*** END AUTONOMOUS ***\n\n");
+    // ReportStatus(Log::Info, "Time: %d %d \n", main.GetTime() - time, int(millis() - time2));
 
     Do(EndOfAction());
 }

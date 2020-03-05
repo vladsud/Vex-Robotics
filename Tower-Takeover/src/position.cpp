@@ -40,24 +40,15 @@ void PositionTracker::UpdateSensorSpeed(const Sensors& pos, SensorSpeed& speed, 
 
 void PositionTracker::SynthesizeSensors(const Sensors& pos, const SensorSpeed& speed, Sensors& posOut)
 {
-    posOut = pos;
-    
-    /*
-
-    To be tested later!
-
     posOut.leftWheels = pos.leftWheels;
     posOut.rightWheels = pos.rightWheels;
     posOut.sideEncoder = pos.sideEncoder;
 
-    float alpha = 0.5;
+    float alpha = 0.9;
     posOut.leftEncoder = (1 - alpha) * (posOut.leftEncoder + speed.leftEncoder) + alpha * pos.leftEncoder;
     posOut.rightEncoder = (1 - alpha) * (posOut.rightEncoder + speed.rightEncoder) + alpha * pos.rightEncoder;
 
-    float angleAlpha = 0.5;
-    posOut.angle = (1 - angleAlpha) * (posOut.angle + speed.angle) + angleAlpha * pos.angle;
-
-    */
+    posOut.angle = (posOut.rightEncoder - posOut.leftEncoder) * SPIN_TO_IN_LR / DISTANCE_LR;
 }
 
 void PositionTracker::InitSensorSpeed(const Sensors& pos, SensorSpeed& speed)
@@ -152,6 +143,7 @@ void PositionTracker::Update()
 
     m_count++;
 
+    /*
     static int count = 0;
     count++;
     if ((count % 2000) == 0)
@@ -161,7 +153,7 @@ void PositionTracker::Update()
             m_position.Y,
             m_sensorsRaw.leftEncoder,
             m_sensorsRaw.rightEncoder);
-
+    */
 }
 
 Position PositionTracker::LatestPosition()
