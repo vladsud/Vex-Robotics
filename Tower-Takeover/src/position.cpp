@@ -29,12 +29,12 @@ void PositionTracker::UpdateSensorSpeed(const Sensors& pos, SensorSpeed& speed, 
     speed.time += delta;
     if (delta == 0)
         delta = 1;
-    speed.angle = (pos.angle - speed.last.angle) / delta;
-    speed.leftEncoder = (pos.leftEncoder - speed.last.leftEncoder) / delta;
-    speed.rightEncoder = (pos.rightEncoder - speed.last.rightEncoder) / delta;
-    speed.sideEncoder = (pos.sideEncoder - speed.last.sideEncoder) / delta;
-    speed.leftWheels = (pos.leftWheels - speed.last.leftWheels) / delta;
-    speed.rightWheels = (pos.rightWheels - speed.last.rightWheels) / delta;
+    speed.angle = float (pos.angle - speed.last.angle) / delta;
+    speed.leftEncoder = float (pos.leftEncoder - speed.last.leftEncoder) / delta;
+    speed.rightEncoder = float (pos.rightEncoder - speed.last.rightEncoder) / delta;
+    speed.sideEncoder = float (pos.sideEncoder - speed.last.sideEncoder) / delta;
+    speed.leftWheels = float (pos.leftWheels - speed.last.leftWheels) / delta;
+    speed.rightWheels = float (pos.rightWheels - speed.last.rightWheels) / delta;
     speed.last = pos;
 }
 
@@ -207,7 +207,7 @@ void PositionTracker::ResetState()
     m_rightEncoder.HardReset();
 }
 
-int PositionTracker::GetRobotVelocity()
+float PositionTracker::GetRobotVelocity()
 {
     return m_sensorSpeedSlow.leftEncoder + m_sensorSpeedSlow.rightEncoder;
 }

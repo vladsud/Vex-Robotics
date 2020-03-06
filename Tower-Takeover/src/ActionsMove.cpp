@@ -49,7 +49,7 @@ struct MoveActionBase : public Action
     {
         if (m_stopOnCollision)
         {
-            if (GetTracker().GetRobotVelocity() <= 5)
+            if (GetTracker().GetRobotVelocity() <= 0.1)
             {
                 ReportStatus(Log::Info, "   Collision detected! distance %d / %d\n",
                         m_drive.GetDistance(), m_origDistanceToMove);
@@ -154,7 +154,7 @@ struct MoveExactAction : public MoveActionBase, public Motion
     {
         if (m_engageStopOnCollision && !m_stopOnCollision)
         {
-            if (abs(GetTracker().GetRobotVelocity()) >= 20 || GetElapsedTime() >= 500)
+            if (abs(GetTracker().GetRobotVelocity()) >= 0.2 || GetElapsedTime() >= 500)
                 m_stopOnCollision = true;
         }
 
@@ -187,12 +187,11 @@ void MoveExactWithAngle(
         int angle,
         unsigned int speedLimit,
         unsigned int timeout /*= 100000U*/,
-        bool allowTurning /*= true*/)
+        bool stopOnCollision /* = false */)
 {
-    if (allowTurning)
-        TurnToAngleIfNeeded(angle);
-    Do(MoveExactAction(distance, angle, speedLimit), timeout);
-    WaitAfterMoveReportDistance(distance);
+    TurnToAngleIfNeeded(angle);
+    bool success = Do(MoveExactAction(distance, angle, speedLimit, stopOnCollision), timeout);
+    WaitAfterMoveReportDistance(distance, success);
 }
 
 /*******************************************************************************
@@ -423,7 +422,12 @@ struct WaitTillStopsAction : public Action
 {
     bool ShouldStop() override
     {
-        return abs(GetTracker().GetRobotVelocity()) <= 2;
+        return abs(GetTracker().GetRobotVelocity()) <= 0.1;
+    }
+
+    void Stop() override {
+        if (!ShouldStop())
+            ReportStatus(Log::Warning, "WaitTillStopsAction timeout error: %f\n", GetTracker().GetRobotVelocity());
     }
     const char* Name() override { return "WaitTillStopsAction"; } 
 };
@@ -437,7 +441,7 @@ void WaitAfterMove(unsigned int timeout /*= 0*/)
     if (timeout == 0)
         timeout = lcd.AtonSkills || !lcd.AtonProtected || !lcd.AtonClimbPlatform ? 500 : 200;
     */
-    Do(WaitTillStopsAction(), timeout == 0 ? 200 : timeout);
+    Do(WaitTillStopsAction(), timeout == 0 ? 300 : timeout);
 }
 
 
@@ -477,14 +481,17 @@ void MoveExactWithAngleAndTray(
         int angle,
         int ticksUntil,
         unsigned int speedLimit,
-        unsigned int timeout /*= 100000U*/,
-        bool allowTurning /*= true*/)
+        unsigned int timeout /*= 100000U*/)
 {
-    if (allowTurning)
-        TurnToAngleIfNeeded(angle);
-    Do(MoveExactActionWithTray(distance, angle, ticksUntil, speedLimit), timeout);
+    TurnToAngleIfNeeded(angle);
 
-    DoTrayAction(State::TrayOut);
+    bool success = Do(
+        MoveExactActionWithTray(distance, angle, ticksUntil, speedLimit),
+        timeout);
 
-    WaitAfterMoveReportDistance(distance);
+    GetStateMachine().SetState(State::TrayOut);
+
+    unsigned int error = abs(distance - GetDrive().GetDistance());
+    if (error >= 50 || !success)
+        ReportStatus(Log::Warning, "MoveExactWithAngleAndTray (or equivalent) big Error: %d, distance travelled: %d, expected: %d\n", error, GetDrive().GetDistance(), distance);
 }

@@ -104,7 +104,7 @@ public:
       printf(pointer);
       pointer += strlen(pointer) + 1;
     }
-    printf("\nDone\n");
+    printf("\nDone logging\n");
   }
 };
 

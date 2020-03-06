@@ -25,7 +25,7 @@ int CubeTray::get_value()
 void CubeTray::Update()
 {
     StateMachine& sm = GetStateMachine();
-    int currentRotation = m_anglePot.get_value();
+    const int currentRotation = get_value();
 
     State desiredState = sm.GetState();
     int motor = 0;
@@ -75,7 +75,7 @@ void CubeTray::Update()
                 }
                 else if (currentRotation > cubeTrayOut)
                 {
-                    motor = 20;
+                    motor = 25;
                 }
                 else
                 {
@@ -88,8 +88,14 @@ void CubeTray::Update()
                     m_tick = 0;
                     SetIntake(0);
                 }
-                // motor = (motor + m_power * 7) / 8;
-                // m_power = motor;
+
+                /*
+                if (m_moving ^ (motor != 0)) {
+                    printf("%d: Tray diagnostics: %d, %d\n", millis(), cubeTrayOut, currentRotation);
+                }
+                if (motor != 0)
+                    printf("   %d: Tray moving: %d %d\n", millis(), currentRotation, motor);
+                */
             }
             /*
             else if (currentRotation < restValue + 100) 
@@ -152,13 +158,30 @@ void CubeTray::Update()
 
 struct TrayAction : public Action
 {
+    const State m_action;
+    int m_timeOpened = -1;
+
     TrayAction(State action)
+        : m_action(action)
     {
         GetStateMachine().SetState(action);
     }
 
     bool ShouldStop() override {
-        return GetElapsedTime() > 100 && !GetCubeTray().IsMoving();
+        if (GetElapsedTime() <= 100 || GetCubeTray().IsMoving())
+        {
+            m_timeOpened = -1;
+            return false;
+        }
+
+        // We do see it being triggered too early, likely indicating open did not finish yet
+        // allow two cycles to see if it really stopped moving
+        if (m_timeOpened == -1)
+            m_timeOpened = millis();
+        if (millis() - m_timeOpened < 15)
+            return false;
+
+        return true;
     }
 
     const char* Name() override {

@@ -33,35 +33,54 @@ void RunAtonUnprotected()
     */
 
     SetIntake(127);
-    const unsigned int intakeSpeed = 30;
-    const unsigned int intakeSpeed2 = 30;
+    const unsigned int intakeSpeed = 20;
+    const unsigned int intakeSpeed2 = 20;
 
     // ===== GO FORWARD =====
-    MoveExactWithAngle(2700, 0, intakeSpeed);
+    MoveExactWithAngle(2000, 0, intakeSpeed);
 
     // ===== Go Sideways Back =====
-    MoveExactWithAngle(-3100, -42);
+    MoveExactWithAngle(-2550, -55);
 
     PrintPos("Pos1");
 
     // ===== GO FORWARD Again =====
-    MoveExactWithAngle(3400, 0, intakeSpeed2);
-    
-    // ===== Get Tower Cube =====
-    /*
-    MoveExactWithAngle(400, -35, intakeSpeed2);
-    MoveExactWithAngle(-500, -35, intakeSpeed2);
-    */
+    MoveExactWithAngle(2500, 0, intakeSpeed2);
+
+    bool SafeMode = false;
+    if (!SafeMode) {
+        int distance = 900;
+        int angle = -28;
+        MoveExactWithAngle(distance, angle);
+        MoveExactWithAngle(-distance, angle);
+    }
 
     // ===== GO STACK =====
-    printf("%s\n", "Moving Exact With Angle and Tray");
     EnableConsoleLogs(Log::Automation);
-    MoveExactWithAngleAndTray(3000, 180-18, 1500, UINT_MAX, 4000, true);
+    printf("Moving Exact With Angle and Tray\n");
+
+    if (SafeMode) {
+        const unsigned speedLimit = 30;
+        MoveExactWithAngle(2500, 180-32, 30, 1800);
+    } else {
+        const unsigned speedLimit = 30;
+        MoveExactWithAngleAndTray(2500, 180-32, 1000, speedLimit, 2000);
+    }
 
     PrintPos("EndPos");
-    DoTrayAction(State::TrayOut);
+
+    int duration = 14600 + timeBegin - GetTime();
+    printf("%d for stacking!\n", duration);
+    DoTrayAction(State::TrayOut, duration);
     // Do(MoveAction(600, 40), 500);
     // MoveExactWithAngle(900, 90+65, intakeSpeed, 1000);
+
+    // Sometimes we move out too quickly, without tray really fully opened.
+    duration = 14300 + timeBegin - GetTime();
+    if (duration > 0)
+    {
+        Wait(duration);
+    }
 
     GetIntake().m_mode = IntakeMode::Hold;
 
@@ -76,7 +95,7 @@ void RunAtonUnprotected()
     // Do(MoveAction(300, 30), 500);
     
     // Move back (straight no matter the angle)
-    Do(MoveAction(-1000, 65), 1000);
+    Do(MoveAction(-1000, 85), 1000);
     
     // MoveStraight(-1800, 70, turnAngle);
     

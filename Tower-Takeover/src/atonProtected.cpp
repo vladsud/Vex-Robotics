@@ -52,7 +52,7 @@ void RunAtonProtected()
 
     GetIntake().m_mode = IntakeMode::Hold;
 
-    MoveExactWithAngleAndTray(900, -180 + 45, 1000,  intakeSpeed, 3000, true);
+    MoveExactWithAngleAndTray(900, -180 + 45, 1000,  intakeSpeed, 3000);
 
     DoTrayAction(State::TrayOut);
     

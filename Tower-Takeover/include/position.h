@@ -13,8 +13,14 @@ struct Sensors {
     float angle;
 };
 
-struct SensorSpeed : public Sensors
+struct SensorSpeed
 {
+    float leftEncoder;
+    float rightEncoder;
+    float rightWheels;
+    float leftWheels;
+    float sideEncoder;
+    float angle;
     Sensors last;
     unsigned int time;
 };
@@ -128,7 +134,7 @@ public:
     void Update();
     void ResetState();
 
-    int GetRobotVelocity();
+    float GetRobotVelocity();
     Position LatestPosition();
     void SetCoordinates(Position cord);
     void SetAngle(int degrees);

@@ -90,7 +90,7 @@ int main()
     Test::Run();
     if (s_Failures == 0)
     {
-        printf("Done\n");
+        printf("Done test\n");
         return 0;
     }
     else

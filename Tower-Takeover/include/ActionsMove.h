@@ -9,14 +9,14 @@ void MoveExactWithAngle(
     int angle,
     unsigned int speedLimit = UINT_MAX,
     unsigned int timeout = 1000000,
-    bool allowTurning = true);
+    bool stopOnCollision = false);
 int HitTheWall(int distanceForward, int angle);
 void MoveExactWithLineCorrection(int fullDistance, unsigned int distanceAfterLine, int angle);
 
 void TurnToAngle(int turn);
 void TurnToAngleIfNeeded(int angle);
 
-void WaitAfterMoveReportDistance(int distance, unsigned int timeout = 0);
+void WaitAfterMoveReportDistance(int distance, bool success = true, unsigned int timeout = 0);
 void MoveStraight(int distance, int power, int angle);
 
 void MoveExactWithAngleAndTray(
@@ -24,5 +24,4 @@ void MoveExactWithAngleAndTray(
     int angle,
     int timeUntil,
     unsigned int speedLimit,
-    unsigned int timeout /*= 100000U*/,
-    bool allowTurning /*= true*/);
+    unsigned int timeout /*= 100000U*/);

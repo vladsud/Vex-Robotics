@@ -170,10 +170,11 @@ void autonomous()
     Do(EndOfAction());
 }
 
-void WaitAfterMoveReportDistance(int distance, unsigned int timeout)
+void WaitAfterMoveReportDistance(int distance, bool success, unsigned int timeout)
 {
-    WaitAfterMove(timeout);
+    if (success)
+        WaitAfterMove(timeout);
     unsigned int error = abs(distance - GetDrive().GetDistance());
-    if (error >= 50)
+    if (error >= 50 || !success)
         ReportStatus(Log::Warning, "MoveExact (or equivalent) big Error: %d, distance travelled: %d, expected: %d\n", error, GetDrive().GetDistance(), distance);
 }
