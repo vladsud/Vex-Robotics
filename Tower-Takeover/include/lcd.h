@@ -40,8 +40,8 @@ union Button
 class LCD
 {
 public:
-	bool AtonRed = false;
-	bool AtonProtected = false;
+	bool AtonRed = true;
+	bool AtonProtected = true;
 	bool AtonSkills = false;
     bool IsTankDrive = false;
 
@@ -65,10 +65,10 @@ private:
     LVOBJ* m_battery = nullptr;
     unsigned int m_count = 0;
 
-    const Button m_buttons[3] = {
+    const Button m_buttons[2] = {
         {.toggle = {ButtonType::ToggleButton, "Red", "Blue", AtonRed}},
         {.toggle = {ButtonType::ToggleButton, "Protected", "Unprotected", AtonProtected}},
-        {.action = {ButtonType::ActionButton, "Dump", DumpLogs}},
+        // {.action = {ButtonType::ActionButton, "Dump", DumpLogs}},
         // {ButtonType::ToggleButton, "Tank Drive", "Arcade Drive", IsTankDrive},
     };
 };

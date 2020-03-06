@@ -23,3 +23,4 @@ bool Do(Action &action, unsigned int timeout = 100000);
 
 void Wait(unsigned int duration);
 void WaitAfterMove(unsigned int timeout = 0);
+void FinishTrayOut(unsigned int timeBegin);

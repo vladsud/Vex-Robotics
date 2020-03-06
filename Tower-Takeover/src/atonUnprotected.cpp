@@ -18,6 +18,29 @@ void PrintPos(const char *name)
     // printf("%s: angle = %f, XY = (%f, %f)\n", name, pos.angle, pos.X, pos.Y);
 }
 
+void FinishTrayOut(unsigned int timeBegin)
+{
+    int duration = 14600 + timeBegin - GetTime();
+    printf("%d for stacking!\n", duration);
+    DoTrayAction(State::TrayOut, duration);
+    // Do(MoveAction(600, 40), 500);
+    // MoveExactWithAngle(900, 90+65, intakeSpeed, 1000);
+
+    // Sometimes we move out too quickly, without tray really fully opened.
+    duration = 14300 + timeBegin - GetTime();
+    if (duration > 0)
+    {
+        Wait(duration);
+    }
+
+    GetIntake().m_mode = IntakeMode::Hold;
+
+    // Move back (straight no matter the angle)
+    Do(MoveAction(-1000, 85), 1000);
+    
+    DoTrayAction(State::Rest);
+}
+
 void RunAtonUnprotected()
 {
     ReportStatus(Log::Info, "Unprotected aton\n");
@@ -69,35 +92,5 @@ void RunAtonUnprotected()
 
     PrintPos("EndPos");
 
-    int duration = 14600 + timeBegin - GetTime();
-    printf("%d for stacking!\n", duration);
-    DoTrayAction(State::TrayOut, duration);
-    // Do(MoveAction(600, 40), 500);
-    // MoveExactWithAngle(900, 90+65, intakeSpeed, 1000);
-
-    // Sometimes we move out too quickly, without tray really fully opened.
-    duration = 14300 + timeBegin - GetTime();
-    if (duration > 0)
-    {
-        Wait(duration);
-    }
-
-    GetIntake().m_mode = IntakeMode::Hold;
-
-    //return;
-
-    // Out take
-    // SetIntake(-20);
-    // Wait(200);
-    // DoTrayAction(State::TrayOut);
-    
-    // Push forward a bit
-    // Do(MoveAction(300, 30), 500);
-    
-    // Move back (straight no matter the angle)
-    Do(MoveAction(-1000, 85), 1000);
-    
-    // MoveStraight(-1800, 70, turnAngle);
-    
-    DoTrayAction(State::Rest);
+    FinishTrayOut(timeBegin);
 }
