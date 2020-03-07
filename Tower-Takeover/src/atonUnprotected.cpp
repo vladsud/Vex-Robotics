@@ -82,12 +82,13 @@ void RunAtonUnprotected()
     EnableConsoleLogs(Log::Automation);
     printf("Moving Exact With Angle and Tray\n");
 
+    const unsigned speedLimit = 30;
+    const int angle = 180-32;
+    const unsigned distance = 2500;
     if (SafeMode) {
-        const unsigned speedLimit = 30;
-        MoveExactWithAngle(2500, 180-32, 30, 1800);
+        MoveExactWithAngle(distance, angle, speedLimit, 1800);
     } else {
-        const unsigned speedLimit = 30;
-        MoveExactWithAngleAndTray(2500, 180-32, 1000, speedLimit, 2000);
+        MoveExactWithAngleAndTray(distance, angle, 1000, speedLimit, 2000);
     }
 
     PrintPos("EndPos");

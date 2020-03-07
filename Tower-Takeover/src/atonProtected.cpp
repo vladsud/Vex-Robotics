@@ -46,7 +46,15 @@ void RunAtonProtected()
     MoveExactWithAngle(3100, 90, intakeSpeedSlow);
 
     MoveExactWithAngle(1900, 180);
-    MoveExactWithAngle(1000, 180-40, UINT_MAX, 1000);
+
+    bool SafeMode = false;
+    const int angle = 180-40;
+    const unsigned distance = 1000;
+    if (SafeMode) {
+        MoveExactWithAngle(distance, angle, UINT_MAX, 1000);
+    } else {
+        MoveExactWithAngleAndTray(distance, angle, 1000, UINT_MAX, 1000);
+    }
 
     GetIntake().m_mode = IntakeMode::Hold;
 
