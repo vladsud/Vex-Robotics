@@ -29,7 +29,7 @@ void StateMachine::Update()
 
     // Calculate the current state based on the current state
     State oldState = currentState;
-    currentState = calculateState(currentState);
+    SetState(calculateState(currentState));
 
     if (currentState != oldState)
     {
