@@ -15,7 +15,7 @@ void RunSuperSkills()
     auto timeBegin = GetTime();
     GetTracker().SetAngle(0);
 
-    OpenTrayOnStart(300);
+    OpenTrayOnStart();
 
     // ============= First Stack ===============
     SetIntake(127);

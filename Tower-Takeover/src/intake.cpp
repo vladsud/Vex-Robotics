@@ -64,7 +64,6 @@ void Intake::Update()
         m_tick++;
         return;
     }
-    
 
     if (sm.GetState() == State::TrayOut && m_mode != IntakeMode::Stop)
     {
@@ -72,7 +71,6 @@ void Intake::Update()
         SetIntakeMotors(0);
         return;
     }
-
 
     bool cubeIn = IsCubeIn(intakeLineTracker);
 

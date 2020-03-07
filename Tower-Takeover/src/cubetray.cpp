@@ -137,9 +137,9 @@ void CubeTray::Update()
                 motor = 0;
             break;
         case State::InitializationState:
-            if (currentRotation > outABitValue)
-                motor = 100;
-            else
+            // if (currentRotation > outABitValue)
+            //     motor = 100;
+            // else
             {
                 motor = 0;
             }
@@ -195,17 +195,20 @@ void DoTrayAction(State state, int timeout)
 }
 
 
-void OpenTrayOnStart(int time)
+void OpenTrayOnStart()
 {
     // Do(LiftAction(State::InitializationState));
     SetIntake(-127);
-    DoTrayAction(State::InitializationState, time + 100);
+    GetStateMachine().SetState(State::InitializationState);
 
-    // DoTrayAction(State::ArmsUpLow);;
-    Wait(time);
-    DoTrayAction(State::Rest);
+    unsigned time = millis();
 
-    // SetIntake(70);
-    Wait(300);
-    // SetIntake(0);
+    Do(MoveAction(300, 60), 800);
+    Do(MoveAction(-300, 70), 800);
+
+    int duration = 1500 + time - millis();
+    if (time > 0)
+        Wait(time);
+
+    GetStateMachine().SetState(State::Rest);
 } 

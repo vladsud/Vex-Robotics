@@ -49,7 +49,7 @@ void RunAtonUnprotected()
     auto& tracker = GetTracker();
     tracker.SetCoordinates({16, 60+24, 0});
     
-    OpenTrayOnStart(300);
+    OpenTrayOnStart();
     /*
     Do(MoveAction(300, 80), 500);
     Do(MoveAction(-300, 80), 500);
@@ -60,7 +60,7 @@ void RunAtonUnprotected()
     const unsigned int intakeSpeed2 = 20;
 
     // ===== GO FORWARD =====
-    MoveExactWithAngle(2000, 0, intakeSpeed);
+    MoveExactWithAngle(1900, 0, intakeSpeed);
 
     // ===== Go Sideways Back =====
     MoveExactWithAngle(-2550, -55);
@@ -68,27 +68,27 @@ void RunAtonUnprotected()
     PrintPos("Pos1");
 
     // ===== GO FORWARD Again =====
-    MoveExactWithAngle(2500, 0, intakeSpeed2);
+    MoveExactWithAngle(2400, 0, intakeSpeed2);
 
-    bool SafeMode = false;
+    bool SafeMode = true;
     if (!SafeMode) {
-        int distance = 900;
+        int distance = 1000;
         int angle = -28;
         MoveExactWithAngle(distance, angle);
         MoveExactWithAngle(-distance, angle);
     }
 
     // ===== GO STACK =====
-    EnableConsoleLogs(Log::Automation);
-    printf("Moving Exact With Angle and Tray\n");
+    // EnableConsoleLogs(Log::Automation);
+    // printf("Moving Exact With Angle and Tray\n");
 
-    const unsigned speedLimit = 30;
+    const unsigned speedLimit = 20;
     const int angle = 180-32;
     const unsigned distance = 2500;
     if (SafeMode) {
-        MoveExactWithAngle(distance, angle, speedLimit, 1800);
+        MoveExactWithAngle(distance, angle, speedLimit, 1500);
     } else {
-        MoveExactWithAngleAndTray(distance, angle, 1000, speedLimit, 2000);
+        MoveExactWithAngleAndTray(distance, angle, 1000, speedLimit, 1500);
     }
 
     PrintPos("EndPos");

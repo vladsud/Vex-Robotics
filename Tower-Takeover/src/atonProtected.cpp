@@ -26,38 +26,30 @@ void RunAtonProtected()
     GetTracker().SetAngle(0);
 
     /*
-    Do(MoveAction(1000, 80));
-    Do(MoveAction(-1000, 80));
+    Do(MoveAction(500, 80));
+    Do(MoveAction(-500, 80));
     */
 
-    OpenTrayOnStart(500);
+    OpenTrayOnStart();
     SetIntake(127);
 
-    const unsigned int intakeSpeed = 35;
-    const unsigned int intakeSpeedSlow = 28;
+    const unsigned int intakeSpeed = 25;
+    const unsigned int intakeSpeedSlow = 20;
 
-    MoveExactWithAngle(1000, 0, intakeSpeed);
+    MoveExactWithAngle(1100, 0, intakeSpeedSlow);
     
-    MoveExactWithAngle(800, -90, intakeSpeed, 1000);
-    // Wait(100);
+    MoveExactWithAngle(850, 90, intakeSpeedSlow, 1000);
+    Wait(300); // pick up cube
+    MoveExactWithAngle(-850, 90, intakeSpeed, 1000);
 
-    MoveExactWithAngle(2000, -25, intakeSpeed);
+    MoveExactWithAngle(1300, -84, intakeSpeed);
+    Wait(300); // pick up cube
 
-    MoveExactWithAngle(3100, 90, intakeSpeedSlow);
-
-    MoveExactWithAngle(1900, 180);
-
-    bool SafeMode = false;
-    const int angle = 180-40;
-    const unsigned distance = 1000;
-    if (SafeMode) {
-        MoveExactWithAngle(distance, angle, UINT_MAX, 1000);
-    } else {
-        MoveExactWithAngleAndTray(distance, angle, 1000, UINT_MAX, 1000);
-    }
+    MoveExactWithAngle(-1250, -42, intakeSpeed);
+    MoveExactWithAngle(1650, -90-10, intakeSpeedSlow, 2500);
 
     GetIntake().m_mode = IntakeMode::Hold;
 
-    FinishTrayOut(timeBegin);
+    FinishTrayOut(timeBegin-100);
 }
  
