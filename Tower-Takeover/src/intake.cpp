@@ -59,7 +59,10 @@ void Intake::Update()
 
     if (m_tick <= GetIntake().tickDown)
     {
-        SetIntakeMotors(-80);
+        int speed = -80;
+        if (isAuto())
+            speed = -127;
+        SetIntakeMotors(speed);
         m_mode = IntakeMode::Hold;
         m_tick++;
         return;

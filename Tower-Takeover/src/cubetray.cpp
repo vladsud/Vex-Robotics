@@ -63,7 +63,10 @@ void CubeTray::Update()
                         motor = pid.GetPower(cubeTrayOut, currentRotation, -8, -3000) * 200 / 127;
                     if (motor < 50)
                         motor = 50;
-                    SetIntake(0);
+                    if (GetIntake().m_tick > GetIntake().tickDown)
+                    {
+                        SetIntake(0);
+                    }
                 }
                 else if (currentRotation > cubeTrayOut)
                 {
@@ -200,7 +203,7 @@ void OpenTrayOnStart()
 
     int duration = 1500 + time - millis();
     if (time > 0)
-        Wait(time);
+        Wait(duration);
 
     GetStateMachine().SetState(State::Rest);
 } 
