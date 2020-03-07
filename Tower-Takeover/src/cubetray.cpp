@@ -36,14 +36,6 @@ void CubeTray::Update()
     {
         case State::TrayOut:
             isForced = false;
-            // only run if the button is held down
-            if (controller_get_digital_new_press(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
-            {
-                if (currentRotation >= restValue - 500)
-                {
-                    GetIntake().m_tick = 0;
-                }
-            }
             if (isAuto() || controller_get_digital(E_CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1))
             {
                 // Start fast, slow down half way through

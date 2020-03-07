@@ -1,5 +1,7 @@
 #include "StateMachine.h"
 #include "main.h"
+#include "intake.h"
+#include "cubetray.h"
 #include "pros/misc.h"
 
 using namespace pros;
@@ -48,6 +50,10 @@ State StateMachine::GetState()
 
 void StateMachine::SetState(State s)
 {
+    if (currentState != State::TrayOut &&
+            s == State::TrayOut)
+            //GetCubeTray().get_value() >= CubeTray::restValue - 500)
+        GetIntake().m_tick = 0;
     currentState = s;
 }
 
