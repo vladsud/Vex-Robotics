@@ -7,6 +7,6 @@ set INCL=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\
 set INCL2=C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt
 set UCRTDIR=C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\ucrt\x64
 
-"%TOOLDIR%\cl" -c /EHsc -I..\include "-I%INCL%" "-I%INCL2%" MotionTest.cpp Test.cpp
+"%TOOLDIR%\cl" -c /EHsc -I..\include "-I%INCL%" "-I%INCL2%" MotionTest.cpp positionTest.cpp Test.cpp
 "%TOOLDIR%\link" *.obj /OUT:Test.exe "/LIBPATH:%LIBDIR%" "/LIBPATH:%SDKDIR%" "/LIBPATH:%UCRTDIR%"
 del *.obj

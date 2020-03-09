@@ -19,10 +19,10 @@ void AssertCore(bool condition, const char *message, const char *file, int line)
 
 unsigned int iterations = 1;
 
-unsigned int _millis()
-{
-    return iterations;
-}
+namespace pros { namespace c {
+unsigned int millis() { return iterations; }
+}}
+
 
 void ResetTime()
 {

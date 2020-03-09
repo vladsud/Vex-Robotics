@@ -1,5 +1,6 @@
 #pragma once
-#include <cmath>
+#include <cstdint>
+#include "forwards.h"
 
 /*****************************
  *
@@ -7,7 +8,6 @@
  * 
  ****************************/
 
-typedef unsigned int  size_t;
 
 extern "C" {
    void autonomous();
@@ -18,10 +18,12 @@ extern "C" {
 }
 
 // C++ definitions
-#define UINT_MAX 0x7fffffff
+#ifndef UINT_MAX
+#define UINT_MAX 0xffffffff
+#endif
+
 extern "C" {
    int printf(const char * format, ... );
-   int snprintf(char * str, size_t n, const char * format, ... );
 //   double sin(double);
 //   double cos(double);
 }
@@ -32,8 +34,6 @@ float sin (float x);
 float atan2 (float y, float x);
 double atan2(double, double);
 */
-
-unsigned int _millis();
 
 /*****************************
  *
@@ -74,7 +74,9 @@ const char* LogCategoryName(Log logCategory);
 
 void ReportStatusCore(Log logCategory, const char* format, ...);
 #define ReportStatusCoreInline(logCategory, format, ...) printf(format, ##__VA_ARGS__)
-#define ReportStatus(logCategory, format, ...) ReportStatusCore(logCategory, "%4ld: %s" format, _millis(), LogCategoryName(logCategory), ##__VA_ARGS__)
+#ifndef ReportStatus
+#  define ReportStatus(logCategory, format, ...) ReportStatusCore(logCategory, "%4ld: %s" format, pros::c::millis(), LogCategoryName(logCategory), ##__VA_ARGS__)
+#endif
 
 #define Assert(f) AssertSz(f, #f)
 #define AssertSz(f, format, ...) do { \

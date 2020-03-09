@@ -54,7 +54,7 @@ struct MotionResults
     int stopPoint;
 };
 
-MotionResults RunModel(TestMotion& motion)
+static MotionResults RunModel(TestMotion& motion)
 {
     // EnableConsoleLogs(Log::Motion);
 
@@ -63,17 +63,17 @@ MotionResults RunModel(TestMotion& motion)
     while (true) {
         if (motion.ShouldStop())
             break;
-        AssertSz(_millis() < 200, "Too many iterations");
+        AssertSz(pros::c::millis() < 200, "Too many iterations");
         pros::c::delay(1);
     }
 
     AssertSz(abs(motion.GetStopPoint()) < 15, "Too many iterations");
-    Test::Report("   %d iterations, stop point = %d\n", _millis(), motion.GetStopPoint());
+    Test::Report("   %d iterations, stop point = %d\n", pros::c::millis(), motion.GetStopPoint());
 
-    return {_millis(), motion.GetStopPoint()};
+    return {pros::c::millis(), motion.GetStopPoint()};
 }
 
-MotionResults RunModels(TestMotion& motion1, TestMotion& motion2)
+static MotionResults RunModels(TestMotion& motion1, TestMotion& motion2)
 {
     auto res1 = RunModel(motion1);
     auto res2 = RunModel(motion2);
@@ -82,7 +82,7 @@ MotionResults RunModels(TestMotion& motion1, TestMotion& motion2)
     return res1;
 }
 
-Test test("Motion", [] {
+static Test test("Motion", [] {
     auto res1 = RunModels(TestMotion(3000), TestMotion(-3000));
     auto res2 = RunModels(TestMotion(1000), TestMotion(-1000));
     Assert(res2.iterations < res1.iterations);

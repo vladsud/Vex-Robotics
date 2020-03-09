@@ -1,5 +1,5 @@
 #include "motion.h"
-#include "cycle.h"
+
 const Model moveModel = {
     45,  /*initialPower */
     0,   /* basePower */
@@ -138,9 +138,11 @@ bool Motion::ShouldStop()
             m_power = -powerLimit;
     }
 
+    /*
     ReportStatus(Log::Motion, "%s err =%5d, angle = %f, speed =%3d, ideal =%3d, power =%4d / %d\n",
         result ? "DONE:" : "",
         error, GetGyroReading(), actualSpeed, idealNow, power, m_power);
+        */
 
     SetMotorPower(m_power);
     return result;

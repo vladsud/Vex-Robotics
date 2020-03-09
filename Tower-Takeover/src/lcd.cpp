@@ -11,6 +11,13 @@
 #include "display/lv_core/lv_obj.h"
 #include "display/lv_objx/lv_btn.h"
 
+
+typedef unsigned int size_t;
+
+extern "C" {
+   int snprintf(char * str, size_t n, const char * format, ... );
+}
+
 using namespace pros::c;
 
 LCD::LCD()

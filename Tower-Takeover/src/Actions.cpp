@@ -5,7 +5,7 @@
 template <typename T>
 bool DoCore(T &&action, unsigned int timeout /* = 100000 */)
 {
-    auto time = _millis();
+    auto time = pros::c::millis();
     bool timedout = false;
 
     while (!action.ShouldStop())
@@ -35,7 +35,7 @@ bool DoCore(T &&action, unsigned int timeout /* = 100000 */)
         return false;
     }
 
-    auto const duration = _millis() - time;
+    auto const duration = pros::c::millis() - time;
     if (duration != 0) {
         if (timeout - duration < 20)
             ReportStatus(Log::Automation, "%s took %ld ms (time-out: %d)\n", action.Name(), duration, timeout);

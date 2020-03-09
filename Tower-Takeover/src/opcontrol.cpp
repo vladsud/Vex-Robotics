@@ -9,10 +9,6 @@
 using namespace pros;
 using namespace pros::c;
 
-unsigned int _millis() {
-    return pros::c::millis();
-}
-
 static Main *g_main = nullptr;
 
 void initialize()
