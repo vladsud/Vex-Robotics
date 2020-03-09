@@ -8,7 +8,6 @@
  * 
  ****************************/
 
-
 extern "C" {
    void autonomous();
    void initialize();
@@ -24,16 +23,7 @@ extern "C" {
 
 extern "C" {
    int printf(const char * format, ... );
-//   double sin(double);
-//   double cos(double);
 }
-
-/*
-float cos (float x);
-float sin (float x);
-float atan2 (float y, float x);
-double atan2(double, double);
-*/
 
 /*****************************
  *
@@ -52,6 +42,8 @@ void MainRunUpdateCycle();
  * Logging
  * 
  ****************************/
+void LcdPrintMessage(const char *message);
+
 enum class Log
 {
    Motion = 0,

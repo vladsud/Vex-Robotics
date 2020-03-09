@@ -3,7 +3,7 @@
 #include "main.h"
 
 #include "drive.h"
-#include "gyro.h"
+// #include "gyro.h"
 #include "lcd.h"
 #include "position.h"
 #include "lineTracker.h"
@@ -32,7 +32,7 @@ class Main
 	StateMachine sm;
 
 	Drive drive;
-	GyroWrapper gyro;
+	// GyroWrapper gyro;
 	PositionTracker tracker;
 	LCD lcd;
 	Intake intake;

@@ -1,6 +1,5 @@
 #include "main.h"
 #include "position.h"
-#include <cmath>
 #include "pros/motors.h"
 
 /*******************************************************************************

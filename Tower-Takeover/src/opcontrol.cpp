@@ -31,7 +31,7 @@ Main &GetMain()
 	return *g_main;
 }
 
-GyroWrapper &GetGyro() { return GetMain().gyro; }
+// GyroWrapper &GetGyro() { return GetMain().gyro; }
 Drive& GetDrive() { return GetMain().drive; }
 PositionTracker &GetTracker() { return GetMain().tracker; }
 StateMachine& GetStateMachine() { return GetMain().sm; }
@@ -44,6 +44,12 @@ Intake& GetIntake() { return GetMain().intake; }
 LineTracker& GetLineTrackerLeft() { return GetMain().lineTrackerLeft; }
 LineTracker& GetLineTrackerRight() { return GetMain().lineTrackerRight; }
 #endif // LineTracker
+
+void LcdPrintMessage(const char *message)
+{
+	if (g_main != nullptr)
+		g_main->lcd.PrintMessage(message);
+}
 
 void MainRunUpdateCycle() { GetMain().Update(); }
 
@@ -90,7 +96,7 @@ void Main::Update()
 
 void Main::UpdateFastSystems()
 {
-	gyro.Integrate();
+	// gyro.Integrate();
 	tracker.Update();
 
 #if LineTracker
@@ -124,7 +130,7 @@ void Main::ResetState()
 
 	tracker.ResetState();
 	drive.ResetState();
-	gyro.ResetState();
+	// gyro.ResetState();
 
 	// Last part of Update() cycle.
 	// UpdateSlowSystems() will be called right away in both automonomous & op control modes

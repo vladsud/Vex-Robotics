@@ -1,5 +1,15 @@
 #include "positionCore.h"
-#include <cmath>
+
+extern "C" {
+   double sin(double);
+   double cos(double);
+}
+
+// float cos (float x);
+// float sin (float x);
+float atan2 (float y, float x);
+double atan2(double, double);
+
 
 PositionTrackerBase::PositionTrackerBase()
 {

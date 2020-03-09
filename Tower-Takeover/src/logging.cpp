@@ -1,6 +1,9 @@
 #include "main.h"
 #include <cstdarg>
 
+typedef unsigned int size_t;
+
+size_t strlen ( const char * str );
 extern "C" int vsnprintf(char* buffer, size_t n, const char* format, va_list list);
 
 struct LogCategoryInfo {
@@ -143,6 +146,6 @@ void ReportStatusCore(Log logCategory, const char* format, ...)
 
     s_logs.Add(buffer);
 
-    if (logCategory == Log::Error && g_main != nullptr)
-		  g_main->lcd.PrintMessage(buffer);
+    if (logCategory == Log::Error)
+		  LcdPrintMessage(buffer);
 }
