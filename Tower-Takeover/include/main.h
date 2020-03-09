@@ -66,9 +66,7 @@ const char* LogCategoryName(Log logCategory);
 
 void ReportStatusCore(Log logCategory, const char* format, ...);
 #define ReportStatusCoreInline(logCategory, format, ...) printf(format, ##__VA_ARGS__)
-#ifndef ReportStatus
-#  define ReportStatus(logCategory, format, ...) ReportStatusCore(logCategory, "%4ld: %s" format, pros::c::millis(), LogCategoryName(logCategory), ##__VA_ARGS__)
-#endif
+#define ReportStatus(logCategory, format, ...) ReportStatusCore(logCategory, "%4ld: %s" format, pros::c::millis(), LogCategoryName(logCategory), ##__VA_ARGS__)
 
 #define Assert(f) AssertSz(f, #f)
 #define AssertSz(f, format, ...) do { \

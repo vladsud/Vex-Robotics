@@ -1,7 +1,5 @@
 #pragma once
 #include <cstdint>
-
-#define ReportStatus __noop
 #include "main.h"
 #include "forwards.h"
 

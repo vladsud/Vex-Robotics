@@ -67,8 +67,8 @@ static MotionResults RunModel(TestMotion& motion)
         pros::c::delay(1);
     }
 
-    AssertSz(abs(motion.GetStopPoint()) < 15, "Too many iterations");
-    Test::Report("   %d iterations, stop point = %d\n", pros::c::millis(), motion.GetStopPoint());
+    AssertSz(abs(motion.GetStopPoint()) < 17, "Stopped too far!");
+    // Test::Report("   %d iterations, stop point = %d\n", pros::c::millis(), motion.GetStopPoint());
 
     return {pros::c::millis(), motion.GetStopPoint()};
 }

@@ -53,28 +53,32 @@ protected:
     float m_steps = 0;
 };
 
-static void RunModel()
+static Position RunModel(PositionTest& model, unsigned int steps)
 {
     ResetTime();
-
-    PositionTest test(0.1, 50, 50);
-    int steps = 200;
-
     while (steps > 0) {
         steps--;
-        test.Update();
+        model.Update();
         pros::c::delay(1);
     }
 
-    auto pos = test.LatestPosition();
+    auto pos = model.LatestPosition();
     pos.X /= PositionTest::TICKS_TO_IN_LR;
     pos.Y /= PositionTest::TICKS_TO_IN_LR;
-
-    Assert(pos.Y == 0);
-    Assert(abs(pos.X - test.Pos()) < 2);
+    return pos;
 }
 
-
 static Test test("Motion", [] {
-    RunModel();
+    PositionTest test1(1, 40, 60000);
+    auto pos = RunModel(test1, 70000);
+    Assert(pos.X == 0);
+    Assert(pos.Y == test1.Pos());
+
+    PositionTest test2(0.01, 40, 10000);
+    pos = RunModel(test2, 10100);
+    Assert(pos.X == 0);
+    auto diff = pos.Y - test2.Pos();
+    Assert(diff <= 0);
+    // due to sensors using integers, and rounding errors in SynthesizeSensors(), we can get up to 2mm of error accumulation.
+    Assert(diff >= -2);
 });

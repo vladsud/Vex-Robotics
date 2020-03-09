@@ -11,12 +11,15 @@ struct Sensors {
 
 struct SensorSpeed
 {
-    float leftEncoder;
-    float rightEncoder;
-    float rightWheels;
-    float leftWheels;
-    float sideEncoder;
-    float angle;
+    // Note we are not that sensetive to precision here - switching to floats
+    // will give us below 1mm error on 1 min streight run.
+    // Not sure about turning though
+    double leftEncoder;
+    double rightEncoder;
+    double rightWheels;
+    double leftWheels;
+    double sideEncoder;
+    double angle;
     Sensors last;
     unsigned int time;
 };
@@ -26,7 +29,7 @@ struct Position
 {
     double X;
     double Y;
-    float angle;
+    double angle;
 };
 
 struct PositionSpeed
@@ -53,9 +56,6 @@ public:
     static constexpr float TICKS_TO_IN_S = WHEEL_DIAMETER_IN_S * PI / TICKS_PER_ROTATION;
 
 protected:
-    // Raw data from sensors
-    Sensors m_sensorsRaw {};
-
     // Synthesized sensor data
     Sensors m_sensors {};
     SensorSpeed m_sensorSpeed;

@@ -23,6 +23,25 @@ namespace pros { namespace c {
 unsigned int millis() { return iterations; }
 }}
 
+const char* LogCategoryName(Log logCategory) {
+    return "";
+}
+
+void ReportStatusCore(Log logCategory, const char* format, ...)
+{
+    if (logCategory == Log::Warning || logCategory == Log::Error)
+    {
+        char buffer[1024];
+        va_list args;
+
+        va_start(args, format);
+        vsnprintf(buffer, CountOf(buffer), format, args);
+        va_end(args);
+
+        Test::Fail(buffer);
+    }
+}
+
 
 void ResetTime()
 {

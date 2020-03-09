@@ -85,8 +85,10 @@ void PositionTrackerBase::SynthesizeSensors(const Sensors& pos, const SensorSpee
 //
 void PositionTrackerBase::Update()
 {
-    ReadSensors(m_sensorsRaw);
-    SynthesizeSensors(m_sensorsRaw, m_sensorSpeed, m_sensors);
+    // Raw data from sensors
+    Sensors sensorsRaw {};
+    ReadSensors(sensorsRaw);
+    SynthesizeSensors(sensorsRaw, m_sensorSpeed, m_sensors);
 
     UpdateSensorSpeed(m_sensors, m_sensorSpeed, 0);
     UpdateSensorSpeed(m_sensors, m_sensorSpeedSlow, 10);
@@ -125,11 +127,11 @@ void PositionTrackerBase::Update()
     count++;
     if ((count % 2000) == 0)
         printf("Angle = %f, X,Y = (%f, %f), encoders = (%d %d)\n",
-            m_sensorsRaw.angle / AngleToRadiants,
+            sensorsRaw.angle / AngleToRadiants,
             m_position.X,
             m_position.Y,
-            m_sensorsRaw.leftEncoder,
-            m_sensorsRaw.rightEncoder);
+            sensorsRaw.leftEncoder,
+            sensorsRaw.rightEncoder);
     */
 }
 
