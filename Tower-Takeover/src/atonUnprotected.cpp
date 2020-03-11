@@ -14,7 +14,7 @@
 
 void PrintPos(const char *name)
 {
-    // auto pos = GetTracker().LatestPosition();
+    // auto pos = GetTracker().GetCoordinates();
     // printf("%s: angle = %f, XY = (%f, %f)\n", name, pos.angle, pos.X, pos.Y);
 }
 

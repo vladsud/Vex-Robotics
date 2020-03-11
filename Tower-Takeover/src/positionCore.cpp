@@ -164,7 +164,7 @@ void PositionTrackerBase::Update()
     */
 }
 
-Position PositionTrackerBase::LatestPosition()
+Position PositionTrackerBase::GetCoordinates()
 {
     Position info = m_position;
     info.angle = GetAngle();

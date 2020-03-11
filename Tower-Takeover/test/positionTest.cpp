@@ -31,8 +31,6 @@ public:
             m_posL += startingSpeed;
             m_posR += startingSpeed;
 
-            // printf("A: %f %f\n", m_posL, m_posR);
-
             Update();
 
             pros::c::delay(1);
@@ -50,8 +48,6 @@ public:
             m_posR += (R - DISTANCE_LR / 2) / TICKS_TO_IN_LR * startingAngularVelocity;
             m_angle += startingAngularVelocity;
 
-            // printf("%f %f\n", R * startingAngularVelocity, m_angle);
-
             Update();
 
             pros::c::delay(1);
@@ -64,9 +60,9 @@ public:
     double PosR() const { return m_posR; }
     double Angle() const { return m_angle; }
 
-    Position GetPos()
+    Position GetCoordinatesTicks()
     {
-        auto pos = LatestPosition();
+        auto pos = GetCoordinates();
         pos.X /= PositionTest::TICKS_TO_IN_LR;
         pos.Y /= PositionTest::TICKS_TO_IN_LR;
         return pos;
@@ -88,13 +84,13 @@ static Test testFast("Motion Fast", [] {
     auto distance = 40 * 40 + 40 * 60;
 
     Assert(test.PosR() == test.PosL());
-    auto pos = test.GetPos();
+    auto pos = test.GetCoordinatesTicks();
     Assert(pos.X == 0);
     Assert(abs(pos.Y -test.PosL()) < 0.00001);
     Assert(abs(pos.Y - distance) < 0.00001);
 
     test.Accelerate(0, 0, 100);
-    auto pos2 = test.GetPos();
+    auto pos2 = test.GetCoordinatesTicks();
     Assert(pos.X == pos2.X);
     Assert(pos.Y == pos2.Y);
 });
@@ -108,7 +104,7 @@ static Test testSlow("Motion Slow backwards", [] {
     float distance = - (0.01 * 1000 * 1000 + 10 * 10000);
 
     Assert(test.PosR() == test.PosL());
-    auto pos = test.GetPos();
+    auto pos = test.GetCoordinatesTicks();
     Assert(pos.X == 0);
     Assert(abs(pos.Y -test.PosL()) < 1);
     Assert(abs(pos.Y - distance) < 1);
@@ -125,7 +121,7 @@ void testDiagonal(float angle, int sign = 1)
 
     float distance = sign * (0.01 * 1000 * 1000 + 10 * 10000);
 
-    auto pos = test.GetPos();
+    auto pos = test.GetCoordinatesTicks();
     angle *=  PI / 180;
     Assert(pos.X * sin(angle) * sign < 0);
     Assert(pos.Y * cos(angle) * sign > 0);
@@ -150,28 +146,50 @@ static Test testDiagBackwards("Motion diagonally backwards", [] {
     testDiagonal(360-30,-1);
 });
 
-static Test testRotate2("Motion rotate uniform", [] {
+void testRotation(float radius, int angleSign)
+{
     PositionTest test;
-    float radius = 15;
-    test.Rotate(radius, PI / 2000, 0, 1000);
+    test.Rotate(radius, angleSign * PI / 2000, 0, 1000);
     
-    auto pos = test.GetPos();
-    Assert(abs(pos.angle + 90) < 0.05);
-    Assert(abs(pos.X - pos.Y) < 1);
+    auto pos = test.GetCoordinatesTicks();
+    Assert(abs(pos.angle + angleSign * 90) < 0.05);
+    Assert(abs(pos.X - angleSign * pos.Y) < 1);
     Assert(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR) < 0.5);
+}
+
+static Test testRotateUni("Motion rotate uniform", [] {
+    testRotation(15, 1);
+    testRotation(15, -1);
+    testRotation(-15, 1);
+    testRotation(-15, -1);
 });
 
-static Test testRotate("Motion rotate 1", [] {
+static Test testRotateNormal("Motion rotate regular", [] {
     PositionTest test;
     float radius = 20;
     test.Rotate(radius, 0, PI / 40 / 2000, 40);
     int steps = (PI / 2 - 2 * test.Angle()) / PI * 2000;
-    test.Rotate(20, PI / 2000, 0, steps);
-    test.Rotate(20, PI / 2000, -PI / 40 / 2000, 40);
+    test.Rotate(radius, PI / 2000, 0, steps);
+    test.Rotate(radius, PI / 2000, -PI / 40 / 2000, 40);
 
-    auto pos = test.GetPos();
-    // printf("%f %f %f\n", pos.X, pos.Y, pos.angle);
+    auto pos = test.GetCoordinatesTicks();
     Assert(abs(pos.angle + 90) < 0.1);
     Assert(abs(pos.X - pos.Y) < 2);
     Assert(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR) < 2);
+});
+
+static Test testRotateCenter("Motion rotate center", [] {
+    PositionTest test;
+
+    test.SetCoordinates({.X = 100, .Y = 200, .angle = 0});
+
+    for (int i = 0; i < 4; i++) {
+        test.Rotate(0, PI / 2000, 0, 1000);
+        test.Rotate(0, 0, 0, 10);
+
+        auto pos = test.GetCoordinates();
+        Assert(abs(pos.angle + 90 * (i+1)) < 0.2);
+        Assert(abs(pos.X - 100) < 0.001);
+        Assert(abs(pos.Y - 200) < 0.001);
+    }
 });

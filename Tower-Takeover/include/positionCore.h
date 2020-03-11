@@ -88,7 +88,7 @@ public:
 
     void Update();
 
-    Position LatestPosition();
+    Position GetCoordinates();
     void SetCoordinates(Position coord);
     double GetAngle();
     void SetAngle(float angle);

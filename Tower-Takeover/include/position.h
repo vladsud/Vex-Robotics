@@ -65,7 +65,7 @@ public:
     PositionTracker();
     void ResetState();
 
-    Position LatestPosition();
+    Position GetCoordinates();
     void SetCoordinates(Position cord);
     void SetAngle(int degrees);
     float GetAngle();

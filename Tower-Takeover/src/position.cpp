@@ -22,7 +22,7 @@ void PositionTracker::ReadSensors(SensorsRaw& sensor)
     sensor.leftWheels = m_motorLeftBack.GetPos();
 }
 
-Position PositionTracker::LatestPosition()
+Position PositionTracker::GetCoordinates()
 {
     Position info = m_position;
     info.angle = GetAngle();
