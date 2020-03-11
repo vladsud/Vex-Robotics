@@ -5,11 +5,7 @@ extern "C" {
    double cos(double);
 }
 
-// float cos (float x);
-// float sin (float x);
-float atan2 (float y, float x);
-double atan2(double, double);
-
+// double atan2(double, double);
 
 /*******************************************************************************
  * 

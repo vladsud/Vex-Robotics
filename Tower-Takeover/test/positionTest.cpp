@@ -1,5 +1,6 @@
 #include "test.h"
 #include "../src/positionCore.cpp"
+#include <chrono>
 
 double PI = PositionTrackerBase::PI;
 
@@ -192,4 +193,20 @@ static Test testRotateCenter("Motion rotate center", [] {
         Assert(abs(pos.X - 100) < 0.001);
         Assert(abs(pos.Y - 200) < 0.001);
     }
+});
+
+static Test speed("Motion calc speed", [] {
+    PositionTest test;
+    auto iterations = 2 * 1000 * 1000;
+
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    test.Rotate(0, PI / 2 / iterations, 0, iterations);
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+    auto time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+    auto itersPerMs = iterations * 1000.0 / time;
+    // printf("Iterations per ms: %lld\n", (long long )itersPerMs);
+    // This is very HW specific, but we should not see anything below 1000 on any more or less
+    // modern PC / laptop (unless it's busy with other work)
+    Assert(itersPerMs > 2000);
 });

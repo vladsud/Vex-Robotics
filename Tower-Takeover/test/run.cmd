@@ -5,8 +5,9 @@ set LIBDIR=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tool
 set SDKDIR=C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\x64
 set INCL=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include
 set INCL2=C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt
+set INCL3=C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um
 set UCRTDIR=C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\ucrt\x64
 
-"%TOOLDIR%\cl" -c /EHsc -I..\include "-I%INCL%" "-I%INCL2%" MotionTest.cpp positionTest.cpp Test.cpp /std:c++latest /nologo
+"%TOOLDIR%\cl" -c /EHsc -I..\include "-I%INCL%" "-I%INCL2%" "-I%INCL3%" MotionTest.cpp positionTest.cpp Test.cpp /std:c++latest /nologo
 "%TOOLDIR%\link" *.obj /OUT:Test.exe "/LIBPATH:%LIBDIR%" "/LIBPATH:%SDKDIR%" "/LIBPATH:%UCRTDIR%"
 del *.obj
