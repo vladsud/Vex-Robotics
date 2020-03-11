@@ -25,3 +25,11 @@ private:
 
     static Test* m_root;
 };
+
+struct TestDisabled
+{
+    TestDisabled(const char* name, TestFunction*  funct) {
+        Test::Report("%s... Skipped\n", name);
+    }
+private: 
+};

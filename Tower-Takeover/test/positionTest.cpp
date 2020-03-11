@@ -1,9 +1,10 @@
 #include "test.h"
 #include "../src/positionCore.cpp"
 
-void ZeroSensor(Sensors& sensor)
+double PI = PositionTrackerBase::PI;
+
+void ZeroSensor(SensorsRaw& sensor)
 {
-    sensor.angle = 0;
     sensor.leftEncoder = 0;
     sensor.rightEncoder = 0;
     sensor.leftWheels = 0;
@@ -13,72 +14,153 @@ void ZeroSensor(Sensors& sensor)
 
 class PositionTest : public PositionTrackerBase
 {
-public:
-    PositionTest(
-        float acceleration,
-        float accelerationSteps,
-        float constantSteps)
-        : m_acceleration(acceleration),
-        m_accelerationSteps(accelerationSteps),
-        m_constantSteps(constantSteps)
-    {
-    }
-
-    float Pos() const { return m_pos; }
-
 protected:
-    void ReadSensors(Sensors& sensor) override
+    void ReadSensors(SensorsRaw& sensor) override
     {
         ZeroSensor(sensor);
-
-        m_steps++;
-        if (m_steps <= m_accelerationSteps)
-            m_pos += m_steps * m_acceleration;
-        else if (m_steps <= m_accelerationSteps + m_constantSteps)
-            m_pos += m_accelerationSteps * m_acceleration;
-        else if (m_steps <= 2 * m_accelerationSteps + m_constantSteps)
-            m_pos += (2 * m_accelerationSteps + m_constantSteps - m_steps) * m_acceleration;
-
-        sensor.leftEncoder = m_pos;
-        sensor.rightEncoder = m_pos;
+        sensor.leftEncoder = m_posL;
+        sensor.rightEncoder = m_posR;
     }
-public:    
-    const float m_acceleration;
-    const float m_accelerationSteps;
-    const float m_constantSteps;
+
+public:
+    double Accelerate(double startingSpeed, double acceleration, unsigned int steps)
+    {
+        while (steps > 0)
+        {
+            startingSpeed += acceleration;
+            m_posL += startingSpeed;
+            m_posR += startingSpeed;
+
+            // printf("A: %f %f\n", m_posL, m_posR);
+
+            Update();
+
+            pros::c::delay(1);
+            steps--;
+        }
+        return startingSpeed;
+    }
+
+    double Rotate(double R, double startingAngularVelocity, double angularAcceleration, unsigned int steps)
+    {
+        while (steps > 0)
+        {
+            startingAngularVelocity += angularAcceleration;
+            m_posL += (R + DISTANCE_LR / 2) / TICKS_TO_IN_LR * startingAngularVelocity;
+            m_posR += (R - DISTANCE_LR / 2) / TICKS_TO_IN_LR * startingAngularVelocity;
+            m_angle += startingAngularVelocity;
+
+            // printf("%f %f\n", R * startingAngularVelocity, m_angle);
+
+            Update();
+
+            pros::c::delay(1);
+            steps--;
+        }
+        return startingAngularVelocity;
+    }
+
+    double PosL() const { return m_posL; }
+    double PosR() const { return m_posR; }
+    double Angle() const { return m_angle; }
+
+    Position GetPos()
+    {
+        auto pos = LatestPosition();
+        pos.X /= PositionTest::TICKS_TO_IN_LR;
+        pos.Y /= PositionTest::TICKS_TO_IN_LR;
+        return pos;
+    }
 
 protected:
-    float m_pos = 0;
-    float m_speed = 0;
-    float m_steps = 0;
+    double m_posL = 0;
+    double m_posR = 0;
+    double m_angle = 0;
 };
 
-static Position RunModel(PositionTest& model, unsigned int steps)
-{
-    ResetTime();
-    while (steps > 0) {
-        steps--;
-        model.Update();
-        pros::c::delay(1);
-    }
+static Test testFast2("Motion Fast", [] {
+    PositionTest test;
+    test.Accelerate(0, 1, 40);
+    test.Accelerate(40, 0, 60);
+    test.Accelerate(40, -1, 40);
+    test.Accelerate(0, 0, 100);
 
-    auto pos = model.LatestPosition();
-    pos.X /= PositionTest::TICKS_TO_IN_LR;
-    pos.Y /= PositionTest::TICKS_TO_IN_LR;
-    return pos;
-}
-
-static Test test("Motion", [] {
-    PositionTest test1(1, 40, 60000);
-    auto pos = RunModel(test1, 70000);
+    Assert(test.PosR() == test.PosL());
+    auto pos = test.GetPos();
     Assert(pos.X == 0);
-    Assert(pos.Y == test1.Pos());
+    Assert(abs(pos.Y -test.PosL()) < 0.00001);
 
-    PositionTest test2(0.01, 40, 10000);
-    pos = RunModel(test2, 10100);
+    test.Accelerate(0, 0, 100);
+    auto pos2 = test.GetPos();
+    Assert(pos.X == pos2.X);
+    Assert(pos.Y == pos2.Y);
+});
+
+static Test testSlow("Motion Slow", [] {
+    PositionTest test;
+    test.Accelerate(0, 0.01, 40);
+    test.Accelerate(4, 0, 10000);
+    test.Accelerate(4, -0.01, 40);
+
+    Assert(test.PosR() == test.PosL());
+    auto pos = test.GetPos();
     Assert(pos.X == 0);
-    auto diff = pos.Y - test2.Pos();
-    Assert(diff <= 0);
+    Assert(abs(pos.Y -test.PosL()) < 0.01);
+});
+
+static Test testBack("Motion backwards", [] {
+    PositionTest test;
+    test.Accelerate(0, -0.01, 40);
+    test.Accelerate(-4, 0, 10000);
+    test.Accelerate(-4, 0.01, 40);
+    Assert(test.PosR() == test.PosL());
+    auto pos = test.GetPos();
+    Assert(pos.X == 0);
+    auto diff = pos.Y - test.PosL();
+    Assert(diff >= 0);
     // due to sensors using integers, and rounding errors in SynthesizeSensors(), we can get up to 2mm of error accumulation.
-    Assert(diff >= -2);
+    Assert(diff < 2);
+});
+
+static Test testDiag("Motion diagonally", [] {
+    PositionTest test;
+    // test.SetCoordinates()
+    test.Accelerate(0, -0.01, 40);
+    test.Accelerate(-4, 0, 10000);
+    test.Accelerate(-4, 0.01, 40);
+    Assert(test.PosR() == test.PosL());
+    auto pos = test.GetPos();
+    Assert(pos.X == 0);
+    auto diff = pos.Y - test.PosL();
+    Assert(diff >= 0);
+    // due to sensors using integers, and rounding errors in SynthesizeSensors(), we can get up to 2mm of error accumulation.
+    Assert(diff < 2);
+});
+
+
+static Test testRotate2("Motion rotate uniform", [] {
+    PositionTest test;
+    float radius = 15;
+    test.Rotate(radius, PI / 2000, 0, 1000);
+    
+    auto pos = test.GetPos();
+    // printf("%f %f %f\n", pos.X, pos.Y, pos.angle);
+    Assert(abs(pos.angle + 90) < 0.05);
+    Assert(abs(pos.X - pos.Y) < 1);
+    Assert(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR) < 0.5);
+});
+
+static Test testRotate("Motion rotate 1", [] {
+    PositionTest test;
+    float radius = 20;
+    test.Rotate(radius, 0, PI / 40 / 2000, 40);
+    int steps = (PI / 2 - 2 * test.Angle()) / PI * 2000;
+    test.Rotate(20, PI / 2000, 0, steps);
+    test.Rotate(20, PI / 2000, -PI / 40 / 2000, 40);
+
+    auto pos = test.GetPos();
+    // printf("%f %f %f\n", pos.X, pos.Y, pos.angle);
+    Assert(abs(pos.angle + 90) < 0.1);
+    Assert(abs(pos.X - pos.Y) < 2);
+    Assert(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR) < 2);
 });

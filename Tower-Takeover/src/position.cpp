@@ -13,16 +13,13 @@ PositionTracker::PositionTracker()
     motor_set_reversed(rightFrontDrivePort, true);
 }
 
-void PositionTracker::ReadSensors(Sensors& sensor)
+void PositionTracker::ReadSensors(SensorsRaw& sensor)
 {
     sensor.leftEncoder = m_leftEncoder.GetPos(); //  motor_get_position(leftBackDrivePort);
     sensor.rightEncoder = m_rightEncoder.GetPos(); //motor_get_position(rightBackDrivePort);
     sensor.sideEncoder = 0;
     sensor.rightWheels = m_motorRightBack.GetPos();
     sensor.leftWheels = m_motorLeftBack.GetPos();
-
-    // float angle = GetGyro().GetAngle() * AngleToRadiants;
-    sensor.angle = (sensor.rightEncoder - sensor.leftEncoder) * TICKS_TO_IN_LR / DISTANCE_LR;
 }
 
 Position PositionTracker::LatestPosition()
@@ -41,16 +38,17 @@ void PositionTracker::FlipX(bool flip)
 
 float PositionTracker::GetAngle()
 {
-    float angle = m_position.angle / AngleToRadiants;
+    float angle = PositionTrackerBase::GetAngle();
     if (m_flipX)
         angle = -angle;
-    return angle + m_angleOffset;
+    return angle;
 }
 
 void PositionTracker::SetAngle(int angle)
 {
-    m_angleOffset = 0;
-    m_angleOffset = angle - GetAngle();
+    if (m_flipX)
+        angle = -angle;
+    PositionTrackerBase::SetAngle(angle);
     Assert(GetAngle() == angle);
 }
 
@@ -73,6 +71,8 @@ void PositionTracker::ResetState()
     m_motorRightFront.HardReset();
     m_leftEncoder.HardReset();
     m_rightEncoder.HardReset();
+
+    PositionTrackerBase::ResetState();
 }
 
 /*******************************************************************************

@@ -1,14 +1,25 @@
 #pragma once
 
-struct Sensors {
+struct SensorsRaw {
     int leftEncoder;
     int rightEncoder;
     int rightWheels;
     int leftWheels;
     int sideEncoder;
+    float angle = 0; // not used
+};
+
+struct Sensors {
+    // Given that we are doing fusion in SynthesizeSensors(), these can't be ints!
+    double leftEncoder;
+    double rightEncoder;
+    double rightWheels;
+    double leftWheels;
+    double sideEncoder;
     float angle;
 };
 
+template <typename T = Sensors>
 struct SensorSpeed
 {
     // Note we are not that sensetive to precision here - switching to floats
@@ -20,7 +31,7 @@ struct SensorSpeed
     double leftWheels;
     double sideEncoder;
     double angle;
-    Sensors last;
+    T last;
     unsigned int time;
 };
 
@@ -50,7 +61,7 @@ public:
     static constexpr float WHEEL_DIAMETER_IN_LR = 2.783;
     static constexpr float WHEEL_DIAMETER_IN_S = 2.783;
     static constexpr float DISTANCE_LR = 10.0; // inches
-    static constexpr double DISTANCE_S = 5.0;  // inches
+    static constexpr double DISTANCE_S = 0;  // inches
 
     static constexpr float TICKS_TO_IN_LR = WHEEL_DIAMETER_IN_LR * PI / TICKS_PER_ROTATION;
     static constexpr float TICKS_TO_IN_S = WHEEL_DIAMETER_IN_S * PI / TICKS_PER_ROTATION;
@@ -58,23 +69,25 @@ public:
 protected:
     // Synthesized sensor data
     Sensors m_sensors {};
-    SensorSpeed m_sensorSpeed;
+    SensorSpeed<Sensors> m_sensorDelta;
 
     // Speed over 10ms
-    SensorSpeed m_sensorSpeedSlow;
+    SensorSpeed<SensorsRaw> m_sensorSpeedSlow;
 
     // Clculated position
     Position m_position;
 
-protected:
-    virtual void ReadSensors(Sensors& sensor) = 0;
+    double m_angleOffset = 0;
 
-    static void UpdateSensorSpeed(const Sensors& pos, SensorSpeed& speed, unsigned int timeDiff);
-    static void InitSensorSpeed(const Sensors& pos, SensorSpeed& speed);
-    static void SynthesizeSensors(const Sensors& pos, const SensorSpeed& speed, Sensors& posOut);
+protected:
+    virtual void ReadSensors(SensorsRaw& sensor) = 0;
+
+    double GetAngle();
+    void SetAngle(float angle);
 
 public:
     PositionTrackerBase();
+    void ResetState();
 
     void Update();
 

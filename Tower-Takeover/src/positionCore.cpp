@@ -11,26 +11,24 @@ float atan2 (float y, float x);
 double atan2(double, double);
 
 
-PositionTrackerBase::PositionTrackerBase()
-{
-    InitSensorSpeed(m_sensors, m_sensorSpeed);
-    InitSensorSpeed(m_sensors, m_sensorSpeedSlow);
-
-    m_position.X = 0;
-    m_position.Y = 0;
-    m_position.angle = m_sensors.angle;
-}
-
-void PositionTrackerBase::InitSensorSpeed(const Sensors& pos, SensorSpeed& speed)
+/*******************************************************************************
+ * 
+ * Helper methods
+ * 
+*******************************************************************************/
+template <typename T>
+void InitSensorSpeed(const T& pos, SensorSpeed<T>& speed)
 {
     speed.time = pros::c::millis();
     speed.last = pos;
     UpdateSensorSpeed(pos, speed, 0);
 }
 
-void PositionTrackerBase::UpdateSensorSpeed(const Sensors& pos, SensorSpeed& speed, unsigned int timeDiff)
+template <typename T>
+void UpdateSensorSpeed(const T& pos, SensorSpeed<T>& speed, unsigned int timeDiff)
 {
     int delta = pros::c::millis() - speed.time;
+    Assert(delta >= 0);
     if (delta < timeDiff)
         return;
     speed.time += delta;
@@ -45,18 +43,46 @@ void PositionTrackerBase::UpdateSensorSpeed(const Sensors& pos, SensorSpeed& spe
     speed.last = pos;
 }
 
-void PositionTrackerBase::SynthesizeSensors(const Sensors& pos, const SensorSpeed& speed, Sensors& posOut)
+void SynthesizeSensors(const SensorsRaw& pos, const SensorSpeed<SensorsRaw>& speed, Sensors& posOut)
 {
     posOut.leftWheels = pos.leftWheels;
     posOut.rightWheels = pos.rightWheels;
     posOut.sideEncoder = pos.sideEncoder;
 
-    float alpha = 0.9;
+    // Experimentally, 0.5 gives one of the better results in terms of precision
+    float alpha = 0.5;
     posOut.leftEncoder = (1 - alpha) * (posOut.leftEncoder + speed.leftEncoder) + alpha * pos.leftEncoder;
     posOut.rightEncoder = (1 - alpha) * (posOut.rightEncoder + speed.rightEncoder) + alpha * pos.rightEncoder;
 
-    posOut.angle = (posOut.rightEncoder - posOut.leftEncoder) * TICKS_TO_IN_LR / DISTANCE_LR;
+    posOut.angle = (posOut.rightEncoder - posOut.leftEncoder) * PositionTrackerBase::TICKS_TO_IN_LR / PositionTrackerBase::DISTANCE_LR;
 }
+
+
+/*******************************************************************************
+ * 
+ * PositionTrackerBase
+ * 
+*******************************************************************************/
+PositionTrackerBase::PositionTrackerBase()
+{
+    ResetState();
+}
+
+void PositionTrackerBase::ResetState()
+{
+    SensorsRaw raw {};
+    InitSensorSpeed(raw, m_sensorSpeedSlow);
+
+    m_sensors = {};
+    InitSensorSpeed(m_sensors, m_sensorDelta);
+
+    m_position.X = 0;
+    m_position.Y = 0;
+    m_position.angle = m_sensors.angle;
+
+    m_angleOffset = 0;
+}
+
 
 // Based on http://thepilons.ca/wp-content/uploads/2018/10/Tracking.pdf
 // We are missing here third wheel, so we can't account for bumps form the side.
@@ -86,18 +112,21 @@ void PositionTrackerBase::SynthesizeSensors(const Sensors& pos, const SensorSpee
 void PositionTrackerBase::Update()
 {
     // Raw data from sensors
-    Sensors sensorsRaw {};
+    SensorsRaw sensorsRaw {};
     ReadSensors(sensorsRaw);
-    SynthesizeSensors(sensorsRaw, m_sensorSpeed, m_sensors);
 
-    UpdateSensorSpeed(m_sensors, m_sensorSpeed, 0);
-    UpdateSensorSpeed(m_sensors, m_sensorSpeedSlow, 10);
+    // Experimentally, calculating speed over 10..40 ms seems to give best results, with 20 being sweet spot
+    UpdateSensorSpeed(sensorsRaw, m_sensorSpeedSlow, 20);
 
-    auto angle = m_sensors.angle;
-    auto deltaAngle  = m_sensorSpeed.angle;
+    SynthesizeSensors(sensorsRaw, m_sensorSpeedSlow, m_sensors);
 
-    auto arcMoveForward = (m_sensorSpeed.leftEncoder + m_sensorSpeed.rightEncoder) * TICKS_TO_IN_LR / 2;
-    auto deltaSide  = m_sensorSpeed.sideEncoder * TICKS_TO_IN_S;
+    UpdateSensorSpeed(m_sensors, m_sensorDelta, 0);
+ 
+    auto angle = m_sensors.angle + m_angleOffset;
+    auto deltaAngle  = m_sensorDelta.angle;
+
+    auto arcMoveForward = (m_sensorDelta.leftEncoder + m_sensorDelta.rightEncoder) * TICKS_TO_IN_LR / 2;
+    auto deltaSide  = m_sensorDelta.sideEncoder * TICKS_TO_IN_S;
 
     auto angleDiffHalf = deltaAngle / 2;
     if (deltaAngle != 0)
@@ -120,7 +149,7 @@ void PositionTrackerBase::Update()
     m_position.X += cosA * deltaSide;
     m_position.Y += sinA * deltaSide;
 
-    m_position.angle = m_sensors.angle;
+    m_position.angle = angle;
 
     /*
     static int count = 0;
@@ -138,13 +167,13 @@ void PositionTrackerBase::Update()
 Position PositionTrackerBase::LatestPosition()
 {
     Position info = m_position;
-    info.angle = m_position.angle / AngleToRadiants;
+    info.angle = GetAngle();
     return info;
 }
 
 void PositionTrackerBase::SetCoordinates(Position coord)
 {
-    m_position.angle = coord.angle * AngleToRadiants;
+    SetAngle(coord.angle);
     m_position.X = coord.X;
     m_position.Y = coord.Y;
 }
@@ -162,4 +191,14 @@ int PositionTrackerBase::GetLeftPos()
 int PositionTrackerBase::GetRightPos()
 {
     return m_sensors.rightEncoder;
+}
+
+double PositionTrackerBase::GetAngle()
+{
+    return (m_position.angle + m_angleOffset) / AngleToRadiants;
+}
+
+void PositionTrackerBase::SetAngle(float angle)
+{
+    m_angleOffset = angle * AngleToRadiants - m_position.angle;
 }

@@ -57,10 +57,9 @@ private:
     Encoder m_rightEncoder {rightEncoderPortTop, rightEncoderPortBottom, true};
 
     bool m_flipX = false;
-    float m_angleOffset = 0;
 
 protected:
-    void ReadSensors(Sensors& sensor) override;
+    void ReadSensors(SensorsRaw& sensor) override;
 
 public:
     PositionTracker();

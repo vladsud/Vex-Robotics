@@ -94,8 +94,9 @@ void Test::Run()
     
     while (m_root != nullptr)
     {
-        printf("%s...", m_root->m_name);
+        printf("%s... ", m_root->m_name);
         try {
+            ResetTime();
             m_root->m_funct();
             if (!m_root->m_failed)
                 printf("Ok\n");
