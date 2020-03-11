@@ -82,9 +82,6 @@ protected:
 protected:
     virtual void ReadSensors(SensorsRaw& sensor) = 0;
 
-    double GetAngle();
-    void SetAngle(float angle);
-
 public:
     PositionTrackerBase();
     void ResetState();
@@ -93,6 +90,8 @@ public:
 
     Position LatestPosition();
     void SetCoordinates(Position coord);
+    double GetAngle();
+    void SetAngle(float angle);
 
     float GetRobotVelocity();
     int GetLeftPos();

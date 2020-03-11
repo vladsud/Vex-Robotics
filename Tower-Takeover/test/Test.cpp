@@ -110,7 +110,7 @@ int main()
     Test::Run();
     if (s_Failures == 0)
     {
-        printf("Done test\n");
+        printf("\nDone tests\n");
         return 0;
     }
     else

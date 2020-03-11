@@ -78,17 +78,20 @@ protected:
     double m_angle = 0;
 };
 
-static Test testFast2("Motion Fast", [] {
+static Test testFast("Motion Fast", [] {
     PositionTest test;
     test.Accelerate(0, 1, 40);
     test.Accelerate(40, 0, 60);
     test.Accelerate(40, -1, 40);
     test.Accelerate(0, 0, 100);
 
+    auto distance = 40 * 40 + 40 * 60;
+
     Assert(test.PosR() == test.PosL());
     auto pos = test.GetPos();
     Assert(pos.X == 0);
     Assert(abs(pos.Y -test.PosL()) < 0.00001);
+    Assert(abs(pos.Y - distance) < 0.00001);
 
     test.Accelerate(0, 0, 100);
     auto pos2 = test.GetPos();
@@ -96,47 +99,56 @@ static Test testFast2("Motion Fast", [] {
     Assert(pos.Y == pos2.Y);
 });
 
-static Test testSlow("Motion Slow", [] {
+static Test testSlow("Motion Slow backwards", [] {
     PositionTest test;
-    test.Accelerate(0, 0.01, 40);
-    test.Accelerate(4, 0, 10000);
-    test.Accelerate(4, -0.01, 40);
+    test.Accelerate(0, -0.01, 1000);
+    test.Accelerate(-10, 0, 10000);
+    test.Accelerate(-10, 0.01, 1000);
+
+    float distance = - (0.01 * 1000 * 1000 + 10 * 10000);
 
     Assert(test.PosR() == test.PosL());
     auto pos = test.GetPos();
     Assert(pos.X == 0);
-    Assert(abs(pos.Y -test.PosL()) < 0.01);
+    Assert(abs(pos.Y -test.PosL()) < 1);
+    Assert(abs(pos.Y - distance) < 1);
 });
 
-static Test testBack("Motion backwards", [] {
+void testDiagonal(float angle, int sign = 1)
+{
     PositionTest test;
-    test.Accelerate(0, -0.01, 40);
-    test.Accelerate(-4, 0, 10000);
-    test.Accelerate(-4, 0.01, 40);
-    Assert(test.PosR() == test.PosL());
+
+    test.SetAngle(angle);
+    test.Accelerate(0, sign * 0.01, 1000);
+    test.Accelerate(sign * 10, 0, 10000);
+    test.Accelerate(sign * 10, -sign * 0.01, 1000);
+
+    float distance = sign * (0.01 * 1000 * 1000 + 10 * 10000);
+
     auto pos = test.GetPos();
-    Assert(pos.X == 0);
-    auto diff = pos.Y - test.PosL();
-    Assert(diff >= 0);
-    // due to sensors using integers, and rounding errors in SynthesizeSensors(), we can get up to 2mm of error accumulation.
-    Assert(diff < 2);
-});
+    angle *=  PI / 180;
+    Assert(pos.X * sin(angle) * sign < 0);
+    Assert(pos.Y * cos(angle) * sign > 0);
+    Assert(abs(pos.X + distance * sin(angle)) < 1);
+    Assert(abs(pos.Y - distance * cos(angle)) < 1);
+}
 
 static Test testDiag("Motion diagonally", [] {
-    PositionTest test;
-    // test.SetCoordinates()
-    test.Accelerate(0, -0.01, 40);
-    test.Accelerate(-4, 0, 10000);
-    test.Accelerate(-4, 0.01, 40);
-    Assert(test.PosR() == test.PosL());
-    auto pos = test.GetPos();
-    Assert(pos.X == 0);
-    auto diff = pos.Y - test.PosL();
-    Assert(diff >= 0);
-    // due to sensors using integers, and rounding errors in SynthesizeSensors(), we can get up to 2mm of error accumulation.
-    Assert(diff < 2);
+    testDiagonal(30);
+    testDiagonal(45);
+    testDiagonal(60);
+
+    testDiagonal(-30);
+    testDiagonal(90+30);
+    testDiagonal(360-30);
 });
 
+static Test testDiagBackwards("Motion diagonally backwards", [] {
+    testDiagonal(45, -1);
+    testDiagonal(-30, -1);
+    testDiagonal(90+30, -1);
+    testDiagonal(360-30,-1);
+});
 
 static Test testRotate2("Motion rotate uniform", [] {
     PositionTest test;
@@ -144,7 +156,6 @@ static Test testRotate2("Motion rotate uniform", [] {
     test.Rotate(radius, PI / 2000, 0, 1000);
     
     auto pos = test.GetPos();
-    // printf("%f %f %f\n", pos.X, pos.Y, pos.angle);
     Assert(abs(pos.angle + 90) < 0.05);
     Assert(abs(pos.X - pos.Y) < 1);
     Assert(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR) < 0.5);
