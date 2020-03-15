@@ -84,16 +84,16 @@ static Test testFast("Motion Fast", [] {
 
     auto distance = 40 * 40 + 40 * 60;
 
-    Assert(test.PosR() == test.PosL());
+    AssertEqual(test.PosR(), test.PosL());
     auto pos = test.GetCoordinatesTicks();
-    Assert(pos.X == 0);
-    Assert(abs(pos.Y -test.PosL()) < 0.00001);
-    Assert(abs(pos.Y - distance) < 0.00001);
+    AssertEqual(pos.X, 0);
+    AssertLess(abs(pos.Y -test.PosL()), 0.00001);
+    AssertLess(abs(pos.Y - distance), 0.00001);
 
     test.Accelerate(0, 0, 100);
     auto pos2 = test.GetCoordinatesTicks();
-    Assert(pos.X == pos2.X);
-    Assert(pos.Y == pos2.Y);
+    AssertEqual(pos.X, pos2.X);
+    AssertEqual(pos.Y, pos2.Y);
 });
 
 static Test testSlow("Motion Slow backwards", [] {
@@ -104,11 +104,11 @@ static Test testSlow("Motion Slow backwards", [] {
 
     float distance = - (0.01 * 1000 * 1000 + 10 * 10000);
 
-    Assert(test.PosR() == test.PosL());
+    AssertEqual(test.PosR(), test.PosL());
     auto pos = test.GetCoordinatesTicks();
-    Assert(pos.X == 0);
-    Assert(abs(pos.Y -test.PosL()) < 1);
-    Assert(abs(pos.Y - distance) < 1);
+    AssertEqual(pos.X, 0);
+    AssertLess(abs(pos.Y -test.PosL()), 1);
+    AssertLess(abs(pos.Y - distance), 1);
 });
 
 void testDiagonal(float angle, int sign = 1)
@@ -124,10 +124,10 @@ void testDiagonal(float angle, int sign = 1)
 
     auto pos = test.GetCoordinatesTicks();
     angle *=  PI / 180;
-    Assert(pos.X * sin(angle) * sign < 0);
-    Assert(pos.Y * cos(angle) * sign > 0);
-    Assert(abs(pos.X + distance * sin(angle)) < 1);
-    Assert(abs(pos.Y - distance * cos(angle)) < 1);
+    AssertLess(pos.X * sin(angle) * sign, 0);
+    AssertLess(0, pos.Y * cos(angle) * sign);
+    AssertLess(abs(pos.X + distance * sin(angle)), 1);
+    AssertLess(abs(pos.Y - distance * cos(angle)), 1);
 }
 
 static Test testDiag("Motion diagonally", [] {
@@ -153,9 +153,9 @@ void testRotation(float radius, int angleSign)
     test.Rotate(radius, angleSign * PI / 2000, 0, 1000);
     
     auto pos = test.GetCoordinatesTicks();
-    Assert(abs(pos.angle + angleSign * 90) < 0.05);
-    Assert(abs(pos.X - angleSign * pos.Y) < 1);
-    Assert(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR) < 0.5);
+    AssertLess(abs(pos.angle + angleSign * 90), 0.05);
+    AssertLess(abs(pos.X - angleSign * pos.Y), 1);
+    AssertLess(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR), 0.5);
 }
 
 static Test testRotateUni("Motion rotate uniform", [] {
@@ -174,9 +174,9 @@ static Test testRotateNormal("Motion rotate regular", [] {
     test.Rotate(radius, PI / 2000, -PI / 40 / 2000, 40);
 
     auto pos = test.GetCoordinatesTicks();
-    Assert(abs(pos.angle + 90) < 0.1);
-    Assert(abs(pos.X - pos.Y) < 2);
-    Assert(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR) < 2);
+    AssertLess(abs(pos.angle + 90), 0.1);
+    AssertLess(abs(pos.X - pos.Y), 2);
+    AssertLess(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR), 2);
 });
 
 static Test testRotateCenter("Motion rotate center", [] {
@@ -189,9 +189,9 @@ static Test testRotateCenter("Motion rotate center", [] {
         test.Rotate(0, 0, 0, 10);
 
         auto pos = test.GetCoordinates();
-        Assert(abs(pos.angle + 90 * (i+1)) < 0.2);
-        Assert(abs(pos.X - 100) < 0.001);
-        Assert(abs(pos.Y - 200) < 0.001);
+        AssertLess(abs(pos.angle + 90 * (i+1)), 0.2);
+        AssertLess(abs(pos.X - 100), 0.001);
+        AssertLess(abs(pos.Y - 200), 0.001);
     }
 });
 
@@ -208,5 +208,5 @@ static Test speed("Motion calc speed", [] {
     // printf("Iterations per ms: %lld\n", (long long )itersPerMs);
     // This is very HW specific, but we should not see anything below 1000 on any more or less
     // modern PC / laptop (unless it's busy with other work)
-    Assert(itersPerMs > 2000);
+    AssertLess(2000, itersPerMs);
 });

@@ -6,6 +6,9 @@
 void Fail(const char* reason);
 void ResetTime();
 
+#define AssertEqual(f1, f2) AssertSz((f1) == (f2), "%s == %s: %f != %f", #f1, #f2, (float)f1, (float)f2);
+#define AssertLess(f1, f2)  AssertSz((f1)  < (f2), "%s < %s: %f >= %f", #f1, #f2, (float)f1, (float)f2);
+
 using TestFunction = void();
 struct Test
 {

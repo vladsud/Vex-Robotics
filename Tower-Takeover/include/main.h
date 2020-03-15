@@ -71,7 +71,7 @@ void ReportStatusCore(Log logCategory, const char* format, ...);
 #define Assert(f) AssertSz(f, #f)
 #define AssertSz(f, format, ...) do { \
    if (!(f)) \
-      ReportStatus(Log::Error, "\n*** ASSERT: %s:%d: " format " ***\n\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+      ReportStatus(Log::Error, "*** ASSERT: %s:%d: " format " ***\n\n", __FILE__, __LINE__, ##__VA_ARGS__); \
    } while(false)
 
 #define StaticAssert(a) static_assert(a, #a)
