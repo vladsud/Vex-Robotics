@@ -81,7 +81,9 @@ void Test::Fail(const char* reason)
     s_Failures++;
     m_root->m_failed = true;
     Report(reason);
-    throw "Error";
+    
+    // Uncomment if you want test to stop running after first failure
+    // throw "Error";
 }
 
 void Test::Run()

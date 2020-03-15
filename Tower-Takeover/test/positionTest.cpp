@@ -87,13 +87,13 @@ static Test testFast("Motion Fast", [] {
     AssertEqual(test.PosR(), test.PosL());
     auto pos = test.GetCoordinatesTicks();
     AssertEqual(pos.X, 0);
-    AssertLess(abs(pos.Y -test.PosL()), 0.00001);
-    AssertLess(abs(pos.Y - distance), 0.00001);
+    AssertLess(abs(pos.Y -test.PosL()), 0.0001);
+    AssertLess(abs(pos.Y - distance), 0.0001);
 
     test.Accelerate(0, 0, 100);
     auto pos2 = test.GetCoordinatesTicks();
     AssertEqual(pos.X, pos2.X);
-    AssertEqual(pos.Y, pos2.Y);
+    AssertLess(abs(pos.Y - pos2.Y), 0.0001);
 });
 
 static Test testSlow("Motion Slow backwards", [] {
@@ -101,6 +101,7 @@ static Test testSlow("Motion Slow backwards", [] {
     test.Accelerate(0, -0.01, 1000);
     test.Accelerate(-10, 0, 10000);
     test.Accelerate(-10, 0.01, 1000);
+    test.Accelerate(0, 0, 10);
 
     float distance = - (0.01 * 1000 * 1000 + 10 * 10000);
 
@@ -151,9 +152,10 @@ void testRotation(float radius, int angleSign)
 {
     PositionTest test;
     test.Rotate(radius, angleSign * PI / 2000, 0, 1000);
+    test.Rotate(radius, 0, 0, 20);
     
     auto pos = test.GetCoordinatesTicks();
-    AssertLess(abs(pos.angle + angleSign * 90), 0.05);
+    AssertLess(abs(pos.angle + angleSign * 90), 0.1);
     AssertLess(abs(pos.X - angleSign * pos.Y), 1);
     AssertLess(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR), 0.5);
 }
@@ -172,9 +174,10 @@ static Test testRotateNormal("Motion rotate regular", [] {
     int steps = (PI / 2 - 2 * test.Angle()) / PI * 2000;
     test.Rotate(radius, PI / 2000, 0, steps);
     test.Rotate(radius, PI / 2000, -PI / 40 / 2000, 40);
+    test.Rotate(radius, 0, 0, 10);
 
     auto pos = test.GetCoordinatesTicks();
-    AssertLess(abs(pos.angle + 90), 0.1);
+    AssertLess(abs(pos.angle + 90), 0.15);
     AssertLess(abs(pos.X - pos.Y), 2);
     AssertLess(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR), 2);
 });
@@ -186,7 +189,7 @@ static Test testRotateCenter("Motion rotate center", [] {
 
     for (int i = 0; i < 4; i++) {
         test.Rotate(0, PI / 2000, 0, 1000);
-        test.Rotate(0, 0, 0, 10);
+        test.Rotate(0, 0, 0, 20);
 
         auto pos = test.GetCoordinates();
         AssertLess(abs(pos.angle + 90 * (i+1)), 0.2);
