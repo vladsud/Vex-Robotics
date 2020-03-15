@@ -1,7 +1,5 @@
 #include "StateMachine.h"
-#include "main.h"
 #include "intake.h"
-#include "cubetray.h"
 #include "pros/misc.h"
 
 using namespace pros;
