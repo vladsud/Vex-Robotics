@@ -28,7 +28,7 @@ void UpdateSensorSpeed(const T& pos, SensorSpeed<T>& speed, unsigned int timeDif
     if (delta < timeDiff)
         return;
     speed.time += delta;
-    if (delta == 0)
+    if (timeDiff == 0)
         delta = 1;
     speed.angle = float (pos.angle - speed.last.angle) / delta;
     speed.leftEncoder = float (pos.leftEncoder - speed.last.leftEncoder) / delta;
@@ -84,26 +84,12 @@ void PositionTrackerBase::ResetState()
 // We are missing here third wheel, so we can't account for bumps form the side.
 // Also see http://www.hmc.edu/lair/ARW/ARW-Lecture01-Odometry.pdf
 //
-// ***         ***
-// ***  TURNS  ***
-// ***         ***
-//      Full in-place turn == 360*3.547 clicks on each wheel.
-//      Or roughly 0.14 degrees per one click.
-//      Gyro, on another hand, 0.004 degree resolution (or 35.5 times better than wheel resolution).
-//      Max full turn in one second == 360 degree/second, measurements per 10ms:
-//          - 25.5 click difference between wheels
-//          - Or 256*3.6 = 921.6 clicks on gyro.
-//
-// ***         ***
-// ***  MOVING ***
-// ***         ***
-//      One tick is roughly 0.9 mm
-//      Assuming 24" / second speed:
-//              670 clicks / second
-//              6.7 clicks per 10ms
-//      Assuming extreame case (which is not possible)
-//          1 click / millisecond = 35" / second
-//      Tthat said, we exceeed that rate when turning, as robot is not really moving (less energy spent per click)
+// One tick is roughly
+//     - 0.6 mm of motion (both wheels)
+//     - 0.14 degrees of turning (single wheel, gyro has 35x better precision)
+// Max speeeds:
+//     - 360 rotaton / second: 2571 clicks wheel difference
+//     - 24" / second motion: 988 clicks / sec / wheel
 //
 void PositionTrackerBase::Update()
 {
@@ -151,12 +137,10 @@ void PositionTrackerBase::Update()
     static int count = 0;
     count++;
     if ((count % 2000) == 0)
-        printf("Angle = %f, X,Y = (%f, %f), encoders = (%d %d)\n",
-            sensorsRaw.angle / AngleToRadiants,
+        printf("Angle = %f, X,Y = (%f, %f)\n",
+            m_position.angle / AngleToRadiants,
             m_position.X,
-            m_position.Y,
-            sensorsRaw.leftEncoder,
-            sensorsRaw.rightEncoder);
+            m_position.Y);
     */
 }
 
