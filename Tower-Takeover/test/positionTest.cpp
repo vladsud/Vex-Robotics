@@ -131,22 +131,17 @@ void testDiagonal(float angle, int sign = 1)
     AssertLess(abs(pos.Y - distance * cos(angle)), 1);
 }
 
-static Test testDiag("Motion diagonally", [] {
-    testDiagonal(30);
-    testDiagonal(45);
-    testDiagonal(60);
+static Test testDiag30("Motion diagonally 30", [] { testDiagonal(30); });
+static Test testDiag45("Motion diagonally 45", [] { testDiagonal(45); });
+static Test testDiag60("Motion diagonally 60", [] { testDiagonal(60); });
+static Test testDiag_30("Motion diagonally -30", [] { testDiagonal(-30); });
+static Test testDiag120("Motion diagonally 120", [] { testDiagonal(90+30); });
+static Test testDiag330("Motion diagonally 330", [] { testDiagonal(360-30); });
 
-    testDiagonal(-30);
-    testDiagonal(90+30);
-    testDiagonal(360-30);
-});
-
-static Test testDiagBackwards("Motion diagonally backwards", [] {
-    testDiagonal(45, -1);
-    testDiagonal(-30, -1);
-    testDiagonal(90+30, -1);
-    testDiagonal(360-30,-1);
-});
+static Test testDiagBackwards1("Motion diagonally backwards 1", [] { testDiagonal(45, -1); });
+static Test testDiagBackwards2("Motion diagonally backwards 2", [] { testDiagonal(-30, -1); });
+static Test testDiagBackwards3("Motion diagonally backwards 3", [] { testDiagonal(90+30, -1); });
+static Test testDiagBackwards4("Motion diagonally backwards 4", [] { testDiagonal(360-30, -1); });
 
 void testRotation(float radius, int angleSign)
 {
@@ -160,12 +155,10 @@ void testRotation(float radius, int angleSign)
     AssertLess(abs(pos.X - radius / PositionTest::TICKS_TO_IN_LR), 0.5);
 }
 
-static Test testRotateUni("Motion rotate uniform", [] {
-    testRotation(15, 1);
-    testRotation(15, -1);
-    testRotation(-15, 1);
-    testRotation(-15, -1);
-});
+static Test testRotateUni1("Motion rotate uniform 1", [] { testRotation(15, 1); });
+static Test testRotateUni2("Motion rotate uniform 2", [] { testRotation(15, -1); });
+static Test testRotateUni3("Motion rotate uniform 3", [] { testRotation(-15, 1); });
+static Test testRotateUni4("Motion rotate uniform 4", [] { testRotation(-15, -1); });
 
 static Test testRotateNormal("Motion rotate regular", [] {
     PositionTest test;
