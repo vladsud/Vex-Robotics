@@ -21,12 +21,13 @@ struct Test
 
 private: 
     TestFunction* const m_funct;
-    Test* const m_next;
+    Test* m_next;
     const char* const m_name;
     bool m_failed = false;
     bool m_newline = true;
 
-    static Test* m_root;
+    static Test* m_head;
+    static Test* m_tail;
 };
 
 struct TestDisabled

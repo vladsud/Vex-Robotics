@@ -1,5 +1,7 @@
 #pragma once
 
+float AdjustAngle(float);
+
 struct SensorsRaw {
     int leftEncoder;
     int rightEncoder;

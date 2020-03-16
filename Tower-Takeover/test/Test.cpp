@@ -3,7 +3,8 @@
 #include <cstdarg>
 #include <stdint.h>
 
-Test* Test::m_root = nullptr;
+Test* Test::m_head = nullptr;
+Test* Test::m_tail = nullptr;
 
 unsigned int s_Failures = 0;
 
@@ -57,18 +58,27 @@ void delay(const uint32_t milliseconds)
 
 Test::Test(const char* name, TestFunction* funct)
     : m_funct(funct)
-    , m_next(m_root)
+    , m_next(nullptr)
     , m_name(name)
 {
-    m_root = this;
+    if (m_tail)
+    {
+        Assert(m_tail->m_next == nullptr);
+        m_tail->m_next = this;
+        m_tail = this;
+    } else {
+        Assert(m_head == nullptr);
+        m_tail = this;
+        m_head = this;
+    }
 }
 
 void Test::Report(const char* reason, ...)
 {
-    if (m_root->m_newline)
+    if (m_head->m_newline)
     {
         printf("\n");
-        m_root->m_newline = false;
+        m_head->m_newline = false;
     }
     va_list args;
     va_start(args, reason);
@@ -79,7 +89,7 @@ void Test::Report(const char* reason, ...)
 void Test::Fail(const char* reason)
 {
     s_Failures++;
-    m_root->m_failed = true;
+    m_head->m_failed = true;
     Report(reason);
     
     // Uncomment if you want test to stop running after first failure
@@ -88,22 +98,22 @@ void Test::Fail(const char* reason)
 
 void Test::Run()
 {
-    if (m_root == nullptr)
+    if (m_head == nullptr)
     {
         printf("Nothing to run\n");
         return;
     }
     
-    while (m_root != nullptr)
+    while (m_head != nullptr)
     {
-        printf("%s... ", m_root->m_name);
+        printf("%s... ", m_head->m_name);
         try {
             ResetTime();
-            m_root->m_funct();
-            if (!m_root->m_failed)
+            m_head->m_funct();
+            if (!m_head->m_failed)
                 printf("Ok\n");
         } catch(...) {}
-        m_root = m_root->m_next;
+        m_head = m_head->m_next;
     }
 }
 
