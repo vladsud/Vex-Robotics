@@ -214,7 +214,7 @@ static Test testRotateCenter("Motion rotate center", [] {
         test.AccelerateArc(0, 0, 0, 20);
 
         auto pos = test.GetCoordinates();
-        AssertLess(abs(pos.angle + 90 * (i+1)), 0.2);
+        AssertLess(abs(pos.angle + 90 * (i+1)), 0.25);
         AssertLess(abs(pos.X - 100), 0.001);
         AssertLess(abs(pos.Y - 200), 0.001);
     }
@@ -256,6 +256,7 @@ static Test testFull("End to end test", [] {
     test.AccelerateStraight(0, 0, 20);
 
     test.AccelerateStraight(0, 0, 20);
+
     test.PrintCoord();
 
     // TODO: Investigate how to improve accuracy here!

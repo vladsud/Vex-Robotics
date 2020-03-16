@@ -59,7 +59,7 @@ void SynthesizeSensors(const SensorsRaw& pos, const SensorSpeed<SensorsRaw>& spe
     posOut.rightWheels = pos.rightWheels;
     posOut.sideEncoder = pos.sideEncoder;
 
-    // Experimentally, 0.5 gives one of the better results in terms of precision
+    // Experimentally, 0.6 gives one of the better results in terms of precision
     float alpha = 0.6;
     posOut.leftEncoder = (1 - alpha) * (posOut.leftEncoder + speed.leftEncoder) + alpha * pos.leftEncoder;
     posOut.rightEncoder = (1 - alpha) * (posOut.rightEncoder + speed.rightEncoder) + alpha * pos.rightEncoder;
@@ -115,8 +115,10 @@ void PositionTrackerBase::Update()
 
     ReadSensors(sensorsRaw);
 
-    // Experimentally, calculating speed over 10..40 ms seems to give best results, with 20 being sweet spot
-    UpdateSensorSpeed(sensorsRaw, m_sensorSpeedSlow, 20);
+    // Experimentally, calculating speed over 10..40 ms seems to give best results
+    // That said, the bigger the number, the more inertia there is in the system,
+    // so 10 looks like best spot
+    UpdateSensorSpeed(sensorsRaw, m_sensorSpeedSlow, 10);
 
     SynthesizeSensors(sensorsRaw, m_sensorSpeedSlow, m_sensors);
 

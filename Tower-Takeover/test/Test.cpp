@@ -122,12 +122,12 @@ int main()
     Test::Run();
     if (s_Failures == 0)
     {
-        printf("\nDone tests\n");
+        printf("\nAll tests passed\n");
         return 0;
     }
     else
     {
-        printf("%d failures detected\n", s_Failures);
+        printf("*** %d failures detected ***\n", s_Failures);
         return 1;
     } 
 }
