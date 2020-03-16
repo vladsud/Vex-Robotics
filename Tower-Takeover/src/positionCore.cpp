@@ -60,7 +60,7 @@ void SynthesizeSensors(const SensorsRaw& pos, const SensorSpeed<SensorsRaw>& spe
     posOut.sideEncoder = pos.sideEncoder;
 
     // Experimentally, 0.5 gives one of the better results in terms of precision
-    float alpha = 0.5;
+    float alpha = 0.6;
     posOut.leftEncoder = (1 - alpha) * (posOut.leftEncoder + speed.leftEncoder) + alpha * pos.leftEncoder;
     posOut.rightEncoder = (1 - alpha) * (posOut.rightEncoder + speed.rightEncoder) + alpha * pos.rightEncoder;
 
@@ -109,6 +109,10 @@ void PositionTrackerBase::Update()
 {
     // Raw data from sensors
     SensorsRaw sensorsRaw {};
+
+    // if ((pros::c::millis() % 5) != 0)
+    //    return;
+
     ReadSensors(sensorsRaw);
 
     // Experimentally, calculating speed over 10..40 ms seems to give best results, with 20 being sweet spot
