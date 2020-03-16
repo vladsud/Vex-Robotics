@@ -73,12 +73,21 @@ public:
 
     void MoveArc(float radius, float angle, unsigned int normalSpeedtime, unsigned int accTime)
     {
-        float staringAngle = Angle();
-        float speed = angle / normalSpeedtime;
+        double staringAngle = Angle();
+        double speed = angle / normalSpeedtime;
         AccelerateArc(radius, 0, speed / accTime, accTime);
-        int steps = (angle - 2 * (Angle() - staringAngle)) / speed;
+        
+        double angle2 = angle - 2 * (Angle() - staringAngle);
+        int steps = angle2 / speed;
         AssertLess(0, steps);
+        speed = angle2 / steps;
+        
+        // Need steps+1, because AccelerateArc applies acceleration first before updating position,
+        // so there is one less step on decelaration below.
+        if (accTime > 0)
+            steps++;
         AccelerateArc(radius, speed, 0, steps);
+
         AccelerateArc(radius, speed, -speed / accTime, accTime);
     }
 
@@ -99,7 +108,12 @@ public:
         auto pos = GetCoordinates();
         pos.X /= PositionTest::TICKS_TO_IN_LR;
         pos.Y /= PositionTest::TICKS_TO_IN_LR;
-        printf("Coord: X,Y = (%f %f), a = %f\n", pos.X, pos.Y, pos.angle);
+        printf("Coord: X,Y = (%f %f), a = %f, a_int = %f\n",
+            pos.X,
+            pos.Y,
+            pos.angle,
+            (m_posR - m_posL) * PositionTrackerBase::TICKS_TO_IN_LR / PositionTrackerBase::DISTANCE_LR * 180 / PI
+        );
     }
 
 protected:
@@ -226,10 +240,8 @@ static Test testRotateCenter("Motion rotate center", [] {
  * End-to-end test
  * 
  ******************************************************************************/
-static Test testFull("End to end test", [] {
-    PositionTest test;
-    test.SetCoordinates({.X = 0, .Y = 0, .angle = 0});
-
+void EndToEndOneRuund(PositionTest& test)
+{
     float duration1 = 2000;
     float duration2 = 2000;
     float angle = PI / 6;
@@ -254,18 +266,51 @@ static Test testFull("End to end test", [] {
 
     test.MoveStraight(0.002, 500, duration1 + duration2 * sin(PI/3));
     test.AccelerateStraight(0, 0, 20);
+}
 
-    test.AccelerateStraight(0, 0, 20);
+static Test testFull("End to end test", [] {
+    PositionTest test;
+    test.SetCoordinates({.X = 0, .Y = 0, .angle = 0});
+    EndToEndOneRuund(test);
 
-    test.PrintCoord();
+    auto pos = test.GetCoordinatesTicks();
+    AssertLess(abs(AdjustAngle(pos.angle - 180)), 0.1);
+    AssertLess(abs(pos.X), 6);
+    AssertLess(abs(pos.Y), 3);
+});
+
+static Test testFull10("End to end test x10", [] {
+    PositionTest test;
+    test.SetCoordinates({.X = 0, .Y = 0, .angle = 0});
+    for (int i = 0; i < 10; i++)
+    {
+        EndToEndOneRuund(test);
+    }
+
+    // test.PrintCoord();
 
     // TODO: Investigate how to improve accuracy here!
     auto pos = test.GetCoordinatesTicks();
-    AssertLess(abs(AdjustAngle(pos.angle - 180)), 0.4);
-    AssertLess(abs(pos.X), 14);
+    AssertLess(abs(AdjustAngle(pos.angle)), 0.2);
+    AssertLess(abs(pos.X), 20);
     AssertLess(abs(pos.Y), 2);
 });
 
+static Test testFull10_2("End to end test x10 Same Path", [] {
+    PositionTest test;
+    test.SetCoordinates({.X = 0, .Y = 0, .angle = 0});
+    for (int i = 0; i < 10; i++)
+    {
+        EndToEndOneRuund(test);
+        test.MoveArc(0, PI, 1000, 200);
+    }
+
+    // TODO: Investigate how to improve accuracy here!
+    auto pos = test.GetCoordinatesTicks();
+    AssertLess(abs(AdjustAngle(pos.angle)), 0.2);
+    AssertLess(abs(pos.X), 40);
+    AssertLess(abs(pos.Y), 40);
+});
 
 /*******************************************************************************
  *
