@@ -50,6 +50,7 @@ enum class Log
    Drive,
    Gyro,
    States,
+   Position,
    Automation,
    
    Verbose,

@@ -60,7 +60,7 @@ void SynthesizeSensors(const SensorsRaw& pos, const SensorSpeed<SensorsRaw>& spe
     posOut.sideEncoder = pos.sideEncoder;
 
     // Experimentally, 0.6 gives one of the better results in terms of precision
-    float alpha = 0.6;
+    float alpha = 0.5;
     posOut.leftEncoder = (1 - alpha) * (posOut.leftEncoder + speed.leftEncoder) + alpha * pos.leftEncoder;
     posOut.rightEncoder = (1 - alpha) * (posOut.rightEncoder + speed.rightEncoder) + alpha * pos.rightEncoder;
 
@@ -80,6 +80,9 @@ PositionTrackerBase::PositionTrackerBase()
 
 void PositionTrackerBase::ResetState()
 {
+    m_lastUpdated = pros::c::millis();
+    m_sensorsRaw = {};
+
     SensorsRaw raw {};
     InitSensorSpeed(raw, m_sensorSpeedSlow);
 
@@ -109,16 +112,31 @@ void PositionTrackerBase::Update()
 {
     // Raw data from sensors
     SensorsRaw sensorsRaw {};
-
-    // if ((pros::c::millis() % 5) != 0)
-    //    return;
-
     ReadSensors(sensorsRaw);
+    
+    unsigned int time = pros::c::millis();
+
+    if (time -  m_lastUpdated < 10 &&
+        sensorsRaw.leftEncoder == m_sensorsRaw.leftEncoder &&
+        sensorsRaw.rightEncoder == m_sensorsRaw.rightEncoder &&
+        sensorsRaw.sideEncoder == m_sensorsRaw.sideEncoder)
+        return;
+
+    const int badReading = 16*10254*1024;
+    if (abs(sensorsRaw.leftEncoder) > badReading ||
+        abs(sensorsRaw.rightEncoder) > badReading ||
+        abs(sensorsRaw.sideEncoder) > badReading)
+    {
+        return;        
+    }
+
+    m_lastUpdated = time;
+
+    m_sensorsRaw = sensorsRaw;
 
     // Experimentally, calculating speed over 10..40 ms seems to give best results
     // That said, the bigger the number, the more inertia there is in the system,
-    // so 10 looks like best spot
-    UpdateSensorSpeed(sensorsRaw, m_sensorSpeedSlow, 10);
+    UpdateSensorSpeed(sensorsRaw, m_sensorSpeedSlow, 40);
 
     SynthesizeSensors(sensorsRaw, m_sensorSpeedSlow, m_sensors);
 
@@ -153,14 +171,23 @@ void PositionTrackerBase::Update()
 
     m_position.angle = angle;
 
+    ReportStatus(Log::Position, "Angle = %f, XY = %f, %f, enc = %d, %d\n",
+        m_position.angle / AngleToRadiants,
+        m_position.X,
+        m_position.Y,
+        sensorsRaw.leftEncoder,
+        sensorsRaw.rightEncoder);
+
     /*
     static int count = 0;
     count++;
-    if ((count % 2000) == 0)
-        printf("Angle = %f, X,Y = (%f, %f)\n",
+    if ((count % 200) == 0)
+        printf("Angle = %f, X,Y = (%f, %f), enc = (%d, %d)\n",
             m_position.angle / AngleToRadiants,
             m_position.X,
-            m_position.Y);
+            m_position.Y,
+            sensorsRaw.leftEncoder,
+            sensorsRaw.rightEncoder);
     */
 }
 

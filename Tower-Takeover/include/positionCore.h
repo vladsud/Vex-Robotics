@@ -69,6 +69,9 @@ public:
     static constexpr float TICKS_TO_IN_S = WHEEL_DIAMETER_IN_S * PI / TICKS_PER_ROTATION;
 
 protected:
+    unsigned int m_lastUpdated;
+    SensorsRaw m_sensorsRaw;
+
     // Synthesized sensor data
     Sensors m_sensors {};
     SensorSpeed<Sensors> m_sensorDelta;

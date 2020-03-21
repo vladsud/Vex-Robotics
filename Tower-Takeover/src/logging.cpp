@@ -17,6 +17,7 @@ static LogCategoryInfo Categories[(int)Log::Max] = {
   { "Drive: ",    false},
   { "Gyro: ",     false, true},
   { "States: ",   false, true},
+  { "Position: ", false, true},
   { "Automation: ", false, true},
   { "",           false },       // Verbose
   { "",           true,  true},  // info
@@ -56,7 +57,7 @@ void EnableBufferedLogs(Log logCategory)
 *******************************************************************************/
 class BufferedLogs {
   // Assume  100 bytes * 500 events/sec * 60 sec = 3Mb
-  const static size_t capacity = 128*1024;
+  const static size_t capacity = 4*1024*1024;
   char* m_buffer = nullptr;
   char* m_curr = nullptr;
   char* m_over = nullptr;
@@ -76,8 +77,7 @@ public:
 
   void Add(char* string)
   {
-
-    if (!m_curr && !isAuto())
+    if (!m_curr)
       return;
 
     while (m_curr < m_over)
@@ -93,10 +93,10 @@ public:
   void Dump() {
     if (!m_curr)
     {
-      printf("Was not able to allocate memory!\n");
+      printf("\nWas not able to allocate memory!\n");
       return;
     }
-    printf("Dump: total %ld bytes\n\n", m_curr - m_buffer);
+    printf("\n\nStart of a Dump\n\n");
 
     // Always terminate buffer not to run past it!
     m_over[-1] = 0;
@@ -106,8 +106,12 @@ public:
     {
       printf(pointer);
       pointer += strlen(pointer) + 1;
+      
+      // connection is not fast enough to get that much data!
+      delay(5);
     }
     printf("\nDone logging\n");
+    printf("\n\nDump (%ld bytes)\n\n", m_curr - m_buffer);
   }
 };
 
@@ -131,7 +135,7 @@ void DumpLogs()
 void ReportStatusCore(Log logCategory, const char* format, ...)
 {
     auto& category = LogCategory(logCategory);
-    if (!category.enabledConsole && !(isAuto() && category.enabledBuffered))
+    if (!category.enabledConsole && !(category.enabledBuffered))
       return;
 
     char buffer[1024];
