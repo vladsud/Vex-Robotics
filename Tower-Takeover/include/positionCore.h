@@ -79,9 +79,6 @@ protected:
     Sensors m_sensors {};
     SensorSpeed<Sensors> m_sensorDelta;
 
-    // Speed over 10ms
-    SensorSpeed<SensorsRaw> m_sensorSpeedSlow;
-
     // Clculated position
     Position m_position;
 

@@ -53,16 +53,16 @@ void UpdateSensorSpeed(const T& pos, SensorSpeed<T>& speed, unsigned int timeDif
     speed.last = pos;
 }
 
-void SynthesizeSensors(const SensorsRaw& pos, const SensorSpeed<SensorsRaw>& speed, Sensors& posOut)
+void SynthesizeSensors(const SensorsRaw& pos, Sensors& posOut)
 {
     posOut.leftWheels = pos.leftWheels;
     posOut.rightWheels = pos.rightWheels;
     posOut.sideEncoder = pos.sideEncoder;
 
-    // Experimentally, 0.6 gives one of the better results in terms of precision
-    float alpha = 0.5;
-    posOut.leftEncoder = (1 - alpha) * (posOut.leftEncoder + speed.leftEncoder) + alpha * pos.leftEncoder;
-    posOut.rightEncoder = (1 - alpha) * (posOut.rightEncoder + speed.rightEncoder) + alpha * pos.rightEncoder;
+    // NOTE: Experimentally, this gives us 50ms latency in data!!!
+    float alpha = 0.125;
+    posOut.leftEncoder = (1 - alpha) * posOut.leftEncoder + alpha * pos.leftEncoder;
+    posOut.rightEncoder = (1 - alpha) * posOut.rightEncoder + alpha * pos.rightEncoder;
 
     posOut.angle = (posOut.rightEncoder - posOut.leftEncoder) * PositionTrackerBase::TICKS_TO_IN_LR / PositionTrackerBase::DISTANCE_LR;
 }
@@ -83,9 +83,6 @@ void PositionTrackerBase::ResetState()
 {
     m_lastUpdated = pros::c::millis();
     m_sensorsRaw = {};
-
-    SensorsRaw raw {};
-    InitSensorSpeed(raw, m_sensorSpeedSlow);
 
     m_sensors = {};
     InitSensorSpeed(m_sensors, m_sensorDelta);
@@ -137,11 +134,7 @@ void PositionTrackerBase::Update()
 
     m_sensorsRaw = sensorsRaw;
 
-    // Experimentally, calculating speed over 10..40 ms seems to give best results
-    // That said, the bigger the number, the more inertia there is in the system,
-    UpdateSensorSpeed(sensorsRaw, m_sensorSpeedSlow, 20);
-
-    SynthesizeSensors(sensorsRaw, m_sensorSpeedSlow, m_sensors);
+    SynthesizeSensors(sensorsRaw, m_sensors);
 
     UpdateSensorSpeed(m_sensors, m_sensorDelta, 0);
  
@@ -212,7 +205,7 @@ void PositionTrackerBase::SetCoordinates(Position coord)
 
 float PositionTrackerBase::GetRobotVelocity()
 {
-    return m_sensorSpeedSlow.leftEncoder + m_sensorSpeedSlow.rightEncoder;
+    return m_sensorDelta.leftEncoder + m_sensorDelta.rightEncoder;
 }
 
 int PositionTrackerBase::GetLeftPos()
