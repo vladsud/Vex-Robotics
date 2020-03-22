@@ -14,8 +14,7 @@
 
 void PrintPos(const char *name)
 {
-    // auto pos = GetTracker().GetCoordinates();
-    // printf("%s: angle = %f, XY = (%f, %f)\n", name, pos.angle, pos.X, pos.Y);
+    GetTracker().PrintPos(Log::Automation);
 }
 
 void FinishTrayOut(unsigned int timeBegin)

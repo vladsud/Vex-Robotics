@@ -75,6 +75,7 @@ void SynthesizeSensors(const SensorsRaw& pos, const SensorSpeed<SensorsRaw>& spe
 *******************************************************************************/
 PositionTrackerBase::PositionTrackerBase()
 {
+	m_gyro.ResetState();
     ResetState();
 }
 
@@ -110,6 +111,8 @@ void PositionTrackerBase::ResetState()
 //
 void PositionTrackerBase::Update()
 {
+	m_gyro.Integrate();
+
     // Raw data from sensors
     SensorsRaw sensorsRaw {};
     ReadSensors(sensorsRaw);
@@ -136,7 +139,7 @@ void PositionTrackerBase::Update()
 
     // Experimentally, calculating speed over 10..40 ms seems to give best results
     // That said, the bigger the number, the more inertia there is in the system,
-    UpdateSensorSpeed(sensorsRaw, m_sensorSpeedSlow, 40);
+    UpdateSensorSpeed(sensorsRaw, m_sensorSpeedSlow, 20);
 
     SynthesizeSensors(sensorsRaw, m_sensorSpeedSlow, m_sensors);
 
@@ -171,8 +174,9 @@ void PositionTrackerBase::Update()
 
     m_position.angle = angle;
 
-    ReportStatus(Log::Position, "Angle = %f, XY = %f, %f, enc = %d, %d\n",
+    ReportStatus(Log::Position, "Angle = %f, %f XY = %f, %f, enc = %d, %d\n",
         m_position.angle / AngleToRadiants,
+        m_gyro.GetAngle(),
         m_position.X,
         m_position.Y,
         sensorsRaw.leftEncoder,
@@ -182,8 +186,9 @@ void PositionTrackerBase::Update()
     static int count = 0;
     count++;
     if ((count % 200) == 0)
-        printf("Angle = %f, X,Y = (%f, %f), enc = (%d, %d)\n",
+        printf("Angle = %f, %f, XY = (%f, %f), enc = (%d, %d)\n",
             m_position.angle / AngleToRadiants,
+            m_gyro.GetAngle(),
             m_position.X,
             m_position.Y,
             sensorsRaw.leftEncoder,
@@ -228,4 +233,15 @@ double PositionTrackerBase::GetAngle()
 void PositionTrackerBase::SetAngle(float angle)
 {
     m_angleOffset = angle * AngleToRadiants - m_position.angle;
+}
+
+void PositionTrackerBase::PrintPos(Log logCategory)
+{
+    ReportStatus(logCategory, "Angle = %f, %f XY = %f, %f, enc = %d, %d\n",
+        m_position.angle / AngleToRadiants,
+        m_gyro.GetAngle(),
+        m_position.X,
+        m_position.Y,
+        m_sensorsRaw.leftEncoder,
+        m_sensorsRaw.rightEncoder);
 }

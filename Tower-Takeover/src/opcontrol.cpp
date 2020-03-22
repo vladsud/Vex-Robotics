@@ -31,7 +31,6 @@ Main &GetMain()
 	return *g_main;
 }
 
-// GyroWrapper &GetGyro() { return GetMain().gyro; }
 Drive& GetDrive() { return GetMain().drive; }
 PositionTracker &GetTracker() { return GetMain().tracker; }
 StateMachine& GetStateMachine() { return GetMain().sm; }
@@ -96,7 +95,6 @@ void Main::Update()
 
 void Main::UpdateFastSystems()
 {
-	// gyro.Integrate();
 	tracker.Update();
 
 #if LineTracker
@@ -130,7 +128,6 @@ void Main::ResetState()
 
 	tracker.ResetState();
 	drive.ResetState();
-	// gyro.ResetState();
 
 	// Last part of Update() cycle.
 	// UpdateSlowSystems() will be called right away in both automonomous & op control modes

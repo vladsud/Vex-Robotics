@@ -13,7 +13,6 @@ class LegacyGyro
 
   public:
     float GetAngle() const;
-    void SetAngle(float angle);
     void ResetState();
 
     void Integrate();
@@ -24,25 +23,21 @@ class GyroNothing
 {
   public:
     float GetAngle() const;
-    void SetAngle(float angle) {}
     void ResetState() {}
     void Integrate() {}
-    GyroNothing() {}
-    GyroNothing(unsigned int) {}
+    GyroNothing(unsigned int port = 0) {}
 };
 
 class GyroInertial
 {
     const uint8_t m_port;
-    float m_offset = 0;
 
   public:
     float GetAngle() const;
-    void SetAngle(float angle);
     void ResetState();
 
     void Integrate() {}
-    GyroInertial(uint8_t port);
+    GyroInertial(uint8_t port = gyroPortImu);
 };
 
 class GyroBoth
@@ -58,9 +53,8 @@ class GyroBoth
     void Integrate();
 
     float GetAngle() const;
-    void SetAngle(float angle);
     void ResetState();
 };
 
-using GyroWrapper = GyroBoth;
+using GyroWrapper = GyroInertial;
 GyroWrapper &GetGyro();

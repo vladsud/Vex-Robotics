@@ -11,6 +11,6 @@
 #include "../src/position.cpp"
 #include "../src/stateMachine.cpp"
 
-// #include "../src/gyro.cpp"
+#include "../src/gyro.cpp"
 // #include "../src/lineTracker.cpp"
 // #include "../src/vision.cpp"

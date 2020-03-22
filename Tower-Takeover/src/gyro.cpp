@@ -60,11 +60,6 @@ float LegacyGyro::GetAngle() const
     return m_value * m_multiplier;
 }
 
-void LegacyGyro::SetAngle(float angle)
-{
-    m_value = angle / m_multiplier;
-}
-
 LegacyGyro::LegacyGyro(unsigned char port, unsigned short multiplier)
     // Multiplier is (0.0007...<<18) dpms * DT ms * (reading<<4) quid = degrees<<22
     : m_multiplier(float(multiplier == 0 ? GYRO_MULTIPLIER_DEFAULT : multiplier) / (1 << 22)),
@@ -132,14 +127,8 @@ void GyroInertial::ResetState()
 
 float GyroInertial::GetAngle() const
 {
-    return m_offset - imu_get_rotation(m_port);
+    return -imu_get_rotation(m_port);
 }
-
-void GyroInertial::SetAngle(float angle)
-{
-    m_offset = angle + imu_get_rotation(m_port);
-}
-
 
 /*******************************************************************************
  * 
@@ -167,13 +156,6 @@ float GyroBoth::GetAngle() const
 {
     float res = (1 * m_gyro.GetAngle() +  3 * m_gyro2.GetAngle()) / 4;
     return res;
-}
-
-void GyroBoth::SetAngle(float angle)
-{
-    m_gyro.SetAngle(angle);
-    m_gyro2.SetAngle(angle);
-    m_gyroImu.SetAngle(angle);
 }
 
 void GyroBoth::ResetState()

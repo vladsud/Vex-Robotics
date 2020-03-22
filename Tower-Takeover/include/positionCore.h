@@ -1,4 +1,5 @@
 #pragma once
+#include "gyro.h"
 
 float AdjustAngle(float);
 
@@ -69,6 +70,8 @@ public:
     static constexpr float TICKS_TO_IN_S = WHEEL_DIAMETER_IN_S * PI / TICKS_PER_ROTATION;
 
 protected:
+	GyroWrapper m_gyro;
+
     unsigned int m_lastUpdated;
     SensorsRaw m_sensorsRaw;
 
@@ -101,4 +104,6 @@ public:
     float GetRobotVelocity();
     int GetLeftPos();
     int GetRightPos();
+
+    void PrintPos(Log logCategory);
 };
