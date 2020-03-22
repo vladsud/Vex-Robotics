@@ -1,7 +1,8 @@
 #pragma once
 
-#include "pros/adi.hpp"
+// #include "pros/adi.hpp"
 
+/*
 class LegacyGyro
 {
     pros::ADIAnalogIn m_sensor;
@@ -18,6 +19,7 @@ class LegacyGyro
     void Integrate();
     LegacyGyro(unsigned char port, unsigned short multiplier = 0);
 };
+*/
 
 class GyroNothing
 {

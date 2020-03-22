@@ -35,6 +35,7 @@ using namespace pros::c;
  * LegacyGyro class
  * 
  ******************************************************************************/
+/*
 void LegacyGyro::Integrate()
 {
     unsigned long time = millis();
@@ -91,7 +92,7 @@ void LegacyGyro::ResetState()
 {
     m_lastTime = millis() - 1;
 }
-
+*/
 
 /*******************************************************************************
  * 

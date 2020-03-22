@@ -4,6 +4,7 @@
 
 double PI = PositionTrackerBase::PI;
 
+
 void ZeroSensor(SensorsRaw& sensor)
 {
     sensor.leftEncoder = 0;
@@ -12,6 +13,26 @@ void ZeroSensor(SensorsRaw& sensor)
     sensor.rightWheels = 0;
     sensor.sideEncoder = 0;
 };
+
+
+/*******************************************************************************
+ *
+ * Stubs
+ * 
+ ******************************************************************************/
+GyroInertial::GyroInertial(uint8_t port)
+    : m_port(0)
+{
+}
+
+void GyroInertial::ResetState()
+{
+}
+
+float GyroInertial::GetAngle() const
+{
+    return 0;
+}
 
 /*******************************************************************************
  *
