@@ -9,8 +9,6 @@
 *******************************************************************************/
 PositionTracker::PositionTracker()
 {
-    motor_set_reversed(rightBackDrivePort, true);
-    motor_set_reversed(rightFrontDrivePort, true);
 }
 
 void PositionTracker::ReadSensors(SensorsRaw& sensor)
@@ -18,8 +16,6 @@ void PositionTracker::ReadSensors(SensorsRaw& sensor)
     sensor.leftEncoder = m_leftEncoder.GetPos(); //  motor_get_position(leftBackDrivePort);
     sensor.rightEncoder = m_rightEncoder.GetPos(); //motor_get_position(rightBackDrivePort);
     sensor.sideEncoder = 0;
-    sensor.rightWheels = m_motorRightBack.GetPos();
-    sensor.leftWheels = m_motorLeftBack.GetPos();
 }
 
 Position PositionTracker::GetCoordinates()
@@ -103,9 +99,10 @@ int Encoder::GetPos() const
  * CMotor class
  * 
  ******************************************************************************/
-CMotor::CMotor(unsigned int port)
+CMotor::CMotor(unsigned int port, bool reverse)
     : m_port(port)
 {
+    pros::c::motor_set_reversed(m_port, reverse);
     HardReset();
 }
 

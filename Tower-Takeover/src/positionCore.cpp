@@ -48,15 +48,11 @@ void UpdateSensorSpeed(const T& pos, SensorSpeed<T>& speed, unsigned int timeDif
     speed.leftEncoder = float (pos.leftEncoder - speed.last.leftEncoder) / delta;
     speed.rightEncoder = float (pos.rightEncoder - speed.last.rightEncoder) / delta;
     speed.sideEncoder = float (pos.sideEncoder - speed.last.sideEncoder) / delta;
-    speed.leftWheels = float (pos.leftWheels - speed.last.leftWheels) / delta;
-    speed.rightWheels = float (pos.rightWheels - speed.last.rightWheels) / delta;
     speed.last = pos;
 }
 
 void SynthesizeSensors(const SensorsRaw& pos, Sensors& posOut)
 {
-    posOut.leftWheels = pos.leftWheels;
-    posOut.rightWheels = pos.rightWheels;
     posOut.sideEncoder = pos.sideEncoder;
 
     // NOTE: Experimentally, this gives us 50ms latency in data!!!

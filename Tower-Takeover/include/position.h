@@ -33,7 +33,7 @@ private:
 class CMotor
 {
 public:
-  CMotor(unsigned int port);
+  CMotor(unsigned int port, bool reverse = false);
   // Resets motor for all usages:
   // All external accesses to this motor will see current pos being reset
   void HardReset();
@@ -49,10 +49,12 @@ private:
 class PositionTracker : public PositionTrackerBase
 {
 private:
-    CMotor m_motorLeftFront {leftFrontDrivePort};
+    CMotor m_motorLeftFront {leftFrontDrivePort,};
+    CMotor m_motorLeftMiddle {leftMiddleDrivePort, true};
     CMotor m_motorLeftBack {leftBackDrivePort};
-    CMotor m_motorRightFront {rightFrontDrivePort};
-    CMotor m_motorRightBack {rightBackDrivePort};
+    CMotor m_motorRightFront {rightFrontDrivePort, true};
+    CMotor m_motorRightMiddle {rightMiddleDrivePort};
+    CMotor m_motorRightBack {rightBackDrivePort, true};
     Encoder m_leftEncoder {leftEncoderPortTop, leftEncoderPortBottom, true};
     Encoder m_rightEncoder {rightEncoderPortTop, rightEncoderPortBottom, true};
 

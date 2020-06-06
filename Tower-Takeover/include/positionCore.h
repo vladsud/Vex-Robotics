@@ -6,8 +6,6 @@ float AdjustAngle(float);
 struct SensorsRaw {
     int leftEncoder;
     int rightEncoder;
-    int rightWheels;
-    int leftWheels;
     int sideEncoder;
     float angle = 0; // not used
 };
@@ -16,8 +14,6 @@ struct Sensors {
     // Given that we are doing fusion in SynthesizeSensors(), these can't be ints!
     double leftEncoder;
     double rightEncoder;
-    double rightWheels;
-    double leftWheels;
     double sideEncoder;
     float angle;
 };
@@ -30,8 +26,6 @@ struct SensorSpeed
     // Not sure about turning though
     double leftEncoder;
     double rightEncoder;
-    double rightWheels;
-    double leftWheels;
     double sideEncoder;
     double angle;
     T last;

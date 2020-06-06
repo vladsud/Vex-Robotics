@@ -168,15 +168,17 @@ private:
 *
 * 
 *******************************************************************************/
-#define leftBackDrivePort 8
-#define leftFrontDrivePort 17
-#define rightFrontDrivePort 20
-#define rightBackDrivePort 19
+#define leftFrontDrivePort 5
+#define leftMiddleDrivePort 17
+#define leftBackDrivePort 18
+#define rightFrontDrivePort 13
+#define rightMiddleDrivePort 15
+#define rightBackDrivePort 11
 
-#define intakeLeftPort 9
-#define intakeRightPort 4
-#define cubetrayPort 5
-#define liftMotorPort 1
+#define intakeLeftPort 99
+#define intakeRightPort 99
+#define cubetrayPort 99
+#define liftMotorPort 99
 
 #define VisionPort 99
 

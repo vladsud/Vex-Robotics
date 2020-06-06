@@ -9,8 +9,6 @@ void ZeroSensor(SensorsRaw& sensor)
 {
     sensor.leftEncoder = 0;
     sensor.rightEncoder = 0;
-    sensor.leftWheels = 0;
-    sensor.rightWheels = 0;
     sensor.sideEncoder = 0;
 };
 
