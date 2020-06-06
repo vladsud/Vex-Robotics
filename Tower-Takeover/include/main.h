@@ -163,9 +163,6 @@ private:
 /*******************************************************************************
 *
 * MOTOR PORTS
-*
-* BAD PORTS: 17
-*
 * 
 *******************************************************************************/
 #define leftFrontDrivePort 5
@@ -177,8 +174,6 @@ private:
 
 #define intakeLeftPort 99
 #define intakeRightPort 99
-#define cubetrayPort 99
-#define liftMotorPort 99
 
 #define VisionPort 99
 

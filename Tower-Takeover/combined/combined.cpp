@@ -3,13 +3,10 @@
 #include "../src/atonSkills.cpp"
 #include "../src/atonUnprotected.cpp"
 #include "../src/autonomous.cpp"
-#include "../src/cubetray.cpp"
 #include "../src/drive.cpp"
 #include "../src/intake.cpp"
-#include "../src/lift.cpp"
 #include "../src/opcontrol.cpp"
 #include "../src/position.cpp"
-#include "../src/stateMachine.cpp"
 
 #include "../src/gyro.cpp"
 // #include "../src/lineTracker.cpp"

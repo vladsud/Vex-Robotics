@@ -4,7 +4,6 @@
 #include "actions.h"
 #include "position.h"
 #include "drive.h"
-#include "stateMachine.h"
 #include "intake.h"
 
 #ifdef LineTracker
@@ -427,56 +426,4 @@ void WaitAfterMove(unsigned int timeout /*= 0*/)
         timeout = lcd.AtonSkills || !lcd.AtonProtected || !lcd.AtonClimbPlatform ? 500 : 200;
     */
     Do(WaitTillStopsAction(), timeout == 0 ? 300 : timeout);
-}
-
-
-
-/*******************************************************************************
- * 
- * MoveExactWithTray
- * 
- ******************************************************************************/
-
-struct MoveExactActionWithTray : public MoveExactAction
-{
-    MoveExactActionWithTray(int distance, int angle, int ticks, unsigned int speedLimit = UINT_MAX, bool stopOnCollision = false)
-        : ticksUntil(ticks), MoveExactAction(distance, angle, speedLimit, stopOnCollision)
-    {
-
-    }
-
-    bool ShouldStop() override
-    {
-        if (GetError() < ticksUntil + 500) {
-            SetIntake(-80);
-        }
-        if (GetError() < ticksUntil) {
-            SetIntake(0);
-            GetStateMachine().SetState(State::TrayOut);
-        }
-        return MoveExactAction::ShouldStop();
-    }
-
-    protected:
-        int ticksUntil;
-};
-
-void MoveExactWithAngleAndTray(
-        int distance,
-        int angle,
-        int ticksUntil,
-        unsigned int speedLimit,
-        unsigned int timeout /*= 100000U*/)
-{
-    TurnToAngleIfNeeded(angle);
-
-    bool success = Do(
-        MoveExactActionWithTray(distance, angle, ticksUntil, speedLimit),
-        timeout);
-
-    GetStateMachine().SetState(State::TrayOut);
-
-    unsigned int error = abs(distance - GetDrive().GetDistance());
-    if (error >= 50 || !success)
-        ReportStatus(Log::Warning, "MoveExactWithAngleAndTray (or equivalent) big Error: %d, distance travelled: %d, expected: %d\n", error, GetDrive().GetDistance(), distance);
 }

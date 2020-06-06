@@ -8,11 +8,6 @@
 #include "lineTracker.h"
 // #include "vision.h"
 #include "intake.h"
-#include "cubetray.h"
-#include "lift.h"
-#include "StateMachine.h"
-
-#include "StateMachine.h"
 
 /*******************************************************************************
 * 
@@ -28,14 +23,10 @@ class Main
 	static const int allSystemsPullTime = 10;
 
   public:
-	StateMachine sm;
-
 	Drive drive;
 	PositionTracker tracker;
 	LCD lcd;
 	Intake intake;
-	CubeTray cubetray;
-	Lift lift;
 	//Vision vision;
 #if LineTracker
 	LineTracker lineTrackerLeft {lineTrackerLeftPort};

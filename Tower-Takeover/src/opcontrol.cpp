@@ -33,9 +33,6 @@ Main &GetMain()
 
 Drive& GetDrive() { return GetMain().drive; }
 PositionTracker &GetTracker() { return GetMain().tracker; }
-StateMachine& GetStateMachine() { return GetMain().sm; }
-CubeTray& GetCubeTray() { return GetMain().cubetray; }
-Lift& GetLift() { return GetMain().lift; }
 LCD& GetLcd() { return GetMain().lcd; }
 Intake& GetIntake() { return GetMain().intake; }
 
@@ -109,11 +106,7 @@ void Main::UpdateSlowSystems()
 {
 	lcd.Update();
 
-	sm.Update();
-
 	intake.Update();
-	cubetray.Update();
-	lift.Update();
 	//vision.Update(); // before drive, for it to update where to drive
 	drive.Update();
 }
